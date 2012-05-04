@@ -32,11 +32,13 @@ void FreeEmsComms::run()
 		{
 			if (buffer[i] == 0xAA)
 			{
+				qDebug() << "Start of packet";
 				//Start of packet
 				inpacket = true;
 			}
 			if (buffer[i] == 0xCC)
 			{
+				qDebug() << "End of packet. Size:" << qbuffer.size();
 				//End of packet
 				inpacket = false;
 				parseBuffer(qbuffer);
@@ -80,6 +82,11 @@ void FreeEmsComms::run()
 }
 void FreeEmsComms::parseBuffer(QByteArray buffer)
 {
+	if (buffer.size() <= 3)
+	{
+		qDebug() << "Not long enough to even contain a header!";
+		return;
+	}
 	QByteArray header;
 	//currPacket.clear();
 	//Parse the packet here
@@ -101,7 +108,7 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 		qDebug() << "Has length";
 		headersize += 2;
 	}
-	header = buffer.mid(1,headersize);
+	header = buffer.mid(0,headersize);
 	iloc++;
 	unsigned int payloadid = (unsigned int)buffer[iloc] << 8;
 
@@ -130,6 +137,8 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 	}
 	else
 	{
+		qDebug() << "Buffer length:" << buffer.length();
+		qDebug() << "Attempted cut:" << buffer.length() - iloc;
 		payload.append(buffer.mid(iloc),(buffer.length()-iloc) -1);
 	}
 	//Last byte of currPacket should be out checksum.
@@ -150,6 +159,7 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 	}
 	else
 	{
+		qDebug() << "Got full packet. Header length:" << header.length() << "Payload length:" << payload.length();
 		emit payloadReceived(header,payload);
 		/*for (int i=0;i<m_dataFieldList->size();i++)
 		{
