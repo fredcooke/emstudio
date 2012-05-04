@@ -6,6 +6,7 @@
 #include <QFile>
 #include "datafield.h"
 #include "logloader.h"
+#include "freeemscomms.h"
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -17,7 +18,9 @@ private:
 	QList<DataField> m_dataFieldList;
 	Ui::MainWindow ui;
 	LogLoader *logLoader;
+	FreeEmsComms *emsComms;
 private slots:
+	void connectButtonClicked();
 	void logPayloadReceived(QByteArray header,QByteArray payload);
 	void logProgress(qlonglong current,qlonglong total);
 	void logFinished();

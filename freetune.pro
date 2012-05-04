@@ -14,11 +14,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     freeemspacket.cpp \
     datafield.cpp \
-    logloader.cpp
+    logloader.cpp \
+    freeemscomms.cpp
 
 HEADERS  += mainwindow.h \
     freeemspacket.h \
     datafield.h \
-    logloader.h
+    logloader.h \
+    freeemscomms.h
 
 FORMS    += mainwindow.ui

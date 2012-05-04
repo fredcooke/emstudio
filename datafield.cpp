@@ -3,13 +3,15 @@
 DataField::DataField()
 {
 }
-DataField::DataField(QString shortname,QString description,int offset,int size,float div)
+DataField::DataField(QString shortname,QString description,int offset,int size,float div,float min,float max)
 {
 	m_offset = offset;
 	m_size = size;
 	m_div = div;
 	m_name = shortname;
 	m_description = description;
+	m_min = min;
+	m_max = max;
 }
 float DataField::getValue(QByteArray *payload)
 {

@@ -88,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 
 	ui.setupUi(this);
+	connect(ui.connectPushButton,SIGNAL(clicked()),this,SLOT(connectButtonClicked()));
 	connect(ui.loadLogPushButton,SIGNAL(clicked()),this,SLOT(loadLogButtonClicked()));
 	connect(ui.playLogPushButton,SIGNAL(clicked()),this,SLOT(playLogButtonClicked()));
 	connect(ui.pauseLogPushButton,SIGNAL(clicked()),this,SLOT(pauseLogButtonClicked()));
@@ -107,6 +108,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(logLoader,SIGNAL(endOfLog()),this,SLOT(logFinished()));
 	connect(logLoader,SIGNAL(payloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
 	connect(logLoader,SIGNAL(logProgress(qlonglong,qlonglong)),this,SLOT(logProgress(qlonglong,qlonglong)));
+
+	emsComms = new FreeEmsComms(this);
+	connect(emsComms,SIGNAL(payloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
 	//logLoader->start();
 
 }
@@ -144,6 +148,12 @@ void MainWindow::stopLogButtonClicked()
 {
 
 }
+void MainWindow::connectButtonClicked()
+{
+	emsComms->setPort(ui.portNameLineEdit->text());
+	emsComms->setBaud(ui.baudRateLineEdit->text().toInt());
+	emsComms->start();
+}
 
 void MainWindow::logProgress(qlonglong current,qlonglong total)
 {
@@ -152,8 +162,15 @@ void MainWindow::logProgress(qlonglong current,qlonglong total)
 
 void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 {
+	if (payload.length() != 96)
+	{
+		//Wrong sized payload!
+		return;
+	}
+
 	for (int i=0;i<m_dataFieldList.size();i++)
 	{
+		qDebug() << "Length:" << payload.length();
 		ui.tableWidget->item(i,1)->setText(QString::number(m_dataFieldList[i].getValue(&payload)));
 	}
 
