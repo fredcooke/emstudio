@@ -128,6 +128,7 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 	QByteArray payload;
 	if (len)
 	{
+		qDebug() << "Length found, buffer size:" << buffer.length() << "iloc:" << QString::number(iloc);
 		unsigned int length = buffer[iloc] << 8;
 		length += buffer[iloc+1];
 		qDebug() << "Length:" << length;
