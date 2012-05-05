@@ -12,6 +12,7 @@ public:
 private:
 	QString m_filename;
 	QList<DataField> *m_dataFieldList;
+	void parseBuffer(QByteArray buffer);
 protected:
 	void run();
 signals:

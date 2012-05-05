@@ -163,22 +163,22 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 		//qDebug() << "Attempted cut:" << buffer.length() - iloc;
 		payload.append(buffer.mid(iloc),(buffer.length()-iloc) -1);
 	}
-	qDebug() << "Payload";
+	//qDebug() << "Payload";
 	QString output;
 	for (int i=0;i<payload.size();i++)
 	{
 		int num = (unsigned char)payload[i];
 		output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
 	}
-	qDebug() << output;
+	//qDebug() << output;
 	output.clear();
-	qDebug() << "Header";
+	//qDebug() << "Header";
 	for (int i=0;i<header.size();i++)
 	{
 		int num = (unsigned char)header[i];
 		output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
 	}
-	qDebug() << output;
+	//qDebug() << output;
 	//Last byte of currPacket should be out checksum.
 	unsigned char sum = 0;
 	for (int i=0;i<header.size();i++)
@@ -191,7 +191,7 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 	}
 	//qDebug() << "Payload sum:" << QString::number(sum);
 	//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
-	if (sum != (unsigned char)buffer[buffer.length()-2])
+	if (sum != (unsigned char)buffer[buffer.length()-1])
 	{
 		qDebug() << "BAD CHECKSUM!";
 		qDebug() << "header size:" << header.size();
