@@ -24,7 +24,10 @@ private:
 	FreeEmsComms *emsComms;
 	int pidcount;
 	QTimer *timer;
+	QTimer *guiUpdateTimer;
+	QMap<QString,double> m_valueMap;
 private slots:
+	void guiUpdateTimerTick();
 	void timerTick();
 	void connectButtonClicked();
 	void logPayloadReceived(QByteArray header,QByteArray payload);

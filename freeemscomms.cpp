@@ -47,7 +47,7 @@ void FreeEmsComms::run()
 				//Start of packet
 				inpacket = true;
 			}
-			else if (buffer[i] == 0xCC)
+			else if (buffer[i] == 0xCC && inpacket)
 			{
 				//qDebug() << "End of packet. Size:" << qbuffer.size();
 				//End of packet

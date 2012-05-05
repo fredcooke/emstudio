@@ -120,6 +120,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	timer = new QTimer(this);
 	connect(timer,SIGNAL(timeout()),this,SLOT(timerTick()));
 	timer->start(1000);
+
+	guiUpdateTimer = new QTimer(this);
+	connect(guiUpdateTimer,SIGNAL(timeout()),this,SLOT(guiUpdateTimerTick()));
+	guiUpdateTimer->start(100);
 }
 void MainWindow::timerTick()
 {
@@ -172,6 +176,15 @@ void MainWindow::logProgress(qlonglong current,qlonglong total)
 {
 	setWindowTitle(QString::number(current) + "/" + QString::number(total) + " - " + QString::number((float)current/(float)total));
 }
+void MainWindow::guiUpdateTimerTick()
+{
+	QMap<QString,double>::const_iterator i = m_valueMap.constBegin();
+	while (i != m_valueMap.constEnd())
+	{
+		widget->propertyMap.setProperty(i.key().toAscii(),QVariant::fromValue(i.value()));
+		i++;
+	}
+}
 
 void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 {
@@ -183,9 +196,11 @@ void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 	}
 	for (int i=0;i<m_dataFieldList.size();i++)
 	{
-		if (m_dataFieldList[i].name() == "RPM")
+		double value = m_dataFieldList[i].getValue(&payload);
+		m_valueMap[m_dataFieldList[i].name()] = value;
+		ui.tableWidget->item(i,1)->setText(QString::number(value));
+		/*if (m_dataFieldList[i].name() == "RPM")
 		{
-
 			widget->propertyMap.setProperty("0105",m_dataFieldList[i].getValue(&payload));
 		}
 		else if (m_dataFieldList[i].name() == "Advance")
@@ -209,11 +224,11 @@ void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 		else if (m_dataFieldList[i].name() == "MAP")
 		{
 			widget->propertyMap.setProperty("0110",m_dataFieldList[i].getValue(&payload));
-		}
+		}*/
 
 		//qDebug() << "Length:" << payload.length();
 //		qDebug() << "Updating:" << m_dataFieldList[i].name() << m_dataFieldList[i].getValue(&payload);
-		ui.tableWidget->item(i,1)->setText(QString::number(m_dataFieldList[i].getValue(&payload)));
+		//
 	}
 
 }
