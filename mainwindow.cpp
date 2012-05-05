@@ -179,14 +179,13 @@ void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 	if (payload.length() != 96)
 	{
 		//Wrong sized payload!
-		return;
+	//	return;
 	}
-
 	for (int i=0;i<m_dataFieldList.size();i++)
 	{
 		if (m_dataFieldList[i].name() == "RPM")
 		{
-			//qDebug() << "RPM!" << m_dataFieldList[i].getValue(&payload);
+
 			widget->propertyMap.setProperty("0105",m_dataFieldList[i].getValue(&payload));
 		}
 		else if (m_dataFieldList[i].name() == "Advance")
@@ -213,6 +212,7 @@ void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 		}
 
 		//qDebug() << "Length:" << payload.length();
+		qDebug() << "Updating:" << m_dataFieldList[i].name() << m_dataFieldList[i].getValue(&payload);
 		ui.tableWidget->item(i,1)->setText(QString::number(m_dataFieldList[i].getValue(&payload)));
 	}
 
