@@ -17,6 +17,7 @@ public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
 private:
+	void populateDataFields();
 	GaugeWidget *widget;
 	QList<DataField> m_dataFieldList;
 	Ui::MainWindow ui;

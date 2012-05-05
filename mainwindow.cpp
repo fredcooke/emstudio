@@ -4,6 +4,53 @@
 #include "datafield.h"
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+	populateDataFields();
+	ui.setupUi(this);
+	connect(ui.connectPushButton,SIGNAL(clicked()),this,SLOT(connectButtonClicked()));
+	connect(ui.loadLogPushButton,SIGNAL(clicked()),this,SLOT(loadLogButtonClicked()));
+	connect(ui.playLogPushButton,SIGNAL(clicked()),this,SLOT(playLogButtonClicked()));
+	connect(ui.pauseLogPushButton,SIGNAL(clicked()),this,SLOT(pauseLogButtonClicked()));
+	connect(ui.stopLogPushButton,SIGNAL(clicked()),this,SLOT(stopLogButtonClicked()));
+
+	ui.tableWidget->setColumnCount(2);
+	ui.tableWidget->setColumnWidth(0,150);
+	ui.tableWidget->setColumnWidth(1,50);
+	ui.tableWidget->setRowCount(m_dataFieldList.size());
+
+	for (int i=0;i<m_dataFieldList.size();i++)
+	{
+		ui.tableWidget->setItem(i,0,new QTableWidgetItem(m_dataFieldList[i].description()));
+		ui.tableWidget->setItem(i,1,new QTableWidgetItem("0"));
+	}
+
+	logLoader = new LogLoader(this);
+	connect(logLoader,SIGNAL(endOfLog()),this,SLOT(logFinished()));
+	connect(logLoader,SIGNAL(payloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
+	connect(logLoader,SIGNAL(logProgress(qlonglong,qlonglong)),this,SLOT(logProgress(qlonglong,qlonglong)));
+
+	emsComms = new FreeEmsComms(this);
+	connect(emsComms,SIGNAL(payloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
+
+
+	widget = new GaugeWidget(ui.tab_2);
+	widget->setGeometry(0,0,1200,600);
+	widget->show();
+
+	pidcount = 0;
+
+	timer = new QTimer(this);
+	connect(timer,SIGNAL(timeout()),this,SLOT(timerTick()));
+	timer->start(1000);
+
+	guiUpdateTimer = new QTimer(this);
+	connect(guiUpdateTimer,SIGNAL(timeout()),this,SLOT(guiUpdateTimerTick()));
+	guiUpdateTimer->start(250);
+
+	statusBar()->addWidget(ui.ppsLabel);
+	statusBar()->addWidget(ui.statusLabel);
+}
+void MainWindow::populateDataFields()
+{
 	m_dataFieldList.append(DataField("IAT","Intake Air Temperature",0,2,100.0));
 	m_dataFieldList.append(DataField("CHT","Coolant/Head Temperature",2,2,100.0));
 	m_dataFieldList.append(DataField("TPS","Throttle Position Sensor",4,2,100.0));
@@ -63,71 +110,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_dataFieldList.append(DataField("injectionLimiterFlags","",97,1,1.0));
 
 
-	/*new LogField("syncLostOnThisEvent", types.UINT8), // Where in the input pattern it all went very badly wrong
-	new LogField("syncCaughtOnThisEvent", types.UINT8), // Where in the input pattern that things started making sense
-	new LogField("syncResetCalls", types.UINT8), // Sum of losses, corrections and state clears
-	new LogField("primaryTeethSeen", types.UINT8), // Free running counters for number of input events, useful at lower RPM
-	new LogField("secondaryTeethSeen", types.UINT8), // Free running counters for number of input events, useful at lower RPM
-	new LogField("serialOverrunErrors", types.UINT8), // Incremented when an overrun occurs due to high ISR load, just a fact of life at high RPM
-	new LogField("serialHardwareErrors", types.UINT8), // Sum of noise, parity, and framing errors
-	new LogField("serialAndCommsCodeErrors", types.UINT8), // Sum of checksum, escape mismatches, starts inside, and over/under length
-	new LogField("inputEventTimeTolerance"), // Required to tune noise rejection over RPM TODO add to LT1 and MissingTeeth
-	new LogField("zsp10"), // Spare US variable
-	new LogField("zsp9"), // Spare US variable
-	new LogField("zsp8"), // Spare US variable
-	new LogField("zsp7"), // Spare US variable
-	new LogField("zsp6"), // Spare US variable
-	new LogField("zsp5"), // Spare US variable
-	new LogField("zsp4"), // Spare US variable
-	new LogField("zsp3"), // Spare US variable
-	new LogField("clockInMilliSeconds"), // Migrate to start of all large datalogs once analysed
-	new LogField("clock8thMSsInMillis", 8), // Migrate to start of all large datalogs once analysed
-	new LogField("ignitionLimiterFlags", types.BITS8, ignitionLimiterFlagsNames),
-	new LogField("injectionLimiterFlags", types.BITS8, injectionLimiterFlagsNames)
-	*/
-
-
-	ui.setupUi(this);
-	connect(ui.connectPushButton,SIGNAL(clicked()),this,SLOT(connectButtonClicked()));
-	connect(ui.loadLogPushButton,SIGNAL(clicked()),this,SLOT(loadLogButtonClicked()));
-	connect(ui.playLogPushButton,SIGNAL(clicked()),this,SLOT(playLogButtonClicked()));
-	connect(ui.pauseLogPushButton,SIGNAL(clicked()),this,SLOT(pauseLogButtonClicked()));
-	connect(ui.stopLogPushButton,SIGNAL(clicked()),this,SLOT(stopLogButtonClicked()));
-
-	ui.tableWidget->setColumnCount(2);
-	ui.tableWidget->setColumnWidth(0,150);
-	ui.tableWidget->setColumnWidth(1,50);
-	ui.tableWidget->setRowCount(m_dataFieldList.size());
-	for (int i=0;i<m_dataFieldList.size();i++)
-	{
-		ui.tableWidget->setItem(i,0,new QTableWidgetItem(m_dataFieldList[i].description()));
-		ui.tableWidget->setItem(i,1,new QTableWidgetItem("0"));
-	}
-
-	logLoader = new LogLoader(this);
-	connect(logLoader,SIGNAL(endOfLog()),this,SLOT(logFinished()));
-	connect(logLoader,SIGNAL(payloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
-	connect(logLoader,SIGNAL(logProgress(qlonglong,qlonglong)),this,SLOT(logProgress(qlonglong,qlonglong)));
-
-	emsComms = new FreeEmsComms(this);
-	connect(emsComms,SIGNAL(payloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
-	//logLoader->start();
-	//410,170
-	widget = new GaugeWidget(this);
-	widget->setGeometry(410,170,1200,600);
-	widget->show();
-	pidcount = 0;
-	timer = new QTimer(this);
-	connect(timer,SIGNAL(timeout()),this,SLOT(timerTick()));
-	timer->start(1000);
-
-	guiUpdateTimer = new QTimer(this);
-	connect(guiUpdateTimer,SIGNAL(timeout()),this,SLOT(guiUpdateTimerTick()));
-	guiUpdateTimer->start(100);
 }
 void MainWindow::timerTick()
 {
-	ui.label_3->setText("PPS: " + QString::number(pidcount));
+	ui.ppsLabel->setText("PPS: " + QString::number(pidcount));
 	pidcount = 0;
 }
 
@@ -174,7 +160,7 @@ void MainWindow::connectButtonClicked()
 
 void MainWindow::logProgress(qlonglong current,qlonglong total)
 {
-	setWindowTitle(QString::number(current) + "/" + QString::number(total) + " - " + QString::number((float)current/(float)total));
+	//setWindowTitle(QString::number(current) + "/" + QString::number(total) + " - " + QString::number((float)current/(float)total));
 }
 void MainWindow::guiUpdateTimerTick()
 {
@@ -192,44 +178,16 @@ void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 	if (payload.length() != 96)
 	{
 		//Wrong sized payload!
-	//	return;
+		//We should do something here or something...
+		//return;
 	}
 	for (int i=0;i<m_dataFieldList.size();i++)
 	{
 		double value = m_dataFieldList[i].getValue(&payload);
 		m_valueMap[m_dataFieldList[i].name()] = value;
 		ui.tableWidget->item(i,1)->setText(QString::number(value));
-		/*if (m_dataFieldList[i].name() == "RPM")
-		{
-			widget->propertyMap.setProperty("0105",m_dataFieldList[i].getValue(&payload));
-		}
-		else if (m_dataFieldList[i].name() == "Advance")
-		{
-			widget->propertyMap.setProperty("0106",m_dataFieldList[i].getValue(&payload));
-		}
-		else if (m_dataFieldList[i].name() == "EffectivePW")
-		{
-			widget->propertyMap.setProperty("0107",m_dataFieldList[i].getValue(&payload));
-
-		}
-		else if (m_dataFieldList[i].name() == "IAT")
-		{
-			double value =  (m_dataFieldList[i].getValue(&payload) * 5/9) + 459.76;
-			widget->propertyMap.setProperty("0108",value);
-		}
-		else if (m_dataFieldList[i].name() == "EGO")
-		{
-			widget->propertyMap.setProperty("0109",m_dataFieldList[i].getValue(&payload));
-		}
-		else if (m_dataFieldList[i].name() == "MAP")
-		{
-			widget->propertyMap.setProperty("0110",m_dataFieldList[i].getValue(&payload));
-		}*/
-
-		//qDebug() << "Length:" << payload.length();
-//		qDebug() << "Updating:" << m_dataFieldList[i].name() << m_dataFieldList[i].getValue(&payload);
-		//
 	}
+	//guiUpdateTimerTick();
 
 }
 

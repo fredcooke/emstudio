@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <vector>
+#include <QFile>
 
 class FreeEmsComms : public QThread
 {
@@ -15,9 +16,12 @@ public:
 	FreeEmsComms(QObject *parent = 0);
 	void setPort(QString portname);
 	void setBaud(int baudrate);
+	void setLogFileName(QString filename);
 protected:
 	void run();
 private:
+	QFile *m_logFile;
+	QString m_logFileName;
 	QString m_portName;
 	int m_baud;
 	void parseBuffer(QByteArray buffer);

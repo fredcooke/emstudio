@@ -20,6 +20,8 @@ void FreeEmsComms::run()
 		qDebug() << "Error opening com port";
 		return;
 	}
+	m_logFile = new QFile(m_logFileName);
+	m_logFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 	unsigned char buffer[1024];
 	int readlen = 0;
 	QByteArray qbuffer;
@@ -43,6 +45,7 @@ void FreeEmsComms::run()
 					inescape = false;
 					qbuffer.clear();
 				}
+				qbuffer.append(buffer[i]);
 				//qDebug() << "Start of packet";
 				//Start of packet
 				inpacket = true;
@@ -52,7 +55,7 @@ void FreeEmsComms::run()
 				//qDebug() << "End of packet. Size:" << qbuffer.size();
 				//End of packet
 				inpacket = false;
-				//qbuffer.append(buffer[i]);
+				qbuffer.append(buffer[i]);
 				parseBuffer(qbuffer);
 				QString output;
 				for (int i=0;i<qbuffer.size();i++)
@@ -100,13 +103,25 @@ void FreeEmsComms::run()
 		}
 	}
 }
+void FreeEmsComms::setLogFileName(QString filename)
+{
+	m_logFileName = filename;
+}
+
 void FreeEmsComms::parseBuffer(QByteArray buffer)
 {
+	m_logFile->write(buffer);
+	m_logFile->flush();
 	if (buffer.size() <= 3)
 	{
 		qDebug() << "Not long enough to even contain a header!";
 		return;
 	}
+
+	//Trim off 0xAA and 0xCC from the start and end
+	buffer = buffer.mid(1);
+	buffer = buffer.mid(0,buffer.length()-1);
+
 	//qDebug() << "Packet:" << QString::number(buffer[1],16) << QString::number(buffer[buffer.length()-2],16);
 	QByteArray header;
 	//currPacket.clear();
@@ -163,22 +178,22 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 		//qDebug() << "Attempted cut:" << buffer.length() - iloc;
 		payload.append(buffer.mid(iloc),(buffer.length()-iloc) -1);
 	}
-	//qDebug() << "Payload";
+	qDebug() << "Payload";
 	QString output;
 	for (int i=0;i<payload.size();i++)
 	{
 		int num = (unsigned char)payload[i];
 		output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
 	}
-	//qDebug() << output;
+	qDebug() << output;
 	output.clear();
-	//qDebug() << "Header";
+	qDebug() << "Header";
 	for (int i=0;i<header.size();i++)
 	{
 		int num = (unsigned char)header[i];
 		output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
 	}
-	//qDebug() << output;
+	qDebug() << output;
 	//Last byte of currPacket should be out checksum.
 	unsigned char sum = 0;
 	for (int i=0;i<header.size();i++)
