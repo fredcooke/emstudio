@@ -36,6 +36,14 @@ void FreeEmsComms::run()
 		{
 			if (buffer[i] == 0xAA)
 			{
+				if (inpacket)
+				{
+					//Start byte in the middle of a packet
+					//Clear out the buffer and start fresh
+					inescape = false;
+					qbuffer.clear();
+
+				}
 				//qDebug() << "Start of packet";
 				//Start of packet
 				inpacket = true;
@@ -45,7 +53,7 @@ void FreeEmsComms::run()
 				//qDebug() << "End of packet. Size:" << qbuffer.size();
 				//End of packet
 				inpacket = false;
-				qbuffer.append(buffer[i]);
+				//qbuffer.append(buffer[i]);
 				parseBuffer(qbuffer);
 				QString output;
 				for (int i=0;i<qbuffer.size();i++)
@@ -104,7 +112,7 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 	//currPacket.clear();
 	//Parse the packet here
 	int headersize = 3;
-	int iloc = 1;
+	int iloc = 0;
 	bool seq = false;
 	bool len = false;
 	if (buffer[iloc] & 0b00000100)
@@ -121,7 +129,7 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 		//qDebug() << "Has length";
 		headersize += 2;
 	}
-	header = buffer.mid(1,headersize);
+	header = buffer.mid(0,headersize);
 	iloc++;
 	unsigned int payloadid = (unsigned int)buffer[iloc] << 8;
 
@@ -153,7 +161,7 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 	{
 		//qDebug() << "Buffer length:" << buffer.length();
 		//qDebug() << "Attempted cut:" << buffer.length() - iloc;
-		payload.append(buffer.mid(iloc),(buffer.length()-iloc) -2);
+		payload.append(buffer.mid(iloc),(buffer.length()-iloc) -1);
 	}
 	//qDebug() << "Payload";
 	QString output;
