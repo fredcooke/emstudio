@@ -7,6 +7,8 @@
 #include "datafield.h"
 #include "logloader.h"
 #include "freeemscomms.h"
+#include "gaugewidget.h"
+#include <QTimer>
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -15,11 +17,15 @@ public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
 private:
+	GaugeWidget *widget;
 	QList<DataField> m_dataFieldList;
 	Ui::MainWindow ui;
 	LogLoader *logLoader;
 	FreeEmsComms *emsComms;
+	int pidcount;
+	QTimer *timer;
 private slots:
+	void timerTick();
 	void connectButtonClicked();
 	void logPayloadReceived(QByteArray header,QByteArray payload);
 	void logProgress(qlonglong current,qlonglong total);

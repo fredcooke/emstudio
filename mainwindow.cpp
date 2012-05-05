@@ -112,8 +112,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsComms = new FreeEmsComms(this);
 	connect(emsComms,SIGNAL(payloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
 	//logLoader->start();
-
+	//410,170
+	widget = new GaugeWidget(this);
+	widget->setGeometry(410,170,1200,600);
+	widget->show();
+	pidcount = 0;
+	timer = new QTimer(this);
+	connect(timer,SIGNAL(timeout()),this,SLOT(timerTick()));
+	timer->start(1000);
 }
+void MainWindow::timerTick()
+{
+	ui.label_3->setText("PPS: " + QString::number(pidcount));
+	pidcount = 0;
+}
+
 void MainWindow::loadLogButtonClicked()
 {
 	QFileDialog file;
@@ -162,6 +175,7 @@ void MainWindow::logProgress(qlonglong current,qlonglong total)
 
 void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 {
+	pidcount++;
 	if (payload.length() != 96)
 	{
 		//Wrong sized payload!
@@ -170,7 +184,35 @@ void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 
 	for (int i=0;i<m_dataFieldList.size();i++)
 	{
-		qDebug() << "Length:" << payload.length();
+		if (m_dataFieldList[i].name() == "RPM")
+		{
+			//qDebug() << "RPM!" << m_dataFieldList[i].getValue(&payload);
+			widget->propertyMap.setProperty("0105",m_dataFieldList[i].getValue(&payload));
+		}
+		else if (m_dataFieldList[i].name() == "Advance")
+		{
+			widget->propertyMap.setProperty("0106",m_dataFieldList[i].getValue(&payload));
+		}
+		else if (m_dataFieldList[i].name() == "EffectivePW")
+		{
+			widget->propertyMap.setProperty("0107",m_dataFieldList[i].getValue(&payload));
+
+		}
+		else if (m_dataFieldList[i].name() == "IAT")
+		{
+			double value =  (m_dataFieldList[i].getValue(&payload) * 5/9) + 459.76;
+			widget->propertyMap.setProperty("0108",value);
+		}
+		else if (m_dataFieldList[i].name() == "EGO")
+		{
+			widget->propertyMap.setProperty("0109",m_dataFieldList[i].getValue(&payload));
+		}
+		else if (m_dataFieldList[i].name() == "MAP")
+		{
+			widget->propertyMap.setProperty("0110",m_dataFieldList[i].getValue(&payload));
+		}
+
+		//qDebug() << "Length:" << payload.length();
 		ui.tableWidget->item(i,1)->setText(QString::number(m_dataFieldList[i].getValue(&payload)));
 	}
 

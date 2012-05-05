@@ -28,20 +28,32 @@ void FreeEmsComms::run()
 	while (true)
 	{
 		readlen = read(m_portHandle,buffer,1024);
+		if (readlen == 0)
+		{
+			msleep(10);
+		}
 		for (int i=0;i<readlen;i++)
 		{
 			if (buffer[i] == 0xAA)
 			{
-				qDebug() << "Start of packet";
+				//qDebug() << "Start of packet";
 				//Start of packet
 				inpacket = true;
 			}
 			if (buffer[i] == 0xCC)
 			{
-				qDebug() << "End of packet. Size:" << qbuffer.size();
+				//qDebug() << "End of packet. Size:" << qbuffer.size();
 				//End of packet
 				inpacket = false;
+				qbuffer.append(buffer[i]);
 				parseBuffer(qbuffer);
+				QString output;
+				for (int i=0;i<qbuffer.size();i++)
+				{
+					int num = (unsigned char)qbuffer[i];
+					output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
+				}
+				//qDebug() << output;
 				qbuffer.clear();
 			}
 			else
@@ -87,37 +99,38 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 		qDebug() << "Not long enough to even contain a header!";
 		return;
 	}
+	//qDebug() << "Packet:" << QString::number(buffer[1],16) << QString::number(buffer[buffer.length()-2],16);
 	QByteArray header;
 	//currPacket.clear();
 	//Parse the packet here
 	int headersize = 3;
-	int iloc = 0;
+	int iloc = 1;
 	bool seq = false;
 	bool len = false;
 	if (buffer[iloc] & 0b00000100)
 	{
 		//Has header
 		seq = true;
-		qDebug() << "Has seq";
+		//qDebug() << "Has seq";
 		headersize += 1;
 	}
 	if (buffer[iloc] & 0b00000001)
 	{
 		//Has length
 		len = true;
-		qDebug() << "Has length";
+		//qDebug() << "Has length";
 		headersize += 2;
 	}
-	header = buffer.mid(0,headersize);
+	header = buffer.mid(1,headersize);
 	iloc++;
 	unsigned int payloadid = (unsigned int)buffer[iloc] << 8;
 
 	payloadid += (unsigned char)buffer[iloc+1];
 	//qDebug() << QString::number(payloadid,16);
-	qDebug() << QString::number(buffer[iloc-1],16);
-	qDebug() << QString::number(buffer[iloc],16);
-	qDebug() << QString::number(buffer[iloc+1],16);
-	qDebug() << QString::number(buffer[iloc+2],16);
+	//qDebug() << QString::number(buffer[iloc-1],16);
+	//qDebug() << QString::number(buffer[iloc],16);
+	//qDebug() << QString::number(buffer[iloc+1],16);
+	//qDebug() << QString::number(buffer[iloc+2],16);
 	iloc += 2;
 	//qDebug() << QString::number(payloadid,16);
 	if (seq)
@@ -128,20 +141,36 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 	QByteArray payload;
 	if (len)
 	{
-		qDebug() << "Length found, buffer size:" << buffer.length() << "iloc:" << QString::number(iloc);
+		//qDebug() << "Length found, buffer size:" << buffer.length() << "iloc:" << QString::number(iloc);
 		unsigned int length = buffer[iloc] << 8;
 		length += buffer[iloc+1];
-		qDebug() << "Length:" << length;
+		//qDebug() << "Length:" << length;
 		iloc += 2;
 		//curr += length;
 		payload.append(buffer.mid(iloc,length));
 	}
 	else
 	{
-		qDebug() << "Buffer length:" << buffer.length();
-		qDebug() << "Attempted cut:" << buffer.length() - iloc;
-		payload.append(buffer.mid(iloc),(buffer.length()-iloc) -1);
+		//qDebug() << "Buffer length:" << buffer.length();
+		//qDebug() << "Attempted cut:" << buffer.length() - iloc;
+		payload.append(buffer.mid(iloc),(buffer.length()-iloc) -2);
 	}
+	//qDebug() << "Payload";
+	QString output;
+	for (int i=0;i<payload.size();i++)
+	{
+		int num = (unsigned char)payload[i];
+		output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
+	}
+	//qDebug() << output;
+	output.clear();
+	//qDebug() << "Header";
+	for (int i=0;i<header.size();i++)
+	{
+		int num = (unsigned char)header[i];
+		output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
+	}
+	//qDebug() << output;
 	//Last byte of currPacket should be out checksum.
 	unsigned char sum = 0;
 	for (int i=0;i<header.size();i++)
@@ -154,13 +183,15 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 	}
 	//qDebug() << "Payload sum:" << QString::number(sum);
 	//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
-	if (sum != (unsigned char)buffer[buffer.length()-1])
+	if (sum != (unsigned char)buffer[buffer.length()-2])
 	{
 		qDebug() << "BAD CHECKSUM!";
+		qDebug() << "header size:" << header.size();
+		qDebug() << "payload size:" << payload.size();
 	}
 	else
 	{
-		qDebug() << "Got full packet. Header length:" << header.length() << "Payload length:" << payload.length();
+		//qDebug() << "Got full packet. Header length:" << header.length() << "Payload length:" << payload.length();
 		emit payloadReceived(header,payload);
 		/*for (int i=0;i<m_dataFieldList->size();i++)
 		{
@@ -223,12 +254,24 @@ int FreeEmsComms::openPort(QString portName,int baudrate)
 	else
 	{
 	}
-
-	newtio.c_cflag |= (CLOCAL | CREAD | PARENB | PARODD);
-	newtio.c_lflag &= !(ICANON | ECHO | ECHOE | ISIG);
+	newtio.c_cflag = (newtio.c_cflag & ~CSIZE) | CS8;
+	newtio.c_cflag |= CLOCAL | CREAD;
+	newtio.c_cflag |= (PARENB | PARODD);
+	newtio.c_cflag &= ~CRTSCTS;
+	newtio.c_cflag &= ~CSTOPB;
+	newtio.c_iflag=IGNBRK;
+	//newtio.c_cflag |= (CLOCAL | CREAD | PARODD);
+	/*newtio.c_lflag &= !(ICANON | ECHO | ECHOE | ISIG);
 	newtio.c_oflag &= !(OPOST);
 	newtio.c_cc[VMIN] = 0; // Min number of bytes to read
-	newtio.c_cc[VTIME] = 100; //10 second read timeout
+	newtio.c_cc[VTIME] = 100; //10 second read timeout*/
+	newtio.c_iflag &= ~(IXON|IXOFF|IXANY);
+	newtio.c_lflag=0;
+	newtio.c_oflag=0;
+	//newtio.c_cc[VTIME]=1;
+	//newtio.c_cc[VMIN]=60;
+	newtio.c_cc[VTIME]=2;
+	newtio.c_cc[VMIN]=1;
 	if (baudrate != -1)
 	{
 		if(cfsetispeed(&newtio, BAUD))

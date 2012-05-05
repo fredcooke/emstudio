@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui declarative
 CONFIG += debug
 TARGET = freetune
 TEMPLATE = app
@@ -15,12 +15,16 @@ SOURCES += main.cpp\
     freeemspacket.cpp \
     datafield.cpp \
     logloader.cpp \
-    freeemscomms.cpp
+    freeemscomms.cpp \
+    gaugewidget.cpp \
+    gaugeitem.cpp
 
 HEADERS  += mainwindow.h \
     freeemspacket.h \
     datafield.h \
     logloader.h \
-    freeemscomms.h
+    freeemscomms.h \
+    gaugewidget.h \
+    gaugeitem.h
 
 FORMS    += mainwindow.ui
