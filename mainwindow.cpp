@@ -212,7 +212,7 @@ void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 		}
 
 		//qDebug() << "Length:" << payload.length();
-		qDebug() << "Updating:" << m_dataFieldList[i].name() << m_dataFieldList[i].getValue(&payload);
+//		qDebug() << "Updating:" << m_dataFieldList[i].name() << m_dataFieldList[i].getValue(&payload);
 		ui.tableWidget->item(i,1)->setText(QString::number(m_dataFieldList[i].getValue(&payload)));
 	}
 
