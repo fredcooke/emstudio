@@ -42,13 +42,12 @@ void FreeEmsComms::run()
 					//Clear out the buffer and start fresh
 					inescape = false;
 					qbuffer.clear();
-
 				}
 				//qDebug() << "Start of packet";
 				//Start of packet
 				inpacket = true;
 			}
-			if (buffer[i] == 0xCC)
+			else if (buffer[i] == 0xCC)
 			{
 				//qDebug() << "End of packet. Size:" << qbuffer.size();
 				//End of packet
@@ -61,6 +60,7 @@ void FreeEmsComms::run()
 					int num = (unsigned char)qbuffer[i];
 					output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
 				}
+				//qDebug() << "Full packet:";
 				//qDebug() << output;
 				qbuffer.clear();
 			}
