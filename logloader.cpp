@@ -99,7 +99,7 @@ void LogLoader::run()
 
 	}*/
 }
-void LogLoader::parseBuffer(QByteArray buffer)
+/*void LogLoader::parseBuffer(QByteArray buffer)
 {
 	if (buffer.size() <= 3)
 	{
@@ -205,10 +205,6 @@ void LogLoader::parseBuffer(QByteArray buffer)
 	{
 		//qDebug() << "Got full packet. Header length:" << header.length() << "Payload length:" << payload.length();
 		emit payloadReceived(header,payload);
-		/*for (int i=0;i<m_dataFieldList->size();i++)
-		{
-			//ui.tableWidget->item(i,1)->setText(QString::number(m_dataFieldList[i].getValue(&payload)));
-		}*/
 		//payload is our actual data.
 		//unsigned int rpm = (payload[26] << 8) + payload[27];
 
@@ -216,4 +212,4 @@ void LogLoader::parseBuffer(QByteArray buffer)
 		//qDebug() << QString::number(rpm);
 		//qDebug() << QString::number(((unsigned short)payload[8] << 8) + (unsigned short)payload[9]);
 	}
-}
+}*/

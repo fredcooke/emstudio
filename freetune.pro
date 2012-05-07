@@ -17,7 +17,9 @@ SOURCES += main.cpp\
     logloader.cpp \
     freeemscomms.cpp \
     gaugewidget.cpp \
-    gaugeitem.cpp
+    gaugeitem.cpp \
+    serialthread.cpp \
+    datapacketdecoder.cpp
 
 HEADERS  += mainwindow.h \
     freeemspacket.h \
@@ -25,6 +27,8 @@ HEADERS  += mainwindow.h \
     logloader.h \
     freeemscomms.h \
     gaugewidget.h \
-    gaugeitem.h
+    gaugeitem.h \
+    serialthread.h \
+    datapacketdecoder.h
 
 FORMS    += mainwindow.ui
