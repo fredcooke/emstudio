@@ -8,9 +8,15 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 	logLoader = new LogLoader(this);
 	connect(logLoader,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
 }
-void FreeEmsComms::connectSerial()
+void FreeEmsComms::connectSerial(QString port,int baud)
 {
-
+	RequestClass req;
+	req.type = SERIAL_CONNECT;
+	req.args.append(QVariant(port));
+	req.args.append(baud);
+	m_reqListMutex.lock();
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
 }
 
 void FreeEmsComms::loadLog(QString filename)
@@ -35,20 +41,69 @@ void FreeEmsComms::setBaud(int baudrate)
 
 void FreeEmsComms::run()
 {
+	bool serialconnected = false;
+	while (true)
+	{
+		m_reqListMutex.lock();
+		m_threadReqList.append(m_reqList);
+		m_reqList.clear();
+		m_reqListMutex.unlock();
+		for (int i=0;i<m_threadReqList.size();i++)
+		{
+			if (m_threadReqList[i].type == SERIAL_CONNECT)
+			{
+				serialconnected = true;
+				if (serialThread->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt()))
+				{
+					qDebug() << "Unable to connect to COM port";
+					emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()));
+				}
+			}
+		}
+		if (serialconnected)
+		{
+			serialThread->readSerial(20);
+		}
+		else
+		{
+			msleep(20);
+		}
+		while (serialThread->bufferSize() != 0)
+		{
+			QByteArray packet = serialThread->readPacket();
+			QPair<QByteArray,QByteArray> packetpair = parseBuffer(packet);
+			if (packetpair.first.size() >= 3)
+			{
+				unsigned int payloadid = (unsigned int)packetpair.first[1] << 8;
+				payloadid += (unsigned char)packetpair.first[2];
+				if (payloadid == 0x0191)
+				{	//Datalog packet
 
+					if (packetpair.first[0] & 0b00000010)
+					{
+						//NAK
+					}
+					else
+					{
+						emit dataLogPayloadReceived(header,payload);
+					}
+				}
+			}
+		}
+	}
 }
 void FreeEmsComms::setLogFileName(QString filename)
 {
 	serialThread->setLogFileName(filename);
 }
 
-void FreeEmsComms::parseBuffer(QByteArray buffer)
+QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 {
 	if (buffer.size() <= 3)
 	{
 
 		qDebug() << "Not long enough to even contain a header!";
-		return;
+		return QPair<QByteArray,QByteArray>();
 	}
 
 	//Trim off 0xAA and 0xCC from the start and end
@@ -147,8 +202,8 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 	}
 	else
 	{
+		return QPair<QByteArray,QByteArray>(header,payload);
 		//qDebug() << "Got full packet. Header length:" << header.length() << "Payload length:" << payload.length();
-		emit payloadReceived(header,payload);
 		/*for (int i=0;i<m_dataFieldList->size();i++)
 		{
 			//ui.tableWidget->item(i,1)->setText(QString::number(m_dataFieldList[i].getValue(&payload)));
@@ -160,6 +215,7 @@ void FreeEmsComms::parseBuffer(QByteArray buffer)
 		//qDebug() << QString::number(rpm);
 		//qDebug() << QString::number(((unsigned short)payload[8] << 8) + (unsigned short)payload[9]);
 	}
+	return QPair<QByteArray,QByteArray>();
 }
 
 

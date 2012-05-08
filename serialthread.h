@@ -17,13 +17,19 @@ public:
     void setLogFileName(QString filename);
     void setPort(QString portname);
     void setBaud(int baudrate);
+    int openPort(QString portName,int baudrate);
+    QByteArray readPacket();
+    void readSerial(int timeout);
+    int bufferSize() { return m_queuedMessages.size(); }
 private:
+    QList<QByteArray> m_queuedMessages;
+    QByteArray m_buffer;
     QFile *m_logFile;
     QString m_logFileName;
     QString m_portName;
     int m_baud;
     int m_portHandle;
-    int openPort(QString portName,int baudrate);
+
 
 protected:
     void run();

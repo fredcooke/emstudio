@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(logLoader,SIGNAL(logProgress(qlonglong,qlonglong)),this,SLOT(logProgress(qlonglong,qlonglong)));
 	*/
 	emsComms = new FreeEmsComms(this);
-	connect(emsComms,SIGNAL(payloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
 
 
 	widget = new GaugeWidget(ui.tab_2);
@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	statusBar()->addWidget(ui.ppsLabel);
 	statusBar()->addWidget(ui.statusLabel);
+	emsComms->start();
 }
 
 void MainWindow::timerTick()
@@ -98,9 +99,7 @@ void MainWindow::stopLogButtonClicked()
 }
 void MainWindow::connectButtonClicked()
 {
-	emsComms->setPort(ui.portNameLineEdit->text());
-	emsComms->setBaud(ui.baudRateLineEdit->text().toInt());
-	emsComms->start();
+	emsComms->connectSerial(ui.portNameLineEdit->text(),ui.baudRateLineEdit->text().toInt());
 }
 
 void MainWindow::logProgress(qlonglong current,qlonglong total)

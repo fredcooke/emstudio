@@ -1,5 +1,5 @@
 #include "serialthread.h"
-
+#include <QDateTime>
 SerialThread::SerialThread(QObject *parent) : QThread(parent)
 {
 }
@@ -15,6 +15,118 @@ void SerialThread::setBaud(int baudrate)
 void SerialThread::setLogFileName(QString filename)
 {
 	m_logFileName = filename;
+}
+void SerialThread::readSerial(int timeout)
+{
+	qint64 currms = QDateTime::currentMSecsSinceEpoch();
+	int readlen = m_buffer.size();
+	QByteArray qbuffer;
+	if (m_buffer.size() > 10240)
+	{
+		//Error here somehow;
+		Q_ASSERT(m_buffer.size() < 10240);
+	}
+	unsigned char buffer[10240];
+	for (int i=0;i<m_buffer.size();i++)
+	{
+		buffer[i] = m_buffer[i];
+	}
+	m_buffer.clear();
+	bool inpacket = false;
+	bool inescape = false;
+	while (currms + timeout > QDateTime::currentMSecsSinceEpoch())
+	{
+		for (int i=0;i<readlen;i++)
+		{
+			if (buffer[i] == 0xAA)
+			{
+				if (inpacket)
+				{
+					//Start byte in the middle of a packet
+					//Clear out the buffer and start fresh
+					inescape = false;
+					qbuffer.clear();
+				}
+				qbuffer.append(buffer[i]);
+				//qDebug() << "Start of packet";
+				//Start of packet
+				inpacket = true;
+			}
+			else if (buffer[i] == 0xCC && inpacket)
+			{
+				//qDebug() << "End of packet. Size:" << qbuffer.size();
+				//End of packet
+				inpacket = false;
+				qbuffer.append(buffer[i]);
+				m_logFile->write(qbuffer);
+				m_logFile->flush();
+				//emit parseBuffer(qbuffer);
+				m_queuedMessages.append(qbuffer);
+				//return qbuffer;
+				QString output;
+				for (int i=0;i<qbuffer.size();i++)
+				{
+					int num = (unsigned char)qbuffer[i];
+					output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
+				}
+				//qDebug() << "Full packet:";
+				//qDebug() << output;
+				qbuffer.clear();
+			}
+			else
+			{
+				if (inpacket && !inescape)
+				{
+					if (buffer[i] == 0xBB)
+					{
+						//Need to escape the next byte
+						//retval = logfile.read(1);
+						inescape = true;
+					}
+					else
+					{
+						qbuffer.append(buffer[i]);
+					}
+
+				}
+				else if (inpacket && inescape)
+				{
+					if (buffer[i] == 0x55)
+					{
+						qbuffer.append((char)0xAA);
+					}
+					else if (buffer[i] == 0x44)
+					{
+						qbuffer.append((char)0xBB);
+					}
+					else if (buffer[i] == 0x33)
+					{
+						qbuffer.append((char)0xCC);
+					}
+					inescape = false;
+				}
+			}
+		}
+		readlen = read(m_portHandle,buffer,1024);
+		if (readlen == 0)
+		{
+			msleep(10);
+		}
+	}
+}
+
+QByteArray SerialThread::readPacket()
+{
+	if (m_queuedMessages.size() > 0)
+	{
+		QByteArray ret = m_queuedMessages[0];
+		m_queuedMessages.removeAt(0);
+		return ret;
+	}
+	else
+	{
+		return QByteArray();
+	}
 }
 
 void SerialThread::run()
