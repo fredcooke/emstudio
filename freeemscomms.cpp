@@ -7,6 +7,8 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 
 	logLoader = new LogLoader(this);
 	connect(logLoader,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
+	m_waitingForResponse = false;
+	m_sequenceNumber = 1;
 }
 void FreeEmsComms::connectSerial(QString port,int baud)
 {
@@ -38,10 +40,27 @@ void FreeEmsComms::setBaud(int baudrate)
 {
 	serialThread->setBaud(baudrate);
 }
+int FreeEmsComms::updateBlockInRam(int location,int offset, int size,QByteArray data)
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = UPDATE_BLOCK_IN_RAM;
+	req.args.append(location);
+	req.args.append(offset);
+	req.args.append(size);
+	req.args.append(data);
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
 
 void FreeEmsComms::run()
 {
 	bool serialconnected = false;
+	bool waitingforresponse=false;
+	int waitingpayloadid=0;
 	while (true)
 	{
 		m_reqListMutex.lock();
@@ -58,8 +77,46 @@ void FreeEmsComms::run()
 					qDebug() << "Unable to connect to COM port";
 					emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()));
 				}
+				m_threadReqList.removeAt(i);
+				i--;
+			}
+			else if (m_threadReqList[i].type == UPDATE_BLOCK_IN_RAM)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_currentWaitingRequest = m_threadReqList[i];
+					int location = m_threadReqList[i].args[0].toInt();
+					int offset= m_threadReqList[i].args[1].toInt();
+					int size = m_threadReqList[i].args[2].toInt();
+					QByteArray data = m_threadReqList[i].args[3].toByteArray();
+					QByteArray header;
+					QByteArray packet;
+					header.append((char)0x01); //Length, no seq no nak
+					header.append((char)0x01); // Payload 0x0100, update block in ram
+					header.append((char)0x00);
+					packet.append((char)((location << 8) & 0xFF));
+					packet.append((char)((location) & 0xFF));
+					packet.append((char)((offset << 8) & 0xFF));
+					packet.append((char)((offset) & 0xFF));
+					packet.append((char)((size << 8) & 0xFF));
+					packet.append((char)((size) & 0xFF));
+					packet.append(data);
+					header.append((char)(packet.length() << 8) & 0xFF);
+					m_threadReqList.removeAt(i);
+					i--;
+				}
+
+			}
+			else if (false)
+			{
+				serialThread->writePacket(QByteArray());
+				waitingforresponse = true;
+				waitingpayloadid = 0x0101;
+				break;
 			}
 		}
+
+		//General packet reading
 		if (serialconnected)
 		{
 			serialThread->readSerial(20);
@@ -76,6 +133,23 @@ void FreeEmsComms::run()
 			{
 				unsigned int payloadid = (unsigned int)packetpair.first[1] << 8;
 				payloadid += (unsigned char)packetpair.first[2];
+				if (m_waitingForResponse)
+				{
+					if (payloadid == m_payloadWaitingForResponse+1)
+					{
+						if (packetpair.first[0] & 0b00000010)
+						{
+							//NAK to our packet
+							emit commandFailed(m_currentWaitingRequest.sequencenumber,0);
+						}
+						else
+						{
+							//Packet is good.
+							emit commandSuccessfull(m_currentWaitingRequest.sequencenumber);
+						}
+						m_waitingForResponse = false;
+					}
+				}
 				if (payloadid == 0x0191)
 				{	//Datalog packet
 
@@ -85,7 +159,7 @@ void FreeEmsComms::run()
 					}
 					else
 					{
-						emit dataLogPayloadReceived(header,payload);
+						emit dataLogPayloadReceived(packetpair.first,packetpair.second);
 					}
 				}
 			}

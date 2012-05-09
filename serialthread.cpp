@@ -114,6 +114,10 @@ void SerialThread::readSerial(int timeout)
 		}
 	}
 }
+void SerialThread::writePacket(QByteArray packet)
+{
+	write(m_portHandle,packet.data(),packet.length());
+}
 
 QByteArray SerialThread::readPacket()
 {
@@ -221,6 +225,11 @@ void SerialThread::run()
 		}
 	}
 }
+/*void SerialThread::sendMessageForResponse(QByteArray header,QByteArray payload)
+{
+
+}*/
+
 int SerialThread::openPort(QString portName,int baudrate)
 {
 	m_portHandle = open(portName.toAscii(),O_RDWR | O_NOCTTY | O_NDELAY);
