@@ -15,7 +15,8 @@ public:
 	{
 		SERIAL_CONNECT,
 		SERIAL_DISCONNECT,
-		UPDATE_BLOCK_IN_RAM
+		UPDATE_BLOCK_IN_RAM,
+		RETRIEVE_BLOCK_IN_RAM
 	};
 	class RequestClass
 	{
@@ -33,7 +34,9 @@ public:
 	void loadLog(QString filename);
 	void playLog();
 	void populateDataFields();
+	QByteArray generatePacket(QByteArray header,QByteArray payload);
 	int updateBlockInRam(int location,int offset, int size,QByteArray data);
+	int retrieveBlockFromRam(int location, int offset, int size);
 protected:
 	void run();
 private:
@@ -48,6 +51,7 @@ private:
 	RequestClass m_currentWaitingRequest;
 	//void parseBuffer(QByteArray buffer);
 signals:
+	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void error(QString msg);
 	void commandSuccessfull(int sequencenumber);

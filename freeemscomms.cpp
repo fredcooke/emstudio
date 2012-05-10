@@ -55,6 +55,73 @@ int FreeEmsComms::updateBlockInRam(int location,int offset, int size,QByteArray 
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
+int FreeEmsComms::retrieveBlockFromRam(int location, int offset, int size)
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = RETRIEVE_BLOCK_IN_RAM;
+	req.args.append(location);
+	req.args.append(offset);
+	req.args.append(size);
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+QByteArray FreeEmsComms::generatePacket(QByteArray header,QByteArray payload)
+{
+	QByteArray packet;
+	packet.append(0xAA);
+	for (int j=0;j<header.size();j++)
+	{
+		if (header[j] == (char)0xAA)
+		{
+			packet.append(0xBB);
+			packet.append(0x55);
+		}
+		else if (header[j] == (char)0xBB)
+		{
+			packet.append(0xBB);
+			packet.append(0x44);
+		}
+		else if (header[j] == (char)0xCC)
+		{
+			packet.append(0xBB);
+			packet.append(0x33);
+		}
+		else
+		{
+			packet.append(header[j]);
+		}
+	}
+	for (int j=0;j<payload.size();j++)
+	{
+		if (payload[j] == (char)0xAA)
+		{
+			packet.append(0xBB);
+			packet.append(0x55);
+		}
+		else if (payload[j] == (char)0xBB)
+		{
+			packet.append(0xBB);
+			packet.append(0x44);
+		}
+		else if (payload[j] == (char)0xCC)
+		{
+			packet.append(0xBB);
+			packet.append(0x33);
+		}
+		else
+		{
+			packet.append(payload[j]);
+		}
+	}
+	//packet.append(header);
+	//packet.append(payload);
+	packet.append(0xCC);
+	return packet;
+}
 
 void FreeEmsComms::run()
 {
@@ -90,22 +157,48 @@ void FreeEmsComms::run()
 					int size = m_threadReqList[i].args[2].toInt();
 					QByteArray data = m_threadReqList[i].args[3].toByteArray();
 					QByteArray header;
-					QByteArray packet;
+					QByteArray payload;
 					header.append((char)0x01); //Length, no seq no nak
 					header.append((char)0x01); // Payload 0x0100, update block in ram
 					header.append((char)0x00);
+					payload.append((char)((location << 8) & 0xFF));
+					payload.append((char)((location) & 0xFF));
+					payload.append((char)((offset << 8) & 0xFF));
+					payload.append((char)((offset) & 0xFF));
+					payload.append((char)((size << 8) & 0xFF));
+					payload.append((char)((size) & 0xFF));
+					payload.append(data);
+					header.append((char)(payload.length() << 8) & 0xFF);
+					m_threadReqList.removeAt(i);
+					i--;
+					serialThread->writePacket(generatePacket(header,payload));
+				}
+
+			}
+			else if (m_threadReqList[i].type == RETRIEVE_BLOCK_IN_RAM)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_currentWaitingRequest = m_threadReqList[i];
+					int location = m_threadReqList[i].args[0].toInt();
+					int offset= m_threadReqList[i].args[1].toInt();
+					int size = m_threadReqList[i].args[2].toInt();
+					QByteArray header;
+					QByteArray packet;
+					header.append((char)0x00); //No Length, no seq no nak
+					header.append((char)0x01); // Payload 0x0104, retrieve block
+					header.append((char)0x04);
 					packet.append((char)((location << 8) & 0xFF));
 					packet.append((char)((location) & 0xFF));
 					packet.append((char)((offset << 8) & 0xFF));
 					packet.append((char)((offset) & 0xFF));
 					packet.append((char)((size << 8) & 0xFF));
 					packet.append((char)((size) & 0xFF));
-					packet.append(data);
-					header.append((char)(packet.length() << 8) & 0xFF);
+					//header.append((char)(packet.length() << 8) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
+					serialThread->writePacket(generatePacket(header,packet));
 				}
-
 			}
 			else if (false)
 			{
@@ -160,6 +253,17 @@ void FreeEmsComms::run()
 					else
 					{
 						emit dataLogPayloadReceived(packetpair.first,packetpair.second);
+					}
+				}
+				else if (payloadid == 0x0105)
+				{
+					if (packetpair.first[0] & 0b00000010)
+					{
+					}
+					else
+					{
+						//Block from ram is here.
+						emit blockRetrieved(m_currentWaitingRequest.sequencenumber,packetpair.first,packetpair.second);
 					}
 				}
 			}
