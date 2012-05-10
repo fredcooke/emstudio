@@ -73,6 +73,7 @@ QByteArray FreeEmsComms::generatePacket(QByteArray header,QByteArray payload)
 {
 	QByteArray packet;
 	packet.append(0xAA);
+	unsigned char checksum = 0;
 	for (int j=0;j<header.size();j++)
 	{
 		if (header[j] == (char)0xAA)
@@ -94,6 +95,7 @@ QByteArray FreeEmsComms::generatePacket(QByteArray header,QByteArray payload)
 		{
 			packet.append(header[j]);
 		}
+		checksum += header[j];
 	}
 	for (int j=0;j<payload.size();j++)
 	{
@@ -116,9 +118,11 @@ QByteArray FreeEmsComms::generatePacket(QByteArray header,QByteArray payload)
 		{
 			packet.append(payload[j]);
 		}
+		checksum += packet[j];
 	}
 	//packet.append(header);
 	//packet.append(payload);
+	packet.append(checksum);
 	packet.append(0xCC);
 	return packet;
 }
