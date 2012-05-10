@@ -16,7 +16,14 @@ public:
 		SERIAL_CONNECT,
 		SERIAL_DISCONNECT,
 		UPDATE_BLOCK_IN_RAM,
-		RETRIEVE_BLOCK_IN_RAM
+		RETRIEVE_BLOCK_IN_RAM,
+		GET_INTERFACE_VERSION,
+		GET_FIRMWARE_VERSION,
+		GET_MAX_PACKET_SIZE,
+		ECHO_PACKET,
+		SOFT_RESET,
+		HARD_RESET
+
 	};
 	class RequestClass
 	{
@@ -30,6 +37,12 @@ public:
 	void setPort(QString portname);
 	void setBaud(int baudrate);
 	void setLogFileName(QString filename);
+	int getInterfaceVersion();
+	int getFirmwareVersion();
+	int getMaxPacketSize();
+	int echoPacket(QByteArray packet);
+	int softReset();
+	int hardReset();
 	void connectSerial(QString port,int baud);
 	void loadLog(QString filename);
 	void playLog();

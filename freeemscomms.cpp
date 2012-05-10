@@ -69,6 +69,80 @@ int FreeEmsComms::retrieveBlockFromRam(int location, int offset, int size)
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
+/*GET_INTERFACE_VERSION,
+GET_FIRMWARE_VERSION,
+GET_MAX_PACKET_SIZE,
+ECHO_PACKET,
+SOFT_RESET,
+HARD_RESET*/
+int FreeEmsComms::getInterfaceVersion()
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = GET_INTERFACE_VERSION;
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+int FreeEmsComms::getFirmwareVersion()
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = GET_FIRMWARE_VERSION;
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+int FreeEmsComms::getMaxPacketSize()
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = GET_MAX_PACKET_SIZE;
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+int FreeEmsComms::echoPacket(QByteArray packet)
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = ECHO_PACKET;
+	req.sequencenumber = m_sequenceNumber;
+	req.args.append(packet);
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+int FreeEmsComms::softReset()
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = SOFT_RESET;
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+int FreeEmsComms::hardReset()
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = HARD_RESET;
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+
 QByteArray FreeEmsComms::generatePacket(QByteArray header,QByteArray payload)
 {
 	QByteArray packet;
@@ -199,6 +273,97 @@ void FreeEmsComms::run()
 					packet.append((char)((size << 8) & 0xFF));
 					packet.append((char)((size) & 0xFF));
 					//header.append((char)(packet.length() << 8) & 0xFF);
+					m_threadReqList.removeAt(i);
+					i--;
+					serialThread->writePacket(generatePacket(header,packet));
+				}
+			}
+			else if (m_threadReqList[i].type == GET_INTERFACE_VERSION)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_currentWaitingRequest = m_threadReqList[i];
+					QByteArray header;
+					QByteArray packet;
+					header.append((char)0x00);
+					header.append((char)0x00);
+					header.append((char)0x00);
+					m_threadReqList.removeAt(i);
+					i--;
+					serialThread->writePacket(generatePacket(header,packet));
+				}
+			}
+			else if (m_threadReqList[i].type == GET_FIRMWARE_VERSION)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_currentWaitingRequest = m_threadReqList[i];
+					QByteArray header;
+					QByteArray packet;
+					header.append((char)0x00);
+					header.append((char)0x00);
+					header.append((char)0x02);
+					m_threadReqList.removeAt(i);
+					i--;
+					serialThread->writePacket(generatePacket(header,packet));
+				}
+			}
+			else if (m_threadReqList[i].type == GET_MAX_PACKET_SIZE)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_currentWaitingRequest = m_threadReqList[i];
+					QByteArray header;
+					QByteArray packet;
+					header.append((char)0x00);
+					header.append((char)0x00);
+					header.append((char)0x04);
+					m_threadReqList.removeAt(i);
+					i--;
+					serialThread->writePacket(generatePacket(header,packet));
+				}
+			}
+			else if (m_threadReqList[i].type == ECHO_PACKET)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_currentWaitingRequest = m_threadReqList[i];
+					QByteArray header;
+					QByteArray packet;
+					header.append((char)0x00);
+					header.append((char)0x00);
+					header.append((char)0x06);
+					packet.append(m_threadReqList[i].args[0].toByteArray());
+					m_threadReqList.removeAt(i);
+					i--;
+					serialThread->writePacket(generatePacket(header,packet));
+				}
+			}
+			else if (m_threadReqList[i].type == SOFT_RESET)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_currentWaitingRequest = m_threadReqList[i];
+					QByteArray header;
+					QByteArray packet;
+					header.append((char)0x00);
+					header.append((char)0x00);
+					header.append((char)0x08);
+					m_threadReqList.removeAt(i);
+					i--;
+					serialThread->writePacket(generatePacket(header,packet));
+				}
+			}
+			else if (m_threadReqList[i].type == HARD_RESET)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_currentWaitingRequest = m_threadReqList[i];
+					QByteArray header;
+					QByteArray packet;
+					header.append((char)0x00);
+					header.append((char)0x00);
+					header.append((char)0x10);
 					m_threadReqList.removeAt(i);
 					i--;
 					serialThread->writePacket(generatePacket(header,packet));
