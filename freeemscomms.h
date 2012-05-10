@@ -66,6 +66,8 @@ private:
 signals:
 	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
+	void interfaceVersion(QByteArray version);
+	void firmwareVersion(QString version);
 	void error(QString msg);
 	void commandSuccessfull(int sequencenumber);
 	void commandFailed(int sequencenumber,int errornum);

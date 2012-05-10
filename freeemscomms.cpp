@@ -424,6 +424,29 @@ void FreeEmsComms::run()
 						emit dataLogPayloadReceived(packetpair.first,packetpair.second);
 					}
 				}
+				else if (payloadid == 0x0001) //Interface version response
+				{
+					//Handle interface version
+					if (packetpair.first[0] & 0b00000010)
+					{
+						//NAK
+					}
+					else
+					{
+						emit interfaceVersion(packetpair.second);
+					}
+				}
+				else if (payloadid == 0x0003) //Firmware version response
+				{
+					if (packetpair.first[0] & 0b00000010)
+					{
+						//NAK
+					}
+					else
+					{
+						emit firmwareVersion(QString(packetpair.second));
+					}
+				}
 				else if (payloadid == 0x0105)
 				{
 					if (packetpair.first[0] & 0b00000010)
