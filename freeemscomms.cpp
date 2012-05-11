@@ -440,12 +440,14 @@ void FreeEmsComms::run()
 						if (packetpair.first[0] & 0b00000010)
 						{
 							//NAK to our packet
-							emit commandFailed(m_currentWaitingRequest.sequencenumber,0);
+							unsigned short errornum = packetpair.second[0] << 8;
+							errornum += packetpair.second[1];
+							emit commandFailed(m_currentWaitingRequest.sequencenumber,errornum);
 						}
 						else
 						{
 							//Packet is good.
-							emit commandSuccessfull(m_currentWaitingRequest.sequencenumber);
+							emit commandSuccessful(m_currentWaitingRequest.sequencenumber);
 						}
 						m_waitingForResponse = false;
 					}
@@ -456,6 +458,8 @@ void FreeEmsComms::run()
 					if (packetpair.first[0] & 0b00000010)
 					{
 						//NAK
+
+						//emit commandFailed(int sequencenumber,int errornum);
 					}
 					else
 					{

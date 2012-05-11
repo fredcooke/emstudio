@@ -72,8 +72,8 @@ signals:
 	void interfaceVersion(QByteArray version);
 	void firmwareVersion(QString version);
 	void error(QString msg);
-	void commandSuccessfull(int sequencenumber);
-	void commandFailed(int sequencenumber,int errornum);
+	void commandSuccessful(int sequencenumber);
+	void commandFailed(int sequencenumber,unsigned short errornum);
 	//void updateBlockInRamFailed(int location,int offset,int size,QByteArray data);
 	//void updateBlockInRamSucceeded();
 public slots:
