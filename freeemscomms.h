@@ -39,11 +39,32 @@ public:
 		GET_FIRMWARE_VERSION,
 		GET_MAX_PACKET_SIZE,
 		GET_LOCATION_ID_LIST,
+		GET_LOCATION_ID_INFO,
 		ECHO_PACKET,
 		SOFT_RESET,
 		HARD_RESET
 
 	};
+	enum LocationIdFlags
+	{
+		BLOCK_HAS_PARENT=0x0001,
+		BLOCK_IS_RAM=0x0002,
+		BLOCK_IS_FLASH=0x0004,
+		BLOCK_IS_INDEXABLE=0x0008,
+		BLOCK_IS_READ_ONLY=0x0010,
+		BLOCK_GETS_VERIFIED=0x0020,
+		BLOCK_FOR_BACKUP_RESTORE=0x0040,
+		BLOCK_SPARE_7=0x0080,
+		BLOCK_SPARE_8=0x0100,
+		BLOCK_SPARE_9=0x0200,
+		BLOCK_SPARE_10=0x0400,
+		BLOCK_SPARE_11=0x0800,
+		BLOCK_IS_2D_TABLE=0x1000,
+		BLOCK_IS_MAIN_TABLE=0x2000,
+		BLOCK_IS_LOOKUP_DATA=0x4000,
+		BLOCK_IS_CONFIGURATION=0x8000
+	};
+
 	class RequestClass
 	{
 	public:
@@ -56,6 +77,7 @@ public:
 	void setPort(QString portname);
 	void setBaud(int baudrate);
 	void setLogFileName(QString filename);
+	int getLocationIdInfo(unsigned short locationid);
 	int getInterfaceVersion();
 	int getFirmwareVersion();
 	int getMaxPacketSize();
@@ -73,6 +95,7 @@ public:
 protected:
 	void run();
 private:
+	QList<LocationIdFlags> m_blockFlagList;
 	int m_sequenceNumber;
 	QMutex m_reqListMutex;
 	QList<RequestClass> m_reqList;
@@ -85,6 +108,7 @@ private:
 	//void parseBuffer(QByteArray buffer);
 signals:
 	void locationIdList(QList<unsigned short> idlist);
+	void locationIdInfo(QList<LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QByteArray version);

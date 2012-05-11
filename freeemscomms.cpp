@@ -27,6 +27,23 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 	connect(logLoader,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
 	m_waitingForResponse = false;
 	m_sequenceNumber = 1;
+	m_blockFlagList.append(BLOCK_HAS_PARENT);
+	m_blockFlagList.append(BLOCK_IS_RAM);
+	m_blockFlagList.append(BLOCK_IS_FLASH);
+	m_blockFlagList.append(BLOCK_IS_INDEXABLE);
+	m_blockFlagList.append(BLOCK_IS_READ_ONLY);
+	m_blockFlagList.append(BLOCK_GETS_VERIFIED);
+	m_blockFlagList.append(BLOCK_FOR_BACKUP_RESTORE);
+	m_blockFlagList.append(BLOCK_SPARE_7);
+	m_blockFlagList.append(BLOCK_SPARE_8);
+	m_blockFlagList.append(BLOCK_SPARE_9);
+	m_blockFlagList.append(BLOCK_SPARE_10);
+	m_blockFlagList.append(BLOCK_SPARE_11);
+	m_blockFlagList.append(BLOCK_IS_2D_TABLE);
+	m_blockFlagList.append(BLOCK_IS_MAIN_TABLE);
+	m_blockFlagList.append(BLOCK_IS_LOOKUP_DATA);
+	m_blockFlagList.append(BLOCK_IS_CONFIGURATION);
+
 }
 void FreeEmsComms::connectSerial(QString port,int baud)
 {
@@ -138,6 +155,19 @@ int FreeEmsComms::echoPacket(QByteArray packet)
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
+int FreeEmsComms::getLocationIdInfo(unsigned short locationid)
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = GET_LOCATION_ID_INFO;
+	req.sequencenumber = m_sequenceNumber;
+	req.args.append(locationid);
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+
 int FreeEmsComms::getLocationIdList(unsigned char listtype, unsigned short listmask)
 {
 	m_reqListMutex.lock();
@@ -274,6 +304,26 @@ void FreeEmsComms::run()
 					payload.append((char)((listtype) & 0xFF));
 					payload.append((char)((listmask << 8) & 0xFF));
 					payload.append((char)((listmask) & 0xFF));
+					header.append((char)(payload.length() << 8) & 0xFF);
+					header.append((char)(payload.length()) & 0xFF);
+					m_threadReqList.removeAt(i);
+					i--;
+					serialThread->writePacket(generatePacket(header,payload));
+				}
+			}
+			else if (m_threadReqList[i].type == GET_LOCATION_ID_INFO)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_currentWaitingRequest = m_threadReqList[i];
+					unsigned short locationid = m_threadReqList[i].args[0].toInt();
+					QByteArray header;
+					QByteArray payload;
+					header.append((char)0x01); //Length, no seq no nak
+					header.append((char)0xF8); // Payload 0xF8E0, get location ID Info
+					header.append((char)0xE0);
+					payload.append((char)((locationid << 8) & 0xFF));
+					payload.append((char)((locationid) & 0xFF));
 					header.append((char)(payload.length() << 8) & 0xFF);
 					header.append((char)(payload.length()) & 0xFF);
 					m_threadReqList.removeAt(i);
@@ -501,6 +551,70 @@ void FreeEmsComms::run()
 							idlist.append(tmp);
 						}
 						emit locationIdList(idlist);
+					}
+				}
+				else if (payloadid == 0xF8E1) //Location ID Info
+				{
+					if (packetpair.first[0] & 0b00000010)
+					{
+					}
+					else
+					{
+						//TODO double check to make sure that there aren't an odd number of items here...
+						//QList<unsigned short> idlist;
+						QList<LocationIdFlags> flaglist;
+						if (packetpair.second.size() >= 2)
+						{
+							unsigned short test = packetpair.second[0] << 8;
+							unsigned short parent;
+							unsigned char rampage;
+							unsigned char flashpage;
+							unsigned short ramaddress;
+							unsigned short flashaddress;
+							unsigned short size;
+							test += packetpair.second[1];
+							for (int j=0;j<m_blockFlagList.size();j++)
+							{
+								if (test & m_blockFlagList[j])
+								{
+									flaglist.append(m_blockFlagList[j]);
+								}
+							}
+							parent = packetpair.second[2] << 8;
+							parent += packetpair.second[3];
+							if (test & BLOCK_IS_RAM && test & BLOCK_IS_FLASH)
+							{
+								rampage = packetpair.second[4];
+								flashpage = packetpair.second[5];
+								ramaddress = packetpair.second[6] << 8;
+								ramaddress += packetpair.second[7];
+								flashaddress = packetpair.second[8] << 8;
+								flashaddress += packetpair.second[9];
+								size = packetpair.second[10] << 8;
+								size += packetpair.second[11];
+							}
+							else if (test & BLOCK_IS_RAM)
+							{
+								rampage = packetpair.second[4];
+								ramaddress = packetpair.second[5] << 8;
+								ramaddress += packetpair.second[6];
+								size = packetpair.second[7] << 8;
+								size += packetpair.second[8];
+
+							}
+							else if (test & BLOCK_IS_FLASH)
+							{
+								flashpage = packetpair.second[4];
+								flashaddress = packetpair.second[5] << 8;
+								flashaddress += packetpair.second[6];
+								size = packetpair.second[7] << 8;
+								size += packetpair.second[8];
+							}
+							emit locationIdInfo(flaglist,parent,rampage,flashpage,ramaddress,flashaddress,size);
+						}
+
+
+						//emit locationIdList(idlist);
 					}
 				}
 				else if (payloadid == 0x0001) //Interface version response
