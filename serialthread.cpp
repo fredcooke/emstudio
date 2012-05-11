@@ -20,6 +20,7 @@
 #include <QDateTime>
 SerialThread::SerialThread(QObject *parent) : QThread(parent)
 {
+	m_logFile = 0;
 }
 void SerialThread::setPort(QString portname)
 {
@@ -33,6 +34,7 @@ void SerialThread::setBaud(int baudrate)
 void SerialThread::setLogFileName(QString filename)
 {
 	m_logFileName = filename;
+	//m_logFile = new QFile(m_logFileName);
 }
 void SerialThread::readSerial(int timeout)
 {
@@ -76,8 +78,8 @@ void SerialThread::readSerial(int timeout)
 				//End of packet
 				inpacket = false;
 				qbuffer.append(buffer[i]);
-				m_logFile->write(qbuffer);
-				m_logFile->flush();
+
+				//m_logFile->flush();
 				//emit parseBuffer(qbuffer);
 				m_queuedMessages.append(qbuffer);
 				//return qbuffer;
@@ -217,8 +219,9 @@ void SerialThread::run()
 				//End of packet
 				inpacket = false;
 				qbuffer.append(buffer[i]);
-				m_logFile->write(qbuffer);
-				m_logFile->flush();
+				//
+				->write(qbuffer);
+				//m_logFile->flush();
 				emit parseBuffer(qbuffer);
 				QString output;
 				for (int i=0;i<qbuffer.size();i++)
