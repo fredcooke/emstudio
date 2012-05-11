@@ -32,3 +32,6 @@ HEADERS  += mainwindow.h \
     datapacketdecoder.h
 
 FORMS    += mainwindow.ui
+
+OTHER_FILES += \
+    README.txt
