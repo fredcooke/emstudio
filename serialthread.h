@@ -3,12 +3,15 @@
 #include <QThread>
 #include <QFile>
 #include <QDebug>
+#ifdef Q_OS_WIN32
+#include <windows.h>
+#else
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <termios.h>
+#endif
 #include <vector>
-
 class SerialThread : public QThread
 {
 	Q_OBJECT

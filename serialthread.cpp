@@ -116,7 +116,18 @@ void SerialThread::readSerial(int timeout)
 }
 void SerialThread::writePacket(QByteArray packet)
 {
+#ifdef Q_OS_WIN32
+	long len=0;
+	if (!::WriteFile(m_portHandle, (void*)packet.data(), (DWORD)packet.length(), (LPDWORD)&len, NULL)) {
+		//DWORD error = GetLastError();
+		//int i = 2;
+		//An error happened, I should probably handle this sometime.
+		qDebug() << "Serial Write error";
+		return;
+	}
+#else
 	write(m_portHandle,packet.data(),packet.length());
+#endif //Q_OS_WIN32
 }
 
 QByteArray SerialThread::readPacket()
@@ -149,10 +160,22 @@ void SerialThread::run()
 	bool inescape=true;
 	while (true)
 	{
+#ifdef Q_OS_WIN32
+		if (!ReadFile(m_portHandle,(LPVOID)buffer,1024,(LPDWORD)&readlen,NULL))
+		{
+			//Serial error here
+			qDebug() << "Serial Read error";
+		}
+#else
 		readlen = read(m_portHandle,buffer,1024);
+#endif //Q_OS_WIN32
 		if (readlen == 0)
 		{
 			msleep(10);
+		}
+		else if (readlen == -1)
+		{
+			qDebug() << "Serial Read error";
 		}
 		for (int i=0;i<readlen;i++)
 		{
@@ -232,6 +255,48 @@ void SerialThread::run()
 
 int SerialThread::openPort(QString portName,int baudrate)
 {
+#ifdef Q_OS_WIN32
+	portHandle=CreateFileA(portName, GENERIC_READ|GENERIC_WRITE,0, NULL, OPEN_EXISTING, 0, NULL);
+	if (portHandle == INVALID_HANDLE_VALUE)
+	{
+		return -1;
+	}
+	COMMCONFIG Win_CommConfig;
+	COMMTIMEOUTS Win_CommTimeouts;
+	unsigned long confSize = sizeof(COMMCONFIG);
+	Win_CommConfig.dwSize = confSize;
+	GetCommConfig(portHandle, &Win_CommConfig, &confSize);
+	Win_CommConfig.dcb.Parity = 1; //Odd parity
+	Win_CommConfig.dcb.fRtsControl = RTS_CONTROL_DISABLE;
+	Win_CommConfig.dcb.fOutxCtsFlow = FALSE;
+	Win_CommConfig.dcb.fOutxDsrFlow = FALSE;
+	Win_CommConfig.dcb.fDtrControl = DTR_CONTROL_DISABLE;
+	Win_CommConfig.dcb.fDsrSensitivity = FALSE;
+	Win_CommConfig.dcb.fNull=FALSE;
+	Win_CommConfig.dcb.fTXContinueOnXoff = FALSE;
+	Win_CommConfig.dcb.fInX=FALSE;
+	Win_CommConfig.dcb.fOutX=FALSE;
+	Win_CommConfig.dcb.fBinary=TRUE;
+	Win_CommConfig.dcb.DCBlength = sizeof(DCB);
+	if (baudrate != -1)
+	{
+		Win_CommConfig.dcb.BaudRate = baudrate;
+	}
+	else
+	{
+		Win_CommConfig.dcb.BaudRate = 115200;
+	}
+	Win_CommConfig.dcb.ByteSize = 8;
+	Win_CommTimeouts.ReadIntervalTimeout = 50;
+	Win_CommTimeouts.ReadTotalTimeoutMultiplier = 0;
+	Win_CommTimeouts.ReadTotalTimeoutConstant = 110;
+	Win_CommTimeouts.WriteTotalTimeoutMultiplier = 0;
+	Win_CommTimeouts.WriteTotalTimeoutConstant = 110;
+	SetCommConfig(portHandle, &Win_CommConfig, sizeof(COMMCONFIG));
+	SetCommTimeouts(portHandle,&Win_CommTimeouts);
+	return 0;
+#else
+
 	m_portHandle = open(portName.toAscii(),O_RDWR | O_NOCTTY | O_NDELAY);
 	if (m_portHandle < 0)
 	{
@@ -311,4 +376,5 @@ int SerialThread::openPort(QString portName,int baudrate)
 	}
 	tcsetattr(m_portHandle,TCSANOW,&newtio);
 	return 0;
+#endif //Q_OS_WIN32
 }
