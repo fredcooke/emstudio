@@ -219,8 +219,7 @@ void SerialThread::run()
 				//End of packet
 				inpacket = false;
 				qbuffer.append(buffer[i]);
-				//
-				->write(qbuffer);
+				//m_logFile->write(qbuffer);
 				//m_logFile->flush();
 				emit parseBuffer(qbuffer);
 				QString output;
