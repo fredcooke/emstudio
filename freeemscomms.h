@@ -20,6 +20,7 @@ public:
 		GET_INTERFACE_VERSION,
 		GET_FIRMWARE_VERSION,
 		GET_MAX_PACKET_SIZE,
+		GET_LOCATION_ID_LIST,
 		ECHO_PACKET,
 		SOFT_RESET,
 		HARD_RESET
@@ -41,6 +42,7 @@ public:
 	int getFirmwareVersion();
 	int getMaxPacketSize();
 	int echoPacket(QByteArray packet);
+	int getLocationIdList(unsigned char listtype, unsigned short listmask);
 	int softReset();
 	int hardReset();
 	void connectSerial(QString port,int baud);
@@ -64,6 +66,7 @@ private:
 	RequestClass m_currentWaitingRequest;
 	//void parseBuffer(QByteArray buffer);
 signals:
+	void locationIdList(QList<unsigned short> idlist);
 	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QByteArray version);

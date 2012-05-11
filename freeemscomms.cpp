@@ -120,6 +120,20 @@ int FreeEmsComms::echoPacket(QByteArray packet)
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
+int FreeEmsComms::getLocationIdList(unsigned char listtype, unsigned short listmask)
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = GET_LOCATION_ID_LIST;
+	req.sequencenumber = m_sequenceNumber;
+	req.args.append(listtype);
+	req.args.append(listmask);
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+
 int FreeEmsComms::softReset()
 {
 	m_reqListMutex.lock();
@@ -224,6 +238,30 @@ void FreeEmsComms::run()
 				}
 				m_threadReqList.removeAt(i);
 				i--;
+			}
+			else if (m_threadReqList[i].type == GET_LOCATION_ID_LIST)
+			{
+				//m_threadReqList[i].args[0] - unsigned char listtype
+				//m_threadReqList[i].args[1] - unsigned short listmask
+				if (!m_waitingForResponse)
+				{
+					m_currentWaitingRequest = m_threadReqList[i];
+					unsigned char listtype = m_threadReqList[i].args[0].toInt();
+					unsigned short listmask = m_threadReqList[i].args[1].toInt();
+					QByteArray header;
+					QByteArray payload;
+					header.append((char)0x01); //Length, no seq no nak
+					header.append((char)0xDA); // Payload 0xDA5E, get list of location IDs
+					header.append((char)0x5E);
+					payload.append((char)((listtype) & 0xFF));
+					payload.append((char)((listmask << 8) & 0xFF));
+					payload.append((char)((listmask) & 0xFF));
+					header.append((char)(payload.length() << 8) & 0xFF);
+					header.append((char)(payload.length()) & 0xFF);
+					m_threadReqList.removeAt(i);
+					i--;
+					serialThread->writePacket(generatePacket(header,payload));
+				}
 			}
 			else if (m_threadReqList[i].type == UPDATE_BLOCK_IN_RAM)
 			{
@@ -422,6 +460,25 @@ void FreeEmsComms::run()
 					else
 					{
 						emit dataLogPayloadReceived(packetpair.first,packetpair.second);
+					}
+				}
+				else if (payloadid == 0xDA5F)
+				{
+					if (packetpair.first[0] & 0b00000010)
+					{
+					}
+					else
+					{
+						//TODO double check to make sure that there aren't an odd number of items here...
+						QList<unsigned short> idlist;
+						for (int j=0;j<packetpair.second.size();j+=2)
+						{
+							unsigned short tmp = 0;
+							tmp += packetpair.second[j] << 8;
+							tmp += packetpair.second[j+1];
+							idlist.append(tmp);
+						}
+						emit locationIdList(idlist);
 					}
 				}
 				else if (payloadid == 0x0001) //Interface version response
