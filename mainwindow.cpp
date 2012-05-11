@@ -105,7 +105,39 @@ void MainWindow::playLogButtonClicked()
 	emsComms->playLog();
 	ui.statusLabel->setText("Status: File loaded and playing");
 }
-
+void MainWindow::locationIdList(QList<unsigned short> idlist)
+{
+	for (int i=0;i<idlist.size();i++)
+	{
+		ui.listWidget->addItem(QString::number(idlist[i]));
+	}
+}
+void MainWindow::locationIdInfo(QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
+{
+}
+void MainWindow::blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload)
+{
+}
+void MainWindow::dataLogPayloadReceived(QByteArray header,QByteArray payload)
+{
+}
+void MainWindow::interfaceVersion(QByteArray version)
+{
+	ui.interfaceVersionLineEdit->setText(version);
+}
+void MainWindow::firmwareVersion(QString version)
+{
+	ui.firmwareVersionLineEdit->setText(version);
+}
+void MainWindow::error(QString msg)
+{
+}
+void MainWindow::commandSuccessful(int sequencenumber)
+{
+}
+void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
+{
+}
 void MainWindow::pauseLogButtonClicked()
 {
 
@@ -118,6 +150,9 @@ void MainWindow::stopLogButtonClicked()
 void MainWindow::connectButtonClicked()
 {
 	emsComms->connectSerial(ui.portNameLineEdit->text(),ui.baudRateLineEdit->text().toInt());
+	emsComms->getFirmwareVersion();
+	emsComms->getInterfaceVersion();
+	emsComms->getLocationIdList(0x00,0x00);
 }
 
 void MainWindow::logProgress(qlonglong current,qlonglong total)
