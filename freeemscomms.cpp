@@ -278,12 +278,14 @@ void FreeEmsComms::run()
 		{
 			if (m_threadReqList[i].type == SERIAL_CONNECT)
 			{
+				emit debugVerbose("SERIAL_CONNECT");
 				serialconnected = true;
 				if (serialThread->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt()))
 				{
 					qDebug() << "Unable to connect to COM port";
 					emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()));
 				}
+				emit debug("Connected to serial port");
 				m_threadReqList.removeAt(i);
 				i--;
 			}
@@ -293,7 +295,9 @@ void FreeEmsComms::run()
 				//m_threadReqList[i].args[1] - unsigned short listmask
 				if (!m_waitingForResponse)
 				{
+					emit debugVerbose("GET_LOCATION_ID_LIST");
 					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = 0xDA5E;
 					unsigned char listtype = m_threadReqList[i].args[0].toInt();
 					unsigned short listmask = m_threadReqList[i].args[1].toInt();
 					QByteArray header;
@@ -316,6 +320,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = 0xF8E0;
 					unsigned short locationid = m_threadReqList[i].args[0].toInt();
 					QByteArray header;
 					QByteArray payload;
@@ -336,6 +341,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = 0x0100;
 					int location = m_threadReqList[i].args[0].toInt();
 					int offset= m_threadReqList[i].args[1].toInt();
 					int size = m_threadReqList[i].args[2].toInt();
@@ -364,6 +370,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = 0x0104;
 					int location = m_threadReqList[i].args[0].toInt();
 					int offset= m_threadReqList[i].args[1].toInt();
 					int size = m_threadReqList[i].args[2].toInt();
@@ -391,6 +398,7 @@ void FreeEmsComms::run()
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
+					m_payloadWaitingForResponse = 0x0000;
 					header.append((char)0x00);
 					header.append((char)0x00);
 					header.append((char)0x00);
@@ -406,6 +414,7 @@ void FreeEmsComms::run()
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
+					m_payloadWaitingForResponse = 0x0002;
 					header.append((char)0x00);
 					header.append((char)0x00);
 					header.append((char)0x02);
@@ -421,6 +430,7 @@ void FreeEmsComms::run()
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
+					m_payloadWaitingForResponse = 0x0004;
 					header.append((char)0x00);
 					header.append((char)0x00);
 					header.append((char)0x04);
@@ -436,6 +446,7 @@ void FreeEmsComms::run()
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
+					m_payloadWaitingForResponse = 0x0006;
 					header.append((char)0x00);
 					header.append((char)0x00);
 					header.append((char)0x06);
@@ -452,6 +463,7 @@ void FreeEmsComms::run()
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
+					m_payloadWaitingForResponse = 0x0008;
 					header.append((char)0x00);
 					header.append((char)0x00);
 					header.append((char)0x08);
@@ -467,6 +479,7 @@ void FreeEmsComms::run()
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
+					m_payloadWaitingForResponse = 0x0010;
 					header.append((char)0x00);
 					header.append((char)0x00);
 					header.append((char)0x10);

@@ -113,6 +113,8 @@ signals:
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QByteArray version);
 	void firmwareVersion(QString version);
+	void debugVerbose(QString msg);
+	void debug(QString msg);
 	void error(QString msg);
 	void commandSuccessful(int sequencenumber);
 	void commandFailed(int sequencenumber,unsigned short errornum);
