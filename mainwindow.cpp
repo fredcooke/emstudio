@@ -29,6 +29,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.playLogPushButton,SIGNAL(clicked()),this,SLOT(playLogButtonClicked()));
 	connect(ui.pauseLogPushButton,SIGNAL(clicked()),this,SLOT(pauseLogButtonClicked()));
 	connect(ui.stopLogPushButton,SIGNAL(clicked()),this,SLOT(stopLogButtonClicked()));
+	ui.sendCommandTableWidget->setColumnCount(4);
+	ui.sendCommandTableWidget->setColumnWidth(0,50);
+	ui.sendCommandTableWidget->setColumnWidth(1,100);
+	ui.sendCommandTableWidget->setColumnWidth(2,100);
+	ui.sendCommandTableWidget->setColumnWidth(3,500);
 
 
 	dataPacketDecoder = new DataPacketDecoder(this);
@@ -55,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
 	connect(emsComms,SIGNAL(interfaceVersion(QString)),this,SLOT(interfaceVersion(QString)));
 	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)));
+	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
 
 
 	widget = new GaugeWidget(ui.tab_2);
@@ -80,6 +86,18 @@ void MainWindow::timerTick()
 {
 	ui.ppsLabel->setText("PPS: " + QString::number(pidcount));
 	pidcount = 0;
+}
+void MainWindow::unknownPacket(QByteArray header,QByteArray payload)
+{
+	QString result = "";
+	for (int i=0;i<header.size();i++)
+	{
+		result += (((unsigned char)header[i] < (char)0xF) ? "0" : "") + QString::number((unsigned char)header[i],16).toUpper();
+	}
+	for (int i=0;i<payload.size();i++)
+	{
+		result += (((unsigned char)payload[i] < (char)0xF) ? "0" : "") + QString::number((unsigned char)payload[i],16).toUpper();
+	}
 }
 
 void MainWindow::loadLogButtonClicked()
@@ -112,7 +130,7 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 {
 	for (int i=0;i<idlist.size();i++)
 	{
-		ui.listWidget->addItem(QString::number(idlist[i]));
+		//ui.listWidget->addItem(QString::number(idlist[i]));
 	}
 }
 void MainWindow::locationIdInfo(QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
@@ -137,9 +155,24 @@ void MainWindow::error(QString msg)
 }
 void MainWindow::commandSuccessful(int sequencenumber)
 {
+	for (int i=0;i<ui.sendCommandTableWidget->rowCount();i++)
+	{
+		if (ui.sendCommandTableWidget->item(i,0)->text().toInt() == sequencenumber)
+		{
+			ui.sendCommandTableWidget->item(i,1)->setText("Success");
+		}
+	}
 }
 void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 {
+	for (int i=0;i<ui.sendCommandTableWidget->rowCount();i++)
+	{
+		if (ui.sendCommandTableWidget->item(i,0)->text().toInt() == sequencenumber)
+		{
+			ui.sendCommandTableWidget->item(i,1)->setText("Failed");
+			ui.sendCommandTableWidget->item(i,2)->setText(QString::number(errornum));
+		}
+	}
 }
 void MainWindow::pauseLogButtonClicked()
 {
@@ -153,9 +186,26 @@ void MainWindow::stopLogButtonClicked()
 void MainWindow::connectButtonClicked()
 {
 	emsComms->connectSerial(ui.portNameLineEdit->text(),ui.baudRateLineEdit->text().toInt());
-	emsComms->getFirmwareVersion();
-	emsComms->getInterfaceVersion();
-	emsComms->getLocationIdList(0x00,0x00);
+	int firmwareseq = emsComms->getFirmwareVersion();
+	int ifaceseq = emsComms->getInterfaceVersion();
+	int locidseq = emsComms->getLocationIdList(0x00,0x00);
+	ui.sendCommandTableWidget->setRowCount(ui.sendCommandTableWidget->rowCount()+1);
+	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(firmwareseq)));
+	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,1,new QTableWidgetItem("0"));
+	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,2,new QTableWidgetItem("Pending"));
+	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,3,new QTableWidgetItem("getFirmwareVersion"));
+
+	ui.sendCommandTableWidget->setRowCount(ui.sendCommandTableWidget->rowCount()+1);
+	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(ifaceseq)));
+	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,1,new QTableWidgetItem("0"));
+	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,2,new QTableWidgetItem("Pending"));
+	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,3,new QTableWidgetItem("getInterfaceVersion"));
+
+	ui.sendCommandTableWidget->setRowCount(ui.sendCommandTableWidget->rowCount()+1);
+	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(locidseq)));
+	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,1,new QTableWidgetItem("0"));
+	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,2,new QTableWidgetItem("Pending"));
+	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,3,new QTableWidgetItem("getLocationIdList"));
 }
 
 void MainWindow::logProgress(qlonglong current,qlonglong total)
