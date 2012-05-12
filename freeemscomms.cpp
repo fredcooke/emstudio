@@ -639,7 +639,7 @@ void FreeEmsComms::run()
 					}
 					else
 					{
-						emit interfaceVersion(packetpair.second);
+						emit interfaceVersion(QString(packetpair.second));
 					}
 				}
 				else if (payloadid == 0x0003) //Firmware version response

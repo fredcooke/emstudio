@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsComms = new FreeEmsComms(this);
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
-	connect(emsComms,SIGNAL(interfaceVersion(QByteArray)),this,SLOT(interfaceVersion(QByteArray)));
+	connect(emsComms,SIGNAL(interfaceVersion(QString)),this,SLOT(interfaceVersion(QString)));
 	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)));
 
 
@@ -124,7 +124,7 @@ void MainWindow::blockRetrieved(int sequencenumber,QByteArray header,QByteArray 
 void MainWindow::dataLogPayloadReceived(QByteArray header,QByteArray payload)
 {
 }
-void MainWindow::interfaceVersion(QByteArray version)
+void MainWindow::interfaceVersion(QString version)
 {
 	ui.interfaceVersionLineEdit->setText(version);
 }
