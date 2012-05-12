@@ -664,6 +664,10 @@ void FreeEmsComms::run()
 						emit blockRetrieved(m_currentWaitingRequest.sequencenumber,packetpair.first,packetpair.second);
 					}
 				}
+				else
+				{
+					emit unknownPacket(packetpair.first,packetpair.second);
+				}
 			}
 		}
 	}

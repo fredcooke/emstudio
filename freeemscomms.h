@@ -114,6 +114,7 @@ signals:
 	void interfaceVersion(QByteArray version);
 	void firmwareVersion(QString version);
 	void debugVerbose(QString msg);
+	void unknownPacket(QByteArray header,QByteArray payload);
 	void debug(QString msg);
 	void error(QString msg);
 	void commandSuccessful(int sequencenumber);
