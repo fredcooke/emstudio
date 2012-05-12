@@ -69,6 +69,7 @@ private slots:
 	void error(QString msg);
 	void commandSuccessful(int sequencenumber);
 	void commandFailed(int sequencenumber,unsigned short errornum);
+	void interByteDelayChanged(int num);
 
 };
 

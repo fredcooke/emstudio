@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	ui.sendCommandTableWidget->setColumnWidth(2,100);
 	ui.sendCommandTableWidget->setColumnWidth(3,500);
 
-
+	connect(ui.interByteDelaySpinBox,SIGNAL(valueChanged(int)),this,SLOT(interByteDelayChanged(int)));
 	dataPacketDecoder = new DataPacketDecoder(this);
 	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QMap<QString,double>)),this,SLOT(dataLogDecoded(QMap<QString,double>)));
 	ui.tableWidget->setColumnCount(2);
@@ -115,6 +115,11 @@ void MainWindow::loadLogButtonClicked()
 		}
 	}
 }
+void MainWindow::interByteDelayChanged(int num)
+{
+	emsComms->setInterByteSendDelay(num);
+}
+
 void MainWindow::logFinished()
 {
 	ui.statusLabel->setText("Status: File loaded and log finished");

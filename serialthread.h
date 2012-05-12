@@ -44,7 +44,9 @@ public:
     void writePacket(QByteArray packet);
     //void sendMessageForResponse(QByteArray header,QByteArray payload);
     int bufferSize() { return m_queuedMessages.size(); }
+    void setInterByteSendDelay(int milliseconds);
 private:
+    int m_interByteSendDelay;
     QList<QByteArray> m_queuedMessages;
     QByteArray m_buffer;
     QFile *m_logFile;

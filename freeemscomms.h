@@ -92,6 +92,7 @@ public:
 	QByteArray generatePacket(QByteArray header,QByteArray payload);
 	int updateBlockInRam(int location,int offset, int size,QByteArray data);
 	int retrieveBlockFromRam(int location, int offset, int size);
+	void setInterByteSendDelay(int milliseconds);
 protected:
 	void run();
 private:

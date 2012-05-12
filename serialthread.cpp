@@ -21,6 +21,7 @@
 SerialThread::SerialThread(QObject *parent) : QThread(parent)
 {
 	m_logFile = 0;
+	m_interByteSendDelay=0;
 }
 void SerialThread::setPort(QString portname)
 {
@@ -36,6 +37,11 @@ void SerialThread::setLogFileName(QString filename)
 	m_logFileName = filename;
 	//m_logFile = new QFile(m_logFileName);
 }
+void SerialThread::setInterByteSendDelay(int milliseconds)
+{
+	m_interByteSendDelay = milliseconds;
+}
+
 void SerialThread::readSerial(int timeout)
 {
 	qint64 currms = QDateTime::currentMSecsSinceEpoch();
@@ -137,16 +143,23 @@ void SerialThread::readSerial(int timeout)
 void SerialThread::writePacket(QByteArray packet)
 {
 #ifdef Q_OS_WIN32
-	long len=0;
-	if (!::WriteFile(m_portHandle, (void*)packet.data(), (DWORD)packet.length(), (LPDWORD)&len, NULL)) {
-		//DWORD error = GetLastError();
-		//int i = 2;
-		//An error happened, I should probably handle this sometime.
-		qDebug() << "Serial Write error";
-		return;
+	for (int i=0;i<packet.size();i++)
+	{
+		char c = packet.data()[i];
+		if (!::WriteFile(m_portHandle, (void*)&c, (DWORD)1, (LPDWORD)&len, NULL))
+		{
+			qDebug() << "Serial Write Error";
+			return;
+		}
+		msleep(m_interByteSendDelay);
 	}
 #else
-	write(m_portHandle,packet.data(),packet.length());
+	for (int i=0;i<packet.size();i++)
+	{
+		char c = packet.data()[i];
+		write(m_portHandle,&c,1);
+		msleep(m_interByteSendDelay);
+	}
 #endif //Q_OS_WIN32
 }
 

@@ -262,6 +262,10 @@ QByteArray FreeEmsComms::generatePacket(QByteArray header,QByteArray payload)
 	packet.append(0xCC);
 	return packet;
 }
+void FreeEmsComms::setInterByteSendDelay(int milliseconds)
+{
+	serialThread->setInterByteSendDelay(milliseconds);
+}
 
 void FreeEmsComms::run()
 {
