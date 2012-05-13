@@ -526,6 +526,11 @@ void FreeEmsComms::run()
 				if (payloadid != 0x0191)
 				{
 					qDebug() << "Non debug packet:" << QString::number(payloadid);
+					if (m_waitingForResponse)
+					{
+						qDebug() << "Waiting for response: " << QString::number(m_payloadWaitingForResponse);
+					}
+
 				}
 
 				if (m_waitingForResponse)
