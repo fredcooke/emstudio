@@ -521,6 +521,13 @@ void FreeEmsComms::run()
 			{
 				unsigned int payloadid = (unsigned int)packetpair.first[1] << 8;
 				payloadid += (unsigned char)packetpair.first[2];
+
+
+				if (payloadid != 0x0191)
+				{
+					qDebug() << "Non debug packet:" << QString::number(payloadid);
+				}
+
 				if (m_waitingForResponse)
 				{
 					if (payloadid == m_payloadWaitingForResponse+1)
