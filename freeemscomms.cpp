@@ -299,6 +299,7 @@ void FreeEmsComms::run()
 				//m_threadReqList[i].args[1] - unsigned short listmask
 				if (!m_waitingForResponse)
 				{
+					m_waitingForResponse = true;
 					qDebug() << "GET_LOCATION_ID_LIST";
 					emit debugVerbose("GET_LOCATION_ID_LIST");
 					m_currentWaitingRequest = m_threadReqList[i];
@@ -324,6 +325,7 @@ void FreeEmsComms::run()
 			{
 				if (!m_waitingForResponse)
 				{
+					m_waitingForResponse = true;
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0xF8E0;
 					unsigned short locationid = m_threadReqList[i].args[0].toInt();
@@ -345,6 +347,7 @@ void FreeEmsComms::run()
 			{
 				if (!m_waitingForResponse)
 				{
+					m_waitingForResponse = true;
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0100;
 					int location = m_threadReqList[i].args[0].toInt();
@@ -374,6 +377,7 @@ void FreeEmsComms::run()
 			{
 				if (!m_waitingForResponse)
 				{
+					m_waitingForResponse = true;
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0104;
 					int location = m_threadReqList[i].args[0].toInt();
@@ -400,6 +404,7 @@ void FreeEmsComms::run()
 			{
 				if (!m_waitingForResponse)
 				{
+					m_waitingForResponse = true;
 					qDebug() << "GET_INTERFACE_VERSION";
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
@@ -417,6 +422,7 @@ void FreeEmsComms::run()
 			{
 				if (!m_waitingForResponse)
 				{
+					m_waitingForResponse = true;
 					qDebug() << "GET_FIRMWARE_VERSION";
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
@@ -434,6 +440,7 @@ void FreeEmsComms::run()
 			{
 				if (!m_waitingForResponse)
 				{
+					m_waitingForResponse = true;
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
@@ -450,6 +457,7 @@ void FreeEmsComms::run()
 			{
 				if (!m_waitingForResponse)
 				{
+					m_waitingForResponse = true;
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
@@ -467,6 +475,7 @@ void FreeEmsComms::run()
 			{
 				if (!m_waitingForResponse)
 				{
+					m_waitingForResponse = true;
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
@@ -483,6 +492,7 @@ void FreeEmsComms::run()
 			{
 				if (!m_waitingForResponse)
 				{
+					m_waitingForResponse = true;
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
