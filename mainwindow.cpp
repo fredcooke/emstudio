@@ -160,6 +160,7 @@ void MainWindow::error(QString msg)
 }
 void MainWindow::commandSuccessful(int sequencenumber)
 {
+	qDebug() << "command succesful:" << QString::number(sequencenumber);
 	for (int i=0;i<ui.sendCommandTableWidget->rowCount();i++)
 	{
 		if (ui.sendCommandTableWidget->item(i,0)->text().toInt() == sequencenumber)
@@ -170,6 +171,7 @@ void MainWindow::commandSuccessful(int sequencenumber)
 }
 void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 {
+	qDebug() << "command failed:" << QString::number(sequencenumber);
 	for (int i=0;i<ui.sendCommandTableWidget->rowCount();i++)
 	{
 		if (ui.sendCommandTableWidget->item(i,0)->text().toInt() == sequencenumber)
