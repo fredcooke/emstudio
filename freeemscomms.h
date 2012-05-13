@@ -23,6 +23,7 @@
 #include <QFile>
 #include <QMutex>
 #include <QVariant>
+#include <QDateTime>
 #include "serialthread.h"
 #include "logloader.h"
 class FreeEmsComms : public QThread
@@ -96,6 +97,7 @@ public:
 protected:
 	void run();
 private:
+	qint64 m_timeoutMsecs;
 	QList<LocationIdFlags> m_blockFlagList;
 	int m_sequenceNumber;
 	QMutex m_reqListMutex;

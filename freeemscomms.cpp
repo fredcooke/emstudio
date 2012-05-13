@@ -20,6 +20,7 @@
 #include <QDebug>
 FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 {
+
 	serialThread = new SerialThread(this);
 	connect(serialThread,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
 
@@ -300,6 +301,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					qDebug() << "GET_LOCATION_ID_LIST";
 					emit debugVerbose("GET_LOCATION_ID_LIST");
 					m_currentWaitingRequest = m_threadReqList[i];
@@ -326,6 +328,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0xF8E0;
 					unsigned short locationid = m_threadReqList[i].args[0].toInt();
@@ -348,6 +351,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0100;
 					int location = m_threadReqList[i].args[0].toInt();
@@ -378,6 +382,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0104;
 					int location = m_threadReqList[i].args[0].toInt();
@@ -405,6 +410,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					qDebug() << "GET_INTERFACE_VERSION";
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
@@ -423,6 +429,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					qDebug() << "GET_FIRMWARE_VERSION";
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
@@ -441,6 +448,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
@@ -458,6 +466,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
@@ -476,6 +485,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
@@ -493,6 +503,7 @@ void FreeEmsComms::run()
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
 					QByteArray packet;
@@ -542,9 +553,9 @@ void FreeEmsComms::run()
 					}
 
 				}
-
 				if (m_waitingForResponse)
 				{
+
 					if (payloadid == m_payloadWaitingForResponse+1)
 					{
 						if (packetpair.first[0] & 0b00000010)
@@ -560,6 +571,15 @@ void FreeEmsComms::run()
 							emit commandSuccessful(m_currentWaitingRequest.sequencenumber);
 						}
 						m_waitingForResponse = false;
+					}
+					else
+					{
+						if (QDateTime::currentDateTime().currentMSecsSinceEpoch() - m_timeoutMsecs > 5000)
+						{
+							//5 seconds
+							qDebug() << "TIMEOUT waiting for response to payload:" << QString::number(m_payloadWaitingForResponse);
+							m_waitingForResponse = false;
+						}
 					}
 				}
 				if (payloadid == 0x0191)
