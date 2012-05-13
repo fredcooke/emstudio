@@ -49,7 +49,8 @@ private:
     int m_interByteSendDelay;
     QList<QByteArray> m_queuedMessages;
     QByteArray m_buffer;
-    QFile *m_logFile;
+    QFile *m_logInFile;
+    QFile *m_logInOutFile;
     QString m_logFileName;
     QString m_portName;
     int m_baud;

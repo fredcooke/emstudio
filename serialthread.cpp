@@ -20,8 +20,10 @@
 #include <QDateTime>
 SerialThread::SerialThread(QObject *parent) : QThread(parent)
 {
-	m_logFile = 0;
+	m_logInFile = 0;
+	m_logInOutFile = 0;
 	m_interByteSendDelay=0;
+	m_logFileName = "IOLog";
 }
 void SerialThread::setPort(QString portname)
 {
@@ -44,6 +46,13 @@ void SerialThread::setInterByteSendDelay(int milliseconds)
 
 void SerialThread::readSerial(int timeout)
 {
+	if (!m_logInFile || !m_logInOutFile)
+	{
+		m_logInFile = new QFile("log.in.log");
+		m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		m_logInOutFile = new QFile("log.out.log");
+		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+	}
 	qint64 currms = QDateTime::currentMSecsSinceEpoch();
 	int readlen = m_buffer.size();
 	QByteArray qbuffer;
@@ -134,6 +143,10 @@ void SerialThread::readSerial(int timeout)
 			}
 		}
 		readlen = read(m_portHandle,buffer,1024);
+		m_logInFile->write((const char*)buffer,readlen);
+		m_logInOutFile->write((const char*)buffer,readlen);
+		m_logInFile->flush();
+		m_logInOutFile->flush();
 		if (readlen == 0)
 		{
 			msleep(10);
@@ -142,6 +155,15 @@ void SerialThread::readSerial(int timeout)
 }
 void SerialThread::writePacket(QByteArray packet)
 {
+	if (!m_logInFile || !m_logInOutFile)
+	{
+		m_logInFile = new QFile("log.in.log");
+		m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		m_logInOutFile = new QFile("log.out.log");
+		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+	}
+	m_logInOutFile->write(packet);
+	m_logInOutFile->flush();
 #ifdef Q_OS_WIN32
 	for (int i=0;i<packet.size();i++)
 	{
@@ -184,8 +206,8 @@ void SerialThread::run()
 		qDebug() << "Error opening com port";
 		return;
 	}
-	m_logFile = new QFile(m_logFileName);
-	m_logFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+	//m_logFile = new QFile(m_logFileName);
+	//m_logFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 	unsigned char buffer[1024];
 	int readlen = 0;
 	QByteArray qbuffer;
