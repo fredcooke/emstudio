@@ -534,6 +534,12 @@ void FreeEmsComms::run()
 		{
 			msleep(20);
 		}
+		if (QDateTime::currentDateTime().currentMSecsSinceEpoch() - m_timeoutMsecs > 5000 && m_waitingForResponse)
+		{
+			//5 seconds
+			qDebug() << "TIMEOUT waiting for response to payload:" << QString::number(m_payloadWaitingForResponse);
+			m_waitingForResponse = false;
+		}
 		while (serialThread->bufferSize() != 0)
 		{
 			QByteArray packet = serialThread->readPacket();
@@ -571,15 +577,6 @@ void FreeEmsComms::run()
 							emit commandSuccessful(m_currentWaitingRequest.sequencenumber);
 						}
 						m_waitingForResponse = false;
-					}
-					else
-					{
-						if (QDateTime::currentDateTime().currentMSecsSinceEpoch() - m_timeoutMsecs > 5000)
-						{
-							//5 seconds
-							qDebug() << "TIMEOUT waiting for response to payload:" << QString::number(m_payloadWaitingForResponse);
-							m_waitingForResponse = false;
-						}
 					}
 				}
 				if (payloadid == 0x0191)
