@@ -273,6 +273,7 @@ void FreeEmsComms::run()
 	bool serialconnected = false;
 	//bool waitingforresponse=false;
 	//int waitingpayloadid=0;
+
 	while (true)
 	{
 		m_reqListMutex.lock();
@@ -284,17 +285,24 @@ void FreeEmsComms::run()
 			if (m_threadReqList[i].type == SERIAL_CONNECT)
 			{
 				emit debugVerbose("SERIAL_CONNECT");
-				serialconnected = true;
+
 				if (serialThread->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt()))
 				{
 					qDebug() << "Unable to connect to COM port";
 					emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()));
-					return;
+					//return;
+					m_threadReqList.removeAt(i);
+					i--;					continue;
 				}
+				serialconnected = true;
 				emit debug("Connected to serial port");
 				emit connected();
 				m_threadReqList.removeAt(i);
 				i--;
+			}
+			else if (!serialconnected)
+			{
+				continue;
 			}
 			else if (m_threadReqList[i].type == GET_LOCATION_ID_LIST)
 			{
