@@ -59,6 +59,7 @@ private slots:
 	void playLogButtonClicked();
 	void pauseLogButtonClicked();
 	void stopLogButtonClicked();
+	void emsCommsConnected();
 	void unknownPacket(QByteArray header,QByteArray payload);
 	void locationIdList(QList<unsigned short> idlist);
 	void locationIdInfo(QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);

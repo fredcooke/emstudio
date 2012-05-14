@@ -292,6 +292,7 @@ void FreeEmsComms::run()
 					return;
 				}
 				emit debug("Connected to serial port");
+				emit connected();
 				m_threadReqList.removeAt(i);
 				i--;
 			}

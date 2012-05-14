@@ -110,6 +110,7 @@ private:
 	RequestClass m_currentWaitingRequest;
 	//void parseBuffer(QByteArray buffer);
 signals:
+	void connected();
 	void locationIdList(QList<unsigned short> idlist);
 	void locationIdInfo(QList<LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
