@@ -142,12 +142,24 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 }
 void MainWindow::locationIdInfo(QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
 {
+	Q_UNUSED(flags)
+	Q_UNUSED(parent)
+	Q_UNUSED(rampage)
+	Q_UNUSED(flashpage)
+	Q_UNUSED(ramaddress)
+	Q_UNUSED(flashaddress)
+	Q_UNUSED(size)
 }
 void MainWindow::blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload)
 {
+	Q_UNUSED(sequencenumber)
+	Q_UNUSED(header)
+	Q_UNUSED(payload)
 }
 void MainWindow::dataLogPayloadReceived(QByteArray header,QByteArray payload)
 {
+	Q_UNUSED(header)
+	Q_UNUSED(payload)
 }
 void MainWindow::interfaceVersion(QString version)
 {
@@ -159,6 +171,7 @@ void MainWindow::firmwareVersion(QString version)
 }
 void MainWindow::error(QString msg)
 {
+	Q_UNUSED(msg)
 }
 void MainWindow::commandSuccessful(int sequencenumber)
 {

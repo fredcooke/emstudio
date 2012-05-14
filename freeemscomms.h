@@ -106,7 +106,7 @@ private:
 	SerialThread *serialThread;
 	LogLoader *logLoader;
 	bool m_waitingForResponse;
-	int m_payloadWaitingForResponse;
+	unsigned int m_payloadWaitingForResponse;
 	RequestClass m_currentWaitingRequest;
 	//void parseBuffer(QByteArray buffer);
 signals:

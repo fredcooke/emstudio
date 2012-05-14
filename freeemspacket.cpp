@@ -24,7 +24,7 @@ FreeEmsPacket::FreeEmsPacket()
 QByteArray FreeEmsPacket::updateRamBlockPacket(int locationid,int offset,int size,QByteArray data)
 {
 	QByteArray ret;
-	int flags;
+	int flags=0;
 	int payloadlength = data.size() + 6;
 	//TODO Actually set some flag values here
 

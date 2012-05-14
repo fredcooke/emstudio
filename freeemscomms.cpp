@@ -271,8 +271,8 @@ void FreeEmsComms::setInterByteSendDelay(int milliseconds)
 void FreeEmsComms::run()
 {
 	bool serialconnected = false;
-	bool waitingforresponse=false;
-	int waitingpayloadid=0;
+	//bool waitingforresponse=false;
+	//int waitingpayloadid=0;
 	while (true)
 	{
 		m_reqListMutex.lock();
@@ -560,8 +560,8 @@ void FreeEmsComms::run()
 			else if (false)
 			{
 				serialThread->writePacket(QByteArray());
-				waitingforresponse = true;
-				waitingpayloadid = 0x0101;
+				//waitingforresponse = true;
+				//waitingpayloadid = 0x0101;
 				break;
 			}
 		}
