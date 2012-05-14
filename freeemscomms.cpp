@@ -598,7 +598,7 @@ void FreeEmsComms::run()
 			{
 				unsigned int payloadid = (unsigned int)packetpair.first[1] << 8;
 				payloadid += (unsigned char)packetpair.first[2];
-
+				qDebug() << "Incoming packet. Payload:" << payloadid;
 
 				if (payloadid != 0x0191)
 				{
