@@ -767,6 +767,11 @@ void FreeEmsComms::run()
 					emit unknownPacket(packetpair.first,packetpair.second);
 				}
 			}
+			else
+			{
+				//Header size is 2?
+				qDebug() << "Header size is only 2! THIS SHOULD NOT HAPPEN!";
+			}
 		}
 	}
 }
