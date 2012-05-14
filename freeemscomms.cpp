@@ -255,7 +255,7 @@ QByteArray FreeEmsComms::generatePacket(QByteArray header,QByteArray payload)
 		{
 			packet.append(payload[j]);
 		}
-		checksum += packet[j];
+		checksum += payload[j];
 	}
 	//packet.append(header);
 	//packet.append(payload);
