@@ -50,6 +50,7 @@ private:
     QList<QByteArray> m_queuedMessages;
     QByteArray m_buffer;
     QFile *m_logInFile;
+    QFile *m_logOutFile;
     QFile *m_logInOutFile;
     QString m_logFileName;
     QString m_portName;

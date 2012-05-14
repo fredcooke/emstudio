@@ -22,6 +22,7 @@ SerialThread::SerialThread(QObject *parent) : QThread(parent)
 {
 	m_logInFile = 0;
 	m_logInOutFile = 0;
+	m_logOutFile = 0;
 	m_interByteSendDelay=0;
 	m_logFileName = "IOLog";
 }
@@ -52,6 +53,9 @@ void SerialThread::readSerial(int timeout)
 		m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 		m_logInOutFile = new QFile("log.inandout.log");
 		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		m_logOutFile = new QFile("log.out.log");
+		m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+
 	}
 	qint64 currms = QDateTime::currentMSecsSinceEpoch();
 	int readlen = m_buffer.size();
@@ -161,9 +165,13 @@ int SerialThread::writePacket(QByteArray packet)
 		m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 		m_logInOutFile = new QFile("log.out.log");
 		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		m_logOutFile = new QFile("log.out.log");
+		m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 	}
 	m_logInOutFile->write(packet);
 	m_logInOutFile->flush();
+	m_logOutFile->write(packet);
+	m_logOutFile->flush();
 #ifdef Q_OS_WIN32
 	for (int i=0;i<packet.size();i++)
 	{
