@@ -73,6 +73,7 @@ void SerialThread::readSerial(int timeout)
 	m_buffer.clear();
 	bool inpacket = false;
 	bool inescape = false;
+	QString byteoutofpacket;
 	while (currms + timeout > QDateTime::currentMSecsSinceEpoch())
 	{
 		for (int i=0;i<readlen;i++)
@@ -150,10 +151,12 @@ void SerialThread::readSerial(int timeout)
 				}
 				else
 				{
-					qDebug() << "Byte out of a packet:" << QString::number(buffer[i],16);
+					//qDebug() << "Byte out of a packet:" << QString::number(buffer[i],16);
+					byteoutofpacket += QString::number(buffer[i],16) + " ";
 				}
 			}
 		}
+		qDebug() << "Bytes out of a packet:" << byteoutofpacket;
 		readlen = read(m_portHandle,buffer,1024);
 		m_logInFile->write((const char*)buffer,readlen);
 		m_logInOutFile->write((const char*)buffer,readlen);
