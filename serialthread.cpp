@@ -108,8 +108,8 @@ void SerialThread::readSerial(int timeout)
 					int num = (unsigned char)qbuffer[i];
 					output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
 				}
-				qDebug() << "Full packet:";
-				qDebug() << output;
+				//qDebug() << "Full packet:";
+				//qDebug() << output;
 				qbuffer.clear();
 			}
 			else
@@ -142,7 +142,15 @@ void SerialThread::readSerial(int timeout)
 					{
 						qbuffer.append((char)0xCC);
 					}
+					else
+					{
+						qDebug() << "Error, escaped character is not valid!:" << QString::number(buffer[i],16);
+					}
 					inescape = false;
+				}
+				else
+				{
+					qDebug() << "Byte out of a packet:" << QString::number(buffer[i],16);
 				}
 			}
 		}
