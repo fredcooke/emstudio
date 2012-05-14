@@ -534,7 +534,7 @@ void FreeEmsComms::run()
 		{
 			msleep(20);
 		}
-		if (QDateTime::currentDateTime().currentMSecsSinceEpoch() - m_timeoutMsecs > 5000 && m_waitingForResponse)
+		if (QDateTime::currentDateTime().currentMSecsSinceEpoch() - m_timeoutMsecs > 500 && m_waitingForResponse)
 		{
 			//5 seconds
 			qDebug() << "TIMEOUT waiting for response to payload:" << QString::number(m_payloadWaitingForResponse);

@@ -50,7 +50,7 @@ void SerialThread::readSerial(int timeout)
 	{
 		m_logInFile = new QFile("log.in.log");
 		m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-		m_logInOutFile = new QFile("log.out.log");
+		m_logInOutFile = new QFile("log.inandout.log");
 		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 	}
 	qint64 currms = QDateTime::currentMSecsSinceEpoch();
