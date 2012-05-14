@@ -289,6 +289,7 @@ void FreeEmsComms::run()
 				{
 					qDebug() << "Unable to connect to COM port";
 					emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()));
+					return;
 				}
 				emit debug("Connected to serial port");
 				m_threadReqList.removeAt(i);
@@ -320,7 +321,11 @@ void FreeEmsComms::run()
 					header.append((char)(payload.length()) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
-					serialThread->writePacket(generatePacket(header,payload));
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
 				}
 			}
 			else if (m_threadReqList[i].type == GET_LOCATION_ID_INFO)
@@ -343,7 +348,11 @@ void FreeEmsComms::run()
 					header.append((char)(payload.length()) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
-					serialThread->writePacket(generatePacket(header,payload));
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
 				}
 			}
 			else if (m_threadReqList[i].type == UPDATE_BLOCK_IN_RAM)
@@ -373,7 +382,11 @@ void FreeEmsComms::run()
 					header.append((char)(payload.length() << 8) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
-					serialThread->writePacket(generatePacket(header,payload));
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
 				}
 
 			}
@@ -389,20 +402,24 @@ void FreeEmsComms::run()
 					int offset= m_threadReqList[i].args[1].toInt();
 					int size = m_threadReqList[i].args[2].toInt();
 					QByteArray header;
-					QByteArray packet;
+					QByteArray payload;
 					header.append((char)0x00); //No Length, no seq no nak
 					header.append((char)0x01); // Payload 0x0104, retrieve block
 					header.append((char)0x04);
-					packet.append((char)((location << 8) & 0xFF));
-					packet.append((char)((location) & 0xFF));
-					packet.append((char)((offset << 8) & 0xFF));
-					packet.append((char)((offset) & 0xFF));
-					packet.append((char)((size << 8) & 0xFF));
-					packet.append((char)((size) & 0xFF));
+					payload.append((char)((location << 8) & 0xFF));
+					payload.append((char)((location) & 0xFF));
+					payload.append((char)((offset << 8) & 0xFF));
+					payload.append((char)((offset) & 0xFF));
+					payload.append((char)((size << 8) & 0xFF));
+					payload.append((char)((size) & 0xFF));
 					//header.append((char)(packet.length() << 8) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
-					serialThread->writePacket(generatePacket(header,packet));
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
 				}
 			}
 			else if (m_threadReqList[i].type == GET_INTERFACE_VERSION)
@@ -414,14 +431,18 @@ void FreeEmsComms::run()
 					qDebug() << "GET_INTERFACE_VERSION";
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
-					QByteArray packet;
+					QByteArray payload;
 					m_payloadWaitingForResponse = 0x0000;
 					header.append((char)0x00);
 					header.append((char)0x00);
 					header.append((char)0x00);
 					m_threadReqList.removeAt(i);
 					i--;
-					serialThread->writePacket(generatePacket(header,packet));
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
 				}
 			}
 			else if (m_threadReqList[i].type == GET_FIRMWARE_VERSION)
@@ -433,14 +454,18 @@ void FreeEmsComms::run()
 					qDebug() << "GET_FIRMWARE_VERSION";
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
-					QByteArray packet;
+					QByteArray payload;
 					m_payloadWaitingForResponse = 0x0002;
 					header.append((char)0x00);
 					header.append((char)0x00);
 					header.append((char)0x02);
 					m_threadReqList.removeAt(i);
 					i--;
-					serialThread->writePacket(generatePacket(header,packet));
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
 				}
 			}
 			else if (m_threadReqList[i].type == GET_MAX_PACKET_SIZE)
@@ -451,14 +476,18 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
-					QByteArray packet;
+					QByteArray payload;
 					m_payloadWaitingForResponse = 0x0004;
 					header.append((char)0x00);
 					header.append((char)0x00);
 					header.append((char)0x04);
 					m_threadReqList.removeAt(i);
 					i--;
-					serialThread->writePacket(generatePacket(header,packet));
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
 				}
 			}
 			else if (m_threadReqList[i].type == ECHO_PACKET)
@@ -469,15 +498,19 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
-					QByteArray packet;
+					QByteArray payload;
 					m_payloadWaitingForResponse = 0x0006;
 					header.append((char)0x00);
 					header.append((char)0x00);
 					header.append((char)0x06);
-					packet.append(m_threadReqList[i].args[0].toByteArray());
+					payload.append(m_threadReqList[i].args[0].toByteArray());
 					m_threadReqList.removeAt(i);
 					i--;
-					serialThread->writePacket(generatePacket(header,packet));
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
 				}
 			}
 			else if (m_threadReqList[i].type == SOFT_RESET)
@@ -488,14 +521,18 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
-					QByteArray packet;
+					QByteArray payload;
 					m_payloadWaitingForResponse = 0x0008;
 					header.append((char)0x00);
 					header.append((char)0x00);
 					header.append((char)0x08);
 					m_threadReqList.removeAt(i);
 					i--;
-					serialThread->writePacket(generatePacket(header,packet));
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
 				}
 			}
 			else if (m_threadReqList[i].type == HARD_RESET)
@@ -506,14 +543,18 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					QByteArray header;
-					QByteArray packet;
+					QByteArray payload;
 					m_payloadWaitingForResponse = 0x0010;
 					header.append((char)0x00);
 					header.append((char)0x00);
 					header.append((char)0x10);
 					m_threadReqList.removeAt(i);
 					i--;
-					serialThread->writePacket(generatePacket(header,packet));
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
 				}
 			}
 			else if (false)

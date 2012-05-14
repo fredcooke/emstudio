@@ -153,7 +153,7 @@ void SerialThread::readSerial(int timeout)
 		}
 	}
 }
-void SerialThread::writePacket(QByteArray packet)
+int SerialThread::writePacket(QByteArray packet)
 {
 	if (!m_logInFile || !m_logInOutFile)
 	{
@@ -171,10 +171,11 @@ void SerialThread::writePacket(QByteArray packet)
 		if (!::WriteFile(m_portHandle, (void*)&c, (DWORD)1, (LPDWORD)&len, NULL))
 		{
 			qDebug() << "Serial Write Error";
-			return;
+			return -1;
 		}
 		msleep(m_interByteSendDelay);
 	}
+	return 0;
 #else
 	for (int i=0;i<packet.size();i++)
 	{
@@ -182,6 +183,7 @@ void SerialThread::writePacket(QByteArray packet)
 		write(m_portHandle,&c,1);
 		msleep(m_interByteSendDelay);
 	}
+	return 0;
 #endif //Q_OS_WIN32
 }
 

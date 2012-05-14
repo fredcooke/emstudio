@@ -41,7 +41,7 @@ public:
     int openPort(QString portName,int baudrate);
     QByteArray readPacket();
     void readSerial(int timeout);
-    void writePacket(QByteArray packet);
+    int writePacket(QByteArray packet);
     //void sendMessageForResponse(QByteArray header,QByteArray payload);
     int bufferSize() { return m_queuedMessages.size(); }
     void setInterByteSendDelay(int milliseconds);
