@@ -593,12 +593,19 @@ void FreeEmsComms::run()
 		while (serialThread->bufferSize() != 0)
 		{
 			QByteArray packet = serialThread->readPacket();
+			QString header;
+			for (int i=0;i<3;i++)
+			{
+				header += QString::number(packet[i]) + " ";
+			}
+			qDebug() << "First 4:" << header;
 			QPair<QByteArray,QByteArray> packetpair = parseBuffer(packet);
+			qDebug() << "Parsed header size:" << packetpair.first.size();
 			if (packetpair.first.size() >= 3)
 			{
 				unsigned int payloadid = (unsigned int)packetpair.first[1] << 8;
 				payloadid += (unsigned char)packetpair.first[2];
-				qDebug() << "Incoming packet. Payload:" << payloadid;
+				//qDebug() << "Incoming packet. Payload:" << payloadid;
 
 				if (payloadid != 0x0191)
 				{
