@@ -621,7 +621,7 @@ void FreeEmsComms::run()
 
 					if (payloadid == m_payloadWaitingForResponse+1)
 					{
-						if (packetpair.first[0] & 0b00000010)
+						if (packetpair.first[0] & 0x10)
 						{
 							//NAK to our packet
 							unsigned short errornum = packetpair.second[0] << 8;
@@ -639,7 +639,7 @@ void FreeEmsComms::run()
 				if (payloadid == 0x0191)
 				{	//Datalog packet
 
-					if (packetpair.first[0] & 0b00000010)
+					if (packetpair.first[0] & 0x10)
 					{
 						//NAK
 
@@ -652,7 +652,7 @@ void FreeEmsComms::run()
 				}
 				else if (payloadid == 0xDA5F)
 				{
-					if (packetpair.first[0] & 0b00000010)
+					if (packetpair.first[0] & 0x10)
 					{
 					}
 					else
@@ -671,7 +671,7 @@ void FreeEmsComms::run()
 				}
 				else if (payloadid == 0xF8E1) //Location ID Info
 				{
-					if (packetpair.first[0] & 0b00000010)
+					if (packetpair.first[0] & 0x10)
 					{
 					}
 					else
@@ -736,7 +736,7 @@ void FreeEmsComms::run()
 				else if (payloadid == 0x0001) //Interface version response
 				{
 					//Handle interface version
-					if (packetpair.first[0] & 0b00000010)
+					if (packetpair.first[0] & 0x10)
 					{
 						//NAK
 						qDebug() << "IFACE VERSION NAK";
@@ -748,7 +748,7 @@ void FreeEmsComms::run()
 				}
 				else if (payloadid == 0x0003) //Firmware version response
 				{
-					if (packetpair.first[0] & 0b00000010)
+					if (packetpair.first[0] & 0x10)
 					{
 						//NAK
 						qDebug() << "FIRMWARE VERSION NAK";
@@ -760,7 +760,7 @@ void FreeEmsComms::run()
 				}
 				else if (payloadid == 0x0105)
 				{
-					if (packetpair.first[0] & 0b00000010)
+					if (packetpair.first[0] & 0x10)
 					{
 					}
 					else
@@ -808,14 +808,14 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 	int iloc = 0;
 	bool seq = false;
 	bool len = false;
-	if (buffer[iloc] & 0b00000100)
+	if (buffer[iloc] & 0x100)
 	{
 		//Has header
 		seq = true;
 		//qDebug() << "Has seq";
 		headersize += 1;
 	}
-	if (buffer[iloc] & 0b00000001)
+	if (buffer[iloc] & 0x1)
 	{
 		//Has length
 		len = true;
