@@ -194,6 +194,7 @@ int SerialThread::writePacket(QByteArray packet)
 	m_logOutFile->write(packet);
 	m_logOutFile->flush();
 #ifdef Q_OS_WIN32
+	int len=0;
 	for (int i=0;i<packet.size();i++)
 	{
 		char c = packet.data()[i];

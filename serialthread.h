@@ -25,6 +25,7 @@
 #ifdef Q_OS_WIN32
 #include <windows.h>
 #else
+#define HANDLE int
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -56,7 +57,7 @@ private:
     QString m_logFileName;
     QString m_portName;
     int m_baud;
-    int m_portHandle;
+    HANDLE m_portHandle;
 
 
 protected:
