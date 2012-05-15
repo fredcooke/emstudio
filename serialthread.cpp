@@ -343,8 +343,8 @@ void SerialThread::run()
 int SerialThread::openPort(QString portName,int baudrate)
 {
 #ifdef Q_OS_WIN32
-	portHandle=CreateFileA(portName, GENERIC_READ|GENERIC_WRITE,0, NULL, OPEN_EXISTING, 0, NULL);
-	if (portHandle == INVALID_HANDLE_VALUE)
+	m_portHandle=CreateFileA(portName.toAscii(), GENERIC_READ|GENERIC_WRITE,0, NULL, OPEN_EXISTING, 0, NULL);
+	if (m_portHandle == INVALID_HANDLE_VALUE)
 	{
 		return -1;
 	}
@@ -352,7 +352,7 @@ int SerialThread::openPort(QString portName,int baudrate)
 	COMMTIMEOUTS Win_CommTimeouts;
 	unsigned long confSize = sizeof(COMMCONFIG);
 	Win_CommConfig.dwSize = confSize;
-	GetCommConfig(portHandle, &Win_CommConfig, &confSize);
+	GetCommConfig(m_portHandle, &Win_CommConfig, &confSize);
 	Win_CommConfig.dcb.Parity = 1; //Odd parity
 	Win_CommConfig.dcb.fRtsControl = RTS_CONTROL_DISABLE;
 	Win_CommConfig.dcb.fOutxCtsFlow = FALSE;
@@ -379,8 +379,8 @@ int SerialThread::openPort(QString portName,int baudrate)
 	Win_CommTimeouts.ReadTotalTimeoutConstant = 110;
 	Win_CommTimeouts.WriteTotalTimeoutMultiplier = 0;
 	Win_CommTimeouts.WriteTotalTimeoutConstant = 110;
-	SetCommConfig(portHandle, &Win_CommConfig, sizeof(COMMCONFIG));
-	SetCommTimeouts(portHandle,&Win_CommTimeouts);
+	SetCommConfig(m_portHandle, &Win_CommConfig, sizeof(COMMCONFIG));
+	SetCommTimeouts(m_portHandle,&Win_CommTimeouts);
 	return 0;
 #else
 
