@@ -156,7 +156,7 @@ void SerialThread::readSerial(int timeout)
 				}
 			}
 		}
-		qDebug() << "Bytes out of a packet:" << byteoutofpacket;
+		//qDebug() << "Bytes out of a packet:" << byteoutofpacket;
 		readlen = read(m_portHandle,buffer,1024);
 		m_logInFile->write((const char*)buffer,readlen);
 		m_logInOutFile->write((const char*)buffer,readlen);
@@ -167,6 +167,8 @@ void SerialThread::readSerial(int timeout)
 			msleep(10);
 		}
 	}
+	//m_buffer.write(buffer,readlen);
+	m_buffer.append(buffer,readlen);
 }
 int SerialThread::writePacket(QByteArray packet)
 {
