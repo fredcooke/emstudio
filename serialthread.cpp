@@ -157,7 +157,15 @@ void SerialThread::readSerial(int timeout)
 			}
 		}
 		//qDebug() << "Bytes out of a packet:" << byteoutofpacket;
+#ifdef Q_OS_WIN32
+		if (!ReadFile(m_portHandle,(LPVOID)buffer,1024,(LPDWORD)&readlen,NULL))
+		{
+			//Serial error here
+			qDebug() << "Serial Read error";
+		}
+#else
 		readlen = read(m_portHandle,buffer,1024);
+#endif //Q_OS_WIN32
 		m_logInFile->write((const char*)buffer,readlen);
 		m_logInOutFile->write((const char*)buffer,readlen);
 		m_logInFile->flush();
