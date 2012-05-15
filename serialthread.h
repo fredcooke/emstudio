@@ -21,6 +21,7 @@
 #include <QThread>
 #include <QFile>
 #include <QDebug>
+#include <qglobal.h>
 #ifdef Q_OS_WIN32
 #include <windows.h>
 #else
