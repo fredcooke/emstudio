@@ -652,22 +652,13 @@ void FreeEmsComms::run()
 			{
 				if (!m_waitingForResponse)
 				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					QByteArray header;
-					QByteArray payload;
-					m_payloadWaitingForResponse = 0x0008;
-					header.append((char)0x00);
-					header.append((char)0x00);
-					header.append((char)0x08);
-					m_threadReqList.removeAt(i);
-					i--;
-					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					if (!sendSimplePacket(SOFT_RESET))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
 						return;
 					}
+					m_threadReqList.removeAt(i);
+					i--;
 				}
 			}
 			else if (m_threadReqList[i].type == HARD_RESET)
@@ -940,6 +931,24 @@ void FreeEmsComms::run()
 		}
 	}
 }
+bool FreeEmsComms::sendSimplePacket(unsigned short payloadid)
+{
+	m_waitingForResponse = true;
+	m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+	QByteArray header;
+	QByteArray payload;
+	header.append((char)0x00);
+	header.append((char)((payloadid << 8) & 0xFF));
+	header.append((char)(payloadid & 0xFF));
+	m_payloadWaitingForResponse = payloadid;
+	if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+	{
+		qDebug() << "Error writing packet. Quitting thread";
+		return false;
+	}
+	return true;
+}
+
 void FreeEmsComms::setLogFileName(QString filename)
 {
 	serialThread->setLogFileName(filename);
