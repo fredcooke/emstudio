@@ -91,6 +91,50 @@ int FreeEmsComms::updateBlockInRam(int location,int offset, int size,QByteArray 
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
+int FreeEmsComms::getDecoderName()
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = GET_DECODER_NAME;
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+int FreeEmsComms::getFirmwareBuildDate()
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = GET_FIRMWARE_BUILD_DATE;
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+int FreeEmsComms::getCompilerVersion()
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = GET_COMPILER_VERSION;
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+int FreeEmsComms::getOperatingSystem()
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = GET_OPERATING_SYSTEM;
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
 int FreeEmsComms::retrieveBlockFromRam(int location, int offset, int size)
 {
 	m_reqListMutex.lock();
@@ -105,12 +149,6 @@ int FreeEmsComms::retrieveBlockFromRam(int location, int offset, int size)
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
-/*GET_INTERFACE_VERSION,
-GET_FIRMWARE_VERSION,
-GET_MAX_PACKET_SIZE,
-ECHO_PACKET,
-SOFT_RESET,
-HARD_RESET*/
 int FreeEmsComms::getInterfaceVersion()
 {
 	m_reqListMutex.lock();
@@ -328,6 +366,98 @@ void FreeEmsComms::run()
 					payload.append((char)((listmask) & 0xFF));
 					header.append((char)(payload.length() << 8) & 0xFF);
 					header.append((char)(payload.length()) & 0xFF);
+					m_threadReqList.removeAt(i);
+					i--;
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
+				}
+			}
+			/*GET_DECODER_NAME,
+			  GET_FIRMWARE_BUILD_DATE,
+			  GET_COMPILER_VERSION,
+			  GET_OPERATING_SYSTEM*/
+			else if (m_threadReqList[i].type == GET_DECODER_NAME)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = 0xEEEE;
+					QByteArray header;
+					QByteArray payload;
+					header.append((char)0x00); //No length, no seq no nak
+					header.append((char)0xEE); // Payload 0xEEEE, get decoder name
+					header.append((char)0xEE);
+					m_threadReqList.removeAt(i);
+					i--;
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
+				}
+			}
+			else if (m_threadReqList[i].type == GET_FIRMWARE_BUILD_DATE)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = 0xEEF0;
+					QByteArray header;
+					QByteArray payload;
+					header.append((char)0x00); //No length, no seq no nak
+					header.append((char)0xEE); // Payload 0xEEF0, get firmware build date
+					header.append((char)0xF0);
+					m_threadReqList.removeAt(i);
+					i--;
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
+				}
+			}
+			else if (m_threadReqList[i].type == GET_COMPILER_VERSION)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = 0xEEF2;
+					QByteArray header;
+					QByteArray payload;
+					header.append((char)0x00); //No length, no seq no nak
+					header.append((char)0xEE); // Payload 0xEEF2, get compiler version
+					header.append((char)0xF2);
+					m_threadReqList.removeAt(i);
+					i--;
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
+				}
+			}
+			else if (m_threadReqList[i].type == GET_OPERATING_SYSTEM)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = 0xEEF4;
+					QByteArray header;
+					QByteArray payload;
+					header.append((char)0x00); //No length, no seq no nak
+					header.append((char)0xEE); // Payload 0xEEF4, get operating system
+					header.append((char)0xF4);
 					m_threadReqList.removeAt(i);
 					i--;
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
@@ -648,6 +778,41 @@ void FreeEmsComms::run()
 					else
 					{
 						emit dataLogPayloadReceived(packetpair.first,packetpair.second);
+					}
+				}/*void decoderName(QString name);
+  void firmwareBuild(QString date);
+  void compilerVersion(QString version);
+  void operatingSystem(QString os);*/
+				else if (payloadid == 0xEEEE)
+				{
+					//Decoder
+					if (!(packetpair.first[0] & 0x10))
+					{
+						emit decoderName(QString(packetpair.second));
+					}
+				}
+				else if (payloadid == 0xEEF0)
+				{
+					//Firmware build date
+					if (!(packetpair.first[0] & 0x10))
+					{
+						emit firmwareBuild(QString(packetpair.second));
+					}
+				}
+				else if (payloadid == 0xEEF2)
+				{
+					//Compiler Version
+					if (!(packetpair.first[0] & 0x10))
+					{
+						emit compilerVersion(QString(packetpair.second));
+					}
+				}
+				else if (payloadid == 0xEEF4)
+				{
+					//Operating System
+					if (!(packetpair.first[0] & 0x10))
+					{
+						emit operatingSystem(QString(packetpair.second));
 					}
 				}
 				else if (payloadid == 0xDA5F)

@@ -32,19 +32,22 @@ class FreeEmsComms : public QThread
 public:
 	enum RequestType
 	{
-		SERIAL_CONNECT,
-		SERIAL_DISCONNECT,
-		UPDATE_BLOCK_IN_RAM,
-		RETRIEVE_BLOCK_IN_RAM,
-		GET_INTERFACE_VERSION,
-		GET_FIRMWARE_VERSION,
-		GET_MAX_PACKET_SIZE,
-		GET_LOCATION_ID_LIST,
-		GET_LOCATION_ID_INFO,
-		ECHO_PACKET,
-		SOFT_RESET,
-		HARD_RESET
-
+		SERIAL_CONNECT=0xFFFF01,
+		SERIAL_DISCONNECT=0xFFFF02,
+		UPDATE_BLOCK_IN_RAM=0x0100,
+		RETRIEVE_BLOCK_IN_RAM=0x0104,
+		GET_INTERFACE_VERSION=0x0000,
+		GET_FIRMWARE_VERSION=0x0002,
+		GET_MAX_PACKET_SIZE=0x0004,
+		GET_LOCATION_ID_LIST=0xDA5E,
+		GET_LOCATION_ID_INFO=0xF8E0,
+		ECHO_PACKET=0x0006,
+		SOFT_RESET=0x0008,
+		HARD_RESET=0x0010,
+		GET_DECODER_NAME=0xEEEE,
+		GET_FIRMWARE_BUILD_DATE=0xEEF0,
+		GET_COMPILER_VERSION=0xEEF2,
+		GET_OPERATING_SYSTEM=0xEEF4
 	};
 	enum LocationIdFlags
 	{
@@ -82,6 +85,10 @@ public:
 	int getInterfaceVersion();
 	int getFirmwareVersion();
 	int getMaxPacketSize();
+	int getDecoderName();
+	int getFirmwareBuildDate();
+	int getCompilerVersion();
+	int getOperatingSystem();
 	int echoPacket(QByteArray packet);
 	int getLocationIdList(unsigned char listtype, unsigned short listmask);
 	int softReset();
@@ -110,6 +117,10 @@ private:
 	RequestClass m_currentWaitingRequest;
 	//void parseBuffer(QByteArray buffer);
 signals:
+	void decoderName(QString name);
+	void firmwareBuild(QString date);
+	void compilerVersion(QString version);
+	void operatingSystem(QString os);
 	void connected();
 	void locationIdList(QList<unsigned short> idlist);
 	void locationIdInfo(QList<LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
