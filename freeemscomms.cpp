@@ -375,10 +375,6 @@ void FreeEmsComms::run()
 					}
 				}
 			}
-			/*GET_DECODER_NAME,
-			  GET_FIRMWARE_BUILD_DATE,
-			  GET_COMPILER_VERSION,
-			  GET_OPERATING_SYSTEM*/
 			else if (m_threadReqList[i].type == GET_DECODER_NAME)
 			{
 				if (!m_waitingForResponse)
@@ -779,11 +775,8 @@ void FreeEmsComms::run()
 					{
 						emit dataLogPayloadReceived(packetpair.first,packetpair.second);
 					}
-				}/*void decoderName(QString name);
-  void firmwareBuild(QString date);
-  void compilerVersion(QString version);
-  void operatingSystem(QString os);*/
-				else if (payloadid == 0xEEEE)
+				}
+				else if (payloadid == 0xEEEF)
 				{
 					//Decoder
 					if (!(packetpair.first[0] & 0x10))
@@ -791,7 +784,7 @@ void FreeEmsComms::run()
 						emit decoderName(QString(packetpair.second));
 					}
 				}
-				else if (payloadid == 0xEEF0)
+				else if (payloadid == 0xEEF1)
 				{
 					//Firmware build date
 					if (!(packetpair.first[0] & 0x10))
@@ -799,7 +792,7 @@ void FreeEmsComms::run()
 						emit firmwareBuild(QString(packetpair.second));
 					}
 				}
-				else if (payloadid == 0xEEF2)
+				else if (payloadid == 0xEEF3)
 				{
 					//Compiler Version
 					if (!(packetpair.first[0] & 0x10))
@@ -807,7 +800,7 @@ void FreeEmsComms::run()
 						emit compilerVersion(QString(packetpair.second));
 					}
 				}
-				else if (payloadid == 0xEEF4)
+				else if (payloadid == 0xEEF5)
 				{
 					//Operating System
 					if (!(packetpair.first[0] & 0x10))
