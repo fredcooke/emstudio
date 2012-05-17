@@ -344,8 +344,6 @@ void FreeEmsComms::run()
 			}
 			else if (m_threadReqList[i].type == GET_LOCATION_ID_LIST)
 			{
-				//m_threadReqList[i].args[0] - unsigned char listtype
-				//m_threadReqList[i].args[1] - unsigned short listmask
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -825,6 +823,7 @@ void FreeEmsComms::run()
 					}
 					else
 					{
+						unsigned short locationid = m_currentWaitingRequest.args[0].toInt();
 						//TODO double check to make sure that there aren't an odd number of items here...
 						//QList<unsigned short> idlist;
 						QList<LocationIdFlags> flaglist;
@@ -875,7 +874,7 @@ void FreeEmsComms::run()
 								size = packetpair.second[7] << 8;
 								size += packetpair.second[8];
 							}
-							emit locationIdInfo(flaglist,parent,rampage,flashpage,ramaddress,flashaddress,size);
+							emit locationIdInfo(locationid,flaglist,parent,rampage,flashpage,ramaddress,flashaddress,size);
 						}
 
 

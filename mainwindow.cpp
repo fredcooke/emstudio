@@ -64,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
+	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,QList<LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,QList<LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 
 
 	widget = new GaugeWidget(ui.tab_2);
@@ -141,15 +142,51 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 		//ui.listWidget->addItem(QString::number(idlist[i]));
 	}
 }
-void MainWindow::locationIdInfo(QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
+void MainWindow::locationIdInfo(unsigned short locationid,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
 {
-	Q_UNUSED(flags)
-	Q_UNUSED(parent)
-	Q_UNUSED(rampage)
-	Q_UNUSED(flashpage)
-	Q_UNUSED(ramaddress)
-	Q_UNUSED(flashaddress)
-	Q_UNUSED(size)
+	bool found = false;
+	int foundi = -1;
+	for (int i=0;i<ui.locationIdInfoTableWidget->rowCount();i++)
+	{
+		if (ui.locationIdInfoTableWidget->item(i,0)->text().toInt() == locationid)
+		{
+			foundi = i;
+			found = true;
+		}
+	}
+	if (!found)
+	{
+		ui.locationIdInfoTableWidget->setRowCount(ui.locationIdInfoTableWidget->rowCount()+1);
+		foundi = ui.locationIdInfoTableWidget->rowCount()-1;
+		ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem(QString::number(locationid,16)));
+		for (int i=1;i<7;i++)
+		{
+			ui.locationIdInfoTableWidget->setItem(foundi,i,new QTableWidgetItem(""));
+		}
+	}
+	if (flags.contains(FreeEmsComms::BLOCK_IS_RAM))
+	{
+		ui.locationIdInfoTableWidget->item(foundi,2)->setText(QString::number(rampage));
+		ui.locationIdInfoTableWidget->item(foundi,4)->setText(QString::number(ramaddress));
+		ui.locationIdInfoTableWidget->item(foundi,6)->setText(QString::number(size));
+	}
+	if (flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
+	{
+		ui.locationIdInfoTableWidget->item(foundi,3)->setText(QString::number(flashpage));
+		ui.locationIdInfoTableWidget->item(foundi,5)->setText(QString::number(flashaddress));
+	}
+	if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+	{
+		ui.locationIdInfoTableWidget->item(foundi,1)->setText(QString::number(parent));
+	}
+	//Q_UNUSED(locationid)
+	//Q_UNUSED(flags)
+	//Q_UNUSED(parent)
+	//Q_UNUSED(rampage)
+	//Q_UNUSED(flashpage)
+	//Q_UNUSED(ramaddress)
+	//Q_UNUSED(flashaddress)
+	//Q_UNUSED(size)
 }
 void MainWindow::blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload)
 {

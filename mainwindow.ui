@@ -215,9 +215,9 @@
      <widget class="QListWidget" name="unknownPacketListWidget">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>790</x>
         <y>260</y>
-        <width>1431</width>
+        <width>651</width>
         <height>351</height>
        </rect>
       </property>
@@ -225,8 +225,8 @@
      <widget class="QLabel" name="label_5">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>240</y>
+        <x>800</x>
+        <y>230</y>
         <width>141</width>
         <height>18</height>
        </rect>
@@ -279,6 +279,16 @@
       </property>
       <property name="text">
        <string>InterByteSendDelay (In milliseconds)</string>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="locationIdInfoTableWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>270</y>
+        <width>781</width>
+        <height>331</height>
+       </rect>
       </property>
      </widget>
     </widget>
