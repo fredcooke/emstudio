@@ -974,27 +974,25 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 		qDebug() << "Not long enough to even contain a header!";
 		return QPair<QByteArray,QByteArray>();
 	}
+
+	//Trim off 0xAA and 0xCC from the start and end
+	buffer = buffer.mid(1);
+	buffer = buffer.mid(0,buffer.length()-1);
+
+
 	unsigned char sum = 0;
-	for (int i=0;i<header.size();i++)
+	for (int i=0;i<buffer.size()-1;i++)
 	{
-		sum += header[i];
-	}
-	for (int i=0;i<payload.size();i++)
-	{
-		sum += payload[i];
+		sum += buffer[i];
 	}
 	//qDebug() << "Payload sum:" << QString::number(sum);
 	//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
 	if (sum != (unsigned char)buffer[buffer.length()-1])
 	{
 		qDebug() << "BAD CHECKSUM!";
-		qDebug() << "header size:" << header.size();
-		qDebug() << "payload size:" << payload.size();
 		return QPair<QByteArray,QByteArray>();
 	}
-	//Trim off 0xAA and 0xCC from the start and end
-	buffer = buffer.mid(1);
-	buffer = buffer.mid(0,buffer.length()-1);
+
 
 	//qDebug() << "Packet:" << QString::number(buffer[1],16) << QString::number(buffer[buffer.length()-2],16);
 	QByteArray header;

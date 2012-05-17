@@ -36,14 +36,14 @@ void DataPacketDecoder::decodePayload(QByteArray payload)
 
 void DataPacketDecoder::populateDataFields()
 {
-	m_dataFieldList.append(DataField("IAT","Intake Air Temperature",0,2,100.0));
-	m_dataFieldList.append(DataField("CHT","Coolant/Head Temperature",2,2,100.0));
-	m_dataFieldList.append(DataField("TPS","Throttle Position Sensor",4,2,100.0));
+	m_dataFieldList.append(DataField("IAT","Intake Air Temperature",0,2,100,-273.15));
+	m_dataFieldList.append(DataField("CHT","Coolant/Head Temperature",2,2,100,-273.15));
+	m_dataFieldList.append(DataField("TPS","Throttle Position Sensor",4,2,640.0));
 	m_dataFieldList.append(DataField("EGO","Exhaust Gas Oxygen",6,2,32768.0));
 	m_dataFieldList.append(DataField("MAP","Manifold Air Pressure",8,2,100.0));
 	m_dataFieldList.append(DataField("AAP","Ambient Atmosphere Pressure",10,2,100.0));
 	m_dataFieldList.append(DataField("BRV","Battery Reference Voltage",12,2,1000.0));
-	m_dataFieldList.append(DataField("MAT","Manifold Air Temperature",14,2,100.0));
+	m_dataFieldList.append(DataField("MAT","Manifold Air Temperature",14,2,100.0,-273.15));
 	m_dataFieldList.append(DataField("EGO2","Exhaust Gas Oxygen 2",16,2,32768.0));
 	m_dataFieldList.append(DataField("IAP","Intercooler Absolute Pressure",18,2,100.0));
 	m_dataFieldList.append(DataField("MAF","Mass Air Flow",20,2,1.0));

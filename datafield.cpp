@@ -21,7 +21,7 @@
 DataField::DataField()
 {
 }
-DataField::DataField(QString shortname,QString description,int offset,int size,float div,float min,float max)
+DataField::DataField(QString shortname,QString description,int offset,int size,float div,float min,float max,float addoffset)
 {
 	m_offset = offset;
 	m_size = size;
@@ -30,6 +30,7 @@ DataField::DataField(QString shortname,QString description,int offset,int size,f
 	m_description = description;
 	m_min = min;
 	m_max = max;
+	m_addoffset = addoffset;
 }
 float DataField::getValue(QByteArray *payload)
 {
@@ -40,7 +41,7 @@ float DataField::getValue(QByteArray *payload)
 		{
 			val += ((unsigned char)payload->at(m_offset+i)) << (8*(m_size-(i+1)));
 		}
-		return val / m_div;
+		return (val / m_div) + m_addoffset;
 	}
 	return 0;
 }
