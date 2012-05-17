@@ -323,7 +323,7 @@ void FreeEmsComms::run()
 		{
 			if (m_threadReqList[i].type == SERIAL_CONNECT)
 			{
-				qDebug() << "SERIAL_CONNECT";
+				//qDebug() << "SERIAL_CONNECT";
 				emit debugVerbose("SERIAL_CONNECT");
 
 				if (serialThread->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt()))
@@ -335,7 +335,7 @@ void FreeEmsComms::run()
 					i--;
 					continue;
 				}
-				qDebug() << "Serial connected!";
+				//qDebug() << "Serial connected!";
 				serialconnected = true;
 				emit debug("Connected to serial port");
 				emit connected();
@@ -697,9 +697,9 @@ void FreeEmsComms::run()
 		//General packet reading
 		if (serialconnected)
 		{
-			qDebug() << "Attempting to read:";
+			//qDebug() << "Attempting to read:";
 			serialThread->readSerial(20);
-			qDebug() << "finished attempting to read";
+			//qDebug() << "finished attempting to read";
 		}
 		else
 		{

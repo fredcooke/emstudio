@@ -186,7 +186,8 @@ void SerialThread::readSerial(int timeout)
 #endif //Q_OS_WIN32
 		if (readlen < 0)
 		{
-
+			//Nothing on the port
+			msleep(10);
 		}
 		else
 		{
