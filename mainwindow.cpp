@@ -210,7 +210,7 @@ void MainWindow::locationIdInfo(unsigned short locationid,QList<FreeEmsComms::Lo
 		ui.locationIdInfoTableWidget->setRowCount(ui.locationIdInfoTableWidget->rowCount()+1);
 		foundi = ui.locationIdInfoTableWidget->rowCount()-1;
 		ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem(QString::number(locationid)));
-		for (int i=1;i<7;i++)
+		for (int i=1;i<15;i++)
 		{
 			ui.locationIdInfoTableWidget->setItem(foundi,i,new QTableWidgetItem(""));
 		}
