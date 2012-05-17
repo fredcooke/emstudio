@@ -419,7 +419,7 @@ int SerialThread::openPort(QString portName,int baudrate)
 	}
 	//printf("Com Port Opened %i\n",portHandle);
 	//debug(obdLib::DEBUG_VERBOSE,"Com Port Opened %i",portHandle);
-	fcntl(m_portHandle, F_SETFL, 1); //Set it to blocking. This is required? Wtf?
+	fcntl(m_portHandle, F_SETFL, O_NONBLOCK); //Set it to blocking. This is required? Wtf?
 	//struct termios oldtio;
 	struct termios newtio;
 	//bzero(&newtio,sizeof(newtio));
