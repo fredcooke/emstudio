@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <termios.h>
+#include <unistd.h>
 #endif
 #include <vector>
 class SerialThread : public QThread
