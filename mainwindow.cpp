@@ -139,7 +139,8 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 {
 	for (int i=0;i<idlist.size();i++)
 	{
-		//ui.listWidget->addItem(QString::number(idlist[i]));
+		//ui/listWidget->addItem(QString::number(idlist[i]));
+		emsComms->getLocationIdInfo(idlist[i]);
 	}
 }
 void MainWindow::locationIdInfo(unsigned short locationid,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
