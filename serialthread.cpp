@@ -184,10 +184,17 @@ void SerialThread::readSerial(int timeout)
 #else
 		readlen = read(m_portHandle,buffer,1024);
 #endif //Q_OS_WIN32
-		m_logInFile->write((const char*)buffer,readlen);
-		m_logInOutFile->write((const char*)buffer,readlen);
-		m_logInFile->flush();
-		m_logInOutFile->flush();
+		if (readlen < 0)
+		{
+
+		}
+		else
+		{
+			m_logInFile->write((const char*)buffer,readlen);
+			m_logInOutFile->write((const char*)buffer,readlen);
+			m_logInFile->flush();
+			m_logInOutFile->flush();
+		}
 		if (readlen == 0)
 		{
 			msleep(10);
@@ -412,7 +419,7 @@ int SerialThread::openPort(QString portName,int baudrate)
 	}
 	//printf("Com Port Opened %i\n",portHandle);
 	//debug(obdLib::DEBUG_VERBOSE,"Com Port Opened %i",portHandle);
-	fcntl(m_portHandle, F_SETFL, 0); //Set it to blocking. This is required? Wtf?
+	fcntl(m_portHandle, F_SETFL, 1); //Set it to blocking. This is required? Wtf?
 	//struct termios oldtio;
 	struct termios newtio;
 	//bzero(&newtio,sizeof(newtio));
