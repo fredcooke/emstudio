@@ -927,6 +927,18 @@ void FreeEmsComms::run()
 			{
 				//Header size is 2?
 				qDebug() << "Header size is only 2! THIS SHOULD NOT HAPPEN!";
+				QString headerstring = "";
+				QString packetstring = "";
+				for (int i=0;i<packetpair.first.size();i++)
+				{
+					headerstring += QString::number((unsigned char)packetpair.first[i],16);
+				}
+				for (int i=0;i<packetpair.second.size();i++)
+				{
+					packetstring += QString::number((unsigned char)packetpair.first[i],16);
+				}
+				qDebug() << "Header:" << headerstring;
+				qDebug() << "Packet:" << packetstring;
 			}
 		}
 	}
