@@ -409,7 +409,7 @@ int SerialThread::openPort(QString portName,int baudrate)
 	return 0;
 #else
 
-	m_portHandle = open(portName.toAscii(),O_RDWR | O_NOCTTY | O_NONBLOCK); //Should open the port non blocking
+	m_portHandle = open(portName.toAscii(),O_RDWR | O_NOCTTY | O_NDELAY); //Should open the port non blocking
 	if (m_portHandle < 0)
 	{
 		//printf("Error opening Com: %s\n",portName);
@@ -419,7 +419,7 @@ int SerialThread::openPort(QString portName,int baudrate)
 	}
 	//printf("Com Port Opened %i\n",portHandle);
 	//debug(obdLib::DEBUG_VERBOSE,"Com Port Opened %i",portHandle);
-	fcntl(m_portHandle, F_SETFL, FASYNC); //Set it to blocking. This is required? Wtf?
+	//fcntl(m_portHandle, F_SETFL, FASYNC); //Set it to blocking. This is required? Wtf?
 	//struct termios oldtio;
 	struct termios newtio;
 	//bzero(&newtio,sizeof(newtio));
