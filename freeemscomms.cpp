@@ -974,7 +974,24 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 		qDebug() << "Not long enough to even contain a header!";
 		return QPair<QByteArray,QByteArray>();
 	}
-
+	unsigned char sum = 0;
+	for (int i=0;i<header.size();i++)
+	{
+		sum += header[i];
+	}
+	for (int i=0;i<payload.size();i++)
+	{
+		sum += payload[i];
+	}
+	//qDebug() << "Payload sum:" << QString::number(sum);
+	//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
+	if (sum != (unsigned char)buffer[buffer.length()-1])
+	{
+		qDebug() << "BAD CHECKSUM!";
+		qDebug() << "header size:" << header.size();
+		qDebug() << "payload size:" << payload.size();
+		return QPair<QByteArray,QByteArray>();
+	}
 	//Trim off 0xAA and 0xCC from the start and end
 	buffer = buffer.mid(1);
 	buffer = buffer.mid(0,buffer.length()-1);
@@ -1052,39 +1069,19 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 	}
 	//qDebug() << output;
 	//Last byte of currPacket should be out checksum.
-	unsigned char sum = 0;
-	for (int i=0;i<header.size();i++)
-	{
-		sum += header[i];
-	}
-	for (int i=0;i<payload.size();i++)
-	{
-		sum += payload[i];
-	}
-	//qDebug() << "Payload sum:" << QString::number(sum);
-	//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
-	if (sum != (unsigned char)buffer[buffer.length()-1])
-	{
-		qDebug() << "BAD CHECKSUM!";
-		qDebug() << "header size:" << header.size();
-		qDebug() << "payload size:" << payload.size();
-	}
-	else
-	{
-		return QPair<QByteArray,QByteArray>(header,payload);
-		//qDebug() << "Got full packet. Header length:" << header.length() << "Payload length:" << payload.length();
-		/*for (int i=0;i<m_dataFieldList->size();i++)
-		{
-			//ui.tableWidget->item(i,1)->setText(QString::number(m_dataFieldList[i].getValue(&payload)));
-		}*/
-		//payload is our actual data.
-		//unsigned int rpm = (payload[26] << 8) + payload[27];
 
-		//qDebug() << "f" << f.getValue(&payload);
-		//qDebug() << QString::number(rpm);
-		//qDebug() << QString::number(((unsigned short)payload[8] << 8) + (unsigned short)payload[9]);
-	}
-	return QPair<QByteArray,QByteArray>();
+	return QPair<QByteArray,QByteArray>(header,payload);
+	//qDebug() << "Got full packet. Header length:" << header.length() << "Payload length:" << payload.length();
+	/*for (int i=0;i<m_dataFieldList->size();i++)
+	{
+		//ui.tableWidget->item(i,1)->setText(QString::number(m_dataFieldList[i].getValue(&payload)));
+	}*/
+	//payload is our actual data.
+	//unsigned int rpm = (payload[26] << 8) + payload[27];
+
+	//qDebug() << "f" << f.getValue(&payload);
+	//qDebug() << QString::number(rpm);
+	//qDebug() << QString::number(((unsigned short)payload[8] << 8) + (unsigned short)payload[9]);
 }
 
 
