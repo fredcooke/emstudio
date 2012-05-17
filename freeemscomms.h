@@ -124,7 +124,7 @@ signals:
 	void operatingSystem(QString os);
 	void connected();
 	void locationIdList(QList<unsigned short> idlist);
-	void locationIdInfo(unsigned short locationid,QList<LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
+	void locationIdInfo(unsigned short locationid,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QString version);
