@@ -68,7 +68,8 @@ void SerialThread::readSerial(int timeout)
 	unsigned char buffer[10240];
 	for (int i=0;i<m_buffer.size();i++)
 	{
-		buffer[i] = m_buffer[i];
+		//buffer[i] = m_buffer[i];
+		qbuffer.append(m_buffer[i]);
 	}
 	m_buffer.clear();
 	bool inpacket = false;
@@ -76,6 +77,31 @@ void SerialThread::readSerial(int timeout)
 	QString byteoutofpacket;
 	while (currms + timeout > QDateTime::currentMSecsSinceEpoch())
 	{
+#ifdef Q_OS_WIN32
+		if (!ReadFile(m_portHandle,(LPVOID)buffer,1024,(LPDWORD)&readlen,NULL))
+		{
+			//Serial error here
+			qDebug() << "Serial Read error";
+		}
+#else
+		readlen = read(m_portHandle,buffer,1024);
+#endif //Q_OS_WIN32
+		if (readlen < 0)
+		{
+			//Nothing on the port
+			msleep(10);
+		}
+		else
+		{
+			m_logInFile->write((const char*)buffer,readlen);
+			m_logInOutFile->write((const char*)buffer,readlen);
+			m_logInFile->flush();
+			m_logInOutFile->flush();
+		}
+		if (readlen == 0)
+		{
+			msleep(10);
+		}
 		for (int i=0;i<readlen;i++)
 		{
 			if (buffer[i] == 0xAA)
@@ -175,32 +201,8 @@ void SerialThread::readSerial(int timeout)
 			}
 		}
 		//qDebug() << "Bytes out of a packet:" << byteoutofpacket;
-#ifdef Q_OS_WIN32
-		if (!ReadFile(m_portHandle,(LPVOID)buffer,1024,(LPDWORD)&readlen,NULL))
-		{
-			//Serial error here
-			qDebug() << "Serial Read error";
-		}
-#else
-		readlen = read(m_portHandle,buffer,1024);
-#endif //Q_OS_WIN32
-		if (readlen < 0)
-		{
-			//Nothing on the port
-			msleep(10);
-		}
-		else
-		{
-			m_logInFile->write((const char*)buffer,readlen);
-			m_logInOutFile->write((const char*)buffer,readlen);
-			m_logInFile->flush();
-			m_logInOutFile->flush();
-		}
-		if (readlen == 0)
-		{
-			msleep(10);
-		}
 	}
+	m_buffer.append(qbuffer);
 	if (readlen > 0)
 	{
 	//m_buffer.write(buffer,readlen);
