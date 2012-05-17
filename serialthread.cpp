@@ -66,11 +66,12 @@ void SerialThread::readSerial(int timeout)
 		Q_ASSERT(m_buffer.size() < 10240);
 	}
 	unsigned char buffer[10240];
-	for (int i=0;i<m_buffer.size();i++)
+	qbuffer.append(m_buffer);
+	/*for (int i=0;i<m_buffer.size();i++)
 	{
-		//buffer[i] = m_buffer[i];
+		buffer[i] = m_buffer[i];
 		qbuffer.append(m_buffer[i]);
-	}
+	}*/
 	m_buffer.clear();
 	bool inpacket = false;
 	bool inescape = false;
@@ -206,7 +207,7 @@ void SerialThread::readSerial(int timeout)
 	if (readlen > 0)
 	{
 	//m_buffer.write(buffer,readlen);
-		m_buffer.append((const char*)buffer,readlen);
+	//	m_buffer.append((const char*)buffer,readlen);
 	}
 }
 int SerialThread::writePacket(QByteArray packet)
