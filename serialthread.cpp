@@ -201,8 +201,11 @@ void SerialThread::readSerial(int timeout)
 			msleep(10);
 		}
 	}
+	if (readlen > 0)
+	{
 	//m_buffer.write(buffer,readlen);
-	m_buffer.append((const char*)buffer,readlen);
+		m_buffer.append((const char*)buffer,readlen);
+	}
 }
 int SerialThread::writePacket(QByteArray packet)
 {
