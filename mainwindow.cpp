@@ -35,14 +35,38 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	ui.sendCommandTableWidget->setColumnWidth(2,100);
 	ui.sendCommandTableWidget->setColumnWidth(3,500);
 
-	ui.locationIdInfoTableWidget->setColumnCount(7);
+	ui.locationIdInfoTableWidget->setColumnCount(15);
 	ui.locationIdInfoTableWidget->setColumnWidth(0,80);
 	ui.locationIdInfoTableWidget->setColumnWidth(1,80);
 	ui.locationIdInfoTableWidget->setColumnWidth(2,80);
 	ui.locationIdInfoTableWidget->setColumnWidth(3,80);
-	ui.locationIdInfoTableWidget->setColumnWidth(4,80);
-	ui.locationIdInfoTableWidget->setColumnWidth(5,80);
+	ui.locationIdInfoTableWidget->setColumnWidth(4,100);
+	ui.locationIdInfoTableWidget->setColumnWidth(5,100);
 	ui.locationIdInfoTableWidget->setColumnWidth(6,80);
+	ui.locationIdInfoTableWidget->setColumnWidth(7,80);
+	ui.locationIdInfoTableWidget->setColumnWidth(8,80);
+	ui.locationIdInfoTableWidget->setColumnWidth(9,80);
+	ui.locationIdInfoTableWidget->setColumnWidth(10,80);
+	ui.locationIdInfoTableWidget->setColumnWidth(11,120);
+	ui.locationIdInfoTableWidget->setColumnWidth(12,120);
+	ui.locationIdInfoTableWidget->setColumnWidth(13,120);
+	ui.locationIdInfoTableWidget->setColumnWidth(14,120);
+
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Parent"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("RamPage"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(3,new QTableWidgetItem("FlashPage"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(4,new QTableWidgetItem("RamAddress"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(5,new QTableWidgetItem("FlashAddress"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(6,new QTableWidgetItem("Size"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(7,new QTableWidgetItem("Has Parent"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(8,new QTableWidgetItem("Is Ram"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(9,new QTableWidgetItem("Is Flash"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(10,new QTableWidgetItem("Is Index"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(11,new QTableWidgetItem("Is Read Only"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(12,new QTableWidgetItem("Is Verified"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(13,new QTableWidgetItem("For Backup"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(14,new QTableWidgetItem("Table Type"));
 
 	connect(ui.interByteDelaySpinBox,SIGNAL(valueChanged(int)),this,SLOT(interByteDelayChanged(int)));
 	dataPacketDecoder = new DataPacketDecoder(this);
@@ -154,6 +178,21 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 }
 void MainWindow::locationIdInfo(unsigned short locationid,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
 {
+	/*ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Parent"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("RamPage"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(3,new QTableWidgetItem("FlashPage"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(4,new QTableWidgetItem("RamAddress"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(5,new QTableWidgetItem("FlashAddress"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(6,new QTableWidgetItem("Size"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(7,new QTableWidgetItem("Has Parent"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(8,new QTableWidgetItem("Is Ram"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(9,new QTableWidgetItem("Is Flash"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(10,new QTableWidgetItem("Is Index"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(11,new QTableWidgetItem("Is Read Only"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(12,new QTableWidgetItem("Is Verified"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(13,new QTableWidgetItem("For Backup"));
+ ui.locationIdInfoTableWidget->setHorizontalHeaderItem(14,new QTableWidgetItem("Table Type"));*/
 	qDebug() << "Location ID Info for:" << QString::number(locationid,16);
 	bool found = false;
 	int foundi = -1;
@@ -170,27 +209,91 @@ void MainWindow::locationIdInfo(unsigned short locationid,QList<FreeEmsComms::Lo
 	{
 		ui.locationIdInfoTableWidget->setRowCount(ui.locationIdInfoTableWidget->rowCount()+1);
 		foundi = ui.locationIdInfoTableWidget->rowCount()-1;
-		ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem(QString::number(locationid,16)));
+		ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem(QString::number(locationid)));
 		for (int i=1;i<7;i++)
 		{
 			ui.locationIdInfoTableWidget->setItem(foundi,i,new QTableWidgetItem(""));
 		}
 	}
+	if (flags.contains(FreeEmsComms::BLOCK_IS_2D_TABLE))
+	{
+		ui.locationIdInfoTableWidget->item(foundi,14)->setText("2d Table");
+	}
+	else if (flags.contains(FreeEmsComms::BLOCK_IS_LOOKUP_DATA))
+	{
+		ui.locationIdInfoTableWidget->item(foundi,14)->setText("Lookup ");
+	}
+	else if (flags.contains(FreeEmsComms::BLOCK_IS_MAIN_TABLE))
+	{
+		ui.locationIdInfoTableWidget->item(foundi,14)->setText("Main Table");
+	}
+	else if (flags.contains(FreeEmsComms::BLOCK_IS_CONFIGURATION))
+	{
+		ui.locationIdInfoTableWidget->item(foundi,14)->setText("Config");
+	}
+	if (flags.contains(FreeEmsComms::BLOCK_IS_INDEXABLE))
+	{
+		ui.locationIdInfoTableWidget->item(foundi,10)->setText("True");
+	}
+	else
+	{
+		ui.locationIdInfoTableWidget->item(foundi,12)->setText("False");
+	}
+
+	if (flags.contains(FreeEmsComms::BLOCK_IS_READ_ONLY))
+	{
+		ui.locationIdInfoTableWidget->item(foundi,11)->setText("True");
+	}
+	else
+	{
+		ui.locationIdInfoTableWidget->item(foundi,11)->setText("False");
+	}
+	if (flags.contains(FreeEmsComms::BLOCK_GETS_VERIFIED))
+	{
+		ui.locationIdInfoTableWidget->item(foundi,12)->setText("True");
+	}
+	else
+	{
+		ui.locationIdInfoTableWidget->item(foundi,12)->setText("False");
+	}
+	if (flags.contains(FreeEmsComms::BLOCK_FOR_BACKUP_RESTORE))
+	{
+		ui.locationIdInfoTableWidget->item(foundi,13)->setText("True");
+	}
+	else
+	{
+		ui.locationIdInfoTableWidget->item(foundi,13)->setText("False");
+	}
 	if (flags.contains(FreeEmsComms::BLOCK_IS_RAM))
 	{
+		ui.locationIdInfoTableWidget->item(foundi,8)->setText("True");
 		ui.locationIdInfoTableWidget->item(foundi,2)->setText(QString::number(rampage));
 		ui.locationIdInfoTableWidget->item(foundi,4)->setText(QString::number(ramaddress));
-		ui.locationIdInfoTableWidget->item(foundi,6)->setText(QString::number(size));
+	}
+	else
+	{
+		ui.locationIdInfoTableWidget->item(foundi,8)->setText("False");
 	}
 	if (flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
 	{
+		ui.locationIdInfoTableWidget->item(foundi,9)->setText("True");
 		ui.locationIdInfoTableWidget->item(foundi,3)->setText(QString::number(flashpage));
 		ui.locationIdInfoTableWidget->item(foundi,5)->setText(QString::number(flashaddress));
 	}
+	else
+	{
+		ui.locationIdInfoTableWidget->item(foundi,9)->setText("False");
+	}
 	if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
 	{
+		ui.locationIdInfoTableWidget->item(foundi,7)->setText("True");
 		ui.locationIdInfoTableWidget->item(foundi,1)->setText(QString::number(parent));
 	}
+	else
+	{
+		ui.locationIdInfoTableWidget->item(foundi,7)->setText("False");
+	}
+	ui.locationIdInfoTableWidget->item(foundi,6)->setText(QString::number(size));
 	//Q_UNUSED(locationid)
 	//Q_UNUSED(flags)
 	//Q_UNUSED(parent)
