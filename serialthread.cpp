@@ -25,6 +25,8 @@ SerialThread::SerialThread(QObject *parent) : QThread(parent)
 	m_logOutFile = 0;
 	m_interByteSendDelay=0;
 	m_logFileName = "IOLog";
+	m_inpacket = false;
+	m_inescape = false;
 }
 void SerialThread::setPort(QString portname)
 {
@@ -73,8 +75,8 @@ void SerialThread::readSerial(int timeout)
 		qbuffer.append(m_buffer[i]);
 	}*/
 	m_buffer.clear();
-	bool inpacket = false;
-	bool inescape = false;
+	//bool inpacket = false;
+	//bool inescape = false;
 	QString byteoutofpacket;
 	while (currms + timeout > QDateTime::currentMSecsSinceEpoch())
 	{
@@ -107,23 +109,23 @@ void SerialThread::readSerial(int timeout)
 		{
 			if (buffer[i] == 0xAA)
 			{
-				if (inpacket)
+				if (m_inpacket)
 				{
 					//Start byte in the middle of a packet
 					//Clear out the buffer and start fresh
-					inescape = false;
+					m_inescape = false;
 					qbuffer.clear();
 				}
 				qbuffer.append(buffer[i]);
 				//qDebug() << "Start of packet";
 				//Start of packet
-				inpacket = true;
+				m_inpacket = true;
 			}
-			else if (buffer[i] == 0xCC && inpacket)
+			else if (buffer[i] == 0xCC && m_inpacket)
 			{
 				//qDebug() << "End of packet. Size:" << qbuffer.size();
 				//End of packet
-				inpacket = false;
+				m_inpacket = false;
 				qbuffer.append(buffer[i]);
 
 				//m_logFile->flush();
@@ -154,19 +156,19 @@ void SerialThread::readSerial(int timeout)
 					int num = (unsigned char)qbuffer[i];
 					output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
 				}
-				qDebug() << "Full packet:";
-				qDebug() << output;
+				//qDebug() << "Full packet:";
+				//qDebug() << output;
 				qbuffer.clear();
 			}
 			else
 			{
-				if (inpacket && !inescape)
+				if (m_inpacket && !m_inescape)
 				{
 					if (buffer[i] == 0xBB)
 					{
 						//Need to escape the next byte
 						//retval = logfile.read(1);
-						inescape = true;
+						m_inescape = true;
 					}
 					else
 					{
@@ -174,7 +176,7 @@ void SerialThread::readSerial(int timeout)
 					}
 
 				}
-				else if (inpacket && inescape)
+				else if (m_inpacket && m_inescape)
 				{
 					if (buffer[i] == 0x55)
 					{
@@ -192,7 +194,7 @@ void SerialThread::readSerial(int timeout)
 					{
 						qDebug() << "Error, escaped character is not valid!:" << QString::number(buffer[i],16);
 					}
-					inescape = false;
+					m_inescape = false;
 				}
 				else
 				{

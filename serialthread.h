@@ -48,6 +48,8 @@ public:
     int bufferSize() { return m_queuedMessages.size(); }
     void setInterByteSendDelay(int milliseconds);
 private:
+    bool m_inpacket;
+    bool m_inescape;
     int m_interByteSendDelay;
     QList<QByteArray> m_queuedMessages;
     QByteArray m_buffer;
