@@ -105,13 +105,13 @@ void SerialThread::readSerial(int timeout)
 
 				//New Location of checksum
 				unsigned char sum = 0;
-				for (int i=0;i<qbuffer.size()-1;i++)
+				for (int i=1;i<qbuffer.size()-2;i++)
 				{
 					sum += qbuffer[i];
 				}
 				//qDebug() << "Payload sum:" << QString::number(sum);
 				//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
-				if (sum != (unsigned char)qbuffer[qbuffer.size()-1])
+				if (sum != (unsigned char)qbuffer[qbuffer.size()-2])
 				{
 					qDebug() << "BAD CHECKSUM!";
 					//return QPair<QByteArray,QByteArray>();
