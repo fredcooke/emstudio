@@ -49,7 +49,7 @@ void DataPacketDecoder::populateDataFields()
 	m_dataFieldList.append(DataField("MAF","Mass Air Flow",20,2,1.0));
 	m_dataFieldList.append(DataField("DMAP","Delta Map",22,2,1.0));
 	m_dataFieldList.append(DataField("DTPS","Delta TPS",24,2,1.0));
-	m_dataFieldList.append(DataField("RPM","Engine Speed",26,2,1.0));
+	m_dataFieldList.append(DataField("RPM","Engine Speed",26,2,2.0));
 	m_dataFieldList.append(DataField("DRPM","Delta RPM",28,2,1.0));
 	m_dataFieldList.append(DataField("DDRPM","Delta Delta RPM",30,2,1.0));
 	m_dataFieldList.append(DataField("LoadMain","Configurable Unit of Load",32,2,512.0));
