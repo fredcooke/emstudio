@@ -409,7 +409,7 @@ int SerialThread::openPort(QString portName,int baudrate)
 	return 0;
 #else
 
-	m_portHandle = open(portName.toAscii(),O_RDWR | O_NOCTTY | O_NDELAY);
+	m_portHandle = open(portName.toAscii(),O_RDWR | O_NOCTTY | O_NONBLOCK);
 	if (m_portHandle < 0)
 	{
 		//printf("Error opening Com: %s\n",portName);
