@@ -35,6 +35,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	ui.sendCommandTableWidget->setColumnWidth(2,100);
 	ui.sendCommandTableWidget->setColumnWidth(3,500);
 
+	ui.locationIdInfoTableWidget->setColumnCount(7);
+	ui.locationIdInfoTableWidget->setColumnWidth(0,80);
+	ui.locationIdInfoTableWidget->setColumnWidth(1,80);
+	ui.locationIdInfoTableWidget->setColumnWidth(2,80);
+	ui.locationIdInfoTableWidget->setColumnWidth(3,80);
+	ui.locationIdInfoTableWidget->setColumnWidth(4,80);
+	ui.locationIdInfoTableWidget->setColumnWidth(5,80);
+	ui.locationIdInfoTableWidget->setColumnWidth(6,80);
+
 	connect(ui.interByteDelaySpinBox,SIGNAL(valueChanged(int)),this,SLOT(interByteDelayChanged(int)));
 	dataPacketDecoder = new DataPacketDecoder(this);
 	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QMap<QString,double>)),this,SLOT(dataLogDecoded(QMap<QString,double>)));
@@ -147,6 +156,7 @@ void MainWindow::locationIdInfo(unsigned short locationid,QList<FreeEmsComms::Lo
 {
 	bool found = false;
 	int foundi = -1;
+
 	for (int i=0;i<ui.locationIdInfoTableWidget->rowCount();i++)
 	{
 		if (ui.locationIdInfoTableWidget->item(i,0)->text().toInt() == locationid)
