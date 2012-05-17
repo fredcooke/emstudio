@@ -720,7 +720,7 @@ void FreeEmsComms::run()
 			//qDebug() << "Parsed header size:" << packetpair.first.size();
 			if (packetpair.first.size() >= 3)
 			{
-				unsigned int payloadid = (unsigned int)packetpair.first[1] << 8;
+				unsigned short payloadid = (unsigned short)packetpair.first[1] << 8;
 				payloadid += (unsigned char)packetpair.first[2];
 				//qDebug() << "Incoming packet. Payload:" << payloadid;
 
@@ -980,7 +980,8 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 	buffer = buffer.mid(0,buffer.length()-1);
 
 
-	unsigned char sum = 0;
+	//Old location of checksum. now in serialthread.cpp
+	/*unsigned char sum = 0;
 	for (int i=0;i<buffer.size()-1;i++)
 	{
 		sum += buffer[i];
@@ -991,7 +992,7 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 	{
 		qDebug() << "BAD CHECKSUM!";
 		return QPair<QByteArray,QByteArray>();
-	}
+	}*/
 
 
 	//qDebug() << "Packet:" << QString::number(buffer[1],16) << QString::number(buffer[buffer.length()-2],16);
