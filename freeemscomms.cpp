@@ -843,6 +843,7 @@ void FreeEmsComms::run()
 							unsigned short flashaddress;
 							unsigned short size;
 							test += packetpair.second[1];
+							qDebug() << "Location ID Info for location:" << QString::number(locationid,16) << "Flags:" << QString::number(test,16);
 							for (int j=0;j<m_blockFlagList.size();j++)
 							{
 								if (test & m_blockFlagList[j])

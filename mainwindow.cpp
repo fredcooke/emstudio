@@ -218,6 +218,7 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 		}
 	}
 	ui.locationIdInfoTableWidget->item(foundi,1)->setText(QString::number(rawFlags));
+
 	if (flags.contains(FreeEmsComms::BLOCK_IS_2D_TABLE))
 	{
 		ui.locationIdInfoTableWidget->item(foundi,15)->setText("2d Table");
@@ -234,6 +235,7 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 	{
 		ui.locationIdInfoTableWidget->item(foundi,15)->setText("Config");
 	}
+
 	if (flags.contains(FreeEmsComms::BLOCK_IS_INDEXABLE))
 	{
 		ui.locationIdInfoTableWidget->item(foundi,11)->setText("True");
