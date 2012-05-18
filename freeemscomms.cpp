@@ -1055,13 +1055,17 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 		//qDebug() << "Length:" << length;
 		iloc += 2;
 		//curr += length;
+		if (buffer.length() > length + iloc)
+		{
+			qDebug() << "Packet length should be:" << length + iloc << "But it is" << buffer.length();
+		}
 		payload.append(buffer.mid(iloc,length));
 	}
 	else
 	{
 		//qDebug() << "Buffer length:" << buffer.length();
 		//qDebug() << "Attempted cut:" << buffer.length() - iloc;
-		payload.append(buffer.mid(iloc),(buffer.length()-iloc) -1);
+		payload.append(buffer.mid(iloc),(buffer.length()-iloc));
 	}
 	//qDebug() << "Payload";
 	QString output;
