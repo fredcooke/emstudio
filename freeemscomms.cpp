@@ -201,7 +201,7 @@ int FreeEmsComms::getLocationIdInfo(unsigned short locationid)
 	RequestClass req;
 	req.type = GET_LOCATION_ID_INFO;
 	req.sequencenumber = m_sequenceNumber;
-	req.args.append(locationid);
+	req.args.append((unsigned int)locationid);
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	m_reqListMutex.unlock();
@@ -214,8 +214,8 @@ int FreeEmsComms::getLocationIdList(unsigned char listtype, unsigned short listm
 	RequestClass req;
 	req.type = GET_LOCATION_ID_LIST;
 	req.sequencenumber = m_sequenceNumber;
-	req.args.append(listtype);
-	req.args.append(listmask);
+	req.args.append((unsigned int)listtype);
+	req.args.append((unsigned int)listmask);
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	m_reqListMutex.unlock();
@@ -473,7 +473,8 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0xF8E0;
-					unsigned short locationid = m_threadReqList[i].args[0].toInt();
+					unsigned short locationid = m_threadReqList[i].args[0].toUInt();
+					qDebug() << "Requesting location ID Info for:" << QString::number(locationid,16);
 					QByteArray header;
 					QByteArray payload;
 					header.append((char)0x00); //no length, no seq no nak
