@@ -476,13 +476,13 @@ void FreeEmsComms::run()
 					unsigned short locationid = m_threadReqList[i].args[0].toInt();
 					QByteArray header;
 					QByteArray payload;
-					header.append((char)0x01); //Length, no seq no nak
+					header.append((char)0x00); //no length, no seq no nak
 					header.append((char)0xF8); // Payload 0xF8E0, get location ID Info
 					header.append((char)0xE0);
 					payload.append((char)((locationid << 8) & 0xFF));
 					payload.append((char)((locationid) & 0xFF));
-					header.append((char)(payload.length() << 8) & 0xFF);
-					header.append((char)(payload.length()) & 0xFF);
+					//header.append((char)(payload.length() << 8) & 0xFF);
+					//header.append((char)(payload.length()) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
