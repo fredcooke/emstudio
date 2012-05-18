@@ -199,7 +199,7 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 	bool found = false;
 	int foundi = -1;
 
-	for (int i=0;i<ui.locationIdInfoTableWidget->rowCount();i++)
+	/*for (int i=0;i<ui.locationIdInfoTableWidget->rowCount();i++)
 	{
 		if (ui.locationIdInfoTableWidget->item(i,0)->text().toInt() == locationid)
 		{
@@ -208,15 +208,15 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 		}
 	}
 	if (!found)
+	{*/
+	ui.locationIdInfoTableWidget->setRowCount(ui.locationIdInfoTableWidget->rowCount()+1);
+	foundi = ui.locationIdInfoTableWidget->rowCount()-1;
+	ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem(QString::number(locationid,16)));
+	for (int i=1;i<16;i++)
 	{
-		ui.locationIdInfoTableWidget->setRowCount(ui.locationIdInfoTableWidget->rowCount()+1);
-		foundi = ui.locationIdInfoTableWidget->rowCount()-1;
-		ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem(QString::number(locationid)));
-		for (int i=1;i<16;i++)
-		{
-			ui.locationIdInfoTableWidget->setItem(foundi,i,new QTableWidgetItem(""));
-		}
+		ui.locationIdInfoTableWidget->setItem(foundi,i,new QTableWidgetItem(""));
 	}
+	//}
 	ui.locationIdInfoTableWidget->item(foundi,1)->setText(QString::number(rawFlags));
 
 	if (flags.contains(FreeEmsComms::BLOCK_IS_2D_TABLE))
