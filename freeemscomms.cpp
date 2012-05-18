@@ -854,8 +854,8 @@ void FreeEmsComms::run()
 							}
 							parent = packetpair.second[2] << 8;
 							parent += packetpair.second[3];
-							if (test & BLOCK_IS_RAM && test & BLOCK_IS_FLASH)
-							{
+							//if (test & BLOCK_IS_RAM && test & BLOCK_IS_FLASH)
+							//{
 								rampage = packetpair.second[4];
 								flashpage = packetpair.second[5];
 								ramaddress = packetpair.second[6] << 8;
@@ -864,7 +864,7 @@ void FreeEmsComms::run()
 								flashaddress += packetpair.second[9];
 								size = packetpair.second[10] << 8;
 								size += packetpair.second[11];
-							}
+							/*}
 							else if (test & BLOCK_IS_RAM)
 							{
 								rampage = packetpair.second[4];
@@ -886,7 +886,7 @@ void FreeEmsComms::run()
 							{
 								size = packetpair.second[4] << 8;
 								size += packetpair.second[5];
-							}
+							}*/
 							emit locationIdInfo(locationid,test,flaglist,parent,rampage,flashpage,ramaddress,flashaddress,size);
 						}
 
