@@ -830,7 +830,20 @@ void FreeEmsComms::run()
 					}
 					else
 					{
+						QString details = "Details: {";
+						for (int j=0;j<packetpair.second.size();j++)
+						{
+							//details += ((packetpair.second[j] == 0) ? "0x0" : "0x");
+							details += "0x";
+							details += ((packetpair.second[j] < 0xF) ? "0" : "");
+							details += QString::number(packetpair.second[j],16);
+							details += ",";
+						}
+						details += "}";
+
 						unsigned short locationid = m_currentWaitingRequest.args[0].toInt();
+						qDebug() << "Payload:" << QString::number(locationid,16);
+						qDebug() << details;
 						//TODO double check to make sure that there aren't an odd number of items here...
 						//QList<unsigned short> idlist;
 						QList<LocationIdFlags> flaglist;
