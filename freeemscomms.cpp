@@ -882,6 +882,11 @@ void FreeEmsComms::run()
 								size = packetpair.second[7] << 8;
 								size += packetpair.second[8];
 							}
+							else
+							{
+								size = packetpair.second[4] << 8;
+								size += packetpair.second[5];
+							}
 							emit locationIdInfo(locationid,test,flaglist,parent,rampage,flashpage,ramaddress,flashaddress,size);
 						}
 
