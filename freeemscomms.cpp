@@ -480,7 +480,7 @@ void FreeEmsComms::run()
 					header.append((char)0x00); //no length, no seq no nak
 					header.append((char)0xF8); // Payload 0xF8E0, get location ID Info
 					header.append((char)0xE0);
-					payload.append((char)((locationid << 8) & 0xFF));
+					payload.append((char)((((unsigned int)locationid) << 8) & 0xFF));
 					payload.append((char)((locationid) & 0xFF));
 					//header.append((char)(payload.length() << 8) & 0xFF);
 					//header.append((char)(payload.length()) & 0xFF);
