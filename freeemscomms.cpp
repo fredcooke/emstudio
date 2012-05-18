@@ -364,9 +364,9 @@ void FreeEmsComms::run()
 					header.append((char)0xDA); // Payload 0xDA5E, get list of location IDs
 					header.append((char)0x5E);
 					payload.append((char)((listtype) & 0xFF));
-					payload.append((char)((listmask << 8) & 0xFF));
+					payload.append((char)((listmask >> 8) & 0xFF));
 					payload.append((char)((listmask) & 0xFF));
-					header.append((char)(payload.length() << 8) & 0xFF);
+					header.append((char)(payload.length() >> 8) & 0xFF);
 					header.append((char)(payload.length()) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
@@ -480,7 +480,7 @@ void FreeEmsComms::run()
 					header.append((char)0x00); //no length, no seq no nak
 					header.append((char)0xF8); // Payload 0xF8E0, get location ID Info
 					header.append((char)0xE0);
-					payload.append((char)((((unsigned int)locationid) << 8) & 0xFF));
+					payload.append((char)((locationid >> 8) & 0xFF));
 					payload.append((char)((locationid) & 0xFF));
 					//header.append((char)(payload.length() << 8) & 0xFF);
 					//header.append((char)(payload.length()) & 0xFF);
@@ -510,11 +510,11 @@ void FreeEmsComms::run()
 					header.append((char)0x01); //Length, no seq no nak
 					header.append((char)0x01); // Payload 0x0100, update block in ram
 					header.append((char)0x00);
-					payload.append((char)((location << 8) & 0xFF));
+					payload.append((char)((location >> 8) & 0xFF));
 					payload.append((char)((location) & 0xFF));
-					payload.append((char)((offset << 8) & 0xFF));
+					payload.append((char)((offset >> 8) & 0xFF));
 					payload.append((char)((offset) & 0xFF));
-					payload.append((char)((size << 8) & 0xFF));
+					payload.append((char)((size >> 8) & 0xFF));
 					payload.append((char)((size) & 0xFF));
 					payload.append(data);
 					header.append((char)(payload.length() << 8) & 0xFF);
@@ -544,11 +544,11 @@ void FreeEmsComms::run()
 					header.append((char)0x00); //No Length, no seq no nak
 					header.append((char)0x01); // Payload 0x0104, retrieve block
 					header.append((char)0x04);
-					payload.append((char)((location << 8) & 0xFF));
+					payload.append((char)((location >> 8) & 0xFF));
 					payload.append((char)((location) & 0xFF));
-					payload.append((char)((offset << 8) & 0xFF));
+					payload.append((char)((offset >> 8) & 0xFF));
 					payload.append((char)((offset) & 0xFF));
-					payload.append((char)((size << 8) & 0xFF));
+					payload.append((char)((size >> 8) & 0xFF));
 					payload.append((char)((size) & 0xFF));
 					//header.append((char)(packet.length() << 8) & 0xFF);
 					m_threadReqList.removeAt(i);
