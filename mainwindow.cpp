@@ -252,7 +252,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 		if (ui.sendCommandTableWidget->item(i,0)->text().toInt() == sequencenumber)
 		{
 			ui.sendCommandTableWidget->item(i,1)->setText("Failed");
-			uihttp://forum.diyefi.org/viewtopic.php?p=6453#p6453.sendCommandTableWidget->item(i,2)->setText(QString::number(errornum));
+			ui.sendCommandTableWidget->item(i,2)->setText(QString::number(errornum));
 		}
 	}*/
 }
