@@ -806,12 +806,25 @@ void FreeEmsComms::run()
 				}
 				else if (payloadid == 0xDA5F)
 				{
+					//Location ID List
 					if (packetpair.first[0] & 0x10)
 					{
 					}
 					else
 					{
 						//TODO double check to make sure that there aren't an odd number of items here...
+						qDebug() << "Location ID List";
+						QString details = "Details: {";
+						for (int j=0;j<packetpair.second.size();j++)
+						{
+							//details += ((packetpair.second[j] == 0) ? "0x0" : "0x");
+							details += "0x";
+							details += (((unsigned char)packetpair.second[j] < 0xF) ? "0" : "");
+							details += QString::number(packetpair.second[j],16);
+							details += ",";
+						}
+						details += "}";
+						qDebug() << details;
 						QList<unsigned short> idlist;
 						for (int j=0;j<packetpair.second.size();j+=2)
 						{
@@ -835,7 +848,7 @@ void FreeEmsComms::run()
 						{
 							//details += ((packetpair.second[j] == 0) ? "0x0" : "0x");
 							details += "0x";
-							details += ((packetpair.second[j] < 0xF) ? "0" : "");
+							details += (((unsigned char)packetpair.second[j] < 0xF) ? "0" : "");
 							details += QString::number(packetpair.second[j],16);
 							details += ",";
 						}
@@ -1068,7 +1081,7 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 		//qDebug() << "Length:" << length;
 		iloc += 2;
 		//curr += length;
-		if (buffer.length() > length + iloc)
+		if (buffer.length() > (unsigned int)(length + iloc))
 		{
 			qDebug() << "Packet length should be:" << length + iloc << "But it is" << buffer.length();
 		}
