@@ -53,8 +53,12 @@ private:
 	int pidcount;
 	QTimer *timer;
 	QTimer *guiUpdateTimer;
-
+	QString m_comPort;
+	int m_comBaud;
+	int m_comInterByte;
 private slots:
+	void settingsSaveClicked();
+	void settingsCancelClicked();
 	void guiUpdateTimerTick();
 	void timerTick();
 	void connectButtonClicked();

@@ -22,11 +22,14 @@
 #include "datafield.h"
 #include <QMdiArea>
 #include <QMdiSubWindow>
+#include <QSettings>
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	//populateDataFields();
 	ui.setupUi(this);
 	comSettings = new ComSettings();
+	connect(comSettings,SIGNAL(saveClicked()),this,SLOT(settingsSaveClicked()));
+	connect(comSettings,SIGNAL(cancelClicked()),this,SLOT(settingsCancelClicked()));
 	QMdiSubWindow *win = ui.mdiArea->addSubWindow(comSettings);
 	win->setGeometry(comSettings->geometry());
 	win->show();
@@ -78,6 +81,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 
 
+	//Load settings
+	QSettings settings("freeems","freetune");
+	settings.beginGroup("comms");
+	m_comPort = settings.value("port","/dev/ttyUSB0").toString();
+	m_comBaud = settings.value("baud",115200).toInt();
+	m_comInterByte = settings.value("interbytedelay",0).toInt();
+	settings.endGroup();
+
+	comSettings->setComPort(m_comPort);
+	comSettings->setBaud(m_comBaud);
+	comSettings->setInterByteDelay(m_comInterByte);
 	pidcount = 0;
 
 	timer = new QTimer(this);
@@ -98,6 +112,25 @@ void MainWindow::timerTick()
 	ui.ppsLabel->setText("PPS: " + QString::number(pidcount));
 	pidcount = 0;
 }
+void MainWindow::settingsSaveClicked()
+{
+	m_comBaud = comSettings->getBaud();
+	m_comPort = comSettings->getComPort();
+	m_comInterByte = comSettings->getInterByteDelay();
+	comSettings->hide();
+	QSettings settings("freeems","freetune");
+	settings.beginGroup("comms");
+	settings.setValue("port",m_comPort);
+	settings.setValue("baud",m_comBaud);
+	settings.setValue("interbytedelay",m_comInterByte);
+	settings.endGroup();
+}
+
+void MainWindow::settingsCancelClicked()
+{
+	comSettings->hide();
+}
+
 void MainWindow::unknownPacket(QByteArray header,QByteArray payload)
 {
 	QString result = "";
@@ -219,7 +252,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 		if (ui.sendCommandTableWidget->item(i,0)->text().toInt() == sequencenumber)
 		{
 			ui.sendCommandTableWidget->item(i,1)->setText("Failed");
-			ui.sendCommandTableWidget->item(i,2)->setText(QString::number(errornum));
+			uihttp://forum.diyefi.org/viewtopic.php?p=6453#p6453.sendCommandTableWidget->item(i,2)->setText(QString::number(errornum));
 		}
 	}*/
 }
@@ -234,7 +267,7 @@ void MainWindow::stopLogButtonClicked()
 }
 void MainWindow::connectButtonClicked()
 {
-	emsComms->connectSerial(comSettings->getComPort(),comSettings->getBaud());
+	emsComms->connectSerial(m_comPort,m_comBaud);
 }
 
 void MainWindow::logProgress(qlonglong current,qlonglong total)
