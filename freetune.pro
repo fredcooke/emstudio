@@ -19,7 +19,12 @@ SOURCES += main.cpp\
     gaugewidget.cpp \
     gaugeitem.cpp \
     serialthread.cpp \
-    datapacketdecoder.cpp
+    datapacketdecoder.cpp \
+    comsettings.cpp \
+    emsinfo.cpp \
+    datagauges.cpp \
+    datatables.cpp \
+    rawdatadisplay.cpp
 
 HEADERS  += mainwindow.h \
     freeemspacket.h \
@@ -29,9 +34,19 @@ HEADERS  += mainwindow.h \
     gaugewidget.h \
     gaugeitem.h \
     serialthread.h \
-    datapacketdecoder.h
+    datapacketdecoder.h \
+    comsettings.h \
+    emsinfo.h \
+    datagauges.h \
+    datatables.h \
+    rawdatadisplay.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    comsettings.ui \
+    emsinfo.ui \
+    datagauges.ui \
+    datatables.ui \
+    rawdatadisplay.ui
 
 OTHER_FILES += \
     README.md

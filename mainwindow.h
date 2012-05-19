@@ -25,9 +25,13 @@
 #include "datafield.h"
 //#include "logloader.h"
 #include "freeemscomms.h"
-#include "gaugewidget.h"
+
 #include <QTimer>
 #include "datapacketdecoder.h"
+#include "comsettings.h"
+#include "emsinfo.h"
+#include "datatables.h"
+#include "datagauges.h"
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -36,17 +40,20 @@ public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
 private:
+	DataTables *dataTables;
+	DataGauges *dataGauges;
+	EmsInfo *emsInfo;
+	ComSettings *comSettings;
 	DataPacketDecoder *dataPacketDecoder;
 	void populateDataFields();
-	GaugeWidget *widget;
+
 	Ui::MainWindow ui;
 	//LogLoader *logLoader;
 	FreeEmsComms *emsComms;
 	int pidcount;
 	QTimer *timer;
 	QTimer *guiUpdateTimer;
-	QMap<QString,double> m_valueMap;
-	QMap<QString,int> m_nameToIndexMap;
+
 private slots:
 	void guiUpdateTimerTick();
 	void timerTick();
@@ -62,7 +69,7 @@ private slots:
 	void emsCommsConnected();
 	void unknownPacket(QByteArray header,QByteArray payload);
 	void locationIdList(QList<unsigned short> idlist);
-	void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
+	//void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QString version);
