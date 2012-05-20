@@ -56,7 +56,15 @@ private:
 	QString m_comPort;
 	int m_comBaud;
 	int m_comInterByte;
+	QString m_firmwareVersion;
+	QString m_interfaceVersion;
+
 private slots:
+	void dataTablesDestroyed();
+	void dataGaugesDestroyed();
+	void menu_windows_GaugesClicked();
+	void menu_windows_EmsInfoClicked();
+	void menu_windows_TablesClicked();
 	void menu_settingsClicked();
 	void menu_connectClicked();
 	void menu_disconnectClicked();

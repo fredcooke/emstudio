@@ -31,6 +31,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionSettings,SIGNAL(triggered()),this,SLOT(menu_settingsClicked()));
 	connect(ui.actionConnect,SIGNAL(triggered()),this,SLOT(menu_connectClicked()));
 	connect(ui.actionDisconnect,SIGNAL(triggered()),this,SLOT(menu_disconnectClicked()));
+	connect(ui.actionEMS_Info,SIGNAL(triggered()),this,SLOT(menu_windows_EmsInfoClicked()));
+	connect(ui.actionGauges,SIGNAL(triggered()),this,SLOT(menu_windows_GaugesClicked()));
+	connect(ui.actionTables,SIGNAL(triggered()),this,SLOT(menu_windows_TablesClicked()));
 	//comSettings = new ComSettings();
 	//connect(comSettings,SIGNAL(saveClicked()),this,SLOT(settingsSaveClicked()));
 	//connect(comSettings,SIGNAL(cancelClicked()),this,SLOT(settingsCancelClicked()));
@@ -38,20 +41,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	//win->setGeometry(comSettings->geometry());
 	//win->show();
 
-	emsInfo = new EmsInfo();
-	QMdiSubWindow *win2 = ui.mdiArea->addSubWindow(emsInfo);
-	win2->setGeometry(emsInfo->geometry());
-	win2->show();
+	emsInfo=0;
 
-	dataTables = new DataTables();
-	QMdiSubWindow *win3 = ui.mdiArea->addSubWindow(dataTables);
-	win3->setGeometry(dataTables->geometry());
-	win3->show();
+	dataTables=0;
 
-	dataGauges = new DataGauges();
+	/*dataGauges = new DataGauges();
 	QMdiSubWindow *win4 = ui.mdiArea->addSubWindow(dataGauges);
 	win4->setGeometry(dataGauges->geometry());
-	win4->show();
+	win4->show();*/
+	dataGauges=0;
 
 
 	connect(ui.connectPushButton,SIGNAL(clicked()),this,SLOT(connectButtonClicked()));
@@ -64,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	//connect(ui.interByteDelaySpinBox,SIGNAL(valueChanged(int)),this,SLOT(interByteDelayChanged(int)));
 	dataPacketDecoder = new DataPacketDecoder(this);
 	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QMap<QString,double>)),this,SLOT(dataLogDecoded(QMap<QString,double>)));
-	dataTables->passDecoder(dataPacketDecoder);
+	//
 
 	/*logLoader = new LogLoader(this);
 	connect(logLoader,SIGNAL(endOfLog()),this,SLOT(logFinished()));
@@ -80,7 +78,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
-	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+
+
 
 
 
@@ -157,6 +156,102 @@ void MainWindow::settingsCancelClicked()
 	comSettingsWidget->hide();
 	comSettingsWidget->deleteLater();
 }
+void MainWindow::menu_windows_GaugesClicked()
+{
+	if (dataGauges)
+	{
+		//QMdiSubWindow *win;
+		//win->widget()
+		for (int i=0;i<ui.mdiArea->subWindowList().size();i++)
+		{
+			if (ui.mdiArea->subWindowList()[i]->widget() == dataGauges)
+			{
+				ui.mdiArea->removeSubWindow(ui.mdiArea->subWindowList()[i]);
+				break;
+			}
+		}
+		dataGauges->hide();
+		dataGauges->deleteLater();
+		dataGauges = 0;
+	}
+	else
+	{
+		dataGauges = new DataGauges();
+		connect(dataGauges,SIGNAL(destroyed()),this,SLOT(dataGaugesDestroyed()));
+		QMdiSubWindow *win = ui.mdiArea->addSubWindow(dataGauges);
+		win->setGeometry(dataGauges->geometry());
+		win->show();
+	}
+}
+void MainWindow::dataTablesDestroyed()
+{
+	dataTables=0;
+}
+
+void MainWindow::dataGaugesDestroyed()
+{
+	dataGauges=0;
+}
+
+void MainWindow::menu_windows_EmsInfoClicked()
+{
+	if (emsInfo)
+	{
+		//QMdiSubWindow *win;
+		//win->widget()
+		for (int i=0;i<ui.mdiArea->subWindowList().size();i++)
+		{
+			if (ui.mdiArea->subWindowList()[i]->widget() == emsInfo)
+			{
+				ui.mdiArea->removeSubWindow(ui.mdiArea->subWindowList()[i]);
+				break;
+			}
+		}
+		emsInfo->hide();
+		emsInfo->deleteLater();
+		emsInfo = 0;
+	}
+	else
+	{
+		emsInfo = new EmsInfo();
+		emsInfo->setFirmwareVersion(m_firmwareVersion);
+		emsInfo->setInterfaceVersion(m_interfaceVersion);
+		connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+		connect(emsComms,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
+		QMdiSubWindow *win2 = ui.mdiArea->addSubWindow(emsInfo);
+		win2->setGeometry(emsInfo->geometry());
+		win2->show();
+	}
+}
+
+void MainWindow::menu_windows_TablesClicked()
+{
+	if (dataTables)
+	{
+		//QMdiSubWindow *win;
+		//win->widget()
+		for (int i=0;i<ui.mdiArea->subWindowList().size();i++)
+		{
+			if (ui.mdiArea->subWindowList()[i]->widget() == dataTables)
+			{
+				ui.mdiArea->removeSubWindow(ui.mdiArea->subWindowList()[i]);
+				break;
+			}
+		}
+		dataTables->hide();
+		dataTables->deleteLater();
+		dataTables = 0;
+	}
+	else
+	{
+		dataTables = new DataTables();
+		connect(dataTables,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
+		dataTables->passDecoder(dataPacketDecoder);
+		QMdiSubWindow *win3 = ui.mdiArea->addSubWindow(dataTables);
+		win3->setGeometry(dataTables->geometry());
+		win3->show();
+	}
+}
 
 void MainWindow::unknownPacket(QByteArray header,QByteArray payload)
 {
@@ -224,12 +319,20 @@ void MainWindow::dataLogPayloadReceived(QByteArray header,QByteArray payload)
 void MainWindow::interfaceVersion(QString version)
 {
 	//ui.interfaceVersionLineEdit->setText(version);
-	emsInfo->setInterfaceVersion(version);
+	m_interfaceVersion = version;
+	if (emsInfo)
+	{
+		emsInfo->setInterfaceVersion(version);
+	}
 }
 void MainWindow::firmwareVersion(QString version)
 {
 	//ui.firmwareVersionLineEdit->setText(version);
-	emsInfo->setFirmwareVersion(version);
+	m_firmwareVersion = version;
+	if (emsInfo)
+	{
+		emsInfo->setFirmwareVersion(version);
+	}
 }
 void MainWindow::error(QString msg)
 {
@@ -309,8 +412,14 @@ void MainWindow::guiUpdateTimerTick()
 void MainWindow::dataLogDecoded(QMap<QString,double> data)
 {
 	//m_valueMap = data;
-	dataTables->passData(data);
-	dataGauges->passData(data);
+	if (dataTables)
+	{
+		dataTables->passData(data);
+	}
+	if (dataGauges)
+	{
+		dataGauges->passData(data);
+	}
 }
 
 void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
