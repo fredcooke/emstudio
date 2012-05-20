@@ -43,7 +43,7 @@ private:
 	DataTables *dataTables;
 	DataGauges *dataGauges;
 	EmsInfo *emsInfo;
-	ComSettings *comSettings;
+	//ComSettings *comSettings;
 	DataPacketDecoder *dataPacketDecoder;
 	void populateDataFields();
 
@@ -57,6 +57,9 @@ private:
 	int m_comBaud;
 	int m_comInterByte;
 private slots:
+	void menu_settingsClicked();
+	void menu_connectClicked();
+	void menu_disconnectClicked();
 	void settingsSaveClicked();
 	void settingsCancelClicked();
 	void guiUpdateTimerTick();

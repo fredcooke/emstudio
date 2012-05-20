@@ -27,12 +27,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	//populateDataFields();
 	ui.setupUi(this);
-	comSettings = new ComSettings();
-	connect(comSettings,SIGNAL(saveClicked()),this,SLOT(settingsSaveClicked()));
-	connect(comSettings,SIGNAL(cancelClicked()),this,SLOT(settingsCancelClicked()));
-	QMdiSubWindow *win = ui.mdiArea->addSubWindow(comSettings);
-	win->setGeometry(comSettings->geometry());
-	win->show();
+	ui.actionDisconnect->setEnabled(false);
+	connect(ui.actionSettings,SIGNAL(triggered()),this,SLOT(menu_settingsClicked()));
+	connect(ui.actionConnect,SIGNAL(triggered()),this,SLOT(menu_connectClicked()));
+	connect(ui.actionDisconnect,SIGNAL(triggered()),this,SLOT(menu_disconnectClicked()));
+	//comSettings = new ComSettings();
+	//connect(comSettings,SIGNAL(saveClicked()),this,SLOT(settingsSaveClicked()));
+	//connect(comSettings,SIGNAL(cancelClicked()),this,SLOT(settingsCancelClicked()));
+	//QMdiSubWindow *win = ui.mdiArea->addSubWindow(comSettings);
+	//win->setGeometry(comSettings->geometry());
+	//win->show();
 
 	emsInfo = new EmsInfo();
 	QMdiSubWindow *win2 = ui.mdiArea->addSubWindow(emsInfo);
@@ -89,9 +93,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_comInterByte = settings.value("interbytedelay",0).toInt();
 	settings.endGroup();
 
-	comSettings->setComPort(m_comPort);
-	comSettings->setBaud(m_comBaud);
-	comSettings->setInterByteDelay(m_comInterByte);
 	pidcount = 0;
 
 	timer = new QTimer(this);
@@ -106,6 +107,27 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	statusBar()->addWidget(ui.statusLabel);
 	emsComms->start();
 }
+void MainWindow::menu_settingsClicked()
+{
+	ComSettings *settings = new ComSettings();
+	connect(settings,SIGNAL(saveClicked()),this,SLOT(settingsSaveClicked()));
+	connect(settings,SIGNAL(cancelClicked()),this,SLOT(settingsCancelClicked()));
+	QMdiSubWindow *win = ui.mdiArea->addSubWindow(settings);
+	win->setGeometry(settings->geometry());
+	win->show();
+	settings->show();
+}
+
+void MainWindow::menu_connectClicked()
+{
+	ui.actionConnect->setEnabled(false);
+}
+
+void MainWindow::menu_disconnectClicked()
+{
+	ui.actionConnect->setEnabled(true);
+	ui.actionDisconnect->setEnabled(false);
+}
 
 void MainWindow::timerTick()
 {
@@ -114,21 +136,26 @@ void MainWindow::timerTick()
 }
 void MainWindow::settingsSaveClicked()
 {
-	m_comBaud = comSettings->getBaud();
-	m_comPort = comSettings->getComPort();
-	m_comInterByte = comSettings->getInterByteDelay();
-	comSettings->hide();
+	ComSettings *comSettingsWidget = qobject_cast<ComSettings*>(sender());
+	m_comBaud = comSettingsWidget->getBaud();
+	m_comPort = comSettingsWidget->getComPort();
+	m_comInterByte = comSettingsWidget->getInterByteDelay();
+	comSettingsWidget->hide();
 	QSettings settings("freeems","freetune");
 	settings.beginGroup("comms");
 	settings.setValue("port",m_comPort);
 	settings.setValue("baud",m_comBaud);
 	settings.setValue("interbytedelay",m_comInterByte);
 	settings.endGroup();
+	comSettingsWidget->deleteLater();
 }
 
 void MainWindow::settingsCancelClicked()
 {
-	comSettings->hide();
+	//comSettings->hide();
+	ComSettings *comSettingsWidget = qobject_cast<ComSettings*>(sender());
+	comSettingsWidget->hide();
+	comSettingsWidget->deleteLater();
 }
 
 void MainWindow::unknownPacket(QByteArray header,QByteArray payload)
