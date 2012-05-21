@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     emsinfo.cpp \
     datagauges.cpp \
     datatables.cpp \
-    rawdatadisplay.cpp
+    rawdatadisplay.cpp \
+    dataflags.cpp
 
 HEADERS  += mainwindow.h \
     freeemspacket.h \
@@ -39,14 +40,16 @@ HEADERS  += mainwindow.h \
     emsinfo.h \
     datagauges.h \
     datatables.h \
-    rawdatadisplay.h
+    rawdatadisplay.h \
+    dataflags.h
 
 FORMS    += mainwindow.ui \
     comsettings.ui \
     emsinfo.ui \
     datagauges.ui \
     datatables.ui \
-    rawdatadisplay.ui
+    rawdatadisplay.ui \
+    dataflags.ui
 
 OTHER_FILES += \
     README.md

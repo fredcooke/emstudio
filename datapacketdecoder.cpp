@@ -66,7 +66,7 @@ void DataPacketDecoder::populateDataFields()
 	m_dataFieldList.append(DataField("Advance","Ignition advance",54,2,50.0));
 	m_dataFieldList.append(DataField("Dwell","Dwell period",56,2,1520.0));
 	m_dataFieldList.append(DataField("tempClock","Once per datalog message",58,1,1.0));
-	m_dataFieldList.append(DataField("tempClock","Once per datalog message",59,1,1.0));
+	m_dataFieldList.append(DataField("spareChar","Unused at this time",59,1,1.0));
 	m_dataFieldList.append(DataField("coreStatusA","Duplicate",60,1,1.0));
 	m_dataFieldList.append(DataField("decoderFlags","Various decoder state flags",61,1,1.0));
 	m_dataFieldList.append(DataField("flaggableFlags","Flags to go with flaggables",62,2,1.0));
