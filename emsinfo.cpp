@@ -73,7 +73,7 @@ void EmsInfo::locationIdInfo(unsigned short locationid,unsigned short rawFlags,Q
 	{*/
 	ui.locationIdInfoTableWidget->setRowCount(ui.locationIdInfoTableWidget->rowCount()+1);
 	foundi = ui.locationIdInfoTableWidget->rowCount()-1;
-	ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem(QString::number(locationid,16)));
+	ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem("0x" + QString::number(locationid,16).toUpper()));
 	for (int i=1;i<16;i++)
 	{
 		ui.locationIdInfoTableWidget->setItem(foundi,i,new QTableWidgetItem(""));
