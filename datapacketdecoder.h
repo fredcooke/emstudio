@@ -21,6 +21,7 @@
 
 #include <QObject>
 #include <QMap>
+#include <QVariantMap>
 #include "datafield.h"
 class DataPacketDecoder : public QObject
 {
@@ -30,7 +31,7 @@ public:
 	void populateDataFields();
 	QList<DataField> m_dataFieldList;
 signals:
-	void payloadDecoded(QMap<QString,double> data);
+	void payloadDecoded(QVariantMap data);
 public slots:
 	void decodePayload(QByteArray payload);
 };

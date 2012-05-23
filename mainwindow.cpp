@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionEMS_Info,SIGNAL(triggered()),this,SLOT(menu_windows_EmsInfoClicked()));
 	connect(ui.actionGauges,SIGNAL(triggered()),this,SLOT(menu_windows_GaugesClicked()));
 	connect(ui.actionTables,SIGNAL(triggered()),this,SLOT(menu_windows_TablesClicked()));
+	connect(ui.actionFlags,SIGNAL(triggered()),this,SLOT(menu_windows_FlagsClicked()));
 	//comSettings = new ComSettings();
 	//connect(comSettings,SIGNAL(saveClicked()),this,SLOT(settingsSaveClicked()));
 	//connect(comSettings,SIGNAL(cancelClicked()),this,SLOT(settingsCancelClicked()));
@@ -44,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsInfo=0;
 
 	dataTables=0;
+	dataFlags=0;
 
 	/*dataGauges = new DataGauges();
 	QMdiSubWindow *win4 = ui.mdiArea->addSubWindow(dataGauges);
@@ -61,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	//connect(ui.interByteDelaySpinBox,SIGNAL(valueChanged(int)),this,SLOT(interByteDelayChanged(int)));
 	dataPacketDecoder = new DataPacketDecoder(this);
-	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QMap<QString,double>)),this,SLOT(dataLogDecoded(QMap<QString,double>)));
+	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
 	//
 
 	/*logLoader = new LogLoader(this);
@@ -192,6 +194,10 @@ void MainWindow::dataGaugesDestroyed()
 {
 	dataGauges=0;
 }
+void MainWindow::dataFlagsDestroyed()
+{
+	dataFlags = 0;
+}
 
 void MainWindow::menu_windows_EmsInfoClicked()
 {
@@ -251,6 +257,35 @@ void MainWindow::menu_windows_TablesClicked()
 		win3->setGeometry(dataTables->geometry());
 		win3->show();
 	}
+}
+void MainWindow::menu_windows_FlagsClicked()
+{
+	if (dataFlags)
+	{
+		//QMdiSubWindow *win;
+		//win->widget()
+		for (int i=0;i<ui.mdiArea->subWindowList().size();i++)
+		{
+			if (ui.mdiArea->subWindowList()[i]->widget() == dataTables)
+			{
+				ui.mdiArea->removeSubWindow(ui.mdiArea->subWindowList()[i]);
+				break;
+			}
+		}
+		dataFlags->hide();
+		dataFlags->deleteLater();
+		dataFlags = 0;
+	}
+	else
+	{
+		dataFlags = new DataFlags();
+		connect(dataFlags,SIGNAL(destroyed()),this,SLOT(dataFlagsDestroyed()));
+		dataFlags->passDecoder(dataPacketDecoder);
+		QMdiSubWindow *win3 = ui.mdiArea->addSubWindow(dataFlags);
+		win3->setGeometry(dataFlags->geometry());
+		win3->show();
+	}
+
 }
 
 void MainWindow::unknownPacket(QByteArray header,QByteArray payload)
@@ -409,7 +444,7 @@ void MainWindow::logProgress(qlonglong current,qlonglong total)
 void MainWindow::guiUpdateTimerTick()
 {
 }
-void MainWindow::dataLogDecoded(QMap<QString,double> data)
+void MainWindow::dataLogDecoded(QVariantMap data)
 {
 	//m_valueMap = data;
 	if (dataTables)
@@ -419,6 +454,10 @@ void MainWindow::dataLogDecoded(QMap<QString,double> data)
 	if (dataGauges)
 	{
 		dataGauges->passData(data);
+	}
+	if (dataFlags)
+	{
+		dataFlags->passData(data);
 	}
 }
 

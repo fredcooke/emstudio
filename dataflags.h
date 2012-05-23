@@ -11,7 +11,7 @@ class DataFlags : public QWidget
 public:
 	explicit DataFlags(QWidget *parent = 0);
 	~DataFlags();
-	void passData(QMap<QString,double> data);
+	void passData(QVariantMap data);
 	void passDecoder(DataPacketDecoder *decoder);
 
 private:

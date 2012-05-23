@@ -21,7 +21,7 @@
 DataField::DataField()
 {
 }
-DataField::DataField(QString shortname,QString description,int offset,int size,float div,float min,float max,float addoffset)
+DataField::DataField(QString shortname,QString description,int offset,int size,float div,float min,float max,float addoffset,bool isFlags,int bit)
 {
 	m_offset = offset;
 	m_size = size;
@@ -31,7 +31,27 @@ DataField::DataField(QString shortname,QString description,int offset,int size,f
 	m_min = min;
 	m_max = max;
 	m_addoffset = addoffset;
+	m_isFlags = isFlags;
+	m_bit = bit;
 }
+bool DataField::flagValue(QByteArray *payload)
+{
+	if (!m_isFlags)
+	{
+		return false;
+	}
+	if (payload->size() > m_offset+m_size)
+	{
+		unsigned int val = 0;
+		for (int i=0;i<m_size;i++)
+		{
+			val += ((unsigned char)payload->at(m_offset+i)) << (8*(m_size-(i+1)));
+		}
+		return (m_bit & val);
+	}
+	return false;
+}
+
 float DataField::getValue(QByteArray *payload)
 {
 	if (payload->size() > m_offset+m_size)

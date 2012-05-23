@@ -6,13 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>607</width>
+    <width>401</width>
     <height>508</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QTableWidget" name="flagsTableWidget"/>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

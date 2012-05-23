@@ -32,6 +32,7 @@
 #include "emsinfo.h"
 #include "datatables.h"
 #include "datagauges.h"
+#include "dataflags.h"
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -43,6 +44,7 @@ private:
 	DataTables *dataTables;
 	DataGauges *dataGauges;
 	EmsInfo *emsInfo;
+	DataFlags *dataFlags;
 	//ComSettings *comSettings;
 	DataPacketDecoder *dataPacketDecoder;
 	void populateDataFields();
@@ -62,9 +64,11 @@ private:
 private slots:
 	void dataTablesDestroyed();
 	void dataGaugesDestroyed();
+	void dataFlagsDestroyed();
 	void menu_windows_GaugesClicked();
 	void menu_windows_EmsInfoClicked();
 	void menu_windows_TablesClicked();
+	void menu_windows_FlagsClicked();
 	void menu_settingsClicked();
 	void menu_connectClicked();
 	void menu_disconnectClicked();
@@ -73,7 +77,7 @@ private slots:
 	void guiUpdateTimerTick();
 	void timerTick();
 	void connectButtonClicked();
-	void dataLogDecoded(QMap<QString,double> data);
+	void dataLogDecoded(QVariantMap data);
 	void logPayloadReceived(QByteArray header,QByteArray payload);
 	void logProgress(qlonglong current,qlonglong total);
 	void logFinished();

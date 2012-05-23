@@ -83,7 +83,7 @@
      <x>0</x>
      <y>0</y>
      <width>1525</width>
-     <height>24</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -108,6 +108,7 @@
     <addaction name="actionGauges"/>
     <addaction name="actionTables"/>
     <addaction name="actionEMS_Info"/>
+    <addaction name="actionFlags"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -165,6 +166,11 @@
   <action name="actionEMS_Info">
    <property name="text">
     <string>EMS Info</string>
+   </property>
+  </action>
+  <action name="actionFlags">
+   <property name="text">
+    <string>Flags</string>
    </property>
   </action>
  </widget>

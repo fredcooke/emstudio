@@ -28,18 +28,21 @@ DataTables::~DataTables()
 {
 
 }
-void DataTables::passData(QMap<QString,double> data)
+void DataTables::passData(QVariantMap data)
 {
 	m_valueMap = data;
 }
 
 void DataTables::guiUpdateTimerTick()
 {
-	QMap<QString,double>::const_iterator i = m_valueMap.constBegin();
+	QVariantMap::const_iterator i = m_valueMap.constBegin();
 	while (i != m_valueMap.constEnd())
 	{
-		//widget->propertyMap.setProperty(i.key().toAscii(),QVariant::fromValue(i.value()));
-		ui.tableWidget->item(m_nameToIndexMap[i.key()],1)->setText(QString::number(i.value()));
+		if (i.value().type() == QVariant::Double)
+		{
+			//widget->propertyMap.setProperty(i.key().toAscii(),QVariant::fromValue(i.value()));
+			ui.tableWidget->item(m_nameToIndexMap[i.key()],1)->setText(i.value().toString());
+		}
 		//qDebug() << i.key() << m_nameToIndexMap[i.key()] << i.value();
 		i++;
 	}

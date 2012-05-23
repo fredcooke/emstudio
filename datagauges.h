@@ -12,12 +12,12 @@ class DataGauges : public QWidget
 public:
 	explicit DataGauges(QWidget *parent = 0);
 	~DataGauges();
-	void passData(QMap<QString,double> data);
+	void passData(QVariantMap data);
 	void passDecoder(DataPacketDecoder *decoder);
 private:
 	QTimer *guiUpdateTimer;
 	DataPacketDecoder *dataPacketDecoder;
-	QMap<QString,double> m_valueMap;
+	QVariantMap m_valueMap;
 	Ui::DataGauges ui;
 	GaugeWidget *widget;
 private slots:

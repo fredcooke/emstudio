@@ -12,13 +12,13 @@ class DataTables : public QWidget
 public:
 	explicit DataTables(QWidget *parent = 0);
 	~DataTables();
-	void passData(QMap<QString,double> data);
+	void passData(QVariantMap data);
 	void passDecoder(DataPacketDecoder *decoder);
 private:
 	QTimer *guiUpdateTimer;
 	DataPacketDecoder *dataPacketDecoder;
 	Ui::DataTables ui;
-	QMap<QString,double> m_valueMap;
+	QVariantMap m_valueMap;
 	QMap<QString,int> m_nameToIndexMap;
 private slots:
 	void guiUpdateTimerTick();

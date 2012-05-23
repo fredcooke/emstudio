@@ -17,7 +17,7 @@ DataGauges::~DataGauges()
 {
 }
 
-void DataGauges::passData(QMap<QString,double> data)
+void DataGauges::passData(QVariantMap data)
 {
 	m_valueMap = data;
 }
@@ -29,10 +29,11 @@ void DataGauges::passDecoder(DataPacketDecoder *decoder)
 
 void DataGauges::guiUpdateTimerTick()
 {
-	QMap<QString,double>::const_iterator i = m_valueMap.constBegin();
+
+	QVariantMap::const_iterator i = m_valueMap.constBegin();
 	while (i != m_valueMap.constEnd())
 	{
-		widget->propertyMap.setProperty(i.key().toAscii(),QVariant::fromValue(i.value()));
+		widget->propertyMap.setProperty(i.key().toAscii(),i.value());
 		//ui.tableWidget->item(m_nameToIndexMap[i.key()],1)->setText(QString::number(i.value()));
 		//qDebug() << i.key() << m_nameToIndexMap[i.key()] << i.value();
 		i++;
