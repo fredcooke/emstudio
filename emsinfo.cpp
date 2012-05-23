@@ -134,8 +134,8 @@ void EmsInfo::locationIdInfo(unsigned short locationid,unsigned short rawFlags,Q
 	if (flags.contains(FreeEmsComms::BLOCK_IS_RAM))
 	{
 		ui.locationIdInfoTableWidget->item(foundi,9)->setText("True");
-		ui.locationIdInfoTableWidget->item(foundi,3)->setText(QString::number(rampage));
-		ui.locationIdInfoTableWidget->item(foundi,5)->setText(QString::number(ramaddress));
+		ui.locationIdInfoTableWidget->item(foundi,3)->setText("0x" + QString::number(rampage,16).toUpper());
+		ui.locationIdInfoTableWidget->item(foundi,5)->setText("0x" + QString::number(ramaddress,16).toUpper());
 	}
 	else
 	{
@@ -144,8 +144,8 @@ void EmsInfo::locationIdInfo(unsigned short locationid,unsigned short rawFlags,Q
 	if (flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
 	{
 		ui.locationIdInfoTableWidget->item(foundi,10)->setText("True");
-		ui.locationIdInfoTableWidget->item(foundi,4)->setText(QString::number(flashpage));
-		ui.locationIdInfoTableWidget->item(foundi,6)->setText(QString::number(flashaddress));
+		ui.locationIdInfoTableWidget->item(foundi,4)->setText("0x" + QString::number(flashpage,16).toUpper());
+		ui.locationIdInfoTableWidget->item(foundi,6)->setText("0x" + QString::number(flashaddress,16).toUpper());
 	}
 	else
 	{
