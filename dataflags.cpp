@@ -1,6 +1,6 @@
 #include "dataflags.h"
 #include <QMdiSubWindow>
-
+#include <QDebug>
 DataFlags::DataFlags(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
@@ -27,6 +27,7 @@ void DataFlags::passData(QVariantMap data)
 	{
 		if (i.value().type() == QVariant::Bool)
 		{
+			qDebug() << "Flag value:" << i.key() << i.value();
 			//Flag
 			bool found = false;
 			for (int j=0;j<ui.flagsTableWidget->rowCount();j++)
@@ -48,6 +49,10 @@ void DataFlags::passData(QVariantMap data)
 		else if (i.value().type() == QVariant::Double)
 		{
 			//Value
+		}
+		else
+		{
+			qDebug() << "unknown value type:" << i.value().typeName();
 		}
 		i++;
 	}

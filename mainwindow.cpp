@@ -87,12 +87,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsMdiWindow = ui.mdiArea->addSubWindow(emsInfo);
 	emsMdiWindow->setGeometry(emsInfo->geometry());
 	emsMdiWindow->hide();
+	emsMdiWindow->setWindowTitle("EMS Info");
 
 	dataGauges = new DataGauges();
 	connect(dataGauges,SIGNAL(destroyed()),this,SLOT(dataGaugesDestroyed()));
 	gaugesMdiWindow = ui.mdiArea->addSubWindow(dataGauges);
 	gaugesMdiWindow->setGeometry(dataGauges->geometry());
 	gaugesMdiWindow->hide();
+	gaugesMdiWindow->setWindowTitle("Gauges");
 
 	dataTables = new DataTables();
 	connect(dataTables,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
@@ -100,6 +102,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	tablesMdiWindow = ui.mdiArea->addSubWindow(dataTables);
 	tablesMdiWindow->setGeometry(dataTables->geometry());
 	tablesMdiWindow->hide();
+	tablesMdiWindow->setWindowTitle("Data Tables");
 
 	dataFlags = new DataFlags();
 	connect(dataFlags,SIGNAL(destroyed()),this,SLOT(dataFlagsDestroyed()));
@@ -107,6 +110,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	flagsMdiWindow = ui.mdiArea->addSubWindow(dataFlags);
 	flagsMdiWindow->setGeometry(dataFlags->geometry());
 	flagsMdiWindow->hide();
+	flagsMdiWindow->setWindowTitle("Flags");
 
 
 
