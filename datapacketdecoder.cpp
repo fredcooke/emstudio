@@ -90,7 +90,7 @@ void DataPacketDecoder::populateDataFields()
 	m_dataFieldList.append(DataField("serialNoiseErrors","Incremented when noise is detected",62,2,1.0,0,0,0,true,5));
 	m_dataFieldList.append(DataField("serialFramingErrors","Incremented when a framing error occurs",62,2,1.0,0,0,0,true,6));
 	m_dataFieldList.append(DataField("serialParityErrors","Incremented when a parity error occurs",62,2,1.0,0,0,0,true,7));
-	m_dataFieldList.append(DataField("serialOverrunErrors","Incremented when overrun occurs (duplicated in KeyUserDebug below)",62,2,1.0,0,0,0,true,8));
+	/*MISSING!*/m_dataFieldList.append(DataField("serialOverrunErrors","Incremented when overrun occurs (duplicated in KeyUserDebug below",62,2,1.0,0,0,0,true,8));
 	m_dataFieldList.append(DataField("serialEscapePairMismatches","Incremented when an escape is found but not followed by an escapee",62,2,1.0,0,0,0,true,9));
 	m_dataFieldList.append(DataField("serialStartsInsideAPacket","Incremented when a start byte is found inside a packet",62,2,1.0,0,0,0,true,10));
 	m_dataFieldList.append(DataField("serialPacketsOverLength","Incremented when the buffer fills up before the end",62,2,1.0,0,0,0,true,11));
