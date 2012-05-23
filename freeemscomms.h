@@ -35,6 +35,7 @@ public:
 		SERIAL_CONNECT=0xFFFF01,
 		SERIAL_DISCONNECT=0xFFFF02,
 		UPDATE_BLOCK_IN_RAM=0x0100,
+		RETRIEVE_BLOCK_IN_FLASH=0x0106,
 		RETRIEVE_BLOCK_IN_RAM=0x0104,
 		GET_INTERFACE_VERSION=0x0000,
 		GET_FIRMWARE_VERSION=0x0002,
@@ -101,6 +102,7 @@ public:
 	QByteArray generatePacket(QByteArray header,QByteArray payload);
 	int updateBlockInRam(int location,int offset, int size,QByteArray data);
 	int retrieveBlockFromRam(int location, int offset, int size);
+	int retrieveBlockFromFlash(int location, int offset, int size);
 	void setInterByteSendDelay(int milliseconds);
 protected:
 	void run();
@@ -125,7 +127,8 @@ signals:
 	void connected();
 	void locationIdList(QList<unsigned short> idlist);
 	void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
-	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
+	void ramBlockRetrieved(unsigned short locationid, QByteArray header,QByteArray payload);
+	void flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QString version);
 	void firmwareVersion(QString version);

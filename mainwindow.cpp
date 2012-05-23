@@ -35,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionGauges,SIGNAL(triggered()),this,SLOT(menu_windows_GaugesClicked()));
 	connect(ui.actionTables,SIGNAL(triggered()),this,SLOT(menu_windows_TablesClicked()));
 	connect(ui.actionFlags,SIGNAL(triggered()),this,SLOT(menu_windows_FlagsClicked()));
+
+	connect(ui.saveDataPushButton,SIGNAL(clicked()),this,SLOT(ui_saveDataButtonClicked()));
 	//comSettings = new ComSettings();
 	//connect(comSettings,SIGNAL(saveClicked()),this,SLOT(settingsSaveClicked()));
 	//connect(comSettings,SIGNAL(cancelClicked()),this,SLOT(settingsCancelClicked()));
@@ -83,7 +85,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsInfo->setFirmwareVersion(m_firmwareVersion);
 	emsInfo->setInterfaceVersion(m_interfaceVersion);
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
+
 	emsMdiWindow = ui.mdiArea->addSubWindow(emsInfo);
 	emsMdiWindow->setGeometry(emsInfo->geometry());
 	emsMdiWindow->hide();
@@ -135,7 +141,55 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	statusBar()->addWidget(ui.ppsLabel);
 	statusBar()->addWidget(ui.statusLabel);
 	emsComms->start();
+
+	logfile = new QFile("myoutput.log");
+	logfile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 }
+void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
+{
+	QString towrite = "{ \"locationid\":\"";
+	towrite += QString::number(locationid,16).toUpper();
+	towrite += "\", \"type\":\"ram\"";
+	towrite += "\", \"payload\":\"";
+	for (int i=0;i<payload.size();i++)
+	{
+		if (payload[i] <= 0xF)
+		{
+			towrite += "0";
+		}
+		towrite += QString::number((unsigned char)payload[i],16).toUpper();
+		towrite += " ";
+	}
+	towrite += "\" }\n";
+	logfile->write(towrite.toAscii(),towrite.length());
+	logfile->flush();
+}
+
+void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
+{
+	QString towrite = "{ \"locationid\":\"";
+	towrite += QString::number(locationid,16).toUpper();
+	towrite += "\", \"type\":\"flash\"";
+	towrite += "\", \"payload\":\"";
+	for (int i=0;i<payload.size();i++)
+	{
+		if (payload[i] <= 0xF)
+		{
+			towrite += "0";
+		}
+		towrite += QString::number((unsigned char)payload[i],16).toUpper();
+		towrite += " ";
+	}
+	towrite += "\" }\n";
+	logfile->write(towrite.toAscii(),towrite.length());
+	logfile->flush();
+}
+
+void MainWindow::ui_saveDataButtonClicked()
+{
+
+}
+
 void MainWindow::menu_settingsClicked()
 {
 	ComSettings *settings = new ComSettings();
@@ -177,6 +231,17 @@ void MainWindow::settingsSaveClicked()
 	settings.setValue("interbytedelay",m_comInterByte);
 	settings.endGroup();
 	comSettingsWidget->deleteLater();
+}
+void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
+{
+	if (flags.contains(FreeEmsComms::BLOCK_IS_RAM))
+	{
+		emsComms->retrieveBlockFromRam(locationid,0,0);
+	}
+	else if (flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
+	{
+		emsComms->retrieveBlockFromFlash(locationid,0,0);
+	}
 }
 
 void MainWindow::settingsCancelClicked()

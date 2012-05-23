@@ -136,6 +136,20 @@ int FreeEmsComms::getOperatingSystem()
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
+int FreeEmsComms::retrieveBlockFromFlash(int location, int offset, int size)
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = RETRIEVE_BLOCK_IN_FLASH;
+	req.args.append(location);
+	req.args.append(offset);
+	req.args.append(size);
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
 int FreeEmsComms::retrieveBlockFromRam(int location, int offset, int size)
 {
 	m_reqListMutex.lock();
@@ -566,6 +580,38 @@ void FreeEmsComms::run()
 					}
 				}
 			}
+			else if (m_threadReqList[i].type == RETRIEVE_BLOCK_IN_FLASH)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = 0x0106;
+					int location = m_threadReqList[i].args[0].toInt();
+					int offset= m_threadReqList[i].args[1].toInt();
+					int size = m_threadReqList[i].args[2].toInt();
+					QByteArray header;
+					QByteArray payload;
+					header.append((char)0x00); //No Length, no seq no nak
+					header.append((char)0x01); // Payload 0x0104, retrieve block
+					header.append((char)0x06);
+					payload.append((char)((location >> 8) & 0xFF));
+					payload.append((char)((location) & 0xFF));
+					payload.append((char)((offset >> 8) & 0xFF));
+					payload.append((char)((offset) & 0xFF));
+					payload.append((char)((size >> 8) & 0xFF));
+					payload.append((char)((size) & 0xFF));
+					//header.append((char)(packet.length() << 8) & 0xFF);
+					m_threadReqList.removeAt(i);
+					i--;
+					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
+				}
+			}
 			else if (m_threadReqList[i].type == GET_INTERFACE_VERSION)
 			{
 				if (!m_waitingForResponse)
@@ -951,6 +997,17 @@ void FreeEmsComms::run()
 						emit firmwareVersion(QString(packetpair.second));
 					}
 				}
+				else if (payloadid == 0x0103)
+				{
+					if (packetpair.first[0] & 0x10)
+					{
+					}
+					else
+					{
+						unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
+						emit flashBlockRetrieved(locid,packetpair.first,packetpair.second);
+					}
+				}
 				else if (payloadid == 0x0105)
 				{
 					if (packetpair.first[0] & 0x10)
@@ -959,7 +1016,8 @@ void FreeEmsComms::run()
 					else
 					{
 						//Block from ram is here.
-						emit blockRetrieved(m_currentWaitingRequest.sequencenumber,packetpair.first,packetpair.second);
+						unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
+						emit ramBlockRetrieved(locid,packetpair.first,packetpair.second);
 					}
 				}
 				else

@@ -64,8 +64,9 @@ private:
 	int m_comInterByte;
 	QString m_firmwareVersion;
 	QString m_interfaceVersion;
-
+	QFile *logfile;
 private slots:
+	void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void dataTablesDestroyed();
 	void dataGaugesDestroyed();
 	void dataFlagsDestroyed();
@@ -75,6 +76,7 @@ private slots:
 	void menu_windows_FlagsClicked();
 	void menu_settingsClicked();
 	void menu_connectClicked();
+	void ui_saveDataButtonClicked();
 	void menu_disconnectClicked();
 	void settingsSaveClicked();
 	void settingsCancelClicked();
@@ -94,6 +96,8 @@ private slots:
 	void locationIdList(QList<unsigned short> idlist);
 	//void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
+	void ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
+	void flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QString version);
 	void firmwareVersion(QString version);

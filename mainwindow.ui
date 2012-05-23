@@ -20,6 +20,13 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
+         <widget class="QPushButton" name="saveDataPushButton">
+          <property name="text">
+           <string>Save All Data</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="loadLogPushButton">
           <property name="text">
            <string>Load Log</string>

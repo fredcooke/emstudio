@@ -27,7 +27,7 @@ void DataFlags::passData(QVariantMap data)
 	{
 		if (i.value().type() == QVariant::Bool)
 		{
-			qDebug() << "Flag value:" << i.key() << i.value();
+			//qDebug() << "Flag value:" << i.key() << i.value();
 			//Flag
 			bool found = false;
 			for (int j=0;j<ui.flagsTableWidget->rowCount();j++)
