@@ -49,6 +49,7 @@ void DataFlags::passData(QVariantMap data)
 		else if (i.value().type() == QVariant::Double)
 		{
 			//Value
+			qDebug() << "Double value:" << i.key() << i.value();
 		}
 		else
 		{
