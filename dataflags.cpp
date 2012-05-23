@@ -27,7 +27,7 @@ void DataFlags::passData(QVariantMap data)
 	{
 		if (i.value().type() == QVariant::Bool)
 		{
-			qDebug() << "Flag value:" << i.key() << i.value();
+			//qDebug() << "Flag value:" << i.key() << i.value();
 			//Flag
 			bool found = false;
 			for (int j=0;j<ui.flagsTableWidget->rowCount();j++)
@@ -49,11 +49,11 @@ void DataFlags::passData(QVariantMap data)
 		else if (i.value().type() == QVariant::Double)
 		{
 			//Value
-			qDebug() << "Double value:" << i.key() << i.value();
+			//qDebug() << "Double value:" << i.key() << i.value();
 		}
 		else
 		{
-			qDebug() << "unknown value type:" << i.value().typeName();
+			//qDebug() << "unknown value type:" << i.value().typeName();
 		}
 		i++;
 	}

@@ -17,7 +17,7 @@
 ****************************************************************************/
 
 #include "datapacketdecoder.h"
-
+#include <QDebug>
 DataPacketDecoder::DataPacketDecoder(QObject *parent) : QObject(parent)
 {
 	populateDataFields();
@@ -30,11 +30,13 @@ void DataPacketDecoder::decodePayload(QByteArray payload)
 		if (m_dataFieldList[i].isFlag())
 		{
 			bool value = m_dataFieldList[i].flagValue(&payload);
+			qDebug() << "Decoding flag:" << m_dataFieldList[i].name() << "Value:" << value;
 			m_valueMap[m_dataFieldList[i].name()] = value;
 		}
 		else
 		{
 			double value = m_dataFieldList[i].getValue(&payload);
+			qDebug() << "Decoding value:" << m_dataFieldList[i].name() << "Value:" << value;
 			m_valueMap[m_dataFieldList[i].name()] = value;
 		}
 		//ui.tableWidget->item(i,1)->setText(QString::number(value));
