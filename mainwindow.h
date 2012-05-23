@@ -45,6 +45,10 @@ private:
 	DataGauges *dataGauges;
 	EmsInfo *emsInfo;
 	DataFlags *dataFlags;
+	QMdiSubWindow *tablesMdiWindow;
+	QMdiSubWindow *emsMdiWindow;
+	QMdiSubWindow *flagsMdiWindow;
+	QMdiSubWindow *gaugesMdiWindow;
 	//ComSettings *comSettings;
 	DataPacketDecoder *dataPacketDecoder;
 	void populateDataFields();

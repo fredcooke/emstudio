@@ -2,6 +2,7 @@
 #define DATAGAUGES_H
 
 #include <QWidget>
+#include <QCloseEvent>
 #include "ui_datagauges.h"
 #include "gaugewidget.h"
 #include "datapacketdecoder.h"
@@ -20,6 +21,8 @@ private:
 	QVariantMap m_valueMap;
 	Ui::DataGauges ui;
 	GaugeWidget *widget;
+protected:
+	void closeEvent(QCloseEvent *event);
 private slots:
 	void guiUpdateTimerTick();
 };

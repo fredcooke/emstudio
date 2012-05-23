@@ -1,5 +1,5 @@
 #include "emsinfo.h"
-
+#include <QMdiSubWindow>
 
 EmsInfo::EmsInfo(QWidget *parent) : QWidget(parent)
 {
@@ -40,6 +40,12 @@ EmsInfo::EmsInfo(QWidget *parent) : QWidget(parent)
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(15,new QTableWidgetItem("Table Type"));
 
 }
+void EmsInfo::closeEvent(QCloseEvent *event)
+{
+	event->ignore();
+	((QMdiSubWindow*)this->parent())->hide();
+}
+
 void EmsInfo::locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
 {
 	/*ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));

@@ -1,5 +1,5 @@
 #include "dataflags.h"
-
+#include <QMdiSubWindow>
 
 DataFlags::DataFlags(QWidget *parent) : QWidget(parent)
 {
@@ -15,7 +15,11 @@ DataFlags::DataFlags(QWidget *parent) : QWidget(parent)
 DataFlags::~DataFlags()
 {
 }
-
+void DataFlags::closeEvent(QCloseEvent *event)
+{
+	event->ignore();
+	((QMdiSubWindow*)this->parent())->hide();
+}
 void DataFlags::passData(QVariantMap data)
 {
 	QVariantMap::const_iterator i = data.constBegin();

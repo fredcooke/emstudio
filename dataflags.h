@@ -2,6 +2,8 @@
 #define DATAFLAGS_H
 
 #include <QWidget>
+#include <QCloseEvent>
+#include <QMdiSubWindow>
 #include "datapacketdecoder.h"
 #include "ui_dataflags.h"
 class DataFlags : public QWidget
@@ -13,7 +15,8 @@ public:
 	~DataFlags();
 	void passData(QVariantMap data);
 	void passDecoder(DataPacketDecoder *decoder);
-
+protected:
+	void closeEvent(QCloseEvent *event);
 private:
 	Ui::DataFlags ui;
 };

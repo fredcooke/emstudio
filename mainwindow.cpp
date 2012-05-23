@@ -43,14 +43,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	//win->show();
 
 	emsInfo=0;
-
 	dataTables=0;
 	dataFlags=0;
-
-	/*dataGauges = new DataGauges();
-	QMdiSubWindow *win4 = ui.mdiArea->addSubWindow(dataGauges);
-	win4->setGeometry(dataGauges->geometry());
-	win4->show();*/
 	dataGauges=0;
 
 
@@ -81,8 +75,38 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
 
+	/*QMdiSubWindow *tablesMdiWindow;
+	QMdiSubWindow *emsMdiWindow;
+	QMdiSubWindow *flagsMdiWindow;
+	QMdiSubWindow *gaugesMdiWindow;*/
+	emsInfo = new EmsInfo();
+	emsInfo->setFirmwareVersion(m_firmwareVersion);
+	emsInfo->setInterfaceVersion(m_interfaceVersion);
+	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+	connect(emsComms,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
+	emsMdiWindow = ui.mdiArea->addSubWindow(emsInfo);
+	emsMdiWindow->setGeometry(emsInfo->geometry());
+	emsMdiWindow->hide();
 
+	dataGauges = new DataGauges();
+	connect(dataGauges,SIGNAL(destroyed()),this,SLOT(dataGaugesDestroyed()));
+	gaugesMdiWindow = ui.mdiArea->addSubWindow(dataGauges);
+	gaugesMdiWindow->setGeometry(dataGauges->geometry());
+	gaugesMdiWindow->hide();
 
+	dataTables = new DataTables();
+	connect(dataTables,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
+	dataTables->passDecoder(dataPacketDecoder);
+	tablesMdiWindow = ui.mdiArea->addSubWindow(dataTables);
+	tablesMdiWindow->setGeometry(dataTables->geometry());
+	tablesMdiWindow->hide();
+
+	dataFlags = new DataFlags();
+	connect(dataFlags,SIGNAL(destroyed()),this,SLOT(dataFlagsDestroyed()));
+	dataFlags->passDecoder(dataPacketDecoder);
+	flagsMdiWindow = ui.mdiArea->addSubWindow(dataFlags);
+	flagsMdiWindow->setGeometry(dataFlags->geometry());
+	flagsMdiWindow->hide();
 
 
 
@@ -160,29 +184,13 @@ void MainWindow::settingsCancelClicked()
 }
 void MainWindow::menu_windows_GaugesClicked()
 {
-	if (dataGauges)
+	if (gaugesMdiWindow->isVisible())
 	{
-		//QMdiSubWindow *win;
-		//win->widget()
-		for (int i=0;i<ui.mdiArea->subWindowList().size();i++)
-		{
-			if (ui.mdiArea->subWindowList()[i]->widget() == dataGauges)
-			{
-				ui.mdiArea->removeSubWindow(ui.mdiArea->subWindowList()[i]);
-				break;
-			}
-		}
-		dataGauges->hide();
-		dataGauges->deleteLater();
-		dataGauges = 0;
+		gaugesMdiWindow->hide();
 	}
 	else
 	{
-		dataGauges = new DataGauges();
-		connect(dataGauges,SIGNAL(destroyed()),this,SLOT(dataGaugesDestroyed()));
-		QMdiSubWindow *win = ui.mdiArea->addSubWindow(dataGauges);
-		win->setGeometry(dataGauges->geometry());
-		win->show();
+		gaugesMdiWindow->show();
 	}
 }
 void MainWindow::dataTablesDestroyed()
@@ -201,91 +209,37 @@ void MainWindow::dataFlagsDestroyed()
 
 void MainWindow::menu_windows_EmsInfoClicked()
 {
-	if (emsInfo)
+	if (emsMdiWindow->isVisible())
 	{
-		//QMdiSubWindow *win;
-		//win->widget()
-		for (int i=0;i<ui.mdiArea->subWindowList().size();i++)
-		{
-			if (ui.mdiArea->subWindowList()[i]->widget() == emsInfo)
-			{
-				ui.mdiArea->removeSubWindow(ui.mdiArea->subWindowList()[i]);
-				break;
-			}
-		}
-		emsInfo->hide();
-		emsInfo->deleteLater();
-		emsInfo = 0;
+		emsMdiWindow->hide();
 	}
 	else
 	{
-		emsInfo = new EmsInfo();
-		emsInfo->setFirmwareVersion(m_firmwareVersion);
-		emsInfo->setInterfaceVersion(m_interfaceVersion);
-		connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
-		connect(emsComms,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
-		QMdiSubWindow *win2 = ui.mdiArea->addSubWindow(emsInfo);
-		win2->setGeometry(emsInfo->geometry());
-		win2->show();
+		emsMdiWindow->show();
 	}
 }
 
 void MainWindow::menu_windows_TablesClicked()
 {
-	if (dataTables)
+	if (tablesMdiWindow->isVisible())
 	{
-		//QMdiSubWindow *win;
-		//win->widget()
-		for (int i=0;i<ui.mdiArea->subWindowList().size();i++)
-		{
-			if (ui.mdiArea->subWindowList()[i]->widget() == dataTables)
-			{
-				ui.mdiArea->removeSubWindow(ui.mdiArea->subWindowList()[i]);
-				break;
-			}
-		}
-		dataTables->hide();
-		dataTables->deleteLater();
-		dataTables = 0;
+		tablesMdiWindow->hide();
 	}
 	else
 	{
-		dataTables = new DataTables();
-		connect(dataTables,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
-		dataTables->passDecoder(dataPacketDecoder);
-		QMdiSubWindow *win3 = ui.mdiArea->addSubWindow(dataTables);
-		win3->setGeometry(dataTables->geometry());
-		win3->show();
+		tablesMdiWindow->show();
 	}
 }
 void MainWindow::menu_windows_FlagsClicked()
 {
-	if (dataFlags)
+	if (flagsMdiWindow->isVisible())
 	{
-		//QMdiSubWindow *win;
-		//win->widget()
-		for (int i=0;i<ui.mdiArea->subWindowList().size();i++)
-		{
-			if (ui.mdiArea->subWindowList()[i]->widget() == dataTables)
-			{
-				ui.mdiArea->removeSubWindow(ui.mdiArea->subWindowList()[i]);
-				break;
-			}
-		}
-		dataFlags->hide();
-		dataFlags->deleteLater();
-		dataFlags = 0;
+		flagsMdiWindow->hide();
 	}
 	else
 	{
-		dataFlags = new DataFlags();
-		connect(dataFlags,SIGNAL(destroyed()),this,SLOT(dataFlagsDestroyed()));
-		dataFlags->passDecoder(dataPacketDecoder);
-		QMdiSubWindow *win3 = ui.mdiArea->addSubWindow(dataFlags);
-		win3->setGeometry(dataFlags->geometry());
-		win3->show();
+		flagsMdiWindow->show();
 	}
-
 }
 
 void MainWindow::unknownPacket(QByteArray header,QByteArray payload)

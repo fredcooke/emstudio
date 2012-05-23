@@ -1,5 +1,5 @@
 #include "datagauges.h"
-
+#include <QMdiSubWindow>
 
 DataGauges::DataGauges(QWidget *parent) : QWidget(parent)
 {
@@ -16,7 +16,11 @@ DataGauges::DataGauges(QWidget *parent) : QWidget(parent)
 DataGauges::~DataGauges()
 {
 }
-
+void DataGauges::closeEvent(QCloseEvent *event)
+{
+	event->ignore();
+	((QMdiSubWindow*)this->parent())->hide();
+}
 void DataGauges::passData(QVariantMap data)
 {
 	m_valueMap = data;

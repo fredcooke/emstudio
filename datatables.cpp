@@ -1,5 +1,5 @@
 #include "datatables.h"
-
+#include <QMdiSubWindow>
 
 DataTables::DataTables(QWidget *parent) : QWidget(parent)
 {
@@ -11,6 +11,11 @@ DataTables::DataTables(QWidget *parent) : QWidget(parent)
 	connect(guiUpdateTimer,SIGNAL(timeout()),this,SLOT(guiUpdateTimerTick()));
 	guiUpdateTimer->start(250);
 
+}
+void DataTables::closeEvent(QCloseEvent *event)
+{
+	event->ignore();
+	((QMdiSubWindow*)this->parent())->hide();
 }
 void DataTables::passDecoder(DataPacketDecoder *decoder)
 {

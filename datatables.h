@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTimer>
+#include <QCloseEvent>
 #include "ui_datatables.h"
 #include "datapacketdecoder.h"
 class DataTables : public QWidget
@@ -20,6 +21,8 @@ private:
 	Ui::DataTables ui;
 	QVariantMap m_valueMap;
 	QMap<QString,int> m_nameToIndexMap;
+protected:
+	void closeEvent(QCloseEvent *event);
 private slots:
 	void guiUpdateTimerTick();
 };

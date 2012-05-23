@@ -88,7 +88,7 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
@@ -97,13 +97,13 @@
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
     <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menuWindows">
     <property name="title">
-     <string>Windows</string>
+     <string>&amp;Windows</string>
     </property>
     <addaction name="actionGauges"/>
     <addaction name="actionTables"/>
@@ -130,7 +130,7 @@
   </action>
   <action name="actionConnect">
    <property name="text">
-    <string>Connect</string>
+    <string>&amp;Connect</string>
    </property>
   </action>
   <action name="actionExit_2">
@@ -140,37 +140,37 @@
   </action>
   <action name="actionDisconnect">
    <property name="text">
-    <string>Disconnect</string>
+    <string>&amp;Disconnect</string>
    </property>
   </action>
   <action name="actionExit_3">
    <property name="text">
-    <string>Exit</string>
+    <string>&amp;Exit</string>
    </property>
   </action>
   <action name="actionSettings">
    <property name="text">
-    <string>Settings</string>
+    <string>&amp;Settings</string>
    </property>
   </action>
   <action name="actionGauges">
    <property name="text">
-    <string>Gauges</string>
+    <string>&amp;Gauges</string>
    </property>
   </action>
   <action name="actionTables">
    <property name="text">
-    <string>Tables</string>
+    <string>&amp;Tables</string>
    </property>
   </action>
   <action name="actionEMS_Info">
    <property name="text">
-    <string>EMS Info</string>
+    <string>&amp;EMS Info</string>
    </property>
   </action>
   <action name="actionFlags">
    <property name="text">
-    <string>Flags</string>
+    <string>&amp;Flags</string>
    </property>
   </action>
  </widget>
