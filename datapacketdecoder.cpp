@@ -82,22 +82,22 @@ void DataPacketDecoder::populateDataFields()
 	//m_dataFieldList.append(DataField("flaggableFlags","Flags to go with flaggables",62,2,1.0,0,true));
 
 	//Flaggable flags
-	m_dataFieldList.append(DataField("callsToUISRs","to ensure we aren't accidentally triggering unused ISRs.",62,2,1.0,0,true,0));
-	m_dataFieldList.append(DataField("lowVoltageConditions","low voltage conditions.",62,2,1.0,0,true,1));
-	m_dataFieldList.append(DataField("decoderSyncLosses","Number of times cam, crank or combustion sync is lost.",62,2,1.0,0,true,2));
-	m_dataFieldList.append(DataField("spare","spare",62,2,1.0,0,true,3));
-	m_dataFieldList.append(DataField("decoderSyncStateClears","Sync loss called when not synced yet, thus discarding data and preventing sync.",62,2,1.0,0,true,4));
-	m_dataFieldList.append(DataField("serialNoiseErrors","Incremented when noise is detected",62,2,1.0,0,true,5));
-	m_dataFieldList.append(DataField("serialFramingErrors","Incremented when a framing error occurs",62,2,1.0,0,true,6));
-	m_dataFieldList.append(DataField("serialParityErrors","Incremented when a parity error occurs",62,2,1.0,0,true,7));
-	m_dataFieldList.append(DataField("serialOverrunErrors","Incremented when overrun occurs (duplicated in KeyUserDebug below)",62,2,1.0,0,true,8));
-	m_dataFieldList.append(DataField("serialEscapePairMismatches","Incremented when an escape is found but not followed by an escapee",62,2,1.0,0,true,9));
-	m_dataFieldList.append(DataField("serialStartsInsideAPacket","Incremented when a start byte is found inside a packet",62,2,1.0,0,true,10));
-	m_dataFieldList.append(DataField("serialPacketsOverLength","Incremented when the buffer fills up before the end",62,2,1.0,0,true,11));
-	m_dataFieldList.append(DataField("serialChecksumMismatches","Incremented when calculated checksum did not match the received one",62,2,1.0,0,true,12));
-	m_dataFieldList.append(DataField("serialPacketsUnderLength","Incremented when a packet is found that is too short",62,2,1.0,0,true,13));
-	m_dataFieldList.append(DataField("commsDebugMessagesNotSent","Incremented when a debug message can't be sent due to the TX buffer",62,2,1.0,0,true,14));
-	m_dataFieldList.append(DataField("commsErrorMessagesNotSent","Incremented when an error message can't be sent due to the TX buffer",62,2,1.0,0,true,15));
+	m_dataFieldList.append(DataField("callsToUISRs","to ensure we aren't accidentally triggering unused ISRs.",62,2,1.0,0,0,0,true,0));
+	m_dataFieldList.append(DataField("lowVoltageConditions","low voltage conditions.",62,2,1.0,0,0,0,true,1));
+	m_dataFieldList.append(DataField("decoderSyncLosses","Number of times cam, crank or combustion sync is lost.",62,2,1.0,0,0,0,true,2));
+	m_dataFieldList.append(DataField("spare","spare",62,2,1.0,0,0,0,true,3));
+	m_dataFieldList.append(DataField("decoderSyncStateClears","Sync loss called when not synced yet, thus discarding data and preventing sync.",62,2,1.0,0,0,0,true,4));
+	m_dataFieldList.append(DataField("serialNoiseErrors","Incremented when noise is detected",62,2,1.0,0,0,0,true,5));
+	m_dataFieldList.append(DataField("serialFramingErrors","Incremented when a framing error occurs",62,2,1.0,0,0,0,true,6));
+	m_dataFieldList.append(DataField("serialParityErrors","Incremented when a parity error occurs",62,2,1.0,0,0,0,true,7));
+	m_dataFieldList.append(DataField("serialOverrunErrors","Incremented when overrun occurs (duplicated in KeyUserDebug below)",62,2,1.0,0,0,0,true,8));
+	m_dataFieldList.append(DataField("serialEscapePairMismatches","Incremented when an escape is found but not followed by an escapee",62,2,1.0,0,0,0,true,9));
+	m_dataFieldList.append(DataField("serialStartsInsideAPacket","Incremented when a start byte is found inside a packet",62,2,1.0,0,0,0,true,10));
+	m_dataFieldList.append(DataField("serialPacketsOverLength","Incremented when the buffer fills up before the end",62,2,1.0,0,0,0,true,11));
+	m_dataFieldList.append(DataField("serialChecksumMismatches","Incremented when calculated checksum did not match the received one",62,2,1.0,0,0,0,true,12));
+	m_dataFieldList.append(DataField("serialPacketsUnderLength","Incremented when a packet is found that is too short",62,2,1.0,0,0,0,true,13));
+	m_dataFieldList.append(DataField("commsDebugMessagesNotSent","Incremented when a debug message can't be sent due to the TX buffer",62,2,1.0,0,0,0,true,14));
+	m_dataFieldList.append(DataField("commsErrorMessagesNotSent","Incremented when an error message can't be sent due to the TX buffer",62,2,1.0,0,0,0,true,15));
 
 
 	m_dataFieldList.append(DataField("currentEvent","Which input event was last",64,1,1.0));
