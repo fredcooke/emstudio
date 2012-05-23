@@ -107,9 +107,9 @@ void DataPacketDecoder::populateDataFields()
 	m_dataFieldList.append(DataField("syncResetCalls","Sum of losses, corrections, and state clears",68,1,1.0));
 	m_dataFieldList.append(DataField("primaryTeethSeen","",69,1,1.0));
 	m_dataFieldList.append(DataField("secondaryTeethSeen","",70,1,1.0));
-	m_dataFieldList.append(DataField("serialOverrunErrors","",71,1,1.0));
-	m_dataFieldList.append(DataField("serialHardwareErrors","",72,1,1.0));
-	m_dataFieldList.append(DataField("serialAndCommsCodeErrors","",73,1,1.0));
+	m_dataFieldList.append(DataField("serialOverrunErrorsCount","",71,1,1.0)); //These three have "Count" added to the end.
+	m_dataFieldList.append(DataField("serialHardwareErrorsCount","",72,1,1.0));
+	m_dataFieldList.append(DataField("serialAndCommsCodeErrorsCount","",73,1,1.0));
 	m_dataFieldList.append(DataField("inputEventTimeTolerance","",74,2,1.0));
 	m_dataFieldList.append(DataField("zsp10","",76,2,1.0));
 	m_dataFieldList.append(DataField("zsp9","",78,2,1.0));

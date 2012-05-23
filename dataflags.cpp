@@ -37,11 +37,11 @@ void DataFlags::passData(QVariantMap data)
 					found = true;
 					if (i.value().toBool())
 					{
-						ui.flagsTableWidget->item(j,0)->setBackgroundColor(QColor::fromRgb(0,255,0));
+						ui.flagsTableWidget->item(j,0)->setBackgroundColor(QColor::fromRgb(255,0,0));
 					}
 					else
 					{
-						ui.flagsTableWidget->item(j,0)->setBackgroundColor(QColor::fromRgb(255,0,0));
+						ui.flagsTableWidget->item(j,0)->setBackgroundColor(QColor::fromRgb(0,255,0));
 					}
 					//ui.flagsTableWidget->item(j,1)->setText(i.value().toBool() ? "1" : "0");
 				}
@@ -52,11 +52,11 @@ void DataFlags::passData(QVariantMap data)
 				ui.flagsTableWidget->setItem(ui.flagsTableWidget->rowCount()-1,0,new QTableWidgetItem(i.key()));
 				if (i.value().toBool())
 				{
-					ui.flagsTableWidget->item(ui.flagsTableWidget->rowCount()-1,0)->setBackgroundColor(QColor::fromRgb(0,255,0));
+					ui.flagsTableWidget->item(ui.flagsTableWidget->rowCount()-1,0)->setBackgroundColor(QColor::fromRgb(255,0,0));
 				}
 				else
 				{
-					ui.flagsTableWidget->item(ui.flagsTableWidget->rowCount()-1,0)->setBackgroundColor(QColor::fromRgb(255,0,0));
+					ui.flagsTableWidget->item(ui.flagsTableWidget->rowCount()-1,0)->setBackgroundColor(QColor::fromRgb(0,255,0));
 				}
 				//ui.flagsTableWidget->setItem(ui.flagsTableWidget->rowCount()-1,1,new QTableWidgetItem(i.value().toBool() ? "1" : "0"));
 			}
