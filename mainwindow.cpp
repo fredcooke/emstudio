@@ -150,7 +150,7 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 	QString towrite = "{ \"locationid\":\"";
 	towrite += QString::number(locationid,16).toUpper();
 	towrite += "\", \"type\":\"ram\"";
-	towrite += "\", \"payload\":\"";
+	towrite += ", \"payload\":\"";
 	for (int i=0;i<payload.size();i++)
 	{
 		if (((unsigned char)payload[i]) <= 0xF)
@@ -170,7 +170,7 @@ void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header
 	QString towrite = "{ \"locationid\":\"";
 	towrite += QString::number(locationid,16).toUpper();
 	towrite += "\", \"type\":\"flash\"";
-	towrite += "\", \"payload\":\"";
+	towrite += ", \"payload\":\"";
 	for (int i=0;i<payload.size();i++)
 	{
 		if (((unsigned char)payload[i]) <= 0xF)

@@ -997,7 +997,7 @@ void FreeEmsComms::run()
 						emit firmwareVersion(QString(packetpair.second));
 					}
 				}
-				else if (payloadid == 0x0103)
+				else if (payloadid == 0x0107)
 				{
 					if (packetpair.first[0] & 0x10)
 					{
