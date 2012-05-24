@@ -16,10 +16,10 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
 
-#include "datagauges.h"
+#include "gaugeview.h"
 #include <QMdiSubWindow>
 
-DataGauges::DataGauges(QWidget *parent) : QWidget(parent)
+GaugeView::GaugeView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
 	widget = new GaugeWidget(this);
@@ -31,25 +31,25 @@ DataGauges::DataGauges(QWidget *parent) : QWidget(parent)
 	guiUpdateTimer->start(250);
 }
 
-DataGauges::~DataGauges()
+GaugeView::~GaugeView()
 {
 }
-void DataGauges::closeEvent(QCloseEvent *event)
+void GaugeView::closeEvent(QCloseEvent *event)
 {
 	event->ignore();
 	((QMdiSubWindow*)this->parent())->hide();
 }
-void DataGauges::passData(QVariantMap data)
+void GaugeView::passData(QVariantMap data)
 {
 	m_valueMap = data;
 }
 
-void DataGauges::passDecoder(DataPacketDecoder *decoder)
+void GaugeView::passDecoder(DataPacketDecoder *decoder)
 {
 
 }
 
-void DataGauges::guiUpdateTimerTick()
+void GaugeView::guiUpdateTimerTick()
 {
 
 	QVariantMap::const_iterator i = m_valueMap.constBegin();

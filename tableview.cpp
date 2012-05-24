@@ -16,10 +16,10 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
 
-#include "datatables.h"
+#include "tableview.h"
 #include <QMdiSubWindow>
 
-DataTables::DataTables(QWidget *parent) : QWidget(parent)
+TableView::TableView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
 	ui.tableWidget->setColumnCount(2);
@@ -30,12 +30,12 @@ DataTables::DataTables(QWidget *parent) : QWidget(parent)
 	guiUpdateTimer->start(250);
 
 }
-void DataTables::closeEvent(QCloseEvent *event)
+void TableView::closeEvent(QCloseEvent *event)
 {
 	event->ignore();
 	((QMdiSubWindow*)this->parent())->hide();
 }
-void DataTables::passDecoder(DataPacketDecoder *decoder)
+void TableView::passDecoder(DataPacketDecoder *decoder)
 {
 	dataPacketDecoder = decoder;
 	ui.tableWidget->setRowCount(dataPacketDecoder->m_dataFieldList.size());
@@ -47,16 +47,16 @@ void DataTables::passDecoder(DataPacketDecoder *decoder)
 	}
 }
 
-DataTables::~DataTables()
+TableView::~TableView()
 {
 
 }
-void DataTables::passData(QVariantMap data)
+void TableView::passData(QVariantMap data)
 {
 	m_valueMap = data;
 }
 
-void DataTables::guiUpdateTimerTick()
+void TableView::guiUpdateTimerTick()
 {
 	QVariantMap::const_iterator i = m_valueMap.constBegin();
 	while (i != m_valueMap.constEnd())

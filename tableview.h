@@ -16,33 +16,33 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
 
-#ifndef DATAGAUGES_H
-#define DATAGAUGES_H
+#ifndef DATATABLES_H
+#define DATATABLES_H
 
 #include <QWidget>
+#include <QTimer>
 #include <QCloseEvent>
-#include "ui_datagauges.h"
-#include "gaugewidget.h"
+#include "ui_datatables.h"
 #include "datapacketdecoder.h"
-class DataGauges : public QWidget
+class TableView : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit DataGauges(QWidget *parent = 0);
-	~DataGauges();
+	explicit TableView(QWidget *parent = 0);
+	~TableView();
 	void passData(QVariantMap data);
 	void passDecoder(DataPacketDecoder *decoder);
 private:
 	QTimer *guiUpdateTimer;
 	DataPacketDecoder *dataPacketDecoder;
+	Ui::DataTables ui;
 	QVariantMap m_valueMap;
-	Ui::DataGauges ui;
-	GaugeWidget *widget;
+	QMap<QString,int> m_nameToIndexMap;
 protected:
 	void closeEvent(QCloseEvent *event);
 private slots:
 	void guiUpdateTimerTick();
 };
 
-#endif // DATAGAUGES_H
+#endif // DATATABLES_H

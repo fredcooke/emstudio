@@ -21,16 +21,17 @@ SOURCES += main.cpp\
     serialthread.cpp \
     datapacketdecoder.cpp \
     comsettings.cpp \
-    emsinfo.cpp \
-    datagauges.cpp \
-    datatables.cpp \
     rawdatadisplay.cpp \
-    dataflags.cpp \
     qhexedit.cpp \
     qhexedit_p.cpp \
     xbytearray.cpp \
     commands.cpp \
-    datarawview.cpp
+    datarawview.cpp \
+    rawdataview.cpp \
+    gaugeview.cpp \
+    emsinfoview.cpp \
+    flagview.cpp \
+    tableview.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -43,16 +44,17 @@ HEADERS  += mainwindow.h \
     serialthread.h \
     datapacketdecoder.h \
     comsettings.h \
-    emsinfo.h \
-    datagauges.h \
-    datatables.h \
     rawdatadisplay.h \
-    dataflags.h \
     qhexedit.h \
     qhexedit_p.h \
     xbytearray.h \
     commands.h \
-    datarawview.h
+    datarawview.h \
+    rawdataview.h \
+    gaugeview.h \
+    emsinfoview.h \
+    flagview.h \
+    tableview.h
 
 FORMS    += mainwindow.ui \
     comsettings.ui \
@@ -60,7 +62,8 @@ FORMS    += mainwindow.ui \
     datagauges.ui \
     datatables.ui \
     rawdatadisplay.ui \
-    dataflags.ui
+    dataflags.ui \
+    rawdataview.ui
 
 OTHER_FILES += \
     README.md

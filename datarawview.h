@@ -33,7 +33,7 @@ protected:
 signals:
 	
 public slots:
-	void setData(QByteArray data);
+	void setData(unsigned short locid,QByteArray data);
 };
 
 #endif // DATARAWVIEW_H

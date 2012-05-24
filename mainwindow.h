@@ -29,10 +29,10 @@
 #include <QTimer>
 #include "datapacketdecoder.h"
 #include "comsettings.h"
-#include "emsinfo.h"
-#include "datatables.h"
-#include "datagauges.h"
-#include "dataflags.h"
+#include "emsinfoview.h"
+#include "tableview.h"
+#include "gaugeview.h"
+#include "flagview.h"
 #include "datarawview.h"
 class MainWindow : public QMainWindow
 {
@@ -43,10 +43,10 @@ public:
 	~MainWindow();
 private:
 	DataRawView *rawData;
-	DataTables *dataTables;
-	DataGauges *dataGauges;
-	EmsInfo *emsInfo;
-	DataFlags *dataFlags;
+	TableView *dataTables;
+	GaugeView *dataGauges;
+	EmsInfoView *emsInfo;
+	FlagView *dataFlags;
 	QMdiSubWindow *tablesMdiWindow;
 	QMdiSubWindow *emsMdiWindow;
 	QMdiSubWindow *flagsMdiWindow;

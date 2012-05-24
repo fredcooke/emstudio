@@ -26,7 +26,7 @@ DataRawView::DataRawView(QWidget *parent) : QWidget(parent)
 	horizontalLayout->addWidget(hexEdit);
 }
 
-void DataRawView::setData(QByteArray data)
+void DataRawView::setData(unsigned short locid, QByteArray data)
 {
 	hexEdit->setData(data);
 }

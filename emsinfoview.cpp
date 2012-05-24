@@ -16,10 +16,10 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
 
-#include "emsinfo.h"
+#include "emsinfoview.h"
 #include <QMdiSubWindow>
 
-EmsInfo::EmsInfo(QWidget *parent) : QWidget(parent)
+EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
 	ui.locationIdInfoTableWidget->setColumnCount(16);
@@ -60,7 +60,7 @@ EmsInfo::EmsInfo(QWidget *parent) : QWidget(parent)
 	connect(ui.locationIdInfoTableWidget,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(locationInfoWidgetDoubleClicked(int,int)));
 
 }
-void EmsInfo::locationInfoWidgetDoubleClicked(int row, int column)
+void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 {
 	if (ui.locationIdInfoTableWidget->rowCount() <= row)
 	{
@@ -88,13 +88,13 @@ void EmsInfo::locationInfoWidgetDoubleClicked(int row, int column)
 
 }
 
-void EmsInfo::closeEvent(QCloseEvent *event)
+void EmsInfoView::closeEvent(QCloseEvent *event)
 {
 	event->ignore();
 	((QMdiSubWindow*)this->parent())->hide();
 }
 
-void EmsInfo::locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
+void EmsInfoView::locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
 {
 	/*ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));
  ui.locationIdInfoTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Parent"));
@@ -224,17 +224,17 @@ void EmsInfo::locationIdInfo(unsigned short locationid,unsigned short rawFlags,Q
 	//Q_UNUSED(flashaddress)
 	//Q_UNUSED(size)
 }
-void EmsInfo::setInterfaceVersion(QString version)
+void EmsInfoView::setInterfaceVersion(QString version)
 {
 	ui.interfaceVersionLineEdit->setText(version);
 }
 
-void EmsInfo::setFirmwareVersion(QString firmware)
+void EmsInfoView::setFirmwareVersion(QString firmware)
 {
 	ui.firmwareVersionLineEdit->setText(firmware);
 }
 
-EmsInfo::~EmsInfo()
+EmsInfoView::~EmsInfoView()
 {
     //delete ui;
 }

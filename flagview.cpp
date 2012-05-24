@@ -16,10 +16,10 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
 
-#include "dataflags.h"
+#include "flagview.h"
 #include <QMdiSubWindow>
 #include <QDebug>
-DataFlags::DataFlags(QWidget *parent) : QWidget(parent)
+FlagView::FlagView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
     /*m_dataFieldList.append(DataField("coreStatusA","Duplicate",60,1,1.0));
@@ -30,15 +30,15 @@ DataFlags::DataFlags(QWidget *parent) : QWidget(parent)
 	//ui.flagsTableWidget->setColumnWidth(1,50);
 }
 
-DataFlags::~DataFlags()
+FlagView::~FlagView()
 {
 }
-void DataFlags::closeEvent(QCloseEvent *event)
+void FlagView::closeEvent(QCloseEvent *event)
 {
 	event->ignore();
 	((QMdiSubWindow*)this->parent())->hide();
 }
-void DataFlags::passData(QVariantMap data)
+void FlagView::passData(QVariantMap data)
 {
 	QVariantMap::const_iterator i = data.constBegin();
 	while (i != data.constEnd())
@@ -93,6 +93,6 @@ void DataFlags::passData(QVariantMap data)
 	}
 }
 
-void DataFlags::passDecoder(DataPacketDecoder *decoder)
+void FlagView::passDecoder(DataPacketDecoder *decoder)
 {
 }

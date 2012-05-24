@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	QMdiSubWindow *emsMdiWindow;
 	QMdiSubWindow *flagsMdiWindow;
 	QMdiSubWindow *gaugesMdiWindow;*/
-	emsInfo = new EmsInfo();
+	emsInfo = new EmsInfoView();
 	emsInfo->setFirmwareVersion(m_firmwareVersion);
 	emsInfo->setInterfaceVersion(m_interfaceVersion);
 	connect(emsInfo,SIGNAL(displayLocationId(int,bool)),this,SLOT(emsInfoDisplayLocationId(int,bool)));
@@ -103,14 +103,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	rawMdiWindow->hide();
 	rawMdiWindow->setWindowTitle("Raw Data View");
 
-	dataGauges = new DataGauges();
+	dataGauges = new GaugeView();
 	connect(dataGauges,SIGNAL(destroyed()),this,SLOT(dataGaugesDestroyed()));
 	gaugesMdiWindow = ui.mdiArea->addSubWindow(dataGauges);
 	gaugesMdiWindow->setGeometry(dataGauges->geometry());
 	gaugesMdiWindow->hide();
 	gaugesMdiWindow->setWindowTitle("Gauges");
 
-	dataTables = new DataTables();
+	dataTables = new TableView();
 	connect(dataTables,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
 	dataTables->passDecoder(dataPacketDecoder);
 	tablesMdiWindow = ui.mdiArea->addSubWindow(dataTables);
@@ -118,7 +118,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	tablesMdiWindow->hide();
 	tablesMdiWindow->setWindowTitle("Data Tables");
 
-	dataFlags = new DataFlags();
+	dataFlags = new FlagView();
 	connect(dataFlags,SIGNAL(destroyed()),this,SLOT(dataFlagsDestroyed()));
 	dataFlags->passDecoder(dataPacketDecoder);
 	flagsMdiWindow = ui.mdiArea->addSubWindow(dataFlags);
@@ -181,7 +181,8 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram)
 
 void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
-	rawData->setData(payload);
+	Q_UNUSED(header)
+	rawData->setData(locationid,payload);
 	rawMdiWindow->show();
 	/*QString towrite = "{ \"locationid\":\"";
 	towrite += QString::number(locationid,16).toUpper();
@@ -203,7 +204,8 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 
 void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
-	rawData->setData(payload);
+	Q_UNUSED(header)
+	rawData->setData(locationid,payload);
 	rawMdiWindow->show();
 	/*
 	QString towrite = "{ \"locationid\":\"";
@@ -274,6 +276,15 @@ void MainWindow::settingsSaveClicked()
 }
 void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
 {
+	Q_UNUSED(size)
+	Q_UNUSED(locationid)
+	Q_UNUSED(rawFlags)
+	Q_UNUSED(flags)
+	Q_UNUSED(parent)
+	Q_UNUSED(rampage)
+	Q_UNUSED(flashpage)
+	Q_UNUSED(ramaddress)
+	Q_UNUSED(flashaddress)
 	if (flags.contains(FreeEmsComms::BLOCK_IS_RAM))
 	{
 		//emsComms->retrieveBlockFromRam(locationid,0,0);
@@ -438,9 +449,10 @@ void MainWindow::error(QString msg)
 }
 void MainWindow::emsCommsConnected()
 {
-	int firmwareseq = emsComms->getFirmwareVersion();
-	int ifaceseq = emsComms->getInterfaceVersion();
-	int locidseq = emsComms->getLocationIdList(0x00,0x00);
+	emsComms->getFirmwareVersion();
+	emsComms->getInterfaceVersion();
+	emsComms->getLocationIdList(0x00,0x00);
+
 	/*ui.sendCommandTableWidget->setRowCount(ui.sendCommandTableWidget->rowCount()+1);
 	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(firmwareseq)));
 	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,1,new QTableWidgetItem("0"));

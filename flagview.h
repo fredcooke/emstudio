@@ -16,31 +16,27 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
 
-#ifndef EMSINFO_H
-#define EMSINFO_H
+#ifndef DATAFLAGS_H
+#define DATAFLAGS_H
 
 #include <QWidget>
 #include <QCloseEvent>
-#include "ui_emsinfo.h"
-#include "freeemscomms.h"
-class EmsInfo : public QWidget
+#include <QMdiSubWindow>
+#include "datapacketdecoder.h"
+#include "ui_dataflags.h"
+class FlagView : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-	explicit EmsInfo(QWidget *parent = 0);
-	~EmsInfo();
-	void setInterfaceVersion(QString version);
-	void setFirmwareVersion(QString firmware);
+	explicit FlagView(QWidget *parent = 0);
+	~FlagView();
+	void passData(QVariantMap data);
+	void passDecoder(DataPacketDecoder *decoder);
 protected:
 	void closeEvent(QCloseEvent *event);
-public slots:
-	void locationInfoWidgetDoubleClicked(int row, int column);
-	void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 private:
-	Ui::EmsInfo ui;
-signals:
-	void displayLocationId(int locid, bool isram);
+	Ui::DataFlags ui;
 };
 
-#endif // EMSINFO_H
+#endif // DATAFLAGS_H
