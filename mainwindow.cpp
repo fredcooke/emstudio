@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsMdiWindow->hide();
 	emsMdiWindow->setWindowTitle("EMS Info");
 
-	rawData = new DataRawView();
+	rawData = new RawDataView();
 	rawMdiWindow = ui.mdiArea->addSubWindow(rawData);
 	rawMdiWindow->setGeometry(rawData->geometry());
 	rawMdiWindow->hide();
@@ -178,10 +178,37 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram)
 		emsComms->retrieveBlockFromFlash(locid,0,0);
 	}
 }
+void MainWindow::rawDataViewDestroyed(QObject *object)
+{
+	QMap<unsigned short,RawDataView*>::const_iterator i = m_rawDataView.constBegin();
+	while( i != m_rawDataView.constEnd())
+	{
+		if (i.value() == object)
+		{
+			//This is the one that needs to be removed.
+			m_rawDataView.remove(i.key());
+			QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>(object->parent());
+			win->hide();
+			ui.mdiArea->removeSubWindow(win);
+			return;
+		}
+		i++;
+	}
+}
 
 void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
+	if (m_rawDataView.contains(locationid))
+	{
+		//Ignore, it's already open
+		return;
+	}
+	RawDataView *view = new RawDataView();
+	connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+	QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+	win->setGeometry(view->geometry());
+	m_rawDataView[locationid] = view;
 	rawData->setData(locationid,payload);
 	rawMdiWindow->show();
 	/*QString towrite = "{ \"locationid\":\"";
@@ -205,8 +232,8 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
-	rawData->setData(locationid,payload);
-	rawMdiWindow->show();
+	//rawData->setData(locationid,payload);
+	//rawMdiWindow->show();
 	/*
 	QString towrite = "{ \"locationid\":\"";
 	towrite += QString::number(locationid,16).toUpper();

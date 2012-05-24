@@ -1,14 +1,16 @@
 #include "rawdataview.h"
-#include "ui_rawdataview.h"
 
-RawDataView::RawDataView(QWidget *parent) :
-	QWidget(parent),
-	ui(new Ui::RawDataView)
+
+RawDataView::RawDataView(QWidget *parent) : QWidget(parent)
 {
-	ui->setupUi(this);
+	ui.setupUi(this);
+}
+void RawDataView::setData(unsigned short locationid,QByteArray data)
+{
+	ui.hexEditor->setData(data);
+	ui.locationIdLabel->setText("0x" + QString::number(locationid,16).toUpper());
 }
 
 RawDataView::~RawDataView()
 {
-	delete ui;
 }

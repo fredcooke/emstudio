@@ -79,7 +79,7 @@ void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 		//Is Ram
 		emit displayLocationId(locid,true);
 	}
-	if (ui.locationIdInfoTableWidget->item(row,10)->text().toLower() == "true")
+	else if (ui.locationIdInfoTableWidget->item(row,10)->text().toLower() == "true")
 	{
 		//is flash
 		emit displayLocationId(locid,false);

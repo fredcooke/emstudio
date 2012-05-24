@@ -31,9 +31,10 @@
 #include "comsettings.h"
 #include "emsinfoview.h"
 #include "tableview.h"
+#include "rawdataview.h"
 #include "gaugeview.h"
 #include "flagview.h"
-#include "datarawview.h"
+//#include "datarawview.h"
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -42,11 +43,12 @@ public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
 private:
-	DataRawView *rawData;
+	RawDataView *rawData;
 	TableView *dataTables;
 	GaugeView *dataGauges;
 	EmsInfoView *emsInfo;
 	FlagView *dataFlags;
+	QMap<unsigned short,RawDataView*> m_rawDataView;
 	QMdiSubWindow *tablesMdiWindow;
 	QMdiSubWindow *emsMdiWindow;
 	QMdiSubWindow *flagsMdiWindow;
@@ -69,6 +71,7 @@ private:
 	QString m_interfaceVersion;
 	QFile *logfile;
 private slots:
+	void rawDataViewDestroyed(QObject *object);
 	void emsInfoDisplayLocationId(int locid,bool isram);
 	void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void dataTablesDestroyed();

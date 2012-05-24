@@ -2,10 +2,7 @@
 #define RAWDATAVIEW_H
 
 #include <QWidget>
-
-namespace Ui {
-class RawDataView;
-}
+#include "ui_rawdataview.h"
 
 class RawDataView : public QWidget
 {
@@ -14,9 +11,9 @@ class RawDataView : public QWidget
 public:
 	explicit RawDataView(QWidget *parent = 0);
 	~RawDataView();
-	
+	void setData(unsigned short locationid,QByteArray data);
 private:
-	Ui::RawDataView *ui;
+	Ui::RawDataView ui;
 };
 
 #endif // RAWDATAVIEW_H
