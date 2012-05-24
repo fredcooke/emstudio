@@ -209,6 +209,7 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 	QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 	win->setGeometry(view->geometry());
 	m_rawDataView[locationid] = view;
+	win->show();
 	//rawData->setData(locationid,payload);
 	//rawMdiWindow->show();
 	/*QString towrite = "{ \"locationid\":\"";
