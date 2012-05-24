@@ -4,6 +4,7 @@
 RawDataView::RawDataView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
+	connect(ui.saveChangesButton,SIGNAL(clicked()),this,SLOT(saveButtonClicked()));
 }
 void RawDataView::setData(unsigned short locationid,QByteArray data)
 {
@@ -13,4 +14,9 @@ void RawDataView::setData(unsigned short locationid,QByteArray data)
 
 RawDataView::~RawDataView()
 {
+}
+
+void RawDataView::saveButtonClicked()
+{
+
 }

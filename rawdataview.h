@@ -14,6 +14,8 @@ public:
 	void setData(unsigned short locationid,QByteArray data);
 private:
 	Ui::RawDataView ui;
+private slots:
+	void saveButtonClicked();
 };
 
 #endif // RAWDATAVIEW_H

@@ -423,7 +423,7 @@ int SerialThread::openPort(QString portName,int baudrate)
 	{
 		//printf("Error opening Com: %s\n",portName);
 		//debug(obdLib::DEBUG_ERROR,"Error opening com port %s",portName);
-
+		perror("Error opening COM port Low Level");
 		return -1;
 	}
 	//printf("Com Port Opened %i\n",portHandle);
