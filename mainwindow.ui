@@ -116,7 +116,6 @@
     <addaction name="actionTables"/>
     <addaction name="actionEMS_Info"/>
     <addaction name="actionFlags"/>
-    <addaction name="action_Raw_Data"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>

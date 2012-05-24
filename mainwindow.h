@@ -43,7 +43,7 @@ public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
 private:
-	RawDataView *rawData;
+	//RawDataView *rawData;
 	TableView *dataTables;
 	GaugeView *dataGauges;
 	EmsInfoView *emsInfo;
@@ -53,7 +53,7 @@ private:
 	QMdiSubWindow *emsMdiWindow;
 	QMdiSubWindow *flagsMdiWindow;
 	QMdiSubWindow *gaugesMdiWindow;
-	QMdiSubWindow *rawMdiWindow;
+	//QMdiSubWindow *rawMdiWindow;
 	//ComSettings *comSettings;
 	DataPacketDecoder *dataPacketDecoder;
 	void populateDataFields();

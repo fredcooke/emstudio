@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionGauges,SIGNAL(triggered()),this,SLOT(menu_windows_GaugesClicked()));
 	connect(ui.actionTables,SIGNAL(triggered()),this,SLOT(menu_windows_TablesClicked()));
 	connect(ui.actionFlags,SIGNAL(triggered()),this,SLOT(menu_windows_FlagsClicked()));
-	connect(ui.action_Raw_Data,SIGNAL(triggered()),this,SLOT(menu_window_rawDataClicked()));
+	//connect(ui.action_Raw_Data,SIGNAL(triggered()),this,SLOT(menu_window_rawDataClicked()));
 
 	connect(ui.saveDataPushButton,SIGNAL(clicked()),this,SLOT(ui_saveDataButtonClicked()));
 	//comSettings = new ComSettings();
@@ -97,12 +97,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsMdiWindow->hide();
 	emsMdiWindow->setWindowTitle("EMS Info");
 
-	rawData = new RawDataView();
+	/*rawData = new RawDataView();
 	rawMdiWindow = ui.mdiArea->addSubWindow(rawData);
 	rawMdiWindow->setGeometry(rawData->geometry());
 	rawMdiWindow->hide();
 	rawMdiWindow->setWindowTitle("Raw Data View");
-
+*/
 	dataGauges = new GaugeView();
 	connect(dataGauges,SIGNAL(destroyed()),this,SLOT(dataGaugesDestroyed()));
 	gaugesMdiWindow = ui.mdiArea->addSubWindow(dataGauges);
@@ -157,14 +157,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 }
 void MainWindow::menu_window_rawDataClicked()
 {
-	if (rawMdiWindow->isVisible())
+	/*if (rawMdiWindow->isVisible())
 	{
 		rawMdiWindow->hide();
 	}
 	else
 	{
 		rawMdiWindow->show();
-	}
+	}*/
 }
 
 void MainWindow::emsInfoDisplayLocationId(int locid,bool isram)
@@ -209,8 +209,8 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 	QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 	win->setGeometry(view->geometry());
 	m_rawDataView[locationid] = view;
-	rawData->setData(locationid,payload);
-	rawMdiWindow->show();
+	//rawData->setData(locationid,payload);
+	//rawMdiWindow->show();
 	/*QString towrite = "{ \"locationid\":\"";
 	towrite += QString::number(locationid,16).toUpper();
 	towrite += "\", \"type\":\"ram\"";
