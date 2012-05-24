@@ -16,49 +16,24 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
 
-#include "datagauges.h"
-#include <QMdiSubWindow>
+#ifndef DATARAWVIEW_H
+#define DATARAWVIEW_H
 
-DataGauges::DataGauges(QWidget *parent) : QWidget(parent)
+#include <QWidget>
+#include "qhexedit.h"
+class DataRawView : public QWidget
 {
-	ui.setupUi(this);
-	widget = new GaugeWidget(this);
-	widget->setGeometry(0,0,1200,600);
-	widget->show();
+	Q_OBJECT
+public:
+	explicit DataRawView(QWidget *parent = 0);
+private:
+	QHexEdit *hexEdit;
+protected:
+	void closeEvent(QCloseEvent *event);
+signals:
+	
+public slots:
+	void setData(QByteArray data);
+};
 
-	guiUpdateTimer = new QTimer(this);
-	connect(guiUpdateTimer,SIGNAL(timeout()),this,SLOT(guiUpdateTimerTick()));
-	guiUpdateTimer->start(250);
-}
-
-DataGauges::~DataGauges()
-{
-}
-void DataGauges::closeEvent(QCloseEvent *event)
-{
-	event->ignore();
-	((QMdiSubWindow*)this->parent())->hide();
-}
-void DataGauges::passData(QVariantMap data)
-{
-	m_valueMap = data;
-}
-
-void DataGauges::passDecoder(DataPacketDecoder *decoder)
-{
-
-}
-
-void DataGauges::guiUpdateTimerTick()
-{
-
-	QVariantMap::const_iterator i = m_valueMap.constBegin();
-	while (i != m_valueMap.constEnd())
-	{
-		widget->propertyMap.setProperty(i.key().toAscii(),i.value());
-		//ui.tableWidget->item(m_nameToIndexMap[i.key()],1)->setText(QString::number(i.value()));
-		//qDebug() << i.key() << m_nameToIndexMap[i.key()] << i.value();
-		i++;
-	}
-
-}
+#endif // DATARAWVIEW_H

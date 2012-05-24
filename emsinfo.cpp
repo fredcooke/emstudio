@@ -1,3 +1,21 @@
+/***************************************************************************
+*   Copyright (C) 2012  Michael Carpenter (malcom2073)                     *
+*                                                                          *
+*   This file is a part of FreeTune                                        *
+*                                                                          *
+*   FreeTune is free software: you can redistribute it and/or modify       *
+*   it under the terms of the GNU General Public License version 2 as      *
+*   published by the Free Software Foundation.                             *
+*                                                                          *
+*   FreeTune is distributed in the hope that it will be useful,            *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+*   GNU General Public License for more details.                           *
+									   *
+*   You should have received a copy of the GNU General Public License      *
+*   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
+****************************************************************************/
+
 #include "emsinfo.h"
 #include <QMdiSubWindow>
 
@@ -39,7 +57,37 @@ EmsInfo::EmsInfo(QWidget *parent) : QWidget(parent)
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(14,new QTableWidgetItem("For Backup"));
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(15,new QTableWidgetItem("Table Type"));
 
+	connect(ui.locationIdInfoTableWidget,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(locationInfoWidgetDoubleClicked(int,int)));
+
 }
+void EmsInfo::locationInfoWidgetDoubleClicked(int row, int column)
+{
+	if (ui.locationIdInfoTableWidget->rowCount() <= row)
+	{
+		return;
+	}
+	QString num = ui.locationIdInfoTableWidget->item(row,0)->text().split("x")[1];
+	bool ok = false;
+	int locid = num.toInt(&ok,16);
+	if (!ok)
+	{
+		qDebug() << "Numeric conversion failed for:" << num;
+		return;
+	}
+	if (ui.locationIdInfoTableWidget->item(row,9)->text().toLower() == "true")
+	{
+		//Is Ram
+		emit displayLocationId(locid,true);
+	}
+	if (ui.locationIdInfoTableWidget->item(row,10)->text().toLower() == "true")
+	{
+		//is flash
+		emit displayLocationId(locid,false);
+	}
+
+
+}
+
 void EmsInfo::closeEvent(QCloseEvent *event)
 {
 	event->ignore();

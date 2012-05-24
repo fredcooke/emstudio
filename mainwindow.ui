@@ -116,6 +116,7 @@
     <addaction name="actionTables"/>
     <addaction name="actionEMS_Info"/>
     <addaction name="actionFlags"/>
+    <addaction name="action_Raw_Data"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -178,6 +179,11 @@
   <action name="actionFlags">
    <property name="text">
     <string>&amp;Flags</string>
+   </property>
+  </action>
+  <action name="action_Raw_Data">
+   <property name="text">
+    <string>&amp;Raw Data</string>
    </property>
   </action>
  </widget>

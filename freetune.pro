@@ -25,7 +25,13 @@ SOURCES += main.cpp\
     datagauges.cpp \
     datatables.cpp \
     rawdatadisplay.cpp \
-    dataflags.cpp
+    dataflags.cpp \
+    qhexedit.cpp \
+    qhexedit_p.cpp \
+    xbytearray.cpp \
+    commands.cpp \
+    datarawview.cpp
+
 
 HEADERS  += mainwindow.h \
     freeemspacket.h \
@@ -41,7 +47,12 @@ HEADERS  += mainwindow.h \
     datagauges.h \
     datatables.h \
     rawdatadisplay.h \
-    dataflags.h
+    dataflags.h \
+    qhexedit.h \
+    qhexedit_p.h \
+    xbytearray.h \
+    commands.h \
+    datarawview.h
 
 FORMS    += mainwindow.ui \
     comsettings.ui \

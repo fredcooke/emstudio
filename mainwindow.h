@@ -33,6 +33,7 @@
 #include "datatables.h"
 #include "datagauges.h"
 #include "dataflags.h"
+#include "datarawview.h"
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -41,6 +42,7 @@ public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
 private:
+	DataRawView *rawData;
 	DataTables *dataTables;
 	DataGauges *dataGauges;
 	EmsInfo *emsInfo;
@@ -49,6 +51,7 @@ private:
 	QMdiSubWindow *emsMdiWindow;
 	QMdiSubWindow *flagsMdiWindow;
 	QMdiSubWindow *gaugesMdiWindow;
+	QMdiSubWindow *rawMdiWindow;
 	//ComSettings *comSettings;
 	DataPacketDecoder *dataPacketDecoder;
 	void populateDataFields();
@@ -66,6 +69,7 @@ private:
 	QString m_interfaceVersion;
 	QFile *logfile;
 private slots:
+	void emsInfoDisplayLocationId(int locid,bool isram);
 	void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void dataTablesDestroyed();
 	void dataGaugesDestroyed();
@@ -75,6 +79,7 @@ private slots:
 	void menu_windows_TablesClicked();
 	void menu_windows_FlagsClicked();
 	void menu_settingsClicked();
+	void menu_window_rawDataClicked();
 	void menu_connectClicked();
 	void ui_saveDataButtonClicked();
 	void menu_disconnectClicked();
