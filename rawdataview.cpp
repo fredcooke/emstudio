@@ -18,5 +18,5 @@ RawDataView::~RawDataView()
 
 void RawDataView::saveButtonClicked()
 {
-
+	emit saveData(m_locationId,ui.hexEditor->data(),0); //0 for RAM, 1 for flash.
 }

@@ -77,6 +77,7 @@ private slots:
 	void dataTablesDestroyed();
 	void dataGaugesDestroyed();
 	void dataFlagsDestroyed();
+	void dataViewSaveLocation(unsigned short locationid,QByteArray data,int phyiscallocation);
 	void menu_windows_GaugesClicked();
 	void menu_windows_EmsInfoClicked();
 	void menu_windows_TablesClicked();

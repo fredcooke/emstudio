@@ -32,23 +32,24 @@ class FreeEmsComms : public QThread
 public:
 	enum RequestType
 	{
-		SERIAL_CONNECT=0xFFFF01,
-		SERIAL_DISCONNECT=0xFFFF02,
-		UPDATE_BLOCK_IN_RAM=0x0100,
-		RETRIEVE_BLOCK_IN_FLASH=0x0106,
-		RETRIEVE_BLOCK_IN_RAM=0x0104,
 		GET_INTERFACE_VERSION=0x0000,
 		GET_FIRMWARE_VERSION=0x0002,
 		GET_MAX_PACKET_SIZE=0x0004,
-		GET_LOCATION_ID_LIST=0xDA5E,
-		GET_LOCATION_ID_INFO=0xF8E0,
 		ECHO_PACKET=0x0006,
 		SOFT_RESET=0x0008,
 		HARD_RESET=0x0010,
+		UPDATE_BLOCK_IN_RAM=0x0100,
+		UPDATE_BLOCK_IN_FLASH=0x0102,
+		RETRIEVE_BLOCK_IN_RAM=0x0104,
+		RETRIEVE_BLOCK_IN_FLASH=0x0106,
+		GET_LOCATION_ID_LIST=0xDA5E,
 		GET_DECODER_NAME=0xEEEE,
 		GET_FIRMWARE_BUILD_DATE=0xEEF0,
 		GET_COMPILER_VERSION=0xEEF2,
-		GET_OPERATING_SYSTEM=0xEEF4
+		GET_OPERATING_SYSTEM=0xEEF4,
+		GET_LOCATION_ID_INFO=0xF8E0,
+		SERIAL_CONNECT=0xFFFF01,
+		SERIAL_DISCONNECT=0xFFFF02
 	};
 	enum LocationIdFlags
 	{
@@ -101,6 +102,7 @@ public:
 	void populateDataFields();
 	QByteArray generatePacket(QByteArray header,QByteArray payload);
 	int updateBlockInRam(int location,int offset, int size,QByteArray data);
+	int updateBlockInFlash(int location,int offset, int size,QByteArray data);
 	int retrieveBlockFromRam(int location, int offset, int size);
 	int retrieveBlockFromFlash(int location, int offset, int size);
 	void setInterByteSendDelay(int milliseconds);

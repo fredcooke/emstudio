@@ -26,7 +26,6 @@ SOURCES += main.cpp\
     qhexedit_p.cpp \
     xbytearray.cpp \
     commands.cpp \
-    datarawview.cpp \
     rawdataview.cpp \
     gaugeview.cpp \
     emsinfoview.cpp \
@@ -49,7 +48,6 @@ HEADERS  += mainwindow.h \
     qhexedit_p.h \
     xbytearray.h \
     commands.h \
-    datarawview.h \
     rawdataview.h \
     gaugeview.h \
     emsinfoview.h \

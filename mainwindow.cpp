@@ -166,6 +166,19 @@ void MainWindow::menu_window_rawDataClicked()
 		rawMdiWindow->show();
 	}*/
 }
+void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,int physicallocation)
+{
+	if (physicallocation == 0)
+	{
+		//RAM
+		emsComms->updateBlockInRam(locationid,0,data.size(),data);
+	}
+	else if (physicallocation == 1)
+	{
+		//FLASH
+		emsComms->updateBlockInFlash(locationid,0,data.size(),data);
+	}
+}
 
 void MainWindow::emsInfoDisplayLocationId(int locid,bool isram)
 {
