@@ -74,17 +74,37 @@ void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 		qDebug() << "Numeric conversion failed for:" << num;
 		return;
 	}
+	int type = 0;
+	if (ui.locationIdInfoTableWidget->item(row,15)->text() == "2d Table")
+	{
+		type = 1;
+	}
+	else if (ui.locationIdInfoTableWidget->item(row,15)->text() == "Lookup")
+	{
+		type = 2;
+	}
+	else if (ui.locationIdInfoTableWidget->item(row,15)->text() == "Main Table")
+	{
+		type = 3;
+	}
+	else if (ui.locationIdInfoTableWidget->item(row,15)->text() == "Config")
+	{
+		type = 4;
+	}
 	if (ui.locationIdInfoTableWidget->item(row,9)->text().toLower() == "true")
 	{
 		//Is Ram
-		emit displayLocationId(locid,true);
+		emit displayLocationId(locid,true,type);
 	}
 	else if (ui.locationIdInfoTableWidget->item(row,10)->text().toLower() == "true")
 	{
 		//is flash
-		emit displayLocationId(locid,false);
+		emit displayLocationId(locid,false,type);
 	}
-
+/*		ui.locationIdInfoTableWidget->item(foundi,15)->setText("2d Table");
+		ui.locationIdInfoTableWidget->item(foundi,15)->setText("Lookup ");
+		ui.locationIdInfoTableWidget->item(foundi,15)->setText("Main Table");
+		ui.locationIdInfoTableWidget->item(foundi,15)->setText("Config");*/
 
 }
 
@@ -141,7 +161,7 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,unsigned short rawFla
 	}
 	else if (flags.contains(FreeEmsComms::BLOCK_IS_LOOKUP_DATA))
 	{
-		ui.locationIdInfoTableWidget->item(foundi,15)->setText("Lookup ");
+		ui.locationIdInfoTableWidget->item(foundi,15)->setText("Lookup");
 	}
 	else if (flags.contains(FreeEmsComms::BLOCK_IS_MAIN_TABLE))
 	{

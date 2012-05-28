@@ -85,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsInfo = new EmsInfoView();
 	emsInfo->setFirmwareVersion(m_firmwareVersion);
 	emsInfo->setInterfaceVersion(m_interfaceVersion);
-	connect(emsInfo,SIGNAL(displayLocationId(int,bool)),this,SLOT(emsInfoDisplayLocationId(int,bool)));
+	connect(emsInfo,SIGNAL(displayLocationId(int,bool,int)),this,SLOT(emsInfoDisplayLocationId(int,bool,int)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
@@ -180,7 +180,7 @@ void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,
 	}
 }
 
-void MainWindow::emsInfoDisplayLocationId(int locid,bool isram)
+void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 {
 	if (isram)
 	{
@@ -201,6 +201,11 @@ void MainWindow::rawDataViewDestroyed(QObject *object)
 			//This is the one that needs to be removed.
 			m_rawDataView.remove(i.key());
 			QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>(object->parent());
+			if (!win)
+			{
+				qDebug() << "Raw Data View without a QMdiSubWindow parent!!";
+				return;
+			}
 			win->hide();
 			ui.mdiArea->removeSubWindow(win);
 			return;

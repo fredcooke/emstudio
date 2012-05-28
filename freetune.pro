@@ -30,7 +30,9 @@ SOURCES += main.cpp\
     gaugeview.cpp \
     emsinfoview.cpp \
     flagview.cpp \
-    tableview.cpp
+    tableview.cpp \
+    tableview2d.cpp \
+    table2ddata.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -52,7 +54,9 @@ HEADERS  += mainwindow.h \
     gaugeview.h \
     emsinfoview.h \
     flagview.h \
-    tableview.h
+    tableview.h \
+    tableview2d.h \
+    table2ddata.h
 
 FORMS    += mainwindow.ui \
     comsettings.ui \
@@ -61,7 +65,8 @@ FORMS    += mainwindow.ui \
     datatables.ui \
     rawdatadisplay.ui \
     dataflags.ui \
-    rawdataview.ui
+    rawdataview.ui \
+    tableview2d.ui
 
 OTHER_FILES += \
     README.md

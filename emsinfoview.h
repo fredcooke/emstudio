@@ -40,7 +40,7 @@ public slots:
 private:
 	Ui::EmsInfo ui;
 signals:
-	void displayLocationId(int locid, bool isram);
+	void displayLocationId(int locid, bool isram,int type);
 };
 
 #endif // EMSINFO_H
