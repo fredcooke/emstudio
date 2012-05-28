@@ -224,7 +224,8 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 		return;
 	}
 	RawDataView *view = new RawDataView();
-	view->setData(payload);
+	view->setData(locationid,payload);
+
 	connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 	QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 	win->setGeometry(view->geometry());
