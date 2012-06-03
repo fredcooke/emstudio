@@ -6,7 +6,7 @@
 
 QT       += core gui declarative
 CONFIG += debug
-TARGET = freetune
+TARGET = EMStudio
 TEMPLATE = app
 
 
