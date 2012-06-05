@@ -21,8 +21,10 @@
 
 #include "qhexedit_p.h"
 #include "commands.h"
+#ifdef Q_OS_WIN32
 #define and &&
 #define or ||
+#endif
 const int HEXCHARS_IN_LINE = 47;
 const int GAP_ADR_HEX = 10;
 const int GAP_HEX_ASCII = 16;
