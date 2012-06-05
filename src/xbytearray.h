@@ -19,7 +19,8 @@
 
 #ifndef XBYTEARRAY_H
 #define XBYTEARRAY_H
-
+#define and &&
+#define or ||
 /** \cond docNever */
 
 #include <QtCore>
