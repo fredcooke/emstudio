@@ -18,7 +18,7 @@
 
 #include "emsinfoview.h"
 #include <QMdiSubWindow>
-
+#include <QMessageBox>
 EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
@@ -91,7 +91,22 @@ void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 	{
 		type = 4;
 	}
-	if (ui.locationIdInfoTableWidget->item(row,9)->text().toLower() == "true")
+
+
+	if (ui.locationIdInfoTableWidget->item(row,9)->text().toLower() == "true" && ui.locationIdInfoTableWidget->item(row,10)->text().toLower() == "true")
+	{
+		if (QMessageBox::question(0,"Ram or flash?","Do you wish to open the RAM? (If not, flash will be opened)",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+		{
+			//Is Ram
+			emit displayLocationId(locid,true,type);
+		}
+		else
+		{
+			//is flash
+			emit displayLocationId(locid,false,type);
+		}
+	}
+	else if (ui.locationIdInfoTableWidget->item(row,9)->text().toLower() == "true")
 	{
 		//Is Ram
 		emit displayLocationId(locid,true,type);
@@ -101,11 +116,6 @@ void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 		//is flash
 		emit displayLocationId(locid,false,type);
 	}
-/*		ui.locationIdInfoTableWidget->item(foundi,15)->setText("2d Table");
-		ui.locationIdInfoTableWidget->item(foundi,15)->setText("Lookup ");
-		ui.locationIdInfoTableWidget->item(foundi,15)->setText("Main Table");
-		ui.locationIdInfoTableWidget->item(foundi,15)->setText("Config");*/
-
 }
 
 void EmsInfoView::closeEvent(QCloseEvent *event)
