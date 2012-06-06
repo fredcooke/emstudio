@@ -185,11 +185,57 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 {
 	if (isram)
 	{
-		emsComms->retrieveBlockFromRam(locid,0,0);
+		for (int i=0;i<m_ramRawBlockList.size();i++)
+		{
+			if (m_ramRawBlockList[i]->locationid == locid)
+			{
+				if (m_rawDataView.contains(locid))
+				{
+					m_rawDataView[locid]->show();
+					m_rawDataView[locid]->setData(locid,m_ramRawBlockList[i]->data);
+					m_rawDataView[locid]->show();
+				}
+				else
+				{
+					RawDataView *view = new RawDataView();
+					view->setData(locid,m_ramRawBlockList[i]->data);
+					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setGeometry(view->geometry());
+					m_rawDataView[locid] = view;
+					win->show();
+				}
+				return;
+			}
+		}
+		//emsComms->retrieveBlockFromRam(locid,0,0);
 	}
 	else
 	{
-		emsComms->retrieveBlockFromFlash(locid,0,0);
+		for (int i=0;i<m_flashRawBlockList.size();i++)
+		{
+			if (m_flashRawBlockList[i]->locationid == locid)
+			{
+				if (m_rawDataView.contains(locid))
+				{
+					m_rawDataView[locid]->show();
+					m_rawDataView[locid]->setData(locid,m_flashRawBlockList[i]->data);
+					m_rawDataView[locid]->show();
+				}
+				else
+				{
+					RawDataView *view = new RawDataView();
+					view->setData(locid,m_flashRawBlockList[i]->data);
+					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setGeometry(view->geometry());
+					m_rawDataView[locid] = view;
+					win->show();
+				}
+				return;
+			}
+		}
+		//emsComms->retrieveBlockFromFlash(locid,0,0);
 	}
 }
 void MainWindow::rawDataViewDestroyed(QObject *object)
@@ -218,11 +264,29 @@ void MainWindow::rawDataViewDestroyed(QObject *object)
 void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
+	bool found = false;
+	for (int i=0;i<m_ramRawBlockList.size();i++)
+	{
+		if (m_ramRawBlockList[i]->locationid == locationid)
+		{
+			//Found a location block already existing.
+			found = true;
+		}
+	}
+	if (!found)
+	{
+		RawDataBlock *block = new RawDataBlock();
+		block->locationid = locationid;
+		block->header = header;
+		block->data = payload;
+		m_ramRawBlockList.append(block);
+	}
 	if (m_rawDataView.contains(locationid))
 	{
 		//Ignore, it's already open
 		return;
 	}
+	return;
 	RawDataView *view = new RawDataView();
 	view->setData(locationid,payload);
 
@@ -254,6 +318,29 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
+	bool found = false;
+	for (int i=0;i<m_flashRawBlockList.size();i++)
+	{
+		if (m_flashRawBlockList[i]->locationid == locationid)
+		{
+			//Found a location block already existing.
+			found = true;
+		}
+	}
+	if (!found)
+	{
+		RawDataBlock *block = new RawDataBlock();
+		block->locationid = locationid;
+		block->header = header;
+		block->data = payload;
+		m_flashRawBlockList.append(block);
+	}
+	return;
+	if (m_rawDataView.contains(locationid))
+	{
+		//Ignore, it's already open
+		return;
+	}
 	//rawData->setData(locationid,payload);
 	//rawMdiWindow->show();
 	/*
@@ -326,9 +413,7 @@ void MainWindow::settingsSaveClicked()
 void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
 {
 	Q_UNUSED(size)
-	Q_UNUSED(locationid)
 	Q_UNUSED(rawFlags)
-	Q_UNUSED(flags)
 	Q_UNUSED(parent)
 	Q_UNUSED(rampage)
 	Q_UNUSED(flashpage)
@@ -336,11 +421,11 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 	Q_UNUSED(flashaddress)
 	if (flags.contains(FreeEmsComms::BLOCK_IS_RAM))
 	{
-		//emsComms->retrieveBlockFromRam(locationid,0,0);
+		emsComms->retrieveBlockFromRam(locationid,0,0);
 	}
 	else if (flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
 	{
-		//emsComms->retrieveBlockFromFlash(locationid,0,0);
+		emsComms->retrieveBlockFromFlash(locationid,0,0);
 	}
 }
 

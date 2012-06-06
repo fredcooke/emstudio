@@ -35,6 +35,16 @@
 #include "gaugeview.h"
 #include "flagview.h"
 //#include "datarawview.h"
+
+
+class RawDataBlock
+{
+public:
+	unsigned short locationid;
+	QByteArray header;
+	QByteArray data;
+};
+
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -43,6 +53,8 @@ public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
 private:
+	QList<RawDataBlock*> m_ramRawBlockList;
+	QList<RawDataBlock*> m_flashRawBlockList;
 	//RawDataView *rawData;
 	TableView *dataTables;
 	GaugeView *dataGauges;
