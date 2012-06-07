@@ -109,16 +109,12 @@ private slots:
 	void rawDataViewDestroyed(QObject *object);
 	void emsInfoDisplayLocationId(int locid,bool isram,int type);
 	void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
-	void dataTablesDestroyed();
-	void dataGaugesDestroyed();
-	void dataFlagsDestroyed();
 	void dataViewSaveLocation(unsigned short locationid,QByteArray data,int phyiscallocation);
 	void menu_windows_GaugesClicked();
 	void menu_windows_EmsInfoClicked();
 	void menu_windows_TablesClicked();
 	void menu_windows_FlagsClicked();
 	void menu_settingsClicked();
-	void menu_window_rawDataClicked();
 	void menu_connectClicked();
 	void ui_saveDataButtonClicked();
 	void menu_disconnectClicked();

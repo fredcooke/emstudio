@@ -82,10 +82,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
 
-	/*QMdiSubWindow *tablesMdiWindow;
-	QMdiSubWindow *emsMdiWindow;
-	QMdiSubWindow *flagsMdiWindow;
-	QMdiSubWindow *gaugesMdiWindow;*/
 	emsInfo = new EmsInfoView();
 	emsInfo->setFirmwareVersion(m_firmwareVersion);
 	emsInfo->setInterfaceVersion(m_interfaceVersion);
@@ -101,12 +97,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsMdiWindow->hide();
 	emsMdiWindow->setWindowTitle("EMS Info");
 
-	/*rawData = new RawDataView();
-	rawMdiWindow = ui.mdiArea->addSubWindow(rawData);
-	rawMdiWindow->setGeometry(rawData->geometry());
-	rawMdiWindow->hide();
-	rawMdiWindow->setWindowTitle("Raw Data View");
-*/
 	dataGauges = new GaugeView();
 	connect(dataGauges,SIGNAL(destroyed()),this,SLOT(dataGaugesDestroyed()));
 	gaugesMdiWindow = ui.mdiArea->addSubWindow(dataGauges);
@@ -159,17 +149,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 
 }
-void MainWindow::menu_window_rawDataClicked()
-{
-	/*if (rawMdiWindow->isVisible())
-	{
-		rawMdiWindow->hide();
-	}
-	else
-	{
-		rawMdiWindow->show();
-	}*/
-}
 void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,int physicallocation)
 {
 	if (physicallocation == 0)
@@ -186,8 +165,6 @@ void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,
 
 void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 {
-	//if (isram)
-	//{
 	for (int i=0;i<m_ramRawBlockList.size();i++)
 	{
 		if (m_ramRawBlockList[i]->locationid == locid)
@@ -236,35 +213,6 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 			return;
 		}
 	}
-	//emsComms->retrieveBlockFromRam(locid,0,0);
-	/*}
-	else
-	{
-		for (int i=0;i<m_flashRawBlockList.size();i++)
-		{
-			if (m_flashRawBlockList[i]->locationid == locid)
-			{
-				if (m_rawDataView.contains(locid))
-				{
-					m_rawDataView[locid]->show();
-					m_rawDataView[locid]->setData(locid,m_flashRawBlockList[i]->data);
-					m_rawDataView[locid]->show();
-				}
-				else
-				{
-					RawDataView *view = new RawDataView();
-					view->setData(locid,m_flashRawBlockList[i]->data);
-					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-					win->setGeometry(view->geometry());
-					m_rawDataView[locid] = view;
-					win->show();
-				}
-				return;
-			}
-		}
-		//emsComms->retrieveBlockFromFlash(locid,0,0);
-	}*/
 }
 void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation)
 {
@@ -555,19 +503,6 @@ void MainWindow::menu_windows_GaugesClicked()
 		gaugesMdiWindow->show();
 	}
 }
-void MainWindow::dataTablesDestroyed()
-{
-	dataTables=0;
-}
-
-void MainWindow::dataGaugesDestroyed()
-{
-	dataGauges=0;
-}
-void MainWindow::dataFlagsDestroyed()
-{
-	dataFlags = 0;
-}
 
 void MainWindow::menu_windows_EmsInfoClicked()
 {
@@ -694,25 +629,6 @@ void MainWindow::emsCommsConnected()
 	emsComms->getFirmwareVersion();
 	emsComms->getInterfaceVersion();
 	emsComms->getLocationIdList(0x00,0x00);
-
-	/*ui.sendCommandTableWidget->setRowCount(ui.sendCommandTableWidget->rowCount()+1);
-	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(firmwareseq)));
-	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,1,new QTableWidgetItem("0"));
-	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,2,new QTableWidgetItem("Pending"));
-	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,3,new QTableWidgetItem("getFirmwareVersion"));
-
-	ui.sendCommandTableWidget->setRowCount(ui.sendCommandTableWidget->rowCount()+1);
-	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(ifaceseq)));
-	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,1,new QTableWidgetItem("0"));
-	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,2,new QTableWidgetItem("Pending"));
-	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,3,new QTableWidgetItem("getInterfaceVersion"));
-
-	ui.sendCommandTableWidget->setRowCount(ui.sendCommandTableWidget->rowCount()+1);
-	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(locidseq)));
-	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,1,new QTableWidgetItem("0"));
-	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,2,new QTableWidgetItem("Pending"));
-	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,3,new QTableWidgetItem("getLocationIdList"));
-	*/
 }
 void MainWindow::checkSyncRequest()
 {
@@ -722,13 +638,6 @@ void MainWindow::checkSyncRequest()
 void MainWindow::commandSuccessful(int sequencenumber)
 {
 	qDebug() << "command succesful:" << QString::number(sequencenumber);
-	/*for (int i=0;i<ui.sendCommandTableWidget->rowCount();i++)
-	{
-		if (ui.sendCommandTableWidget->item(i,0)->text().toInt() == sequencenumber)
-		{
-			ui.sendCommandTableWidget->item(i,1)->setText("Success");
-		}
-	}*/
 	if (m_locIdMsgList.contains(sequencenumber))
 	{
 		m_locIdMsgList.removeOne(sequencenumber);
@@ -819,24 +728,12 @@ void MainWindow::checkRamFlashSync()
 		{
 			markDeviceFlashClean();
 		}
-		/*for (int i=0;i<m_flashRawBlockList.size();i++)
-		{
-			m_flashRawBlockList.append(m_deviceFlashRawBlockList[i]);
-		}*/
 	}
 }
 
 void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 {
 	qDebug() << "command failed:" << QString::number(sequencenumber) << QString::number(errornum,16);
-	/*for (int i=0;i<ui.sendCommandTableWidget->rowCount();i++)
-	{
-		if (ui.sendCommandTableWidget->item(i,0)->text().toInt() == sequencenumber)
-		{
-			ui.sendCommandTableWidget->item(i,1)->setText("Failed");
-			ui.sendCommandTableWidget->item(i,2)->setText(QString::number(errornum));
-		}
-	}*/
 	if (m_locIdMsgList.contains(sequencenumber))
 	{
 		m_locIdMsgList.removeOne(sequencenumber);
