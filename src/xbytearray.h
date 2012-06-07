@@ -19,10 +19,7 @@
 
 #ifndef XBYTEARRAY_H
 #define XBYTEARRAY_H
-#ifdef Q_OS_WIN32
-#define and &&
-#define or ||
-#endif
+
 /** \cond docNever */
 
 #include <QtCore>

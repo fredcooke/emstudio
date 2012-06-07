@@ -18,7 +18,10 @@
 ****************************************************************************/
 
 #include "xbytearray.h"
-
+#ifdef Q_WS_WIN32
+#define and &&
+#define or ||
+#endif
 XByteArray::XByteArray()
 {
     _oldSize = -99;
