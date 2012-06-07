@@ -122,6 +122,10 @@ private:
 	RequestClass m_currentWaitingRequest;
 	//void parseBuffer(QByteArray buffer);
 signals:
+	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);
+	void packetAcked(unsigned short locationid,QByteArray header,QByteArray payload);
+	void packetNaked(unsigned short locationid,QByteArray header,QByteArray payload);
+	void decoderFailure(QByteArray packet);
 	void decoderName(QString name);
 	void firmwareBuild(QString date);
 	void compilerVersion(QString version);

@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionTables,SIGNAL(triggered()),this,SLOT(menu_windows_TablesClicked()));
 	connect(ui.actionFlags,SIGNAL(triggered()),this,SLOT(menu_windows_FlagsClicked()));
 	connect(ui.actionExit_3,SIGNAL(triggered()),this,SLOT(close()));
+	connect(ui.actionPacket_Status,SIGNAL(triggered()),this,SLOT(menu_windows_PacketStatusClicked()));
 	//connect(ui.action_Raw_Data,SIGNAL(triggered()),this,SLOT(menu_window_rawDataClicked()));
 
 	connect(ui.saveDataPushButton,SIGNAL(clicked()),this,SLOT(ui_saveDataButtonClicked()));
@@ -81,16 +82,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
-
-	emsInfo = new EmsInfoView();
-	emsInfo->setFirmwareVersion(m_firmwareVersion);
-	emsInfo->setInterfaceVersion(m_interfaceVersion);
-	connect(emsInfo,SIGNAL(displayLocationId(int,bool,int)),this,SLOT(emsInfoDisplayLocationId(int,bool,int)));
-	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
+
+	//connect(emsComms,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
+
+	emsInfo = new EmsInfoView();
+	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+
+	emsInfo->setFirmwareVersion(m_firmwareVersion);
+	emsInfo->setInterfaceVersion(m_interfaceVersion);
+	connect(emsInfo,SIGNAL(displayLocationId(int,bool,int)),this,SLOT(emsInfoDisplayLocationId(int,bool,int)));
+
 
 	emsMdiWindow = ui.mdiArea->addSubWindow(emsInfo);
 	emsMdiWindow->setGeometry(emsInfo->geometry());
@@ -98,14 +102,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsMdiWindow->setWindowTitle("EMS Info");
 
 	dataGauges = new GaugeView();
-	connect(dataGauges,SIGNAL(destroyed()),this,SLOT(dataGaugesDestroyed()));
+	//connect(dataGauges,SIGNAL(destroyed()),this,SLOT(dataGaugesDestroyed()));
 	gaugesMdiWindow = ui.mdiArea->addSubWindow(dataGauges);
 	gaugesMdiWindow->setGeometry(dataGauges->geometry());
 	gaugesMdiWindow->hide();
 	gaugesMdiWindow->setWindowTitle("Gauges");
 
 	dataTables = new TableView();
-	connect(dataTables,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
+	//connect(dataTables,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
 	dataTables->passDecoder(dataPacketDecoder);
 	tablesMdiWindow = ui.mdiArea->addSubWindow(dataTables);
 	tablesMdiWindow->setGeometry(dataTables->geometry());
@@ -113,12 +117,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	tablesMdiWindow->setWindowTitle("Data Tables");
 
 	dataFlags = new FlagView();
-	connect(dataFlags,SIGNAL(destroyed()),this,SLOT(dataFlagsDestroyed()));
+	//connect(dataFlags,SIGNAL(destroyed()),this,SLOT(dataFlagsDestroyed()));
 	dataFlags->passDecoder(dataPacketDecoder);
 	flagsMdiWindow = ui.mdiArea->addSubWindow(dataFlags);
 	flagsMdiWindow->setGeometry(dataFlags->geometry());
 	flagsMdiWindow->hide();
 	flagsMdiWindow->setWindowTitle("Flags");
+
+	packetStatus = new PacketStatusView();
+	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
+	packetStatusMdiWindow = ui.mdiArea->addSubWindow(packetStatus);
+	packetStatusMdiWindow->setGeometry(packetStatus->geometry());
+	packetStatusMdiWindow->hide();
+	packetStatusMdiWindow->setWindowTitle("Packet Status");
 
 
 
@@ -160,6 +174,17 @@ void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,
 	{
 		//FLASH
 		emsComms->updateBlockInFlash(locationid,0,data.size(),data);
+	}
+}
+void MainWindow::menu_windows_PacketStatusClicked()
+{
+	if (packetStatusMdiWindow->isVisible())
+	{
+		packetStatusMdiWindow->hide();
+	}
+	else
+	{
+		packetStatusMdiWindow->show();
 	}
 }
 

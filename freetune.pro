@@ -34,7 +34,8 @@ SOURCES += src/main.cpp\
     src/flagview.cpp \
     src/tableview.cpp \
     src/tableview2d.cpp \
-    src/table2ddata.cpp
+    src/table2ddata.cpp \
+    src/packetstatusview.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -58,7 +59,8 @@ HEADERS  += src/mainwindow.h \
     src/flagview.h \
     src/tableview.h \
     src/tableview2d.h \
-    src/table2ddata.h
+    src/table2ddata.h \
+    src/packetstatusview.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
@@ -68,7 +70,8 @@ FORMS    += src/mainwindow.ui \
     src/rawdatadisplay.ui \
     src/dataflags.ui \
     src/rawdataview.ui \
-    src/tableview2d.ui
+    src/tableview2d.ui \
+    src/packetstatusview.ui
 
 OTHER_FILES += \
     README.md

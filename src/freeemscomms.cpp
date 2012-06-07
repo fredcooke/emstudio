@@ -406,6 +406,7 @@ void FreeEmsComms::run()
 					header.append((char)(payload.length()) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(GET_LOCATION_ID_LIST,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -428,6 +429,7 @@ void FreeEmsComms::run()
 					header.append((char)0xEE);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(GET_DECODER_NAME,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -450,6 +452,7 @@ void FreeEmsComms::run()
 					header.append((char)0xF0);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(GET_FIRMWARE_BUILD_DATE,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -472,6 +475,7 @@ void FreeEmsComms::run()
 					header.append((char)0xF2);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(GET_COMPILER_VERSION,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -494,6 +498,7 @@ void FreeEmsComms::run()
 					header.append((char)0xF4);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(GET_OPERATING_SYSTEM,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -522,6 +527,7 @@ void FreeEmsComms::run()
 					//header.append((char)(payload.length()) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(GET_LOCATION_ID_INFO,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -556,6 +562,7 @@ void FreeEmsComms::run()
 					header.append((char)(payload.length() << 8) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(UPDATE_BLOCK_IN_RAM,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -589,6 +596,7 @@ void FreeEmsComms::run()
 					//header.append((char)(packet.length() << 8) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(RETRIEVE_BLOCK_IN_RAM,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -623,6 +631,7 @@ void FreeEmsComms::run()
 					header.append((char)(payload.length() << 8) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(UPDATE_BLOCK_IN_FLASH,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -655,6 +664,7 @@ void FreeEmsComms::run()
 					//header.append((char)(packet.length() << 8) & 0xFF);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(RETRIEVE_BLOCK_IN_FLASH,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -678,6 +688,7 @@ void FreeEmsComms::run()
 					header.append((char)0x00);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(GET_INTERFACE_VERSION,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -701,6 +712,7 @@ void FreeEmsComms::run()
 					header.append((char)0x02);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(GET_FIRMWARE_VERSION,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -723,6 +735,7 @@ void FreeEmsComms::run()
 					header.append((char)0x04);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(GET_MAX_PACKET_SIZE,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -746,6 +759,7 @@ void FreeEmsComms::run()
 					payload.append(m_threadReqList[i].args[0].toByteArray());
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(ECHO_PACKET,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -764,6 +778,7 @@ void FreeEmsComms::run()
 					}
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(SOFT_RESET,QByteArray(),QByteArray());
 				}
 			}
 			else if (m_threadReqList[i].type == HARD_RESET)
@@ -781,6 +796,7 @@ void FreeEmsComms::run()
 					header.append((char)0x10);
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(HARD_RESET,header,payload);
 					if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -851,15 +867,18 @@ void FreeEmsComms::run()
 							unsigned short errornum = packetpair.second[0] << 8;
 							errornum += packetpair.second[1];
 							emit commandFailed(m_currentWaitingRequest.sequencenumber,errornum);
+							emit packetNaked(m_currentWaitingRequest.type,packetpair.first,packetpair.second);
 						}
 						else
 						{
 							//Packet is good.
 							emit commandSuccessful(m_currentWaitingRequest.sequencenumber);
+							emit packetAcked(m_currentWaitingRequest.type,packetpair.first,packetpair.second);
 						}
 						m_waitingForResponse = false;
 					}
 				}
+
 				if (payloadid == 0x0191)
 				{	//Datalog packet
 
@@ -1124,6 +1143,7 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 	{
 
 		qDebug() << "Not long enough to even contain a header!";
+		emit decoderFailure(buffer);
 		return QPair<QByteArray,QByteArray>();
 	}
 
@@ -1198,6 +1218,8 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 		if (buffer.length() > (unsigned int)(length + iloc))
 		{
 			qDebug() << "Packet length should be:" << length + iloc << "But it is" << buffer.length();
+			emit decoderFailure(buffer);
+			return QPair<QByteArray,QByteArray>();
 		}
 		payload.append(buffer.mid(iloc,length));
 	}
