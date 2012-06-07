@@ -32,6 +32,9 @@ public:
 	~EmsInfoView();
 	void setInterfaceVersion(QString version);
 	void setFirmwareVersion(QString firmware);
+	void setLocalFlash(bool dirty);
+	void setLocalRam(bool dirty);
+	void setDeviceFlash(bool dirty);
 protected:
 	void closeEvent(QCloseEvent *event);
 public slots:
@@ -41,6 +44,7 @@ private:
 	Ui::EmsInfo ui;
 signals:
 	void displayLocationId(int locid, bool isram,int type);
+	void checkSync();
 };
 
 #endif // EMSINFO_H

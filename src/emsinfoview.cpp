@@ -58,8 +58,45 @@ EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(15,new QTableWidgetItem("Table Type"));
 
 	connect(ui.locationIdInfoTableWidget,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(locationInfoWidgetDoubleClicked(int,int)));
+	connect(ui.checkSyncButton,SIGNAL(clicked()),this,SIGNAL(checkSync()));
 
 }
+void EmsInfoView::setLocalFlash(bool dirty)
+{
+	if (dirty)
+	{
+		ui.localFlashLineEdit->setText("DIRTY");
+	}
+	else
+	{
+		ui.localFlashLineEdit->setText("CLEAN");
+	}
+}
+
+void EmsInfoView::setLocalRam(bool dirty)
+{
+	if (dirty)
+	{
+		ui.localRamLineEdit->setText("DIRTY");
+	}
+	else
+	{
+		ui.localRamLineEdit->setText("CLEAN");
+	}
+}
+
+void EmsInfoView::setDeviceFlash(bool dirty)
+{
+	if (dirty)
+	{
+		ui.deviceFlashLineEdit->setText("DIRTY");
+	}
+	else
+	{
+		ui.deviceFlashLineEdit->setText("CLEAN");
+	}
+}
+
 void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 {
 	if (ui.locationIdInfoTableWidget->rowCount() <= row)

@@ -306,17 +306,32 @@ void MainWindow::rawDataViewDestroyed(QObject *object)
 void MainWindow::markRamDirty()
 {
 	m_localRamDirty = true;
-	this->setWindowTitle("DEVICE RAM IS OUT OF SYNC WITH APP RAM");
+	emsInfo->setLocalRam(true);
 }
 void MainWindow::markFlashDirty()
 {
 	m_localFlashDirty = true;
-	this->setWindowTitle("DEVICE FLASH IS OUT OF SYNC WITH APP FLASH");
+	emsInfo->setLocalFlash(true);
 }
 void MainWindow::markDeviceFlashDirty()
 {
 	m_deviceFlashDirty = true;
-	this->setWindowTitle("DEVICE FLASH IS OUT OF SYNC WITH DEVICE RAM");
+	emsInfo->setDeviceFlash(true);
+}
+void MainWindow::markRamClean()
+{
+	m_localRamDirty = false;
+	emsInfo->setLocalRam(false);
+}
+void MainWindow::markFlashClean()
+{
+	m_localFlashDirty = false;
+	emsInfo->setLocalFlash(false);
+}
+void MainWindow::markDeviceFlashClean()
+{
+	m_deviceFlashDirty = false;
+	emsInfo->setDeviceFlash(false);
 }
 QByteArray MainWindow::getLocalRamBlock(unsigned short id)
 {
@@ -699,6 +714,10 @@ void MainWindow::emsCommsConnected()
 	ui.sendCommandTableWidget->setItem(ui.sendCommandTableWidget->rowCount()-1,3,new QTableWidgetItem("getLocationIdList"));
 	*/
 }
+void MainWindow::checkSyncRequest()
+{
+	emsComms->getLocationIdList(0,0);
+}
 
 void MainWindow::commandSuccessful(int sequencenumber)
 {
@@ -744,6 +763,9 @@ void MainWindow::checkRamFlashSync()
 	}
 	else
 	{
+		bool localRamDirty = false;
+		bool localFlashDirty = false;
+		bool deviceFlashDirty = false;
 		for (int i=0;i<m_ramRawBlockList.size();i++)
 		{
 			if (hasDeviceRamBlock(m_ramRawBlockList[i]->locationid))
@@ -753,6 +775,7 @@ void MainWindow::checkRamFlashSync()
 					//Device ram is out of sync with local ram.
 					//markDeviceFlashDirty();
 					markRamDirty();
+					localRamDirty=true;
 				}
 				else
 				{
@@ -761,6 +784,7 @@ void MainWindow::checkRamFlashSync()
 						if (getDeviceFlashBlock(m_ramRawBlockList[i]->locationid) != m_ramRawBlockList[i]->data)
 						{
 							markDeviceFlashDirty();
+							deviceFlashDirty=true;
 						}
 					}
 				}
@@ -775,12 +799,25 @@ void MainWindow::checkRamFlashSync()
 				if (getLocalFlashBlock(m_ramRawBlockList[i]->locationid) != m_ramRawBlockList[i]->data)
 				{
 					markFlashDirty();
+					localFlashDirty = true;
 				}
 			}
 			else
 			{
 				//Local does not have a flash location to match this ram location. This is normal.
 			}
+		}
+		if (!localFlashDirty)
+		{
+			markFlashClean();
+		}
+		if (!localRamDirty)
+		{
+			markRamClean();
+		}
+		if (!deviceFlashDirty)
+		{
+			markDeviceFlashClean();
 		}
 		/*for (int i=0;i<m_flashRawBlockList.size();i++)
 		{

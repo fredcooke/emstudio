@@ -87,6 +87,9 @@ private:
 	void markRamDirty();
 	void markFlashDirty();
 	void markDeviceFlashDirty();
+	void markRamClean();
+	void markFlashClean();
+	void markDeviceFlashClean();
 	bool m_localRamDirty;
 	bool m_localFlashDirty;
 	bool m_deviceFlashDirty;
@@ -101,6 +104,7 @@ private:
 	QList<int> m_locIdMsgList;
 	void checkRamFlashSync();
 private slots:
+	void checkSyncRequest();
 	void rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation);
 	void rawDataViewDestroyed(QObject *object);
 	void emsInfoDisplayLocationId(int locid,bool isram,int type);
