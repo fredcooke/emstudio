@@ -6,7 +6,7 @@
 
 QT       += core gui declarative
 CONFIG += debug
-TARGET = EMStudio
+TARGET = emstudio
 TEMPLATE = app
 INCLUDEPATH += src
 
