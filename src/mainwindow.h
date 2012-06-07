@@ -55,6 +55,8 @@ public:
 private:
 	QList<RawDataBlock*> m_ramRawBlockList;
 	QList<RawDataBlock*> m_flashRawBlockList;
+	QList<RawDataBlock*> m_deviceRamRawBlockList;
+	QList<RawDataBlock*> m_deviceFlashRawBlockList;
 	//RawDataView *rawData;
 	TableView *dataTables;
 	GaugeView *dataGauges;
@@ -84,8 +86,20 @@ private:
 	QFile *logfile;
 	void markRamDirty();
 	void markFlashDirty();
-	bool m_ramDirty;
-	bool m_flashDirty;
+	void markDeviceFlashDirty();
+	bool m_localRamDirty;
+	bool m_localFlashDirty;
+	bool m_deviceFlashDirty;
+	bool hasDeviceRamBlock(unsigned short id);
+	bool hasDeviceFlashBlock(unsigned short id);
+	bool hasLocalRamBlock(unsigned short id);
+	bool hasLocalFlashBlock(unsigned short id);
+	QByteArray getLocalRamBlock(unsigned short id);
+	QByteArray getLocalFlashBlock(unsigned short id);
+	QByteArray getDeviceRamBlock(unsigned short id);
+	QByteArray getDeviceFlashBlock(unsigned short id);
+	QList<int> m_locIdMsgList;
+	void checkRamFlashSync();
 private slots:
 	void rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation);
 	void rawDataViewDestroyed(QObject *object);
