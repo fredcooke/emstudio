@@ -26,6 +26,8 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	//populateDataFields();
+	m_ramDirty = false;
+	m_flashDirty = false;
 	ui.setupUi(this);
 	ui.actionDisconnect->setEnabled(false);
 	connect(ui.actionSettings,SIGNAL(triggered()),this,SLOT(menu_settingsClicked()));
@@ -183,33 +185,58 @@ void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,
 
 void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 {
-	if (isram)
+	//if (isram)
+	//{
+	for (int i=0;i<m_ramRawBlockList.size();i++)
 	{
-		for (int i=0;i<m_ramRawBlockList.size();i++)
+		if (m_ramRawBlockList[i]->locationid == locid)
 		{
-			if (m_ramRawBlockList[i]->locationid == locid)
+			if (m_rawDataView.contains(locid))
 			{
-				if (m_rawDataView.contains(locid))
-				{
-					m_rawDataView[locid]->show();
-					m_rawDataView[locid]->setData(locid,m_ramRawBlockList[i]->data);
-					m_rawDataView[locid]->show();
-				}
-				else
-				{
-					RawDataView *view = new RawDataView();
-					view->setData(locid,m_ramRawBlockList[i]->data);
-					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-					win->setGeometry(view->geometry());
-					m_rawDataView[locid] = view;
-					win->show();
-				}
-				return;
+				m_rawDataView[locid]->show();
+				m_rawDataView[locid]->setData(locid,m_ramRawBlockList[i]->data);
+				m_rawDataView[locid]->show();
 			}
+			else
+			{
+				RawDataView *view = new RawDataView();
+				view->setData(locid,m_ramRawBlockList[i]->data);
+				connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+				connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+				QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+				win->setGeometry(view->geometry());
+				m_rawDataView[locid] = view;
+				win->show();
+			}
+			return;
 		}
-		//emsComms->retrieveBlockFromRam(locid,0,0);
 	}
+	for (int i=0;i<m_flashRawBlockList.size();i++)
+	{
+		if (m_ramRawBlockList[i]->locationid == locid)
+		{
+			if (m_rawDataView.contains(locid))
+			{
+				m_rawDataView[locid]->show();
+				m_rawDataView[locid]->setData(locid,m_ramRawBlockList[i]->data);
+				m_rawDataView[locid]->show();
+			}
+			else
+			{
+				RawDataView *view = new RawDataView();
+				view->setData(locid,m_flashRawBlockList[i]->data);
+				connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+				connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+				QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+				win->setGeometry(view->geometry());
+				m_rawDataView[locid] = view;
+				win->show();
+			}
+			return;
+		}
+	}
+	//emsComms->retrieveBlockFromRam(locid,0,0);
+	/*}
 	else
 	{
 		for (int i=0;i<m_flashRawBlockList.size();i++)
@@ -236,8 +263,23 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 			}
 		}
 		//emsComms->retrieveBlockFromFlash(locid,0,0);
-	}
+	}*/
 }
+void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation)
+{
+	for (int i=0;i<m_flashRawBlockList.size();i++)
+	{
+		if (m_flashRawBlockList[i]->locationid == locationid)
+		{
+			if (m_flashRawBlockList[i]->data != data)
+			{
+				markFlashDirty();
+			}
+		}
+	}
+	emsComms->updateBlockInRam(locationid,0,data.size(),data);
+}
+
 void MainWindow::rawDataViewDestroyed(QObject *object)
 {
 	QMap<unsigned short,RawDataView*>::const_iterator i = m_rawDataView.constBegin();
@@ -270,6 +312,12 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 		if (m_ramRawBlockList[i]->locationid == locationid)
 		{
 			//Found a location block already existing.
+			if (m_ramRawBlockList[i]->data != payload)
+			{
+				//Data is not identical!
+				markRamDirty();
+				qDebug() << "Ram block from device does not match memory!";
+			}
 			found = true;
 		}
 	}
@@ -314,6 +362,16 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 	logfile->write(towrite.toAscii(),towrite.length());
 	logfile->flush();*/
 }
+void MainWindow::markRamDirty()
+{
+	m_ramDirty = true;
+	this->setWindowTitle("DEVICE RAM IS OUT OF SYNC WITH APP RAM");
+}
+void MainWindow::markFlashDirty()
+{
+	m_flashDirty = true;
+	this->setWindowTitle("DEVICE FLASH IS OUT OF SYNC WITH APP FLASH");
+}
 
 void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
@@ -324,6 +382,12 @@ void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header
 		if (m_flashRawBlockList[i]->locationid == locationid)
 		{
 			//Found a location block already existing.
+			if (m_ramRawBlockList[i]->data != payload)
+			{
+				//Data is not identical!
+				qDebug() << "Flash block from device does not match memory!";
+				markFlashDirty();
+			}
 			found = true;
 		}
 	}

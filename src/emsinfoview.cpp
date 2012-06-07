@@ -93,7 +93,7 @@ void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 	}
 
 
-	if (ui.locationIdInfoTableWidget->item(row,9)->text().toLower() == "true" && ui.locationIdInfoTableWidget->item(row,10)->text().toLower() == "true")
+	/*if (ui.locationIdInfoTableWidget->item(row,9)->text().toLower() == "true" && ui.locationIdInfoTableWidget->item(row,10)->text().toLower() == "true")
 	{
 		if (QMessageBox::question(0,"Ram or flash?","Do you wish to open the RAM? (If not, flash will be opened)",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 		{
@@ -115,7 +115,8 @@ void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 	{
 		//is flash
 		emit displayLocationId(locid,false,type);
-	}
+	}*/
+	displayLocationId(locid,true,type);
 }
 
 void EmsInfoView::closeEvent(QCloseEvent *event)
