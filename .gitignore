@@ -1,0 +1,22 @@
+# Compiled sources
+*.o
+*.exe
+moc_*.h
+obj/
+emstudio
+
+# Other project stuff
+Makefile
+
+# Temp files
+*~
+
+
+# Project user files
+*.user
+
+
+# Logs
+
+*.log
+*.bin
