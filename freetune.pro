@@ -9,7 +9,9 @@ CONFIG += debug
 TARGET = emstudio
 TEMPLATE = app
 INCLUDEPATH += src
-
+OBJECTS_DIR = obj
+MOC_DIR = obj
+UI_DIR = obj
 SOURCES += src/main.cpp\
 	src/mainwindow.cpp \
     src/freeemspacket.cpp \
