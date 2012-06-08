@@ -76,13 +76,16 @@ public:
 	public:
 		RequestType type;
 		QList<QVariant> args;
+		QList<int> argsize;
 		int sequencenumber;
+		void addArg(QVariant arg,int size=0) { args.append(arg); argsize.append(size);}
 	};
 
 	FreeEmsComms(QObject *parent = 0);
 	void setPort(QString portname);
 	void setBaud(int baudrate);
 	void setLogFileName(QString filename);
+	bool sendPacket(unsigned short payloadid,QList<QVariant> arglist=QList<QVariant>(),QList<int> argsizelist=QList<int>(),bool haslength=false);
 	int getLocationIdInfo(unsigned short locationid);
 	int getInterfaceVersion();
 	int getFirmwareVersion();

@@ -83,15 +83,15 @@ void LogLoader::run()
 				retval = logfile.read(1);
 				if (retval[0] == (char)0x55)
 				{
-					currPacket.append(0xAA);
+					currPacket.append((char)0xAA);
 				}
 				else if (retval[0] == (char)0x44)
 				{
-					currPacket.append(0xBB);
+					currPacket.append((char)0xBB);
 				}
 				else if (retval[0] == (char)0x33)
 				{
-					currPacket.append(0xCC);
+					currPacket.append((char)0xCC);
 				}
 			}
 			else

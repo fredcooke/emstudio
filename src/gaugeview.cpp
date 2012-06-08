@@ -46,7 +46,7 @@ void GaugeView::passData(QVariantMap data)
 
 void GaugeView::passDecoder(DataPacketDecoder *decoder)
 {
-
+	Q_UNUSED(decoder)
 }
 
 void GaugeView::guiUpdateTimerTick()

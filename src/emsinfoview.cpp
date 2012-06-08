@@ -99,6 +99,7 @@ void EmsInfoView::setDeviceFlash(bool dirty)
 
 void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 {
+	Q_UNUSED(column)
 	if (ui.locationIdInfoTableWidget->rowCount() <= row)
 	{
 		return;
@@ -180,7 +181,7 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,unsigned short rawFla
  ui.locationIdInfoTableWidget->setHorizontalHeaderItem(13,new QTableWidgetItem("For Backup"));
  ui.locationIdInfoTableWidget->setHorizontalHeaderItem(14,new QTableWidgetItem("Table Type"));*/
 	qDebug() << "Location ID Info for:" << QString::number(locationid,16);
-	bool found = false;
+	//bool found = false;
 	int foundi = -1;
 
 	/*for (int i=0;i<ui.locationIdInfoTableWidget->rowCount();i++)

@@ -190,6 +190,7 @@ void MainWindow::menu_windows_PacketStatusClicked()
 
 void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 {
+	Q_UNUSED(type)
 	for (int i=0;i<m_ramRawBlockList.size();i++)
 	{
 		if (m_ramRawBlockList[i]->locationid == locid)

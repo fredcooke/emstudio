@@ -41,6 +41,7 @@ public:
 		DummyValueTwo,
 		DebugData
 	};
+
 	//Packet format:
 	//[start byte][data packet][end byte]
 	//[start byte] == 0xAA
@@ -59,6 +60,13 @@ public:
 	QByteArray updateRamBlockPacket(int locationid,int offset,int size,QByteArray data);
 
 	FreeEmsPacket();
+	unsigned short length;
+	unsigned short offset;
+	unsigned short size;
+	unsigned short locationid;
+	unsigned char listtype;
+	unsigned short listmask;
+	QByteArray rawbuffer;
 };
 
 #endif // FREEEMSPACKET_H

@@ -18,12 +18,25 @@
 
 #include <QtGui/QApplication>
 #include "mainwindow.h"
-
+#include <QVariant>
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
 
-    return a.exec();
+	QVariantList v;
+	v.append((QChar)'c');
+	v.append("s");
+	v.append(1);
+
+	for (int i=0;i<v.size();i++)
+	{
+		QVariant d;
+
+		qDebug() << v[i].type();
+	}
+
+
+	QApplication a(argc, argv);
+	MainWindow w;
+	w.show();
+	return a.exec();
 }

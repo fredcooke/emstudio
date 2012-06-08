@@ -95,4 +95,5 @@ void FlagView::passData(QVariantMap data)
 
 void FlagView::passDecoder(DataPacketDecoder *decoder)
 {
+	Q_UNUSED(decoder)
 }

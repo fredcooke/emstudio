@@ -463,7 +463,7 @@ void GaugeItem::drawBackground(QPainter *painter)
 		tmpPainter.setPen(QPen(QColor(255,0,0,255)));
 		//tmpPainter.drawEllipse(0,0,width(),height());
 		float counter = 0;
-		for (float i=internalWidth;i<=(width() - ((width() - internalWidth)/2));i+=0.1)
+		for (double i=internalWidth;i<=(width() - ((width() - internalWidth)/2));i+=0.1)
 		{
 			counter+=0.5;
 
