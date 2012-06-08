@@ -68,11 +68,11 @@ void PacketStatusView::passPacketNak(unsigned short locationid,QByteArray header
 			QString packettext="";
 			for (int j=0;j<header.size();j++)
 			{
-				packettext += ((header[j] <= 0xF) ? "0" : "") + QString::number(header[j],16).toUpper() + " ";
+				packettext += ((((unsigned char)header[j]) <= 0xF) ? "0" : "") + QString::number(((unsigned char)header[j]),16).toUpper() + " ";
 			}
 			for (int j=0;j<payload.size();j++)
 			{
-				packettext += ((payload[j] <= 0xF) ? "0" : "") + QString::number(payload[j],16).toUpper();
+				packettext += ((((unsigned char)payload[j]) <= 0xF) ? "0" : "") + QString::number(((unsigned char)payload[j]),16).toUpper();
 			}
 			ui.failedPacketTableWidget->setItem(ui.failedPacketTableWidget->rowCount()-1,2,new QTableWidgetItem(packettext));
 			return;
@@ -84,7 +84,7 @@ void PacketStatusView::passDecoderFailure(QByteArray packet)
 	QString packettext="";
 	for (int j=0;j<packet.size();j++)
 	{
-		packettext += ((packet[j] <= 0xF) ? "0" : "") + QString::number(packet[j],16).toUpper();
+		packettext += ((((unsigned char)packet[j]) <= 0xF) ? "0" : "") + QString::number(((unsigned char)packet[j]),16).toUpper();
 	}
 	ui.decoderFailureTableWidget->setRowCount(ui.decoderFailureTableWidget->rowCount()+1);
 	ui.decoderFailureTableWidget->setItem(ui.decoderFailureTableWidget->rowCount()-1,0,new QTableWidgetItem(packettext));
