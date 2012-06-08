@@ -35,8 +35,8 @@ void PacketStatusView::passPacketSent(unsigned short locationid,QByteArray heade
 	}
 	ui.packetCountTableWidget->setRowCount(ui.packetCountTableWidget->rowCount()+1);
 	ui.packetCountTableWidget->setItem(ui.packetCountTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(locationid,16).toUpper()));
-	ui.packetCountTableWidget->setItem(ui.packetCountTableWidget->rowCount()-1,0,new QTableWidgetItem("0"));
-	ui.packetCountTableWidget->setItem(ui.packetCountTableWidget->rowCount()-1,0,new QTableWidgetItem("0"));
+	ui.packetCountTableWidget->setItem(ui.packetCountTableWidget->rowCount()-1,1,new QTableWidgetItem("0"));
+	ui.packetCountTableWidget->setItem(ui.packetCountTableWidget->rowCount()-1,2,new QTableWidgetItem("0"));
 }
 
 void PacketStatusView::passPacketAck(unsigned short locationid,QByteArray header,QByteArray payload)
