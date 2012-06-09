@@ -169,10 +169,24 @@ void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,
 	{
 		//RAM
 		emsComms->updateBlockInRam(locationid,0,data.size(),data);
+		for (int i=0;i<m_ramRawBlockList.size();i++)
+		{
+			if (m_ramRawBlockList[i]->locationid == locationid)
+			{
+				m_ramRawBlockList[i]->data = data;
+			}
+		}
 	}
 	else if (physicallocation == 1)
 	{
 		//FLASH
+		for (int i=0;i<m_flashRawBlockList.size();i++)
+		{
+			if (m_flashRawBlockList[i]->locationid == locationid)
+			{
+				m_flashRawBlockList[i]->data = data;
+			}
+		}
 		emsComms->updateBlockInFlash(locationid,0,data.size(),data);
 	}
 }
