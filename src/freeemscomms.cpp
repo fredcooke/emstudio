@@ -1130,7 +1130,7 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 	{
 		//qDebug() << "Length found, buffer size:" << buffer.length() << "iloc:" << QString::number(iloc);
 		unsigned int length = buffer[iloc] << 8;
-		length += buffer[iloc+1];
+		length += (unsigned char)buffer[iloc+1];
 		//qDebug() << "Length:" << length;
 		iloc += 2;
 		//curr += length;
