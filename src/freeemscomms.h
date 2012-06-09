@@ -104,10 +104,10 @@ public:
 	void playLog();
 	void populateDataFields();
 	QByteArray generatePacket(QByteArray header,QByteArray payload);
-	int updateBlockInRam(int location,int offset, int size,QByteArray data);
-	int updateBlockInFlash(int location,int offset, int size,QByteArray data);
-	int retrieveBlockFromRam(int location, int offset, int size);
-	int retrieveBlockFromFlash(int location, int offset, int size);
+	int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
+	int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
+	int retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size);
+	int retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size);
 	void setInterByteSendDelay(int milliseconds);
 protected:
 	void run();

@@ -78,7 +78,7 @@ void FreeEmsComms::setBaud(int baudrate)
 {
 	serialThread->setBaud(baudrate);
 }
-int FreeEmsComms::updateBlockInRam(int location,int offset, int size,QByteArray data)
+int FreeEmsComms::updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)
 {
 	m_reqListMutex.lock();
 	RequestClass req;
@@ -93,7 +93,7 @@ int FreeEmsComms::updateBlockInRam(int location,int offset, int size,QByteArray 
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
-int FreeEmsComms::updateBlockInFlash(int location,int offset, int size,QByteArray data)
+int FreeEmsComms::updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)
 {
 	m_reqListMutex.lock();
 	RequestClass req;
@@ -153,7 +153,7 @@ int FreeEmsComms::getOperatingSystem()
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
-int FreeEmsComms::retrieveBlockFromFlash(int location, int offset, int size)
+int FreeEmsComms::retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size)
 {
 	m_reqListMutex.lock();
 	RequestClass req;
@@ -167,7 +167,7 @@ int FreeEmsComms::retrieveBlockFromFlash(int location, int offset, int size)
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
-int FreeEmsComms::retrieveBlockFromRam(int location, int offset, int size)
+int FreeEmsComms::retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size)
 {
 	m_reqListMutex.lock();
 	RequestClass req;
