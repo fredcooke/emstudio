@@ -52,8 +52,8 @@ void FreeEmsComms::connectSerial(QString port,int baud)
 {
 	RequestClass req;
 	req.type = SERIAL_CONNECT;
-	req.addArg(baud,sizeof(baud));
 	req.addArg(port);
+	req.addArg(baud,sizeof(baud));
 	m_reqListMutex.lock();
 	m_reqList.append(req);
 	m_reqListMutex.unlock();
