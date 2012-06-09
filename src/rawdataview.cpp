@@ -8,6 +8,7 @@ RawDataView::RawDataView(QWidget *parent) : QWidget(parent)
 }
 void RawDataView::setData(unsigned short locationid,QByteArray data)
 {
+	m_locationId = locationid;
 	ui.hexEditor->setData(data);
 	ui.locationIdLabel->setText("0x" + QString::number(locationid,16).toUpper());
 }
