@@ -19,6 +19,7 @@
 #include "freeemscomms.h"
 #include <QDebug>
 #include "freeemspacket.h"
+#define NAK 0x2
 FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 {
 	qRegisterMetaType<QList<unsigned short> >("QList<unsigned short>");
@@ -780,7 +781,7 @@ void FreeEmsComms::run()
 
 					if (payloadid == m_payloadWaitingForResponse+1)
 					{
-						if (packetpair.first[0] & 0x10)
+						if (packetpair.first[0] & NAK)
 						{
 							//NAK to our packet
 							unsigned short errornum = packetpair.second[0] << 8;
@@ -801,7 +802,7 @@ void FreeEmsComms::run()
 				if (payloadid == 0x0191)
 				{	//Datalog packet
 
-					if (packetpair.first[0] & 0x10)
+					if (packetpair.first[0] & NAK)
 					{
 						//NAK
 
@@ -815,7 +816,7 @@ void FreeEmsComms::run()
 				else if (payloadid == 0xEEEF)
 				{
 					//Decoder
-					if (!(packetpair.first[0] & 0x10))
+					if (!(packetpair.first[0] & NAK))
 					{
 						emit decoderName(QString(packetpair.second));
 					}
@@ -823,7 +824,7 @@ void FreeEmsComms::run()
 				else if (payloadid == 0xEEF1)
 				{
 					//Firmware build date
-					if (!(packetpair.first[0] & 0x10))
+					if (!(packetpair.first[0] & NAK))
 					{
 						emit firmwareBuild(QString(packetpair.second));
 					}
@@ -831,7 +832,7 @@ void FreeEmsComms::run()
 				else if (payloadid == 0xEEF3)
 				{
 					//Compiler Version
-					if (!(packetpair.first[0] & 0x10))
+					if (!(packetpair.first[0] & NAK))
 					{
 						emit compilerVersion(QString(packetpair.second));
 					}
@@ -839,7 +840,7 @@ void FreeEmsComms::run()
 				else if (payloadid == 0xEEF5)
 				{
 					//Operating System
-					if (!(packetpair.first[0] & 0x10))
+					if (!(packetpair.first[0] & NAK))
 					{
 						emit operatingSystem(QString(packetpair.second));
 					}
@@ -847,7 +848,7 @@ void FreeEmsComms::run()
 				else if (payloadid == 0xDA5F)
 				{
 					//Location ID List
-					if (packetpair.first[0] & 0x10)
+					if (packetpair.first[0] & NAK)
 					{
 					}
 					else
@@ -878,7 +879,7 @@ void FreeEmsComms::run()
 				}
 				else if (payloadid == 0xF8E1) //Location ID Info
 				{
-					if (packetpair.first[0] & 0x10)
+					if (packetpair.first[0] & NAK)
 					{
 					}
 					else
@@ -963,7 +964,7 @@ void FreeEmsComms::run()
 				else if (payloadid == 0x0001) //Interface version response
 				{
 					//Handle interface version
-					if (packetpair.first[0] & 0x10)
+					if (packetpair.first[0] & NAK)
 					{
 						//NAK
 						qDebug() << "IFACE VERSION NAK";
@@ -975,7 +976,7 @@ void FreeEmsComms::run()
 				}
 				else if (payloadid == 0x0003) //Firmware version response
 				{
-					if (packetpair.first[0] & 0x10)
+					if (packetpair.first[0] & NAK)
 					{
 						//NAK
 						qDebug() << "FIRMWARE VERSION NAK";
@@ -987,7 +988,7 @@ void FreeEmsComms::run()
 				}
 				else if (payloadid == 0x0107)
 				{
-					if (packetpair.first[0] & 0x10)
+					if (packetpair.first[0] & NAK)
 					{
 					}
 					else
@@ -998,7 +999,7 @@ void FreeEmsComms::run()
 				}
 				else if (payloadid == 0x0105)
 				{
-					if (packetpair.first[0] & 0x10)
+					if (packetpair.first[0] & NAK)
 					{
 					}
 					else
