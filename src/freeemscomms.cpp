@@ -754,287 +754,289 @@ void FreeEmsComms::run()
 		while (serialThread->bufferSize() != 0)
 		{
 			QByteArray packet = serialThread->readPacket();
-			//QString header;
-			//for (int i=0;i<3;i++)
-			//{
-			//	header += QString::number(packet[i]) + " ";
-			//}
-			//qDebug() << "First 4:" << header;
-			QPair<QByteArray,QByteArray> packetpair = parseBuffer(packet);
-			//qDebug() << "Parsed header size:" << packetpair.first.size();
-			if (packetpair.first.size() >= 3)
-			{
-				unsigned short payloadid = (unsigned short)packetpair.first[1] << 8;
-				payloadid += (unsigned char)packetpair.first[2];
-				//qDebug() << "Incoming packet. Payload:" << payloadid;
-
-				if (payloadid != 0x0191)
-				{
-					qDebug() << "Non debug packet:" << QString::number(payloadid);
-					if (m_waitingForResponse)
-					{
-						qDebug() << "Waiting for response: " << QString::number(m_payloadWaitingForResponse);
-					}
-
-				}
-				if (m_waitingForResponse)
-				{
-
-					if (payloadid == m_payloadWaitingForResponse+1)
-					{
-						if (packetpair.first[0] & NAK)
-						{
-							//NAK to our packet
-							unsigned short errornum = packetpair.second[0] << 8;
-							errornum += packetpair.second[1];
-							emit commandFailed(m_currentWaitingRequest.sequencenumber,errornum);
-							emit packetNaked(m_currentWaitingRequest.type,packetpair.first,packetpair.second,errornum);
-						}
-						else
-						{
-							//Packet is good.
-							emit commandSuccessful(m_currentWaitingRequest.sequencenumber);
-							emit packetAcked(m_currentWaitingRequest.type,packetpair.first,packetpair.second);
-						}
-						m_waitingForResponse = false;
-					}
-				}
-
-				if (payloadid == 0x0191)
-				{	//Datalog packet
-
-					if (packetpair.first[0] & NAK)
-					{
-						//NAK
-
-						//emit commandFailed(int sequencenumber,int errornum);
-					}
-					else
-					{
-						emit dataLogPayloadReceived(packetpair.first,packetpair.second);
-					}
-				}
-				else if (payloadid == 0xEEEF)
-				{
-					//Decoder
-					if (!(packetpair.first[0] & NAK))
-					{
-						emit decoderName(QString(packetpair.second));
-					}
-				}
-				else if (payloadid == 0xEEF1)
-				{
-					//Firmware build date
-					if (!(packetpair.first[0] & NAK))
-					{
-						emit firmwareBuild(QString(packetpair.second));
-					}
-				}
-				else if (payloadid == 0xEEF3)
-				{
-					//Compiler Version
-					if (!(packetpair.first[0] & NAK))
-					{
-						emit compilerVersion(QString(packetpair.second));
-					}
-				}
-				else if (payloadid == 0xEEF5)
-				{
-					//Operating System
-					if (!(packetpair.first[0] & NAK))
-					{
-						emit operatingSystem(QString(packetpair.second));
-					}
-				}
-				else if (payloadid == 0xDA5F)
-				{
-					//Location ID List
-					if (packetpair.first[0] & NAK)
-					{
-					}
-					else
-					{
-						//TODO double check to make sure that there aren't an odd number of items here...
-						qDebug() << "Location ID List";
-						QString details = "Details: {";
-						for (int j=0;j<packetpair.second.size();j++)
-						{
-							//details += ((packetpair.second[j] == 0) ? "0x0" : "0x");
-							details += "0x";
-							details += (((unsigned char)packetpair.second[j] < 0xF) ? "0" : "");
-							details += QString::number(packetpair.second[j],16);
-							details += ",";
-						}
-						details += "}";
-						qDebug() << details;
-						QList<unsigned short> idlist;
-						for (int j=0;j<packetpair.second.size();j+=2)
-						{
-							unsigned short tmp = 0;
-							tmp += packetpair.second[j] << 8;
-							tmp += packetpair.second[j+1];
-							idlist.append(tmp);
-						}
-						emit locationIdList(idlist);
-					}
-				}
-				else if (payloadid == 0xF8E1) //Location ID Info
-				{
-					if (packetpair.first[0] & NAK)
-					{
-					}
-					else
-					{
-						QString details = "Details: {";
-						for (int j=0;j<packetpair.second.size();j++)
-						{
-							//details += ((packetpair.second[j] == 0) ? "0x0" : "0x");
-							details += "0x";
-							details += (((unsigned char)packetpair.second[j] < 0xF) ? "0" : "");
-							details += QString::number(packetpair.second[j],16);
-							details += ",";
-						}
-						details += "}";
-
-						unsigned short locationid = m_currentWaitingRequest.args[0].toInt();
-						qDebug() << "Payload:" << QString::number(locationid,16);
-						qDebug() << details;
-						//TODO double check to make sure that there aren't an odd number of items here...
-						//QList<unsigned short> idlist;
-						QList<LocationIdFlags> flaglist;
-						if (packetpair.second.size() >= 2)
-						{
-							unsigned short test = packetpair.second[0] << 8;
-							unsigned short parent;
-							unsigned char rampage;
-							unsigned char flashpage;
-							unsigned short ramaddress;
-							unsigned short flashaddress;
-							unsigned short size;
-							test += packetpair.second[1];
-							qDebug() << "Location ID Info for location:" << QString::number(locationid,16) << "Flags:" << QString::number(test,16);
-							for (int j=0;j<m_blockFlagList.size();j++)
-							{
-								if (test & m_blockFlagList[j])
-								{
-									flaglist.append(m_blockFlagList[j]);
-								}
-							}
-							parent = packetpair.second[2] << 8;
-							parent += packetpair.second[3];
-							//if (test & BLOCK_IS_RAM && test & BLOCK_IS_FLASH)
-							//{
-								rampage = packetpair.second[4];
-								flashpage = packetpair.second[5];
-								ramaddress = packetpair.second[6] << 8;
-								ramaddress += packetpair.second[7];
-								flashaddress = packetpair.second[8] << 8;
-								flashaddress += packetpair.second[9];
-								size = packetpair.second[10] << 8;
-								size += packetpair.second[11];
-							/*}
-							else if (test & BLOCK_IS_RAM)
-							{
-								rampage = packetpair.second[4];
-								ramaddress = packetpair.second[5] << 8;
-								ramaddress += packetpair.second[6];
-								size = packetpair.second[7] << 8;
-								size += packetpair.second[8];
-
-							}
-							else if (test & BLOCK_IS_FLASH)
-							{
-								flashpage = packetpair.second[4];
-								flashaddress = packetpair.second[5] << 8;
-								flashaddress += packetpair.second[6];
-								size = packetpair.second[7] << 8;
-								size += packetpair.second[8];
-							}
-							else
-							{
-								size = packetpair.second[4] << 8;
-								size += packetpair.second[5];
-							}*/
-							emit locationIdInfo(locationid,test,flaglist,parent,rampage,flashpage,ramaddress,flashaddress,size);
-						}
-
-
-						//emit locationIdList(idlist);
-					}
-				}
-				else if (payloadid == 0x0001) //Interface version response
-				{
-					//Handle interface version
-					if (packetpair.first[0] & NAK)
-					{
-						//NAK
-						qDebug() << "IFACE VERSION NAK";
-					}
-					else
-					{
-						emit interfaceVersion(QString(packetpair.second));
-					}
-				}
-				else if (payloadid == 0x0003) //Firmware version response
-				{
-					if (packetpair.first[0] & NAK)
-					{
-						//NAK
-						qDebug() << "FIRMWARE VERSION NAK";
-					}
-					else
-					{
-						emit firmwareVersion(QString(packetpair.second));
-					}
-				}
-				else if (payloadid == 0x0107)
-				{
-					if (packetpair.first[0] & NAK)
-					{
-					}
-					else
-					{
-						unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
-						emit flashBlockRetrieved(locid,packetpair.first,packetpair.second);
-					}
-				}
-				else if (payloadid == 0x0105)
-				{
-					if (packetpair.first[0] & NAK)
-					{
-					}
-					else
-					{
-						//Block from ram is here.
-						unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
-						emit ramBlockRetrieved(locid,packetpair.first,packetpair.second);
-					}
-				}
-				else
-				{
-					emit unknownPacket(packetpair.first,packetpair.second);
-				}
-			}
-			else
-			{
-				//Header size is 2?
-				qDebug() << "Header size is only" << packetpair.first.length() << "! THIS SHOULD NOT HAPPEN!";
-				QString headerstring = "";
-				QString packetstring = "";
-				for (int i=0;i<packetpair.first.size();i++)
-				{
-					headerstring += QString::number((unsigned char)packetpair.first[i],16);
-				}
-				for (int i=0;i<packetpair.second.size();i++)
-				{
-					packetstring += QString::number((unsigned char)packetpair.first[i],16);
-				}
-				qDebug() << "Header:" << headerstring;
-				qDebug() << "Packet:" << packetstring;
-			}
+			Packet parsedPacket = parseBuffer(packet);
+			parsePacket(parsedPacket);
 		}
 	}
 }
+void FreeEmsComms::parsePacket(Packet parsedPacket)
+{
+	if (parsedPacket.isValid)
+	{
+		/*unsigned short payloadid = (unsigned short)packetpair.first[1] << 8;
+		payloadid += (unsigned char)packetpair.first[2];*/
+		unsigned short payloadid = parsedPacket.payloadid;
+		//qDebug() << "Incoming packet. Payload:" << payloadid;
+
+		if (payloadid != 0x0191)
+		{
+			qDebug() << "Non debug packet:" << QString::number(payloadid);
+			if (m_waitingForResponse)
+			{
+				qDebug() << "Waiting for response: " << QString::number(m_payloadWaitingForResponse);
+			}
+
+		}
+		if (m_waitingForResponse)
+		{
+
+			if (payloadid == m_payloadWaitingForResponse+1)
+			{
+				if (parsedPacket.isNAK)
+				{
+					//NAK to our packet
+
+					unsigned short errornum = parsedPacket.payload[0] << 8;
+					errornum += parsedPacket.payload[1];
+					emit commandFailed(m_currentWaitingRequest.sequencenumber,errornum);
+					emit packetNaked(m_currentWaitingRequest.type,parsedPacket.header,parsedPacket.payload,errornum);
+				}
+				else
+				{
+					//Packet is good.
+					emit commandSuccessful(m_currentWaitingRequest.sequencenumber);
+					emit packetAcked(m_currentWaitingRequest.type,parsedPacket.header,parsedPacket.payload);
+				}
+				m_waitingForResponse = false;
+			}
+		}
+
+		if (payloadid == 0x0191)
+		{	//Datalog packet
+
+			if (parsedPacket.isNAK)
+			{
+				//NAK
+
+				//emit commandFailed(int sequencenumber,int errornum);
+			}
+			else
+			{
+				emit dataLogPayloadReceived(parsedPacket.header,parsedPacket.payload);
+			}
+		}
+		else if (payloadid == 0xEEEF)
+		{
+			//Decoder
+			if (!(parsedPacket.isNAK))
+			{
+				emit decoderName(QString(parsedPacket.payload));
+			}
+		}
+		else if (payloadid == 0xEEF1)
+		{
+			//Firmware build date
+			if (!(parsedPacket.isNAK))
+			{
+				emit firmwareBuild(QString(parsedPacket.payload));
+			}
+		}
+		else if (payloadid == 0xEEF3)
+		{
+			//Compiler Version
+			if (!(parsedPacket.isNAK))
+			{
+				emit compilerVersion(QString(parsedPacket.payload));
+			}
+		}
+		else if (payloadid == 0xEEF5)
+		{
+			//Operating System
+			if (!(parsedPacket.isNAK))
+			{
+				emit operatingSystem(QString(parsedPacket.payload));
+			}
+		}
+		else if (payloadid == 0xDA5F)
+		{
+			//Location ID List
+			if (parsedPacket.isNAK)
+			{
+			}
+			else
+			{
+				//TODO double check to make sure that there aren't an odd number of items here...
+				qDebug() << "Location ID List";
+				QString details = "Details: {";
+				for (int j=0;j<parsedPacket.payload.size();j++)
+				{
+					//details += ((packetpair.second[j] == 0) ? "0x0" : "0x");
+					details += "0x";
+					details += (((unsigned char)parsedPacket.payload[j] < 0xF) ? "0" : "");
+					details += QString::number(parsedPacket.payload[j],16);
+					details += ",";
+				}
+				details += "}";
+				qDebug() << details;
+				QList<unsigned short> idlist;
+				for (int j=0;j<parsedPacket.payload.size();j+=2)
+				{
+					unsigned short tmp = 0;
+					tmp += parsedPacket.payload[j] << 8;
+					tmp += parsedPacket.payload[j+1];
+					idlist.append(tmp);
+				}
+				emit locationIdList(idlist);
+			}
+		}
+		else if (payloadid == 0xF8E1) //Location ID Info
+		{
+			if (parsedPacket.isNAK)
+			{
+			}
+			else
+			{
+				QString details = "Details: {";
+				for (int j=0;j<parsedPacket.payload.size();j++)
+				{
+					//details += ((packetpair.second[j] == 0) ? "0x0" : "0x");
+					details += "0x";
+					details += (((unsigned char)parsedPacket.payload[j] < 0xF) ? "0" : "");
+					details += QString::number(parsedPacket.payload[j],16);
+					details += ",";
+				}
+				details += "}";
+
+				unsigned short locationid = m_currentWaitingRequest.args[0].toInt();
+				qDebug() << "Payload:" << QString::number(locationid,16);
+				qDebug() << details;
+				//TODO double check to make sure that there aren't an odd number of items here...
+				//QList<unsigned short> idlist;
+				QList<LocationIdFlags> flaglist;
+				if (parsedPacket.payload.size() >= 2)
+				{
+					unsigned short test = parsedPacket.payload[0] << 8;
+					unsigned short parent;
+					unsigned char rampage;
+					unsigned char flashpage;
+					unsigned short ramaddress;
+					unsigned short flashaddress;
+					unsigned short size;
+					test += parsedPacket.payload[1];
+					qDebug() << "Location ID Info for location:" << QString::number(locationid,16) << "Flags:" << QString::number(test,16);
+					for (int j=0;j<m_blockFlagList.size();j++)
+					{
+						if (test & m_blockFlagList[j])
+						{
+							flaglist.append(m_blockFlagList[j]);
+						}
+					}
+					parent = parsedPacket.payload[2] << 8;
+					parent += parsedPacket.payload[3];
+					//if (test & BLOCK_IS_RAM && test & BLOCK_IS_FLASH)
+					//{
+						rampage = parsedPacket.payload[4];
+						flashpage = parsedPacket.payload[5];
+						ramaddress = parsedPacket.payload[6] << 8;
+						ramaddress += parsedPacket.payload[7];
+						flashaddress = parsedPacket.payload[8] << 8;
+						flashaddress += parsedPacket.payload[9];
+						size = parsedPacket.payload[10] << 8;
+						size += parsedPacket.payload[11];
+					/*}
+					else if (test & BLOCK_IS_RAM)
+					{
+						rampage = packetpair.second[4];
+						ramaddress = packetpair.second[5] << 8;
+						ramaddress += packetpair.second[6];
+						size = packetpair.second[7] << 8;
+						size += packetpair.second[8];
+
+					}
+					else if (test & BLOCK_IS_FLASH)
+					{
+						flashpage = packetpair.second[4];
+						flashaddress = packetpair.second[5] << 8;
+						flashaddress += packetpair.second[6];
+						size = packetpair.second[7] << 8;
+						size += packetpair.second[8];
+					}
+					else
+					{
+						size = packetpair.second[4] << 8;
+						size += packetpair.second[5];
+					}*/
+					emit locationIdInfo(locationid,test,flaglist,parent,rampage,flashpage,ramaddress,flashaddress,size);
+				}
+
+
+				//emit locationIdList(idlist);
+			}
+		}
+		else if (payloadid == 0x0001) //Interface version response
+		{
+			//Handle interface version
+			if (parsedPacket.isNAK)
+			{
+				//NAK
+				qDebug() << "IFACE VERSION NAK";
+			}
+			else
+			{
+				emit interfaceVersion(QString(parsedPacket.payload));
+			}
+		}
+		else if (payloadid == 0x0003) //Firmware version response
+		{
+			if (parsedPacket.isNAK)
+			{
+				//NAK
+				qDebug() << "FIRMWARE VERSION NAK";
+			}
+			else
+			{
+				emit firmwareVersion(QString(parsedPacket.payload));
+			}
+		}
+		else if (payloadid == 0x0107)
+		{
+			if (parsedPacket.isNAK)
+			{
+			}
+			else
+			{
+				unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
+				emit flashBlockRetrieved(locid,parsedPacket.header,parsedPacket.payload);
+			}
+		}
+		else if (payloadid == 0x0105)
+		{
+			if (parsedPacket.isNAK)
+			{
+			}
+			else
+			{
+				//Block from ram is here.
+				unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
+				emit ramBlockRetrieved(locid,parsedPacket.header,parsedPacket.payload);
+			}
+		}
+		else
+		{
+			emit unknownPacket(parsedPacket.header,parsedPacket.payload);
+		}
+	}
+	else
+	{
+		/*
+		//Header size is 2?
+		qDebug() << "Header size is only" << parsedPacket.header.length() << "! THIS SHOULD NOT HAPPEN!";
+		QString headerstring = "";
+		QString packetstring = "";
+		for (int i=0;i<parsedPacket.header.size();i++)
+		{
+			headerstring += QString::number((unsigned char)parsedPacket.header[i],16);
+		}
+		for (int i=0;i<parsedPacket.payload.size();i++)
+		{
+			packetstring += QString::number((unsigned char)parsedPacket.payload[i],16);
+		}
+		qDebug() << "Header:" << headerstring;
+		qDebug() << "Packet:" << packetstring;
+		*/
+	}
+}
+
 bool FreeEmsComms::sendSimplePacket(unsigned short payloadid)
 {
 	m_waitingForResponse = true;
@@ -1058,14 +1060,14 @@ void FreeEmsComms::setLogFileName(QString filename)
 	serialThread->setLogFileName(filename);
 }
 
-QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
+FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 {
 	if (buffer.size() <= 3)
 	{
 
 		qDebug() << "Not long enough to even contain a header!";
 		emit decoderFailure(buffer);
-		return QPair<QByteArray,QByteArray>();
+		return Packet(false);
 	}
 
 	//Trim off 0xAA and 0xCC from the start and end
@@ -1089,6 +1091,7 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 
 
 	//qDebug() << "Packet:" << QString::number(buffer[1],16) << QString::number(buffer[buffer.length()-2],16);
+	Packet retval;
 	QByteArray header;
 	//currPacket.clear();
 	//Parse the packet here
@@ -1115,6 +1118,7 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 	unsigned int payloadid = (unsigned int)buffer[iloc] << 8;
 
 	payloadid += (unsigned char)buffer[iloc+1];
+	retval.payloadid = payloadid;
 	//qDebug() << QString::number(payloadid,16);
 	//qDebug() << QString::number(buffer[iloc-1],16);
 	//qDebug() << QString::number(buffer[iloc],16);
@@ -1126,13 +1130,20 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 	{
 		//qDebug() << "Sequence number" << QString::number(currPacket[iloc]);
 		iloc += 1;
+		retval.hasseq = true;
+	}
+	else
+	{
+		retval.hasseq = false;
 	}
 	QByteArray payload;
 	if (len)
 	{
+		retval.haslength = true;
 		//qDebug() << "Length found, buffer size:" << buffer.length() << "iloc:" << QString::number(iloc);
 		unsigned int length = buffer[iloc] << 8;
 		length += (unsigned char)buffer[iloc+1];
+		retval.length = length;
 		//qDebug() << "Length:" << length;
 		iloc += 2;
 		//curr += length;
@@ -1140,12 +1151,13 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 		{
 			qDebug() << "Packet length should be:" << length + iloc << "But it is" << buffer.length();
 			emit decoderFailure(buffer);
-			return QPair<QByteArray,QByteArray>();
+			return Packet(false);
 		}
 		payload.append(buffer.mid(iloc,length));
 	}
 	else
 	{
+		retval.haslength = false;
 		//qDebug() << "Buffer length:" << buffer.length();
 		//qDebug() << "Attempted cut:" << buffer.length() - iloc;
 		payload.append(buffer.mid(iloc),(buffer.length()-iloc));
@@ -1167,8 +1179,24 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 	}
 	//qDebug() << output;
 	//Last byte of currPacket should be out checksum.
-
-	return QPair<QByteArray,QByteArray>(header,payload);
+	retval.header = header;
+	retval.payload = payload;
+	if (header[0] & NAK)
+	{
+		retval.isNAK = true;
+	}
+	else
+	{
+		retval.isNAK = false;
+	}
+	if (retval.header.size() >= 3)
+	{
+		return retval;
+	}
+	else
+	{
+		return Packet(false);
+	}
 	//qDebug() << "Got full packet. Header length:" << header.length() << "Payload length:" << payload.length();
 	/*for (int i=0;i<m_dataFieldList->size();i++)
 	{

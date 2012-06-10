@@ -70,6 +70,20 @@ public:
 		BLOCK_IS_LOOKUP_DATA=0x4000,
 		BLOCK_IS_CONFIGURATION=0x8000
 	};
+	class Packet
+	{
+	public:
+		Packet(bool valid = true) { isValid = valid; }
+		bool isNAK;
+		bool isValid;
+		QByteArray header;
+		QByteArray payload;
+		unsigned short payloadid;
+		unsigned short length;
+		bool haslength;
+		bool hasseq;
+		unsigned short sequencenum;
+	};
 
 	class RequestClass
 	{
@@ -152,7 +166,8 @@ signals:
 	//void updateBlockInRamSucceeded();
 public slots:
 private slots:
-	QPair<QByteArray,QByteArray> parseBuffer(QByteArray buffer);
+	Packet parseBuffer(QByteArray buffer);
+	void parsePacket(Packet parsedPacket);
 
 };
 
