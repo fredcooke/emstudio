@@ -54,6 +54,7 @@ public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
 private:
+	unsigned short m_currentRamLocationId;
 	QList<RawDataBlock*> m_ramRawBlockList;
 	QList<RawDataBlock*> m_flashRawBlockList;
 	QList<RawDataBlock*> m_deviceRamRawBlockList;
@@ -64,7 +65,7 @@ private:
 	EmsInfoView *emsInfo;
 	FlagView *dataFlags;
 	PacketStatusView *packetStatus;
-	QMap<unsigned short,RawDataView*> m_rawDataView;
+	QMap<unsigned short,QWidget*> m_rawDataView;
 	QMdiSubWindow *tablesMdiWindow;
 	QMdiSubWindow *emsMdiWindow;
 	QMdiSubWindow *flagsMdiWindow;

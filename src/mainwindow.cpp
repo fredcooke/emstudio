@@ -26,6 +26,7 @@
 #include <tableview2d.h>
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+	m_currentRamLocationId=0;
 	//populateDataFields();
 	m_localRamDirty = false;
 	m_localFlashDirty = false;
@@ -212,14 +213,19 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 		{
 			if (m_rawDataView.contains(locid))
 			{
-				m_rawDataView[locid]->show();
-				m_rawDataView[locid]->setData(locid,m_ramRawBlockList[i]->data);
-				m_rawDataView[locid]->show();
+				if (type != 1)
+				{
+
+					m_rawDataView[locid]->show();
+					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_ramRawBlockList[i]->data);
+					m_rawDataView[locid]->show();
+				}
 			}
 			else
 			{
 				if (type == 1)
 				{
+					qDebug() << "Creating new table view for location: 0x" << QString::number(locid,16).toUpper();
 					TableView2D *view = new TableView2D();
 					view->passData(locid,m_ramRawBlockList[i]->data,0);
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
@@ -227,7 +233,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
 					win->setGeometry(view->geometry());
-					//m_rawDataView[locid] = view;
+					m_rawDataView[locid] = view;
 					win->show();
 				}
 				else
@@ -252,9 +258,13 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 		{
 			if (m_rawDataView.contains(locid))
 			{
-				m_rawDataView[locid]->show();
-				m_rawDataView[locid]->setData(locid,m_ramRawBlockList[i]->data);
-				m_rawDataView[locid]->show();
+				if (type != -1)
+				{
+					m_rawDataView[locid]->show();
+					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_ramRawBlockList[i]->data);
+					//m_rawDataView[locid]->setData(locid,m_ramRawBlockList[i]->data);
+					m_rawDataView[locid]->show();
+				}
 			}
 			else
 			{
@@ -267,7 +277,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 					win->setWindowTitle("Flash Location 0x" + QString::number(locid,16).toUpper());
 					win->setGeometry(view->geometry());
-					//m_rawDataView[locid] = view;
+					m_rawDataView[locid] = view;
 					win->show();
 				}
 				else
@@ -308,12 +318,13 @@ void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int p
 	}
 
 	qDebug() << "Requesting to update ram location:" << QString::number(locationid,16).toUpper();
+	m_currentRamLocationId = locationid;
 	emsComms->updateBlockInRam(locationid,0,data.size(),data);
 }
 
 void MainWindow::rawDataViewDestroyed(QObject *object)
 {
-	QMap<unsigned short,RawDataView*>::const_iterator i = m_rawDataView.constBegin();
+	QMap<unsigned short,QWidget*>::const_iterator i = m_rawDataView.constBegin();
 	while( i != m_rawDataView.constEnd())
 	{
 		if (i.value() == object)
@@ -737,7 +748,7 @@ void MainWindow::checkRamFlashSync()
 		//Inital check, populate.
 		for (int i=0;i<m_deviceRamRawBlockList.size();i++)
 		{
-			m_ramRawBlockList.append(m_deviceRamRawBlockList[i]);
+			m_ramRawBlockList.append(new RawDataBlock(*m_deviceRamRawBlockList[i]));
 			if (hasDeviceFlashBlock(m_deviceRamRawBlockList[i]->locationid))
 			{
 				if (getDeviceFlashBlock(m_deviceRamRawBlockList[i]->locationid) != m_deviceRamRawBlockList[i]->data)
@@ -749,7 +760,7 @@ void MainWindow::checkRamFlashSync()
 		}
 		for (int i=0;i<m_deviceFlashRawBlockList.size();i++)
 		{
-			m_flashRawBlockList.append(m_deviceFlashRawBlockList[i]);
+			m_flashRawBlockList.append(new RawDataBlock(*m_deviceFlashRawBlockList[i]));
 		}
 	}
 	else
@@ -816,6 +827,39 @@ void MainWindow::checkRamFlashSync()
 void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 {
 	qDebug() << "command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
+	if (m_currentRamLocationId != 0)
+	{
+		for (int i=0;i<m_ramRawBlockList.size();i++)
+		{
+			if (m_ramRawBlockList[i]->locationid == m_currentRamLocationId)
+			{
+				for (int j=0;j<m_deviceRamRawBlockList.size();j++)
+				{
+					if (m_deviceRamRawBlockList[j]->locationid == m_ramRawBlockList[i]->locationid)
+					{
+						qDebug() << "Data reverted! for location id 0x" + QString::number(m_ramRawBlockList[i]->locationid,16);
+						if (m_ramRawBlockList[i]->data == m_deviceRamRawBlockList[j]->data)
+						{
+							qDebug() << "Data valid. No need for a revert.";
+						}
+						else
+						{
+							qDebug() << "Invalid data, reverting...";
+							m_ramRawBlockList[i]->data = m_deviceRamRawBlockList[j]->data;
+							if (m_ramRawBlockList[i]->data != m_deviceRamRawBlockList[j]->data)
+							{
+								qDebug() << "Failed to revert!!!";
+							}
+						}
+
+						break;
+					}
+				}
+				break;
+			}
+		}
+		m_currentRamLocationId = 0;
+	}
 	if (m_locIdMsgList.contains(sequencenumber))
 	{
 		m_locIdMsgList.removeOne(sequencenumber);
