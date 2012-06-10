@@ -338,6 +338,7 @@ bool FreeEmsComms::sendPacket(unsigned short payloadid,QList<QVariant> arglist,Q
 	{
 		return false;
 	}
+	emit packetSent(payloadid,header,payload);
 	return true;
 }
 
@@ -787,7 +788,7 @@ void FreeEmsComms::run()
 							unsigned short errornum = packetpair.second[0] << 8;
 							errornum += packetpair.second[1];
 							emit commandFailed(m_currentWaitingRequest.sequencenumber,errornum);
-							emit packetNaked(m_currentWaitingRequest.type,packetpair.first,packetpair.second);
+							emit packetNaked(m_currentWaitingRequest.type,packetpair.first,packetpair.second,errornum);
 						}
 						else
 						{
