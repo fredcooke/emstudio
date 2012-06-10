@@ -23,6 +23,7 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QSettings>
+#include <tableview2d.h>
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	//populateDataFields();
@@ -217,14 +218,27 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 			}
 			else
 			{
-				RawDataView *view = new RawDataView();
-				view->setData(locid,m_ramRawBlockList[i]->data);
-				connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
-				connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-				QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-				win->setGeometry(view->geometry());
-				m_rawDataView[locid] = view;
-				win->show();
+				if (type == 1)
+				{
+					TableView2D *view = new TableView2D();
+					view->passData(m_ramRawBlockList[i]->data);
+					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setGeometry(view->geometry());
+					//m_rawDataView[locid] = view;
+					win->show();
+				}
+				else
+				{
+					RawDataView *view = new RawDataView();
+					view->setData(locid,m_ramRawBlockList[i]->data);
+					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setGeometry(view->geometry());
+					m_rawDataView[locid] = view;
+					win->show();
+				}
 			}
 			return;
 		}

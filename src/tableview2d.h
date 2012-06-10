@@ -10,7 +10,7 @@ class TableView2D : public QWidget
 public:
 	explicit TableView2D(QWidget *parent = 0);
 	~TableView2D();
-	
+	void passData(QByteArray data);
 private:
 	Ui::TableView2D ui;
 };
