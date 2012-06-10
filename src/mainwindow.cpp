@@ -221,9 +221,11 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				if (type == 1)
 				{
 					TableView2D *view = new TableView2D();
-					view->passData(m_ramRawBlockList[i]->data);
+					view->passData(locid,m_ramRawBlockList[i]->data,0);
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
 					win->setGeometry(view->geometry());
 					//m_rawDataView[locid] = view;
 					win->show();
@@ -235,6 +237,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setWindowTitle("Ram Location: 0x" + QString::number(locid,16).toUpper());
 					win->setGeometry(view->geometry());
 					m_rawDataView[locid] = view;
 					win->show();
@@ -255,14 +258,30 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 			}
 			else
 			{
-				RawDataView *view = new RawDataView();
-				view->setData(locid,m_flashRawBlockList[i]->data);
-				connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-				connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
-				QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-				win->setGeometry(view->geometry());
-				m_rawDataView[locid] = view;
-				win->show();
+				if (type == 1)
+				{
+					TableView2D *view = new TableView2D();
+					view->passData(locid,m_ramRawBlockList[i]->data,0);
+					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setWindowTitle("Flash Location 0x" + QString::number(locid,16).toUpper());
+					win->setGeometry(view->geometry());
+					//m_rawDataView[locid] = view;
+					win->show();
+				}
+				else
+				{
+					RawDataView *view = new RawDataView();
+					view->setData(locid,m_flashRawBlockList[i]->data);
+					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setWindowTitle("Flash Location: 0x" + QString::number(locid,16).toUpper());
+					win->setGeometry(view->geometry());
+					m_rawDataView[locid] = view;
+					win->show();
+				}
 			}
 			return;
 		}
