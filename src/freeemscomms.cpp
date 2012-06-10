@@ -1062,7 +1062,7 @@ void FreeEmsComms::setLogFileName(QString filename)
 
 FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 {
-	if (buffer.size() <= 3)
+	if (buffer.size() <= 2)
 	{
 
 		qDebug() << "Not long enough to even contain a header!";
