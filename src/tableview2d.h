@@ -15,8 +15,11 @@ private:
 	Ui::TableView2D ui;
 	unsigned short m_locationid;
 	int m_physicalid;
+	unsigned short currentvalue;
 private slots:
 	void saveClicked();
+	void tableCellChanged(int row,int column);
+	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
 signals:
 	void saveData(unsigned short locationid,QByteArray data,int phyiscallocation);
 };

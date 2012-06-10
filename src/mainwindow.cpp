@@ -299,6 +299,14 @@ void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int p
 			}
 		}
 	}
+	for (int i=0;i<m_ramRawBlockList.size();i++)
+	{
+		if (m_ramRawBlockList[i]->locationid == locationid)
+		{
+			m_ramRawBlockList[i]->data = data;
+		}
+	}
+
 	qDebug() << "Requesting to update ram location:" << QString::number(locationid,16).toUpper();
 	emsComms->updateBlockInRam(locationid,0,data.size(),data);
 }
