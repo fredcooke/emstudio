@@ -17,7 +17,7 @@ PacketStatusView::PacketStatusView(QWidget *parent) : QWidget(parent)
 	ui.failedPacketTableWidget->setColumnWidth(1,50);
 	ui.failedPacketTableWidget->setColumnWidth(2,500);
 	ui.failedPacketTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("Payload ID"));
-	ui.failedPacketTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Count"));
+	ui.failedPacketTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Errornum"));
 	ui.failedPacketTableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("Packet Contents"));
 
 	ui.decoderFailureTableWidget->setColumnCount(1);
@@ -28,13 +28,13 @@ void PacketStatusView::passPacketSent(unsigned short locationid,QByteArray heade
 {
 	for (int i=0;i<ui.packetCountTableWidget->rowCount();i++)
 	{
-		if (ui.packetCountTableWidget->item(i,0)->text() == QString::number(locationid,16).toUpper())
+		if (ui.packetCountTableWidget->item(i,0)->text() == QString("0x") + QString::number(locationid,16).toUpper())
 		{
 			return;
 		}
 	}
 	ui.packetCountTableWidget->setRowCount(ui.packetCountTableWidget->rowCount()+1);
-	ui.packetCountTableWidget->setItem(ui.packetCountTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(locationid,16).toUpper()));
+	ui.packetCountTableWidget->setItem(ui.packetCountTableWidget->rowCount()-1,0,new QTableWidgetItem(QString("0x") + QString::number(locationid,16).toUpper()));
 	ui.packetCountTableWidget->setItem(ui.packetCountTableWidget->rowCount()-1,1,new QTableWidgetItem("0"));
 	ui.packetCountTableWidget->setItem(ui.packetCountTableWidget->rowCount()-1,2,new QTableWidgetItem("0"));
 }
@@ -43,7 +43,7 @@ void PacketStatusView::passPacketAck(unsigned short locationid,QByteArray header
 {
 	for (int i=0;i<ui.packetCountTableWidget->rowCount();i++)
 	{
-		if (ui.packetCountTableWidget->item(i,0)->text() == QString::number(locationid,16).toUpper())
+		if (ui.packetCountTableWidget->item(i,0)->text() == QString("0x") + QString::number(locationid,16).toUpper())
 		{
 			int count = ui.packetCountTableWidget->item(i,1)->text().toInt();
 			count++;
@@ -53,15 +53,16 @@ void PacketStatusView::passPacketAck(unsigned short locationid,QByteArray header
 	}
 }
 
-void PacketStatusView::passPacketNak(unsigned short locationid,QByteArray header,QByteArray payload)
+void PacketStatusView::passPacketNak(unsigned short locationid,QByteArray header,QByteArray payload,unsigned short errornum)
 {
 	for (int i=0;i<ui.packetCountTableWidget->rowCount();i++)
 	{
-		if (ui.packetCountTableWidget->item(i,0)->text() == QString::number(locationid,16).toUpper())
+		if (ui.packetCountTableWidget->item(i,0)->text() == QString("0x") + QString::number(locationid,16).toUpper())
 		{
-			int count = ui.packetCountTableWidget->item(i,2)->text().toInt();
-			count++;
-			ui.packetCountTableWidget->item(i,1)->setText(QString::number(count));
+			//int count = ui.packetCountTableWidget->item(i,2)->text().toInt();
+			//count++;
+			//ui.packetCountTableWidget->item(i,1)->setText(QString::number(count));
+			ui.packetCountTableWidget->item(i,1)->setText(QString::number(QString("0x") + QString::number(errornum,16).toUpper()));
 			ui.failedPacketTableWidget->setRowCount(ui.failedPacketTableWidget->rowCount()+1);
 			ui.failedPacketTableWidget->setItem(ui.failedPacketTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(locationid,16).toUpper()));
 			ui.failedPacketTableWidget->setItem(ui.failedPacketTableWidget->rowCount()-1,1,new QTableWidgetItem("0"));

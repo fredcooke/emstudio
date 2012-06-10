@@ -13,7 +13,7 @@ public:
 public slots:
 	void passPacketSent(unsigned short locationid,QByteArray header,QByteArray payload);
 	void passPacketAck(unsigned short locationid,QByteArray header,QByteArray payload);
-	void passPacketNak(unsigned short locationid,QByteArray header,QByteArray payload);
+	void passPacketNak(unsigned short locationid,QByteArray header,QByteArray payload,unsigned short errornum);
 	void passDecoderFailure(QByteArray packet);
 protected:
 	void closeEvent(QCloseEvent *event);

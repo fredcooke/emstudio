@@ -180,7 +180,7 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,unsigned short rawFla
  ui.locationIdInfoTableWidget->setHorizontalHeaderItem(12,new QTableWidgetItem("Is Verified"));
  ui.locationIdInfoTableWidget->setHorizontalHeaderItem(13,new QTableWidgetItem("For Backup"));
  ui.locationIdInfoTableWidget->setHorizontalHeaderItem(14,new QTableWidgetItem("Table Type"));*/
-	qDebug() << "Location ID Info for:" << QString::number(locationid,16);
+	qDebug() << "Location ID Info for:" << "0x" + QString::number(locationid,16).toUpper();
 	//bool found = false;
 	int foundi = -1;
 
@@ -196,13 +196,13 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,unsigned short rawFla
 	{*/
 	ui.locationIdInfoTableWidget->setRowCount(ui.locationIdInfoTableWidget->rowCount()+1);
 	foundi = ui.locationIdInfoTableWidget->rowCount()-1;
-	ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem("0x" + QString::number(locationid,16).toUpper()));
+	ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem("0x" + QString::number(locationisd,16).toUpper()));
 	for (int i=1;i<16;i++)
 	{
 		ui.locationIdInfoTableWidget->setItem(foundi,i,new QTableWidgetItem(""));
 	}
 	//}
-	ui.locationIdInfoTableWidget->item(foundi,1)->setText(QString::number(rawFlags));
+	ui.locationIdInfoTableWidget->item(foundi,1)->setText("0x" + QString::number(rawFlags,16).toUpper());
 
 	if (flags.contains(FreeEmsComms::BLOCK_IS_2D_TABLE))
 	{
@@ -277,7 +277,7 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,unsigned short rawFla
 	if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
 	{
 		ui.locationIdInfoTableWidget->item(foundi,8)->setText("True");
-		ui.locationIdInfoTableWidget->item(foundi,2)->setText(QString::number(parent));
+		ui.locationIdInfoTableWidget->item(foundi,2)->setText("0x" + QString::number(parent,16).toUpper());
 	}
 	else
 	{

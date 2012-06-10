@@ -127,7 +127,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	packetStatus = new PacketStatusView();
 	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
 	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
 	packetStatusMdiWindow = ui.mdiArea->addSubWindow(packetStatus);
 	packetStatusMdiWindow->setGeometry(packetStatus->geometry());
@@ -266,6 +266,7 @@ void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int p
 			}
 		}
 	}
+	qDebug() << "Requesting to update ram location:" << QString::number(locationid,16).toUpper();
 	emsComms->updateBlockInRam(locationid,0,data.size(),data);
 }
 
@@ -773,7 +774,7 @@ void MainWindow::checkRamFlashSync()
 
 void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 {
-	qDebug() << "command failed:" << QString::number(sequencenumber) << QString::number(errornum,16);
+	qDebug() << "command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
 	if (m_locIdMsgList.contains(sequencenumber))
 	{
 		m_locIdMsgList.removeOne(sequencenumber);

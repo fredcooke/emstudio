@@ -127,7 +127,7 @@ private:
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);
 	void packetAcked(unsigned short locationid,QByteArray header,QByteArray payload);
-	void packetNaked(unsigned short locationid,QByteArray header,QByteArray payload);
+	void packetNaked(unsigned short locationid,QByteArray header,QByteArray payload,unsigned short errornum);
 	void decoderFailure(QByteArray packet);
 	void decoderName(QString name);
 	void firmwareBuild(QString date);
