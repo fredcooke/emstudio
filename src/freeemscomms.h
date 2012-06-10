@@ -112,6 +112,7 @@ public:
 protected:
 	void run();
 private:
+
 	qint64 m_timeoutMsecs;
 	QList<LocationIdFlags> m_blockFlagList;
 	int m_sequenceNumber;

@@ -1069,8 +1069,8 @@ QPair<QByteArray,QByteArray> FreeEmsComms::parseBuffer(QByteArray buffer)
 	}
 
 	//Trim off 0xAA and 0xCC from the start and end
-	buffer = buffer.mid(1); //Strip off start byte
-	buffer = buffer.mid(0,buffer.length()-2); //Strip off stop byte and checksum. We know the packet is good already.
+	//buffer = buffer.mid(1); //Strip off start byte
+	//buffer = buffer.mid(0,buffer.length()-2); //Strip off stop byte and checksum. We know the packet is good already.
 
 
 	//Old location of checksum. now in serialthread.cpp

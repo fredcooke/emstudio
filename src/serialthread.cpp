@@ -116,7 +116,7 @@ void SerialThread::readSerial(int timeout)
 					m_inescape = false;
 					qbuffer.clear();
 				}
-				qbuffer.append(buffer[i]);
+				//qbuffer.append(buffer[i]);
 				//qDebug() << "Start of packet";
 				//Start of packet
 				m_inpacket = true;
@@ -126,7 +126,7 @@ void SerialThread::readSerial(int timeout)
 				//qDebug() << "End of packet. Size:" << qbuffer.size();
 				//End of packet
 				m_inpacket = false;
-				qbuffer.append(buffer[i]);
+				//qbuffer.append(buffer[i]);
 
 				//m_logFile->flush();
 				//emit parseBuffer(qbuffer);
@@ -134,20 +134,20 @@ void SerialThread::readSerial(int timeout)
 
 				//New Location of checksum
 				unsigned char sum = 0;
-				for (int i=1;i<qbuffer.size()-2;i++)
+				for (int i=0;i<qbuffer.size()-1;i++)
 				{
 					sum += qbuffer[i];
 				}
 				//qDebug() << "Payload sum:" << QString::number(sum);
 				//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
-				if (sum != (unsigned char)qbuffer[qbuffer.size()-2])
+				if (sum != (unsigned char)qbuffer[qbuffer.size()-1])
 				{
 					qDebug() << "BAD CHECKSUM!";
 					//return QPair<QByteArray,QByteArray>();
 				}
 				else
 				{
-					m_queuedMessages.append(qbuffer);
+					m_queuedMessages.append(qbuffer.mid(0,qbuffer.length()-1));
 				}
 				//return qbuffer;
 				QString output;
