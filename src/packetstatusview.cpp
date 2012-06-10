@@ -62,7 +62,7 @@ void PacketStatusView::passPacketNak(unsigned short locationid,QByteArray header
 			//int count = ui.packetCountTableWidget->item(i,2)->text().toInt();
 			//count++;
 			//ui.packetCountTableWidget->item(i,1)->setText(QString::number(count));
-			ui.packetCountTableWidget->item(i,1)->setText(QString::number(QString("0x") + QString::number(errornum,16).toUpper()));
+			ui.packetCountTableWidget->item(i,1)->setText(QString("0x") + QString::number(errornum,16).toUpper());
 			ui.failedPacketTableWidget->setRowCount(ui.failedPacketTableWidget->rowCount()+1);
 			ui.failedPacketTableWidget->setItem(ui.failedPacketTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(locationid,16).toUpper()));
 			ui.failedPacketTableWidget->setItem(ui.failedPacketTableWidget->rowCount()-1,1,new QTableWidgetItem("0"));
