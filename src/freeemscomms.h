@@ -114,6 +114,7 @@ public:
 	int hardReset();
 	bool sendSimplePacket(unsigned short payload);
 	void connectSerial(QString port,int baud);
+	void disconnectSerial();
 	void loadLog(QString filename);
 	void playLog();
 	void populateDataFields();
@@ -149,6 +150,7 @@ signals:
 	void compilerVersion(QString version);
 	void operatingSystem(QString os);
 	void connected();
+	void disconnected();
 	void locationIdList(QList<unsigned short> idlist);
 	void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void ramBlockRetrieved(unsigned short locationid, QByteArray header,QByteArray payload);

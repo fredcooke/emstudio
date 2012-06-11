@@ -42,6 +42,7 @@ public:
     void setPort(QString portname);
     void setBaud(int baudrate);
     int openPort(QString portName,int baudrate);
+    void closePort();
     QByteArray readPacket();
     void readSerial(int timeout);
     int writePacket(QByteArray packet);

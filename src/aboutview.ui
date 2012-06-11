@@ -28,7 +28,7 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>Git Commit ID</string>
+         <string>Git Commit Version</string>
         </property>
        </widget>
       </item>

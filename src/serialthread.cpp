@@ -373,6 +373,14 @@ void SerialThread::run()
 {
 
 }*/
+void SerialThread::closePort()
+{
+#ifdef Q_OS_WIN32
+	CloseHandle(m_portHandle);
+#else
+	close(m_portHandle);
+#endif
+}
 
 int SerialThread::openPort(QString portName,int baudrate)
 {

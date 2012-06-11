@@ -49,6 +49,15 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 	m_blockFlagList.append(BLOCK_IS_CONFIGURATION);
 
 }
+void FreeEmsComms::disconnectSerial()
+{
+	RequestClass req;
+	req.type = SERIAL_DISCONNECT;
+	m_reqListMutex.lock();
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+}
+
 void FreeEmsComms::connectSerial(QString port,int baud)
 {
 	RequestClass req;
@@ -448,6 +457,13 @@ void FreeEmsComms::run()
 			else if (!serialconnected)
 			{
 				continue;
+			}
+			else if (m_threadReqList[i].type == SERIAL_DISCONNECT)
+			{
+				emit debugVerbose("SERIAL_DISCONNECT");
+				serialThread->closePort();
+				serialconnected = false;
+				emit disconnected();
 			}
 			else if (m_threadReqList[i].type == GET_LOCATION_ID_LIST)
 			{

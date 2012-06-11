@@ -110,8 +110,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 
 	aboutView = new AboutView();
-	aboutView->setHash(define2string(GIT_COMMIT));
-	aboutView->setCommit(define2string(GIT_HASH));
+	aboutView->setHash(define2string(GIT_HASH));
+	aboutView->setCommit(define2string(GIT_COMMIT));
 	aboutMdiWindow = ui.mdiArea->addSubWindow(aboutView);
 	aboutMdiWindow->setGeometry(aboutView->geometry());
 	aboutMdiWindow->hide();
@@ -539,10 +539,12 @@ void MainWindow::menu_settingsClicked()
 void MainWindow::menu_connectClicked()
 {
 	ui.actionConnect->setEnabled(false);
+	emsComms->connectSerial(m_comPort,m_comBaud);
 }
 
 void MainWindow::menu_disconnectClicked()
 {
+	emsComms->disconnectSerial();
 	ui.actionConnect->setEnabled(true);
 	ui.actionDisconnect->setEnabled(false);
 }
