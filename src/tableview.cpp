@@ -23,8 +23,8 @@ TableView::TableView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
 	ui.tableWidget->setColumnCount(2);
-	ui.tableWidget->setColumnWidth(0,150);
-	ui.tableWidget->setColumnWidth(1,50);
+	ui.tableWidget->setColumnWidth(0,300);
+	ui.tableWidget->setColumnWidth(1,100);
 	guiUpdateTimer = new QTimer(this);
 	connect(guiUpdateTimer,SIGNAL(timeout()),this,SLOT(guiUpdateTimerTick()));
 	guiUpdateTimer->start(250);
