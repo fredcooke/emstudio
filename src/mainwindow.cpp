@@ -550,6 +550,10 @@ void MainWindow::settingsSaveClicked()
 	m_comBaud = comSettingsWidget->getBaud();
 	m_comPort = comSettingsWidget->getComPort();
 	m_comInterByte = comSettingsWidget->getInterByteDelay();
+	/*if (!subwin)
+	{
+		subwin->deleteLater();
+	}*/
 	comSettingsWidget->hide();
 	QSettings settings("freeems","freetune");
 	settings.beginGroup("comms");
@@ -557,7 +561,10 @@ void MainWindow::settingsSaveClicked()
 	settings.setValue("baud",m_comBaud);
 	settings.setValue("interbytedelay",m_comInterByte);
 	settings.endGroup();
+	QMdiSubWindow *subwin = qobject_cast<QMdiSubWindow*>(comSettingsWidget->parent());
+	ui.mdiArea->removeSubWindow(subwin);
 	comSettingsWidget->deleteLater();
+
 }
 void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
 {
@@ -583,6 +590,8 @@ void MainWindow::settingsCancelClicked()
 	//comSettings->hide();
 	ComSettings *comSettingsWidget = qobject_cast<ComSettings*>(sender());
 	comSettingsWidget->hide();
+	QMdiSubWindow *subwin = qobject_cast<QMdiSubWindow*>(comSettingsWidget->parent());
+	ui.mdiArea->removeSubWindow(subwin);
 	comSettingsWidget->deleteLater();
 }
 void MainWindow::menu_windows_GaugesClicked()
