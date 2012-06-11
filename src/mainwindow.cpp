@@ -29,7 +29,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_currentRamLocationId=0;
 	//populateDataFields();
 	m_localRamDirty = false;
-	m_localFlashDirty = false;
 	m_deviceFlashDirty = false;
 	ui.setupUi(this);
 	ui.actionDisconnect->setEnabled(false);
@@ -299,16 +298,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 }
 void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation)
 {
-	for (int i=0;i<m_flashRawBlockList.size();i++)
-	{
-		if (m_flashRawBlockList[i]->locationid == locationid)
-		{
-			if (m_flashRawBlockList[i]->data != data)
-			{
-				markFlashDirty();
-			}
-		}
-	}
+	markRamDirty();
 	for (int i=0;i<m_ramRawBlockList.size();i++)
 	{
 		if (m_ramRawBlockList[i]->locationid == locationid)
@@ -349,11 +339,6 @@ void MainWindow::markRamDirty()
 	m_localRamDirty = true;
 	emsInfo->setLocalRam(true);
 }
-void MainWindow::markFlashDirty()
-{
-	m_localFlashDirty = true;
-	emsInfo->setLocalFlash(true);
-}
 void MainWindow::markDeviceFlashDirty()
 {
 	m_deviceFlashDirty = true;
@@ -363,11 +348,6 @@ void MainWindow::markRamClean()
 {
 	m_localRamDirty = false;
 	emsInfo->setLocalRam(false);
-}
-void MainWindow::markFlashClean()
-{
-	m_localFlashDirty = false;
-	emsInfo->setLocalFlash(false);
 }
 void MainWindow::markDeviceFlashClean()
 {
@@ -742,6 +722,11 @@ void MainWindow::checkSyncRequest()
 void MainWindow::commandSuccessful(int sequencenumber)
 {
 	qDebug() << "command succesful:" << QString::number(sequencenumber);
+	if (m_currentRamLocationId != 0)
+	{
+		checkRamFlashSync();
+		return;
+	}
 	if (m_locIdMsgList.contains(sequencenumber))
 	{
 		m_locIdMsgList.removeOne(sequencenumber);
@@ -811,7 +796,8 @@ void MainWindow::checkRamFlashSync()
 			{
 				if (getLocalFlashBlock(m_ramRawBlockList[i]->locationid) != m_ramRawBlockList[i]->data)
 				{
-					markFlashDirty();
+					//This does not matter!
+					//markFlashDirty();
 					localFlashDirty = true;
 				}
 			}
@@ -819,10 +805,6 @@ void MainWindow::checkRamFlashSync()
 			{
 				//Local does not have a flash location to match this ram location. This is normal.
 			}
-		}
-		if (!localFlashDirty)
-		{
-			markFlashClean();
 		}
 		if (!localRamDirty)
 		{
@@ -892,6 +874,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 			}
 		}
 		m_currentRamLocationId = 0;
+		checkRamFlashSync();
 	}
 	if (m_locIdMsgList.contains(sequencenumber))
 	{

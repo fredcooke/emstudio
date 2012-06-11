@@ -17,7 +17,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,0">
+      <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="2,1">
        <item>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
@@ -72,13 +72,6 @@
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>Local Flash</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QLabel" name="label_5">
                <property name="text">
                 <string>Device Flash</string>
@@ -91,9 +84,6 @@
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
               <widget class="QLineEdit" name="localRamLineEdit"/>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="localFlashLineEdit"/>
              </item>
              <item>
               <widget class="QLineEdit" name="deviceFlashLineEdit"/>

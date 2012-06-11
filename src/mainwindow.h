@@ -89,13 +89,10 @@ private:
 	QString m_interfaceVersion;
 	QFile *logfile;
 	void markRamDirty();
-	void markFlashDirty();
 	void markDeviceFlashDirty();
 	void markRamClean();
-	void markFlashClean();
 	void markDeviceFlashClean();
 	bool m_localRamDirty;
-	bool m_localFlashDirty;
 	bool m_deviceFlashDirty;
 	bool hasDeviceRamBlock(unsigned short id);
 	bool hasDeviceFlashBlock(unsigned short id);

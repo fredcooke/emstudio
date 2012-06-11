@@ -61,27 +61,15 @@ EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 	connect(ui.checkSyncButton,SIGNAL(clicked()),this,SIGNAL(checkSync()));
 
 }
-void EmsInfoView::setLocalFlash(bool dirty)
-{
-	if (dirty)
-	{
-		ui.localFlashLineEdit->setText("DIRTY");
-	}
-	else
-	{
-		ui.localFlashLineEdit->setText("CLEAN");
-	}
-}
-
 void EmsInfoView::setLocalRam(bool dirty)
 {
 	if (dirty)
 	{
-		ui.localRamLineEdit->setText("DIRTY");
+		ui.localRamLineEdit->setText("Local changes not saved to RAM");
 	}
 	else
 	{
-		ui.localRamLineEdit->setText("CLEAN");
+		ui.localRamLineEdit->setText("Local changes in device RAM");
 	}
 }
 
@@ -89,11 +77,11 @@ void EmsInfoView::setDeviceFlash(bool dirty)
 {
 	if (dirty)
 	{
-		ui.deviceFlashLineEdit->setText("DIRTY");
+		ui.deviceFlashLineEdit->setText("Local changes not saved to FLASH");
 	}
 	else
 	{
-		ui.deviceFlashLineEdit->setText("CLEAN");
+		ui.deviceFlashLineEdit->setText("Local changes in FLASH");
 	}
 }
 

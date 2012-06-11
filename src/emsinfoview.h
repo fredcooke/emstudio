@@ -32,7 +32,6 @@ public:
 	~EmsInfoView();
 	void setInterfaceVersion(QString version);
 	void setFirmwareVersion(QString firmware);
-	void setLocalFlash(bool dirty);
 	void setLocalRam(bool dirty);
 	void setDeviceFlash(bool dirty);
 protected:
