@@ -35,6 +35,9 @@ void TableView2D::passData(unsigned short locationid,QByteArray data,int physica
 {
 	m_locationid = locationid;
 	m_physicalid = physicallocation;
+	ui.tableWidget->clear();
+	ui.tableWidget->setColumnCount(0);
+	ui.tableWidget->setRowCount(2);
 
 	for (int i=0;i<data.size()/2;i+=2)
 	{
