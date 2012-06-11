@@ -520,6 +520,8 @@ void MainWindow::ui_saveDataButtonClicked()
 void MainWindow::menu_settingsClicked()
 {
 	ComSettings *settings = new ComSettings();
+	settings->setComPort(m_comPort);
+	settings->setBaud(m_comBaud);
 	connect(settings,SIGNAL(saveClicked()),this,SLOT(settingsSaveClicked()));
 	connect(settings,SIGNAL(cancelClicked()),this,SLOT(settingsCancelClicked()));
 	QMdiSubWindow *win = ui.mdiArea->addSubWindow(settings);
