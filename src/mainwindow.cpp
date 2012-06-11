@@ -861,6 +861,28 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 							{
 								qDebug() << "Failed to revert!!!";
 							}
+							if (m_rawDataView.contains(m_ramRawBlockList[i]->locationid))
+							{
+								RawDataView *rawview = qobject_cast<RawDataView*>(m_rawDataView[m_ramRawBlockList[i]->locationid]);
+								if (rawview)
+								{
+									rawview->setData(m_ramRawBlockList[i]->locationid,m_ramRawBlockList[i]->data);
+								}
+								else
+								{
+									TableView2D *tableview = qobject_cast<TableView2D*>(m_rawDataView[m_ramRawBlockList[i]->locationid]);
+									if (tableview)
+									{
+										tableview->passData(m_ramRawBlockList[i]->locationid,m_ramRawBlockList[i]->data,0);
+									}
+									else
+									{
+										qDebug() << "GUI Window open with memory location, but no valid window type found!";
+									}
+								}
+							}
+
+
 						}
 
 						break;
