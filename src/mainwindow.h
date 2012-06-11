@@ -35,6 +35,7 @@
 #include "gaugeview.h"
 #include "flagview.h"
 #include "packetstatusview.h"
+#include "aboutview.h"
 //#include "datarawview.h"
 
 
@@ -65,12 +66,14 @@ private:
 	EmsInfoView *emsInfo;
 	FlagView *dataFlags;
 	PacketStatusView *packetStatus;
+	AboutView *aboutView;
 	QMap<unsigned short,QWidget*> m_rawDataView;
 	QMdiSubWindow *tablesMdiWindow;
 	QMdiSubWindow *emsMdiWindow;
 	QMdiSubWindow *flagsMdiWindow;
 	QMdiSubWindow *gaugesMdiWindow;
 	QMdiSubWindow *packetStatusMdiWindow;
+	QMdiSubWindow *aboutMdiWindow;
 	//QMdiSubWindow *rawMdiWindow;
 	//ComSettings *comSettings;
 	DataPacketDecoder *dataPacketDecoder;
@@ -118,6 +121,7 @@ private slots:
 	void menu_windows_PacketStatusClicked();
 	void menu_settingsClicked();
 	void menu_connectClicked();
+	void menu_aboutClicked();
 	void ui_saveDataButtonClicked();
 	void menu_disconnectClicked();
 	void settingsSaveClicked();

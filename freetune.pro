@@ -12,6 +12,8 @@ INCLUDEPATH += src
 OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
+DEFINES += GIT_COMMIT=$$system(\"c:/program files/git/bin/git.exe\" describe --dirty=-DEV --always)
+DEFINES += GIT_HASH=$$system(\"c:/program files/git/bin/git.exe\" log -n 1 --pretty=format:%H)
 SOURCES += src/main.cpp\
 	src/mainwindow.cpp \
     src/freeemspacket.cpp \
@@ -35,7 +37,8 @@ SOURCES += src/main.cpp\
     src/tableview.cpp \
     src/tableview2d.cpp \
     src/table2ddata.cpp \
-    src/packetstatusview.cpp
+    src/packetstatusview.cpp \
+    src/aboutview.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -60,7 +63,8 @@ HEADERS  += src/mainwindow.h \
     src/tableview.h \
     src/tableview2d.h \
     src/table2ddata.h \
-    src/packetstatusview.h
+    src/packetstatusview.h \
+    src/aboutview.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
@@ -71,7 +75,8 @@ FORMS    += src/mainwindow.ui \
     src/dataflags.ui \
     src/rawdataview.ui \
     src/tableview2d.ui \
-    src/packetstatusview.ui
+    src/packetstatusview.ui \
+    src/aboutview.ui
 
 OTHER_FILES += \
     README.md

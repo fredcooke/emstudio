@@ -24,13 +24,18 @@
 #include <QMdiSubWindow>
 #include <QSettings>
 #include <tableview2d.h>
+
+#define define2string_p(x) #x
+#define define2string(x) define2string_p(x)
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+
 	m_currentRamLocationId=0;
 	//populateDataFields();
 	m_localRamDirty = false;
 	m_deviceFlashDirty = false;
 	ui.setupUi(this);
+	this->setWindowTitle(QString("EMStudio ") + QString(define2string(GIT_COMMIT)));
 	ui.actionDisconnect->setEnabled(false);
 	connect(ui.actionSettings,SIGNAL(triggered()),this,SLOT(menu_settingsClicked()));
 	connect(ui.actionConnect,SIGNAL(triggered()),this,SLOT(menu_connectClicked()));
@@ -41,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionFlags,SIGNAL(triggered()),this,SLOT(menu_windows_FlagsClicked()));
 	connect(ui.actionExit_3,SIGNAL(triggered()),this,SLOT(close()));
 	connect(ui.actionPacket_Status,SIGNAL(triggered()),this,SLOT(menu_windows_PacketStatusClicked()));
+	connect(ui.actionAbout,SIGNAL(triggered()),this,SLOT(menu_aboutClicked()));
 	//connect(ui.action_Raw_Data,SIGNAL(triggered()),this,SLOT(menu_window_rawDataClicked()));
 
 	connect(ui.saveDataPushButton,SIGNAL(clicked()),this,SLOT(ui_saveDataButtonClicked()));
@@ -101,6 +107,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsMdiWindow->setGeometry(emsInfo->geometry());
 	emsMdiWindow->hide();
 	emsMdiWindow->setWindowTitle("EMS Info");
+
+
+	aboutView = new AboutView();
+	aboutView->setHash(define2string(GIT_COMMIT));
+	aboutView->setCommit(define2string(GIT_HASH));
+	aboutMdiWindow = ui.mdiArea->addSubWindow(aboutView);
+	aboutMdiWindow->setGeometry(aboutView->geometry());
+	aboutMdiWindow->hide();
+	aboutMdiWindow->setWindowTitle("About");
 
 	dataGauges = new GaugeView();
 	//connect(dataGauges,SIGNAL(destroyed()),this,SLOT(dataGaugesDestroyed()));
@@ -189,6 +204,17 @@ void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,
 			}
 		}
 		emsComms->updateBlockInFlash(locationid,0,data.size(),data);
+	}
+}
+void MainWindow::menu_aboutClicked()
+{
+	if (aboutMdiWindow->isVisible())
+	{
+		aboutMdiWindow->hide();
+	}
+	else
+	{
+		aboutMdiWindow->show();
 	}
 }
 void MainWindow::menu_windows_PacketStatusClicked()

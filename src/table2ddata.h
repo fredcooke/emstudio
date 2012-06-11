@@ -8,9 +8,13 @@ class Table2DData
 {
 public:
 	Table2DData();
-	void parsePayload(QByteArray payload);
+	Table2DData(unsigned short locationid,QByteArray payload);
+	void setData(unsigned short locationid,QByteArray payload);
+	QByteArray data();
 private:
-	QList<double> m_valueList;
+	unsigned short m_locationId;
+	QList<unsigned short> m_xaxis;
+	QList<unsigned short> m_yaxis;
 	QString xAxisLabel;
 	QString yAxisLabel;
 };
