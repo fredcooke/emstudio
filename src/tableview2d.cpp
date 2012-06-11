@@ -13,11 +13,19 @@ TableView2D::TableView2D(QWidget *parent) : QWidget(parent)
 }
 void TableView2D::tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn)
 {
+	if (currentrow == -1 || currentcolumn == -1)
+	{
+		return;
+	}
 	currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toInt();
 }
 
 void TableView2D::tableCellChanged(int row,int column)
 {
+	if (row == -1 || column == -1)
+	{
+		return;
+	}
 	bool ok = false;
 	if (ui.tableWidget->item(row,column)->text().toInt(&ok) > 65535)
 	{
