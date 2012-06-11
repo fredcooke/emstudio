@@ -12,8 +12,14 @@ INCLUDEPATH += src
 OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
+win32 {
 DEFINES += GIT_COMMIT=$$system(\"c:/program files/git/bin/git.exe\" describe --dirty=-DEV --always)
 DEFINES += GIT_HASH=$$system(\"c:/program files/git/bin/git.exe\" log -n 1 --pretty=format:%H)
+}
+unix {
+DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
+DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+}
 SOURCES += src/main.cpp\
 	src/mainwindow.cpp \
     src/freeemspacket.cpp \
