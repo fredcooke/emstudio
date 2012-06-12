@@ -185,25 +185,41 @@ void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,
 	{
 		//RAM
 		emsComms->updateBlockInRam(locationid,0,data.size(),data);
-		for (int i=0;i<m_ramRawBlockList.size();i++)
+		for (int i=0;i<m_ramMemoryList.size();i++)
+		{
+			if (m_ramMemoryList[i]->locationid == locationid)
+			{
+				m_ramMemoryList[i]->setData(data);
+			}
+		}
+		/*for (int i=0;i<m_ramRawBlockList.size();i++)
 		{
 			if (m_ramRawBlockList[i]->locationid == locationid)
 			{
 				m_ramRawBlockList[i]->data = data;
 			}
-		}
+		}*/
 	}
 	else if (physicallocation == 1)
 	{
 		//FLASH
+		emsComms->updateBlockInFlash(locationid,0,data.size(),data);
+		for (int i=0;i<m_flashMemoryList.size();i++)
+		{
+			if (m_flashMemoryList[i]->locationid == locationid)
+			{
+				m_flashMemoryList[i]->setData(data);
+			}
+		}
+		/*
 		for (int i=0;i<m_flashRawBlockList.size();i++)
 		{
 			if (m_flashRawBlockList[i]->locationid == locationid)
 			{
 				m_flashRawBlockList[i]->data = data;
 			}
-		}
-		emsComms->updateBlockInFlash(locationid,0,data.size(),data);
+		}*/
+
 	}
 }
 void MainWindow::menu_aboutClicked()
@@ -232,6 +248,97 @@ void MainWindow::menu_windows_PacketStatusClicked()
 void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 {
 	Q_UNUSED(type)
+	for (int i=0;i<m_ramMemoryList.size();i++)
+	{
+		if (m_ramMemoryList[i]->locationid == locid)
+		{
+			if (m_rawDataView.contains(locid))
+			{
+				if (type != 1)
+				{
+
+					m_rawDataView[locid]->show();
+					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_ramMemoryList[i]->data());
+					m_rawDataView[locid]->show();
+				}
+			}
+			else
+			{
+				if (type == 1)
+				{
+					qDebug() << "Creating new table view for location: 0x" << QString::number(locid,16).toUpper();
+					TableView2D *view = new TableView2D();
+					view->passData(locid,m_ramMemoryList[i]->data(),0);
+					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
+					win->setGeometry(view->geometry());
+					m_rawDataView[locid] = view;
+					win->show();
+				}
+				else
+				{
+					RawDataView *view = new RawDataView();
+					view->setData(locid,m_ramMemoryList[i]->data());
+					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setWindowTitle("Ram Location: 0x" + QString::number(locid,16).toUpper());
+					win->setGeometry(view->geometry());
+					m_rawDataView[locid] = view;
+					win->show();
+				}
+			}
+			return;
+		}
+	}
+
+	for (int i=0;i<m_flashMemoryList.size();i++)
+	{
+		if (m_flashMemoryList[i]->locationid == locid)
+		{
+			if (m_rawDataView.contains(locid))
+			{
+				if (type != -1)
+				{
+					m_rawDataView[locid]->show();
+					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_flashMemoryList[i]->data());
+					//m_rawDataView[locid]->setData(locid,m_ramRawBlockList[i]->data);
+					m_rawDataView[locid]->show();
+				}
+			}
+			else
+			{
+				if (type == 1)
+				{
+					TableView2D *view = new TableView2D();
+					view->passData(locid,m_flashMemoryList[i]->data(),0);
+					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setWindowTitle("Flash Location 0x" + QString::number(locid,16).toUpper());
+					win->setGeometry(view->geometry());
+					m_rawDataView[locid] = view;
+					win->show();
+				}
+				else
+				{
+					RawDataView *view = new RawDataView();
+					view->setData(locid,m_flashMemoryList[i]->data());
+					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setWindowTitle("Flash Location: 0x" + QString::number(locid,16).toUpper());
+					win->setGeometry(view->geometry());
+					m_rawDataView[locid] = view;
+					win->show();
+				}
+			}
+			return;
+		}
+	}
+	/*
 	for (int i=0;i<m_ramRawBlockList.size();i++)
 	{
 		if (m_ramRawBlockList[i]->locationid == locid)
@@ -320,20 +427,28 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 			}
 			return;
 		}
-	}
+	}*/
 }
 void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation)
 {
 	markRamDirty();
+	for (int i=0;i<m_ramMemoryList.size();i++)
+	{
+		if (m_ramMemoryList[i]->locationid == locationid)
+		{
+			m_ramMemoryList[i]->setData(data);
+		}
+	}
+	/*
 	for (int i=0;i<m_ramRawBlockList.size();i++)
 	{
 		if (m_ramRawBlockList[i]->locationid == locationid)
 		{
 			m_ramRawBlockList[i]->data = data;
 		}
-	}
+	}*/
 
-	qDebug() << "Requesting to update ram location:" << QString::number(locationid,16).toUpper();
+	qDebug() << "Requesting to update ram location: 0x" << QString::number(locationid,16).toUpper() << "data size:" << data.size();
 	m_currentRamLocationId = locationid;
 	emsComms->updateBlockInRam(locationid,0,data.size(),data);
 }
@@ -382,40 +497,61 @@ void MainWindow::markDeviceFlashClean()
 }
 QByteArray MainWindow::getLocalRamBlock(unsigned short id)
 {
-	for (int i=0;i<m_ramRawBlockList.size();i++)
+	for (int i=0;i<m_ramMemoryList.size();i++)
+	{
+		if (m_ramMemoryList[i]->locationid == id)
+		{
+			return m_ramMemoryList[i]->data();
+		}
+	}
+	/*for (int i=0;i<m_ramRawBlockList.size();i++)
 	{
 		if (m_ramRawBlockList[i]->locationid == id)
 		{
 			return m_ramRawBlockList[i]->data;
 		}
-	}
+	}*/
 	return QByteArray();
 }
 
 QByteArray MainWindow::getLocalFlashBlock(unsigned short id)
 {
-	for (int i=0;i<m_flashRawBlockList.size();i++)
+	for (int i=0;i<m_flashMemoryList.size();i++)
+	{
+		if (m_flashMemoryList[i]->locationid == id)
+		{
+			return m_flashMemoryList[i]->data();
+		}
+	}
+	/*for (int i=0;i<m_flashRawBlockList.size();i++)
 	{
 		if (m_flashRawBlockList[i]->locationid == id)
 		{
 			return m_flashRawBlockList[i]->data;
 		}
-	}
+	}*/
 	return QByteArray();
 }
 QByteArray MainWindow::getDeviceRamBlock(unsigned short id)
 {
-	for (int i=0;i<m_deviceRamRawBlockList.size();i++)
+	for (int i=0;i<m_deviceRamMemoryList.size();i++)
+	{
+		if (m_deviceRamMemoryList[i]->locationid == id)
+		{
+			return m_deviceRamMemoryList[i]->data();
+		}
+	}
+	/*for (int i=0;i<m_deviceRamRawBlockList.size();i++)
 	{
 		if (m_deviceRamRawBlockList[i]->locationid == id)
 		{
 			return m_deviceRamRawBlockList[i]->data;
 		}
-	}
+	}*/
 	return QByteArray();
 }
 
-QByteArray MainWindow::getDeviceFlashBlock(unsigned short id)
+/*QByteArray MainWindow::getDeviceFlashBlock(unsigned short id)
 {
 	for (int i=0;i<m_deviceFlashRawBlockList.size();i++)
 	{
@@ -425,20 +561,27 @@ QByteArray MainWindow::getDeviceFlashBlock(unsigned short id)
 		}
 	}
 	return QByteArray();
-}
+}*/
 bool MainWindow::hasDeviceRamBlock(unsigned short id)
 {
-	for (int i=0;i<m_deviceRamRawBlockList.size();i++)
+	for (int i=0;i<m_deviceRamMemoryList.size();i++)
+	{
+		if (m_deviceRamMemoryList[i]->locationid == id)
+		{
+			return true;
+		}
+	}
+	/*for (int i=0;i<m_deviceRamRawBlockList.size();i++)
 	{
 		if (m_deviceRamRawBlockList[i]->locationid == id)
 		{
 			return true;
 		}
-	}
+	}*/
 	return false;
 }
 
-bool MainWindow::hasDeviceFlashBlock(unsigned short id)
+/*bool MainWindow::hasDeviceFlashBlock(unsigned short id)
 {
 	for (int i=0;i<m_deviceFlashRawBlockList.size();i++)
 	{
@@ -448,29 +591,43 @@ bool MainWindow::hasDeviceFlashBlock(unsigned short id)
 		}
 	}
 	return false;
-}
+}*/
 
 bool MainWindow::hasLocalRamBlock(unsigned short id)
 {
-	for (int i=0;i<m_ramRawBlockList.size();i++)
+	for (int i=0;i<m_ramMemoryList.size();i++)
+	{
+		if (m_ramMemoryList[i]->locationid == id)
+		{
+			return true;
+		}
+	}
+	/*for (int i=0;i<m_ramRawBlockList.size();i++)
 	{
 		if (m_ramRawBlockList[i]->locationid == id)
 		{
 			return true;
 		}
-	}
+	}*/
 	return false;
 }
 
 bool MainWindow::hasLocalFlashBlock(unsigned short id)
 {
-	for (int i=0;i<m_flashRawBlockList.size();i++)
+	for (int i=0;i<m_flashMemoryList.size();i++)
+	{
+		if (m_flashMemoryList[i]->locationid == id)
+		{
+			return true;
+		}
+	}
+	/*for (int i=0;i<m_flashRawBlockList.size();i++)
 	{
 		if (m_flashRawBlockList[i]->locationid == id)
 		{
 			return true;
 		}
-	}
+	}*/
 	return false;
 }
 void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
@@ -478,19 +635,38 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 	Q_UNUSED(header)
 	if (!hasDeviceRamBlock(locationid))
 	{
-		RawDataBlock *block = new RawDataBlock();
+		//This should not happen
+		/*RawDataBlock *block = new RawDataBlock();
 		block->locationid = locationid;
 		block->header = header;
 		block->data = payload;
 		//m_flashRawBlockList.append(block);
-		m_deviceRamRawBlockList.append(block);
+		m_deviceRamRawBlockList.append(block);*/
 	}
 	else
 	{
-		if (getDeviceRamBlock(locationid) != payload)
+		for (int i=0;i<m_deviceRamMemoryList.size();i++)
 		{
-			qDebug() << "Ram block on device does not match ram block on tuner! This should not happen!";
+			if (m_deviceRamMemoryList[i]->locationid == locationid)
+			{
+				if (m_deviceRamMemoryList[i]->isEmpty)
+				{
+					//Initial retrieval.
+					m_deviceRamMemoryList[i]->setData(payload);
+				}
+				else
+				{
+					if (getDeviceRamBlock(locationid) != payload)
+					{
+						qDebug() << "Ram block on device does not match ram block on tuner! This should not happen!";
+						qDebug() << "Tuner ram size:" << m_deviceRamMemoryList[i]->data().size();
+						m_deviceRamMemoryList[i]->setData(payload);
+					}
+				}
+
+			}
 		}
+
 	}
 	return;
 }
@@ -499,22 +675,41 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
-	if (!hasDeviceFlashBlock(locationid))
-	{
-		RawDataBlock *block = new RawDataBlock();
+	//if (!hasDeviceFlashBlock(locationid))
+	//{
+		for (int i=0;i<m_flashMemoryList.size();i++)
+		{
+			if (m_flashMemoryList[i]->locationid == locationid)
+			{
+				if (m_flashMemoryList[i]->isEmpty)
+				{
+					m_flashMemoryList[i]->setData(payload);
+				}
+				else
+				{
+					if (getLocalFlashBlock(locationid) != payload)
+					{
+						qDebug() << "Flash block in memory does not match flash block on tuner! This should not happen!";
+						qDebug() << "Flash size:" << m_flashMemoryList[i]->data().size();
+						m_flashMemoryList[i]->setData(payload);
+					}
+				}
+			}
+		}
+		/*RawDataBlock *block = new RawDataBlock();
 		block->locationid = locationid;
 		block->header = header;
 		block->data = payload;
 		//m_flashRawBlockList.append(block);
-		m_deviceFlashRawBlockList.append(block);
-	}
-	else
-	{
-		if (getDeviceFlashBlock(locationid) != payload)
-		{
-			qDebug() << "Flash block on device does not match flash block on tuner! This should not happen!";
-		}
-	}
+		m_deviceFlashRawBlockList.append(block);*/
+	//}
+	//else
+	//{
+	//	if (getDeviceFlashBlock(locationid) != payload)
+	//	{
+	//		qDebug() << "Flash block on device does not match flash block on tuner! This should not happen!";
+	//	}
+	//}
 	return;
 }
 
@@ -585,13 +780,57 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 	Q_UNUSED(flashpage)
 	Q_UNUSED(ramaddress)
 	Q_UNUSED(flashaddress)
-	if (flags.contains(FreeEmsComms::BLOCK_IS_RAM))
+
+	if (flags.contains(FreeEmsComms::BLOCK_IS_RAM) && flags.contains((FreeEmsComms::BLOCK_IS_FLASH)))
 	{
-		m_locIdMsgList.append(emsComms->retrieveBlockFromRam(locationid,0,0));
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = locationid;
+		loc->size = size;
+		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+		{
+			loc->parent = parent;
+			loc->hasParent = true;
+		}
+		loc->isRam = true;
+		loc->isFlash = true;
+		loc->ramAddress = ramaddress;
+		loc->ramPage = rampage;
+		loc->flashAddress = flashaddress;
+		loc->flashPage = flashpage;
+		m_deviceRamMemoryList.append(loc);
+		m_flashMemoryList.append(new MemoryLocation(*loc));
 	}
-	if (flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
+	else if (flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
 	{
-		m_locIdMsgList.append(emsComms->retrieveBlockFromFlash(locationid,0,0));
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = locationid;
+		loc->size = size;
+		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+		{
+			loc->parent = parent;
+			loc->hasParent = true;
+		}
+		loc->isFlash = true;
+		loc->isRam = false;
+		loc->flashAddress = flashaddress;
+		loc->flashPage = flashpage;
+		m_flashMemoryList.append(loc);
+	}
+	else if (flags.contains(FreeEmsComms::BLOCK_IS_RAM))
+	{
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = locationid;
+		loc->size = size;
+		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+		{
+			loc->parent = parent;
+			loc->hasParent = true;
+		}
+		loc->isRam = true;
+		loc->isFlash = false;
+		loc->ramAddress = ramaddress;
+		loc->ramPage = rampage;
+		m_deviceRamMemoryList.append(loc);
 	}
 }
 
@@ -700,7 +939,10 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 	for (int i=0;i<idlist.size();i++)
 	{
 		//ui/listWidget->addItem(QString::number(idlist[i]));
-		emsComms->getLocationIdInfo(idlist[i]);
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = idlist[i];
+		m_tempMemoryList.append(loc);
+		m_locIdMsgList.append(emsComms->getLocationIdInfo(idlist[i]));
 	}
 }
 void MainWindow::blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload)
@@ -752,22 +994,64 @@ void MainWindow::commandSuccessful(int sequencenumber)
 	qDebug() << "command succesful:" << QString::number(sequencenumber);
 	if (m_currentRamLocationId != 0)
 	{
+		for (int i=0;i<m_deviceRamMemoryList.size();i++)
+		{
+			if (m_deviceRamMemoryList[i]->locationid == m_currentRamLocationId)
+			for (int j=0;j<m_ramMemoryList.size();j++)
+			{
+				if (m_ramMemoryList[j]->locationid == m_currentRamLocationId)
+				{
+					m_deviceRamMemoryList[i]->setData(m_ramMemoryList[j]->data());
+				}
+			}
+		}
 		checkRamFlashSync();
 		return;
+	}
+	if (m_locIdInfoMsgList.contains(sequencenumber))
+	{
+		m_locIdInfoMsgList.removeOne(sequencenumber);
+		if (m_locIdInfoMsgList.size() == 0)
+		{
+			//End of the location ID information messages.
+			checkRamFlashSync();
+		}
 	}
 	if (m_locIdMsgList.contains(sequencenumber))
 	{
 		m_locIdMsgList.removeOne(sequencenumber);
 		if (m_locIdMsgList.size() == 0)
 		{
-			//End of the location ID information messages.
-			checkRamFlashSync();
+			populateParentLists();
+			for (int i=0;i<m_flashMemoryList.size();i++)
+			{
+				if (!m_flashMemoryList[i]->hasParent)
+				{
+					m_locIdInfoMsgList.append(emsComms->retrieveBlockFromFlash(m_flashMemoryList[i]->locationid,0,0));
+				}
+			}
+			for (int i=0;i<m_deviceRamMemoryList.size();i++)
+			{
+				if (!m_deviceRamMemoryList[i]->hasParent)
+				{
+					m_locIdInfoMsgList.append(emsComms->retrieveBlockFromRam(m_deviceRamMemoryList[i]->locationid,0,0));
+				}
+			}
 		}
 	}
 }
 void MainWindow::checkRamFlashSync()
 {
-	if (m_ramRawBlockList.size() == 0 && m_flashRawBlockList.size() == 0)
+	if (m_ramMemoryList.size() == 0)
+	{
+		//Internal ram list is empty. Let's fill it.
+		for (int i=0;i<m_deviceRamMemoryList.size();i++)
+		{
+			m_ramMemoryList.append(new MemoryLocation(*m_deviceRamMemoryList[i]));
+		}
+		return;
+	}
+	/*if (m_ramRawBlockList.size() == 0 && m_flashRawBlockList.size() == 0)
 	{
 		//Inital check, populate.
 		for (int i=0;i<m_deviceRamRawBlockList.size();i++)
@@ -842,7 +1126,7 @@ void MainWindow::checkRamFlashSync()
 		{
 			markDeviceFlashClean();
 		}
-	}
+	}*/
 }
 
 void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
@@ -850,7 +1134,58 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	qDebug() << "command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
 	if (m_currentRamLocationId != 0)
 	{
-		for (int i=0;i<m_ramRawBlockList.size();i++)
+		for (int i=0;i<m_ramMemoryList.size();i++)
+		{
+			if (m_ramMemoryList[i]->locationid == m_currentRamLocationId)
+			{
+				for (int j=0;j<m_deviceRamMemoryList.size();j++)
+				{
+					if (m_deviceRamMemoryList[j]->locationid == m_currentRamLocationId)
+					{
+						qDebug() << "Data reverted! for location id 0x" + QString::number(m_ramMemoryList[i]->locationid,16);
+						if (m_ramMemoryList[i]->data() == m_deviceRamMemoryList[j]->data())
+						{
+							qDebug() << "Data valid. No need for a revert.";
+						}
+						else
+						{
+							qDebug() << "Invalid data, reverting...";
+							m_ramMemoryList[i]->setData(m_deviceRamMemoryList[j]->data());
+							if (m_ramMemoryList[i]->data() != m_deviceRamMemoryList[j]->data())
+							{
+								qDebug() << "Failed to revert!!!";
+							}
+							if (m_rawDataView.contains(m_ramMemoryList[i]->locationid))
+							{
+								RawDataView *rawview = qobject_cast<RawDataView*>(m_rawDataView[m_ramMemoryList[i]->locationid]);
+								if (rawview)
+								{
+									rawview->setData(m_ramMemoryList[i]->locationid,m_ramMemoryList[i]->data());
+								}
+								else
+								{
+									TableView2D *tableview = qobject_cast<TableView2D*>(m_rawDataView[m_ramMemoryList[i]->locationid]);
+									if (tableview)
+									{
+										tableview->passData(m_ramMemoryList[i]->locationid,m_ramMemoryList[i]->data(),0);
+									}
+									else
+									{
+										qDebug() << "GUI Window open with memory location, but no valid window type found!";
+									}
+								}
+							}
+
+
+						}
+
+						break;
+					}
+				}
+				break;
+			}
+		}
+		/*for (int i=0;i<m_ramRawBlockList.size();i++)
 		{
 			if (m_ramRawBlockList[i]->locationid == m_currentRamLocationId)
 			{
@@ -900,20 +1235,95 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 				}
 				break;
 			}
-		}
+		}*/
 		m_currentRamLocationId = 0;
 		checkRamFlashSync();
+	}
+	if (m_locIdInfoMsgList.contains(sequencenumber))
+	{
+		m_locIdInfoMsgList.removeOne(sequencenumber);
+		if (m_locIdInfoMsgList.size() == 0)
+		{
+			qDebug() << "All Ram and Flash locations updated";
+			//End of the location ID information messages.
+			checkRamFlashSync();
+		}
 	}
 	if (m_locIdMsgList.contains(sequencenumber))
 	{
 		m_locIdMsgList.removeOne(sequencenumber);
 		if (m_locIdMsgList.size() == 0)
 		{
-			//End of the location ID information messages.
-			checkRamFlashSync();
+			qDebug() << "All ID information recieved. Requesting Ram and Flash updates";
+			populateParentLists();
+			for (int i=0;i<m_flashMemoryList.size();i++)
+			{
+				if (!m_flashMemoryList[i]->hasParent)
+				{
+					m_locIdInfoMsgList.append(emsComms->retrieveBlockFromFlash(m_flashMemoryList[i]->locationid,0,0));
+				}
+			}
+			for (int i=0;i<m_deviceRamMemoryList.size();i++)
+			{
+				if (!m_deviceRamMemoryList[i]->hasParent)
+				{
+					m_locIdInfoMsgList.append(emsComms->retrieveBlockFromRam(m_deviceRamMemoryList[i]->locationid,0,0));
+				}
+			}
 		}
 	}
+
 }
+void MainWindow::populateParentLists()
+{
+	//Need to get a list of all IDs here now.
+	qDebug() << "Populating internal memory parent list.";
+	qDebug() << m_flashMemoryList.size() << "flash locations";
+	qDebug() << m_deviceRamMemoryList.size() << "Device Ram locations";
+	qDebug() << m_ramMemoryList.size() << "Application Ram locations";
+	for (int i=0;i<m_flashMemoryList.size();i++)
+	{
+		if (m_flashMemoryList[i]->hasParent && m_flashMemoryList[i]->getParent() == 0)
+		{
+			for (int j=0;j<m_flashMemoryList.size();j++)
+			{
+				if (m_flashMemoryList[i]->parent== m_flashMemoryList[j]->locationid)
+				{
+					m_flashMemoryList[i]->setParent(m_flashMemoryList[j]);
+				}
+			}
+		}
+	}
+	for (int i=0;i<m_deviceRamMemoryList.size();i++)
+	{
+		if (m_deviceRamMemoryList[i]->hasParent && m_deviceRamMemoryList[i]->getParent() == 0)
+		{
+			for (int j=0;j<m_deviceRamMemoryList.size();j++)
+			{
+				if (m_deviceRamMemoryList[i]->parent== m_deviceRamMemoryList[j]->locationid)
+				{
+					m_deviceRamMemoryList[i]->setParent(m_deviceRamMemoryList[j]);
+				}
+			}
+		}
+	}
+	for (int i=0;i<m_ramMemoryList.size();i++)
+	{
+		if (m_ramMemoryList[i]->hasParent && m_ramMemoryList[i]->getParent() == 0)
+		{
+			for (int j=0;j<m_ramMemoryList.size();j++)
+			{
+				if (m_ramMemoryList[i]->parent== m_ramMemoryList[j]->locationid)
+				{
+					m_ramMemoryList[i]->setParent(m_ramMemoryList[j]);
+				}
+			}
+		}
+	}
+
+
+}
+
 void MainWindow::pauseLogButtonClicked()
 {
 

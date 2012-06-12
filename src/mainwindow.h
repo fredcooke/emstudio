@@ -36,6 +36,7 @@
 #include "flagview.h"
 #include "packetstatusview.h"
 #include "aboutview.h"
+#include "memorylocation.h"
 //#include "datarawview.h"
 
 
@@ -56,10 +57,14 @@ public:
 	~MainWindow();
 private:
 	unsigned short m_currentRamLocationId;
-	QList<RawDataBlock*> m_ramRawBlockList;
-	QList<RawDataBlock*> m_flashRawBlockList;
-	QList<RawDataBlock*> m_deviceRamRawBlockList;
-	QList<RawDataBlock*> m_deviceFlashRawBlockList;
+	//QList<RawDataBlock*> m_ramRawBlockList;
+	//QList<RawDataBlock*> m_flashRawBlockList;
+	//QList<RawDataBlock*> m_deviceRamRawBlockList;
+	//QList<RawDataBlock*> m_deviceFlashRawBlockList;
+	QList<MemoryLocation*> m_ramMemoryList;
+	QList<MemoryLocation*> m_flashMemoryList;
+	QList<MemoryLocation*> m_deviceRamMemoryList;
+	QList<MemoryLocation*> m_tempMemoryList;
 	//RawDataView *rawData;
 	TableView *dataTables;
 	GaugeView *dataGauges;
@@ -76,6 +81,7 @@ private:
 	QMdiSubWindow *aboutMdiWindow;
 	//QMdiSubWindow *rawMdiWindow;
 	//ComSettings *comSettings;
+	void populateParentLists();
 	DataPacketDecoder *dataPacketDecoder;
 	void populateDataFields();
 
@@ -106,6 +112,7 @@ private:
 	QByteArray getDeviceRamBlock(unsigned short id);
 	QByteArray getDeviceFlashBlock(unsigned short id);
 	QList<int> m_locIdMsgList;
+	QList<int> m_locIdInfoMsgList;
 	void checkRamFlashSync();
 private slots:
 	void checkSyncRequest();

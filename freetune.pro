@@ -44,7 +44,8 @@ SOURCES += src/main.cpp\
     src/tableview2d.cpp \
     src/table2ddata.cpp \
     src/packetstatusview.cpp \
-    src/aboutview.cpp
+    src/aboutview.cpp \
+    src/memorylocation.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -70,7 +71,8 @@ HEADERS  += src/mainwindow.h \
     src/tableview2d.h \
     src/table2ddata.h \
     src/packetstatusview.h \
-    src/aboutview.h
+    src/aboutview.h \
+    src/memorylocation.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
