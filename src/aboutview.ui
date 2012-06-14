@@ -46,7 +46,7 @@
       <item>
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Git Commit Hash</string>
+         <string>Git Commit</string>
         </property>
        </widget>
       </item>

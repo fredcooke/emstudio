@@ -215,7 +215,7 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,unsigned short rawFla
 	}
 	else
 	{
-		ui.locationIdInfoTableWidget->item(foundi,13)->setText("False");
+		ui.locationIdInfoTableWidget->item(foundi,11)->setText("False");
 	}
 
 	if (flags.contains(FreeEmsComms::BLOCK_IS_READ_ONLY))

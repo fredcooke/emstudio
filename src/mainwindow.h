@@ -84,7 +84,7 @@ private:
 	void populateParentLists();
 	DataPacketDecoder *dataPacketDecoder;
 	void populateDataFields();
-
+	void updateDataWindows(unsigned short locationid);
 	Ui::MainWindow ui;
 	//LogLoader *logLoader;
 	FreeEmsComms *emsComms;

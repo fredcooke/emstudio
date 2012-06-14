@@ -257,9 +257,9 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				if (type != 1)
 				{
 
-					m_rawDataView[locid]->show();
 					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_ramMemoryList[i]->data());
 					m_rawDataView[locid]->show();
+					m_rawDataView[locid]->raise();
 				}
 			}
 			else
@@ -276,6 +276,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					win->setGeometry(view->geometry());
 					m_rawDataView[locid] = view;
 					win->show();
+					win->raise();
 				}
 				else
 				{
@@ -288,6 +289,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					win->setGeometry(view->geometry());
 					m_rawDataView[locid] = view;
 					win->show();
+					win->raise();
 				}
 			}
 			return;
@@ -302,10 +304,10 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 			{
 				if (type != -1)
 				{
-					m_rawDataView[locid]->show();
 					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_flashMemoryList[i]->data());
 					//m_rawDataView[locid]->setData(locid,m_ramRawBlockList[i]->data);
 					m_rawDataView[locid]->show();
+					m_rawDataView[locid]->raise();
 				}
 			}
 			else
@@ -321,6 +323,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					win->setGeometry(view->geometry());
 					m_rawDataView[locid] = view;
 					win->show();
+					win->raise();
 				}
 				else
 				{
@@ -333,6 +336,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					win->setGeometry(view->geometry());
 					m_rawDataView[locid] = view;
 					win->show();
+					win->raise();
 				}
 			}
 			return;
@@ -1003,22 +1007,70 @@ void MainWindow::checkSyncRequest()
 void MainWindow::commandSuccessful(int sequencenumber)
 {
 	qDebug() << "Command succesful:" << QString::number(sequencenumber);
+	bool hasparent = false;
+	unsigned short tempRamParentId;
+	bool isparent = false;
+	QList<unsigned short> childlist;
 	if (m_currentRamLocationId != 0)
 	{
-		for (int i=0;i<m_deviceRamMemoryList.size();i++)
+		for (int j=0;j<m_ramMemoryList.size();j++)
 		{
-			if (m_deviceRamMemoryList[i]->locationid == m_currentRamLocationId)
+			if (m_ramMemoryList[j]->parent == m_currentRamLocationId)
 			{
-				for (int j=0;j<m_ramMemoryList.size();j++)
+				qDebug() << "Child of:" << "0x" + QString::number(m_currentRamLocationId,16).toUpper() << "is" << "0x" + QString::number(m_ramMemoryList[j]->locationid,16).toUpper();
+				childlist.append(m_ramMemoryList[j]->locationid);
+				isparent = true;
+			}
+			if (m_ramMemoryList[j]->locationid == m_currentRamLocationId)
+			{
+				if (m_ramMemoryList[j]->hasParent)
 				{
-					if (m_ramMemoryList[j]->locationid == m_currentRamLocationId)
+					hasparent = true;
+					tempRamParentId = m_ramMemoryList[j]->parent;
+				}
+				for (int i=0;i<m_deviceRamMemoryList.size();i++)
+				{
+					if (m_deviceRamMemoryList[i]->locationid == m_currentRamLocationId)
 					{
 						m_deviceRamMemoryList[i]->setData(m_ramMemoryList[j]->data());
 					}
 				}
 			}
 		}
+		//Find all windows that use that location id
+		if (hasparent && isparent)
+		{
+			//This should never happen.
+			qDebug() << "Found a memory location that is parent AND child!!! This should not happen.";
+			qDebug() << "Parent:" << "0x" + QString::number(tempRamParentId);
+			qDebug() << "Current:" << "0x" + QString::number(m_currentRamLocationId);
+			QString children;
+			for (int i=0;i<childlist.size();i++)
+			{
+				children += "0x" + QString::number(childlist[i],16).toUpper() + " ";
+			}
+			qDebug() << "Children" << children;
+		}
+		else if (hasparent)
+		{
+			qDebug() << "No children, is a child for:" << "0x" + QString::number(m_currentRamLocationId,16).toUpper();
+			updateDataWindows(tempRamParentId);
+		}
+		else if (isparent)
+		{
+			for (int i=0;i<childlist.size();i++)
+			{
+				updateDataWindows(childlist[i]);
+			}
+
+		}
+		else
+		{
+			qDebug() << "No children for:" << "0x" + QString::number(m_currentRamLocationId,16).toUpper();
+			updateDataWindows(m_currentRamLocationId);
+		}
 		checkRamFlashSync();
+		m_currentRamLocationId=0;
 		return;
 	}
 	if (m_locIdInfoMsgList.contains(sequencenumber))
@@ -1053,6 +1105,34 @@ void MainWindow::commandSuccessful(int sequencenumber)
 		}
 	}
 }
+void MainWindow::updateDataWindows(unsigned short locationid)
+{
+	if (m_rawDataView.contains(locationid))
+	{
+		RawDataView *rawview = qobject_cast<RawDataView*>(m_rawDataView[locationid]);
+		if (rawview)
+		{
+			rawview->setData(locationid,getLocalRamBlock(locationid));
+		}
+		else
+		{
+			TableView2D *tableview = qobject_cast<TableView2D*>(m_rawDataView[locationid]);
+			if (tableview)
+			{
+				tableview->passData(locationid,getLocalRamBlock(locationid),0);
+			}
+			else
+			{
+				qDebug() << "GUI Window open with memory location, but no valid window type found!";
+			}
+		}
+	}
+	else
+	{
+		qDebug() << "Attempted to update a window that does not exist!" << "0x" + QString::number(locationid,16).toUpper();
+	}
+}
+
 void MainWindow::checkRamFlashSync()
 {
 	if (m_ramMemoryList.size() == 0)
@@ -1159,12 +1239,29 @@ void MainWindow::checkRamFlashSync()
 void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 {
 	qDebug() << "Command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
+	bool hasparent = false;
+	int tempRamParentId;
+	bool isparent = false;
+	QList<int> childlist;
 	if (m_currentRamLocationId != 0)
 	{
 		for (int i=0;i<m_ramMemoryList.size();i++)
 		{
 			if (m_ramMemoryList[i]->locationid == m_currentRamLocationId)
 			{
+				if (m_ramMemoryList[i]->hasParent)
+				{
+					hasparent = true;
+					tempRamParentId = m_ramMemoryList[i]->parent;
+				}
+				for (int j=0;j<m_ramMemoryList.size();j++)
+				{
+					if (m_ramMemoryList[j]->parent == m_currentRamLocationId)
+					{
+						isparent = true;
+						childlist.append(m_ramMemoryList[j]->locationid);
+					}
+				}
 				for (int j=0;j<m_deviceRamMemoryList.size();j++)
 				{
 					if (m_deviceRamMemoryList[j]->locationid == m_currentRamLocationId)
@@ -1267,6 +1364,36 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 				break;
 			}
 		}*/
+		//Find all windows that use that location id
+		if (hasparent && isparent)
+		{
+			//This should never happen.
+			qDebug() << "Found a memory location that is parent AND child!!! This should not happen.";
+			qDebug() << "Parent:" << "0x" + QString::number(tempRamParentId);
+			qDebug() << "Current:" << "0x" + QString::number(m_currentRamLocationId);
+			QString children;
+			for (int i=0;i<childlist.size();i++)
+			{
+				children += "0x" + QString::number(childlist[i],16).toUpper() + " ";
+			}
+			qDebug() << "Children" << children;
+		}
+		else if (hasparent)
+		{
+			updateDataWindows(tempRamParentId);
+		}
+		else if (isparent)
+		{
+			for (int i=0;i<childlist.size();i++)
+			{
+				updateDataWindows(childlist[i]);
+			}
+
+		}
+		else
+		{
+			updateDataWindows(m_currentRamLocationId);
+		}
 		m_currentRamLocationId = 0;
 		//checkRamFlashSync();
 	}

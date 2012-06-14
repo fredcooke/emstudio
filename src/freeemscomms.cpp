@@ -943,10 +943,10 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					//{
 						rampage = parsedPacket.payload[4];
 						flashpage = parsedPacket.payload[5];
-						ramaddress = parsedPacket.payload[6] << 8;
-						ramaddress += parsedPacket.payload[7];
-						flashaddress = parsedPacket.payload[8] << 8;
-						flashaddress += parsedPacket.payload[9];
+						ramaddress = ((unsigned char)parsedPacket.payload[6]) << 8;
+						ramaddress += (unsigned char)parsedPacket.payload[7];
+						flashaddress = ((unsigned char)parsedPacket.payload[8]) << 8;
+						flashaddress += (unsigned char)parsedPacket.payload[9];
 						size = parsedPacket.payload[10] << 8;
 						size += parsedPacket.payload[11];
 					/*}
