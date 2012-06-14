@@ -1,6 +1,6 @@
 #include "tableview2d.h"
 #include <QMessageBox>
-
+#include <QDebug>
 TableView2D::TableView2D(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
@@ -41,6 +41,11 @@ void TableView2D::tableCellChanged(int row,int column)
 
 void TableView2D::passData(unsigned short locationid,QByteArray data,int physicallocation)
 {
+	if (data.size() != 64)
+	{
+		qDebug() << "Passed a data pack to a 2d table that was of size" << data.size() << "should be 64!!!";
+		return;
+	}
 	m_locationid = locationid;
 	m_physicalid = physicallocation;
 	ui.tableWidget->clear();

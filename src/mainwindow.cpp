@@ -432,12 +432,23 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation)
 {
 	markRamDirty();
+	bool found = false;
 	for (int i=0;i<m_ramMemoryList.size();i++)
 	{
 		if (m_ramMemoryList[i]->locationid == locationid)
 		{
+			if (m_ramMemoryList[i]->data() == data)
+			{
+				qDebug() << "Data in application memory unchanged, no reason to send write";
+				return;
+			}
 			m_ramMemoryList[i]->setData(data);
+			found = true;
 		}
+	}
+	if (!found)
+	{
+		qDebug() << "Attempted to save data for location id:" << "0x" + QString::number(locationid,16) << "but no valid location found in Ram list. Ram list size:" << m_ramMemoryList.size();
 	}
 	/*
 	for (int i=0;i<m_ramRawBlockList.size();i++)
@@ -448,7 +459,7 @@ void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int p
 		}
 	}*/
 
-	qDebug() << "Requesting to update ram location: 0x" << QString::number(locationid,16).toUpper() << "data size:" << data.size();
+	qDebug() << "Requesting to update ram location:" << "0x" + QString::number(locationid,16).toUpper() << "data size:" << data.size();
 	m_currentRamLocationId = locationid;
 	emsComms->updateBlockInRam(locationid,0,data.size(),data);
 }
@@ -991,17 +1002,19 @@ void MainWindow::checkSyncRequest()
 
 void MainWindow::commandSuccessful(int sequencenumber)
 {
-	qDebug() << "command succesful:" << QString::number(sequencenumber);
+	qDebug() << "Command succesful:" << QString::number(sequencenumber);
 	if (m_currentRamLocationId != 0)
 	{
 		for (int i=0;i<m_deviceRamMemoryList.size();i++)
 		{
 			if (m_deviceRamMemoryList[i]->locationid == m_currentRamLocationId)
-			for (int j=0;j<m_ramMemoryList.size();j++)
 			{
-				if (m_ramMemoryList[j]->locationid == m_currentRamLocationId)
+				for (int j=0;j<m_ramMemoryList.size();j++)
 				{
-					m_deviceRamMemoryList[i]->setData(m_ramMemoryList[j]->data());
+					if (m_ramMemoryList[j]->locationid == m_currentRamLocationId)
+					{
+						m_deviceRamMemoryList[i]->setData(m_ramMemoryList[j]->data());
+					}
 				}
 			}
 		}
@@ -1048,6 +1061,20 @@ void MainWindow::checkRamFlashSync()
 		for (int i=0;i<m_deviceRamMemoryList.size();i++)
 		{
 			m_ramMemoryList.append(new MemoryLocation(*m_deviceRamMemoryList[i]));
+		}
+		//We have to do something special here, since m_ramMemoryList's parents point to m_deviceRamMemoryList.
+		for (int i=0;i<m_ramMemoryList.size();i++)
+		{
+			if (m_ramMemoryList[i]->hasParent)
+			{
+				for (int j=0;j<m_ramMemoryList.size();j++)
+				{
+					if (m_ramMemoryList[i]->parent== m_ramMemoryList[j]->locationid)
+					{
+						m_ramMemoryList[i]->setParent(m_ramMemoryList[j]);
+					}
+				}
+			}
 		}
 		return;
 	}
@@ -1131,7 +1158,7 @@ void MainWindow::checkRamFlashSync()
 
 void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 {
-	qDebug() << "command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
+	qDebug() << "Command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
 	if (m_currentRamLocationId != 0)
 	{
 		for (int i=0;i<m_ramMemoryList.size();i++)
@@ -1142,9 +1169,13 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 				{
 					if (m_deviceRamMemoryList[j]->locationid == m_currentRamLocationId)
 					{
-						qDebug() << "Data reverted! for location id 0x" + QString::number(m_ramMemoryList[i]->locationid,16);
+						qDebug() << "Data reverting for location id 0x" + QString::number(m_ramMemoryList[i]->locationid,16);
 						if (m_ramMemoryList[i]->data() == m_deviceRamMemoryList[j]->data())
 						{
+							if (m_ramMemoryList[i] == m_deviceRamMemoryList[j])
+							{
+								qDebug() << "Ram memory list and Device memory list are using the same pointer! This should NOT happen!!";
+							}
 							qDebug() << "Data valid. No need for a revert.";
 						}
 						else
@@ -1237,7 +1268,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 			}
 		}*/
 		m_currentRamLocationId = 0;
-		checkRamFlashSync();
+		//checkRamFlashSync();
 	}
 	if (m_locIdInfoMsgList.contains(sequencenumber))
 	{
@@ -1307,19 +1338,7 @@ void MainWindow::populateParentLists()
 			}
 		}
 	}
-	for (int i=0;i<m_ramMemoryList.size();i++)
-	{
-		if (m_ramMemoryList[i]->hasParent && m_ramMemoryList[i]->getParent() == 0)
-		{
-			for (int j=0;j<m_ramMemoryList.size();j++)
-			{
-				if (m_ramMemoryList[i]->parent== m_ramMemoryList[j]->locationid)
-				{
-					m_ramMemoryList[i]->setParent(m_ramMemoryList[j]);
-				}
-			}
-		}
-	}
+
 
 
 }
