@@ -177,7 +177,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	logfile = new QFile("myoutput.log");
 	logfile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 
-
+	menu_connectClicked(); //Connect on start.
 }
 void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,int physicallocation)
 {
