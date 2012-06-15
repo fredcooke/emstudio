@@ -29,6 +29,7 @@ private slots:
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
 signals:
 	void saveData(unsigned short locationid,QByteArray data,int phyiscallocation);
+	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
 };
 
 #endif // TABLEVIEW2D_H

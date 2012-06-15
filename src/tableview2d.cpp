@@ -83,6 +83,7 @@ void TableView2D::tableCellChanged(int row,int column)
 	{
 		return;
 	}
+	unsigned short newval = ui.tableWidget->item(row,column)->text().toInt();
 	if (row == 0)
 	{
 		samples.replace(column,QPointF(ui.tableWidget->item(row,column)->text().toInt(),samples.at(column).y()));
@@ -95,6 +96,14 @@ void TableView2D::tableCellChanged(int row,int column)
 		curve->setSamples(samples);
 		ui.plot->replot();
 	}
+	//New value has been accepted. Let's write it.
+	//void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
+	//Data is 64
+	//offset = column + (row * 32), size == 2
+	QByteArray data;
+	data.append((char)((newval >> 8) & 0xFF));
+	data.append((char)(newval & 0xFF));
+	emit saveSingleData(m_locationid,data,column+(row * 32),2);
 }
 void TableView2D::resizeEvent(QResizeEvent *evt)
 {

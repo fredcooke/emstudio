@@ -275,6 +275,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					view->passData(locid,m_ramMemoryList[i]->data(),0);
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
 					win->setGeometry(view->geometry());
@@ -322,6 +323,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					view->passData(locid,m_flashMemoryList[i]->data(),0);
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 					win->setWindowTitle("Flash Location 0x" + QString::number(locid,16).toUpper());
 					win->setGeometry(view->geometry());
@@ -1106,6 +1108,31 @@ void MainWindow::populateParentLists()
 void MainWindow::pauseLogButtonClicked()
 {
 
+}
+void MainWindow::saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size)
+{
+	bool found = false;
+	for (int i=0;i<m_ramMemoryList.size();i++)
+	{
+		if (m_ramMemoryList[i]->locationid == locationid)
+		{
+			if (m_ramMemoryList[i]->data().mid(offset,size) == data)
+			{
+				qDebug() << "Data in application memory unchanged, no reason to send write for single value";
+				return;
+			}
+
+			m_ramMemoryList[i]->setData(m_ramMemoryList[i]->data().replace(offset,size,data));
+			found = true;
+		}
+	}
+	if (!found)
+	{
+		qDebug() << "Attempted to save data for single value at location id:" << "0x" + QString::number(locationid,16) << "but no valid location found in Ram list. Ram list size:" << m_ramMemoryList.size();
+	}
+	qDebug() << "Requesting to update single value at ram location:" << "0x" + QString::number(locationid,16).toUpper() << "data size:" << data.size();
+	m_currentRamLocationId = locationid;
+	emsComms->updateBlockInRam(locationid,offset,size,data);
 }
 
 void MainWindow::stopLogButtonClicked()
