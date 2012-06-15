@@ -2,7 +2,10 @@
 #define TABLEVIEW2D_H
 
 #include <QWidget>
+#include <QResizeEvent>
 #include "ui_tableview2d.h"
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
 class TableView2D : public QWidget
 {
 	Q_OBJECT
@@ -12,10 +15,14 @@ public:
 	~TableView2D();
 	void passData(unsigned short locationid,QByteArray data,int physicallocation);
 private:
+	QwtPlotCurve *curve;
+	QVector<QPointF> samples;
 	Ui::TableView2D ui;
 	unsigned short m_locationid;
 	int m_physicalid;
 	unsigned short currentvalue;
+protected:
+	void resizeEvent(QResizeEvent *evt);
 private slots:
 	void saveClicked();
 	void tableCellChanged(int row,int column);

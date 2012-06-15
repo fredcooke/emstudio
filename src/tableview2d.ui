@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1065</width>
-    <height>180</height>
+    <width>1116</width>
+    <height>431</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,10 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="10,6,0">
+     <item>
+      <widget class="QwtPlot" name="plot" native="true"/>
+     </item>
      <item>
       <widget class="QTableWidget" name="tableWidget"/>
      </item>
@@ -54,6 +57,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QwtPlot</class>
+   <extends>QWidget</extends>
+   <header location="global">qwt_plot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -939,39 +939,14 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					}
 					parent = parsedPacket.payload[2] << 8;
 					parent += parsedPacket.payload[3];
-					//if (test & BLOCK_IS_RAM && test & BLOCK_IS_FLASH)
-					//{
-						rampage = parsedPacket.payload[4];
-						flashpage = parsedPacket.payload[5];
-						ramaddress = ((unsigned char)parsedPacket.payload[6]) << 8;
-						ramaddress += (unsigned char)parsedPacket.payload[7];
-						flashaddress = ((unsigned char)parsedPacket.payload[8]) << 8;
-						flashaddress += (unsigned char)parsedPacket.payload[9];
-						size = parsedPacket.payload[10] << 8;
-						size += parsedPacket.payload[11];
-					/*}
-					else if (test & BLOCK_IS_RAM)
-					{
-						rampage = packetpair.second[4];
-						ramaddress = packetpair.second[5] << 8;
-						ramaddress += packetpair.second[6];
-						size = packetpair.second[7] << 8;
-						size += packetpair.second[8];
-
-					}
-					else if (test & BLOCK_IS_FLASH)
-					{
-						flashpage = packetpair.second[4];
-						flashaddress = packetpair.second[5] << 8;
-						flashaddress += packetpair.second[6];
-						size = packetpair.second[7] << 8;
-						size += packetpair.second[8];
-					}
-					else
-					{
-						size = packetpair.second[4] << 8;
-						size += packetpair.second[5];
-					}*/
+					rampage = parsedPacket.payload[4];
+					flashpage = parsedPacket.payload[5];
+					ramaddress = ((unsigned char)parsedPacket.payload[6]) << 8;
+					ramaddress += (unsigned char)parsedPacket.payload[7];
+					flashaddress = ((unsigned char)parsedPacket.payload[8]) << 8;
+					flashaddress += (unsigned char)parsedPacket.payload[9];
+					size = parsedPacket.payload[10] << 8;
+					size += parsedPacket.payload[11];
 					emit locationIdInfo(locationid,test,flaglist,parent,rampage,flashpage,ramaddress,flashaddress,size);
 				}
 
@@ -1034,8 +1009,6 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 	}
 	else
 	{
-		/*
-		//Header size is 2?
 		qDebug() << "Header size is only" << parsedPacket.header.length() << "! THIS SHOULD NOT HAPPEN!";
 		QString headerstring = "";
 		QString packetstring = "";
@@ -1049,7 +1022,6 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 		}
 		qDebug() << "Header:" << headerstring;
 		qDebug() << "Packet:" << packetstring;
-		*/
 	}
 }
 
@@ -1086,25 +1058,6 @@ FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 		return Packet(false);
 	}
 
-	//Trim off 0xAA and 0xCC from the start and end
-	//buffer = buffer.mid(1); //Strip off start byte
-	//buffer = buffer.mid(0,buffer.length()-2); //Strip off stop byte and checksum. We know the packet is good already.
-
-
-	//Old location of checksum. now in serialthread.cpp
-	/*unsigned char sum = 0;
-	for (int i=0;i<buffer.size()-1;i++)
-	{
-		sum += buffer[i];
-	}
-	//qDebug() << "Payload sum:" << QString::number(sum);
-	//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
-	if (sum != (unsigned char)buffer[buffer.length()-1])
-	{
-		qDebug() << "BAD CHECKSUM!";
-		return QPair<QByteArray,QByteArray>();
-	}*/
-
 
 	//qDebug() << "Packet:" << QString::number(buffer[1],16) << QString::number(buffer[buffer.length()-2],16);
 	Packet retval;
@@ -1135,13 +1088,7 @@ FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 
 	payloadid += (unsigned char)buffer[iloc+1];
 	retval.payloadid = payloadid;
-	//qDebug() << QString::number(payloadid,16);
-	//qDebug() << QString::number(buffer[iloc-1],16);
-	//qDebug() << QString::number(buffer[iloc],16);
-	//qDebug() << QString::number(buffer[iloc+1],16);
-	//qDebug() << QString::number(buffer[iloc+2],16);
 	iloc += 2;
-	//qDebug() << QString::number(payloadid,16);
 	if (seq)
 	{
 		//qDebug() << "Sequence number" << QString::number(currPacket[iloc]);
@@ -1213,17 +1160,6 @@ FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 	{
 		return Packet(false);
 	}
-	//qDebug() << "Got full packet. Header length:" << header.length() << "Payload length:" << payload.length();
-	/*for (int i=0;i<m_dataFieldList->size();i++)
-	{
-		//ui.tableWidget->item(i,1)->setText(QString::number(m_dataFieldList[i].getValue(&payload)));
-	}*/
-	//payload is our actual data.
-	//unsigned int rpm = (payload[26] << 8) + payload[27];
-
-	//qDebug() << "f" << f.getValue(&payload);
-	//qDebug() << QString::number(rpm);
-	//qDebug() << QString::number(((unsigned short)payload[8] << 8) + (unsigned short)payload[9]);
 }
 
 
