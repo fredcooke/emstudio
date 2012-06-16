@@ -94,6 +94,7 @@ void TableView2D::tableCellChanged(int row,int column)
 		return;
 	}
 	unsigned short newval = ui.tableWidget->item(row,column)->text().toInt();
+	currentvalue = newval;
 	if (row == 0)
 	{
 		samples.replace(column,QPointF(ui.tableWidget->item(row,column)->text().toInt(),samples.at(column).y()));
