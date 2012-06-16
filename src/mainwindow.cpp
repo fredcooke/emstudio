@@ -251,7 +251,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	win->show();
 	win->raise();*/
 	//
-	/* //TEST 2d TABLE!!!
+	//TEST 2d TABLE!!!
 	QByteArray data;
 	for (int i=0;i<16;i++)
 	{
@@ -262,8 +262,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	for (int i=0;i<16;i++)
 	{
-		data.append((char)0x00);
-		data.append((char)((unsigned char)rand()));
+		unsigned short random = rand();
+		//unsigned short random = ((i) * (65535/15.0));
+		data.append((char)((random >> 8) & 0xFF));
+		data.append((char)(random & 0xFF));
 	}
 
 	TableView2D *view = new TableView2D();
@@ -275,9 +277,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	win->setGeometry(view->geometry());
 	m_rawDataView[0xABCD] = view;
 	win->show();
-	win->raise();*/
+	win->raise();
 
 }
+void MainWindow::tableview2d_reloadTableData(unsigned short locationid)
+{
+	if (hasLocalFlashBlock(locationid))
+	{
+		TableView2D *table = qobject_cast<TableView2D*>(sender());
+		if (table)
+		{
+			table->passData(locationid,getLocalFlashBlock(locationid),0);
+			emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
+		}
+	}
+}
+
 void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,int physicallocation)
 {
 	if (physicallocation == 0)

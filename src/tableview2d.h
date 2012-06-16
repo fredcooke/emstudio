@@ -32,6 +32,7 @@ signals:
 	void saveToFlash(unsigned short locationid);
 	void saveData(unsigned short locationid,QByteArray data,int phyiscallocation);
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
+	void reloadTableData(unsigned short locationid);
 };
 
 #endif // TABLEVIEW2D_H

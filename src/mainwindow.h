@@ -143,6 +143,7 @@ private slots:
 	void logPayloadReceived(QByteArray header,QByteArray payload);
 	void logProgress(qlonglong current,qlonglong total);
 	void logFinished();
+	void tableview2d_reloadTableData(unsigned short locationid);
 	void loadLogButtonClicked();
 	void playLogButtonClicked();
 	void pauseLogButtonClicked();

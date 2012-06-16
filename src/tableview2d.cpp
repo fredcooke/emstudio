@@ -15,24 +15,7 @@ TableView2D::TableView2D(QWidget *parent) : QWidget(parent)
 	connect(ui.loadPushButton,SIGNAL(clicked()),this,SLOT(loadClicked()));
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
-	/*#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
 
-QwtPlot *myPlot = new QwtPlot("Two Curves", parent);
-
-// add curves
-QwtPlotCurve *curve1 = new QwtPlotCurve("Curve 1");
-QwtPlotCurve *curve2 = new QwtPlotCurve("Curve 2");
-
-// copy the data into the curves
-curve1->setData(...);
-curve2->setData(...);
-
-curve1->attach(myPlot);
-curve2->attach(myPlot);
-
-// finally, refresh the plot
-myPlot->replot();*/
 	QPalette pal = ui.plot->palette();
 	pal.setColor(QPalette::Background,QColor::fromRgb(0,0,0));
 	ui.plot->setPalette(pal);
@@ -59,7 +42,7 @@ void TableView2D::tableCurrentCellChanged(int currentrow,int currentcolumn,int p
 
 void TableView2D::loadClicked()
 {
-	//emit reloadTableData(m_locationId);
+	emit reloadTableData(m_locationid);
 }
 
 void TableView2D::tableCellChanged(int row,int column)
@@ -135,37 +118,36 @@ void TableView2D::passData(unsigned short locationid,QByteArray data,int physica
 	samples.clear();
 	m_locationid = locationid;
 	m_physicalid = physicallocation;
-	//connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	disconnect(ui.tableWidget,SIGNAL(cellChanged(int,int)));
 	ui.tableWidget->clear();
 	ui.tableWidget->setColumnCount(0);
 	ui.tableWidget->setRowCount(2);
-	//QwtSeriesData<QPointF> *series = new QwtSeriesData<QPointF>();
-	//QwtIntervalSeriesData *series = new QwtIntervalSeriesData();
-
-	//QwtArraySeriesData<QwtIntervalSample> series;
 	for (int i=0;i<data.size()/2;i+=2)
 	{
 		unsigned short x = (((unsigned char)data[i]) << 8) + ((unsigned char)data[i+1]);
 		unsigned short y = (((unsigned char)data[(data.size()/2)+ i]) << 8) + ((unsigned char)data[(data.size()/2) + i+1]);
-		/*ui.tableWidget->setRowCount(ui.tableWidget->rowCount()+1);
-		ui.tableWidget->setVerticalHeaderItem(ui.tableWidget->rowCount()-1,new QTableWidgetItem(QString::number(x)));
-		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(y)));*/
 		ui.tableWidget->setColumnCount(ui.tableWidget->columnCount()+1);
 		ui.tableWidget->setColumnWidth(ui.tableWidget->columnCount()-1,ui.tableWidget->width() / (data.size()/4));
 		ui.tableWidget->setItem(0,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(x)));
 		ui.tableWidget->setItem(1,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(y)));
-
-		/*QwtIntervalSample sample;
-		QwtInterval interval;
-		interval.setMinValue(x);
-		interval.setMaxValue(nextx);
-		sample.interval = interval;
-		sample.value = y;*/
-		//vector.append(sample);
+		if (y < 65535/4)
+		{
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,(255*((y)/(65535.0/4.0))),255));
+		}
+		else if (y < ((65535/4)*2))
+		{
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((y-((65535/4.0)))/(65535.0/4.0)))));
+		}
+		else if (y < ((65535/4)*3))
+		{
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb((255*((y-((65535/4.0)*2))/(65535.0/4.0))),255,0));
+		}
+		else
+		{
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((y-((65535/4.0)*3))/(65535.0/4.0))),0));
+		}
 		samples.append(QPointF(x,y));
 	}
-	//series->setSamples(vector);
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	curve->setSamples(samples);
 	ui.plot->replot();
