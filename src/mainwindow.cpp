@@ -24,6 +24,7 @@
 #include <QMdiSubWindow>
 #include <QSettings>
 #include <tableview2d.h>
+#include <tableview3d.h>
 
 #define define2string_p(x) #x
 #define define2string(x) define2string_p(x)
@@ -173,16 +174,82 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	menu_connectClicked(); //Connect on start.
 
+	/*QFile file("log.inandout.log");
+	file.open(QIODevice::ReadOnly);
+	QByteArray filebytes = file.readAll();
+	file.close();
+	unsigned char data2[] = {
+	0xAA,0x00,0x01,0x04,
+	0x00,0x01,0x00,0x00,0x00,0x00,0x06,0xCC
+	};
 
+	for (int i=0;i<filebytes.size();i++)
+	{
+		for (int j=0;j<12;j++)
+		{
+			if ((unsigned char)filebytes[i+j] == data2[j])
+			{
+				if (j == 11)
+				{
+					//Good data.
+					//1032 bytes
+					filebytes.mid(i+j+1,1032);
+					qDebug() << "Found:";
+				}
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+	//38686
+	//39709
+	filebytes = filebytes.mid(38686,(39709-38686)+1);
+	qDebug() <<"Start:" << QString::number((unsigned char)filebytes[0],16) << QString::number((unsigned char)filebytes[filebytes.length()-1],16);
+	//filebytes = filebytes.mid(6,filebytes.length()-7);
+	qDebug() <<"Start:" << QString::number((unsigned char)filebytes[0],16) << QString::number((unsigned char)filebytes[filebytes.length()-1],16);
 	//TEST 3D TABLE
-	/*QByteArray data;
+	QByteArray data;
 	unsigned short xlength = 16;
 	unsigned short ylength = 16;
 	QByteArray xdata;
 	QByteArray ydata;
-	QByteArray data;
-	data.append((char)(((i * 1000) >> 8) & 0xFF));
-	data.append((i * 1000) & 0xFF);*/
+	data.append((char)(((xlength) >> 8) & 0xFF));
+	data.append((xlength) & 0xFF);
+	data.append((char)(((ylength) >> 8) & 0xFF));
+	data.append((ylength) & 0xFF);
+	for (int i=0;i<xlength;i++)
+	{
+		unsigned short r = i * 1000;
+		data.append((char)(((r) >> 8) & 0xFF));
+		data.append((r) & 0xFF);
+	}
+	for (int i=0;i<ylength;i++)
+	{
+		unsigned short r = i * 500;
+		data.append((char)(((r) >> 8) & 0xFF));
+		data.append((r) & 0xFF);
+	}
+	for (int i=0;i<xlength;i++)
+	{
+		for (int j=0;j<ylength;j++)
+		{
+			unsigned short r = rand();
+			data.append((char)(((r) >> 8) & 0xFF));
+			data.append((r) & 0xFF);
+		}
+	}
+	TableView3D *view  = new TableView3D();
+	view->passData(0xABCD,filebytes,0);
+	connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+	connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+	QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+	win->setWindowTitle("Ram Location 0x" + QString::number(0xABCD,16).toUpper());
+	win->setGeometry(view->geometry());
+	m_rawDataView[0xABCD] = view;
+	win->show();
+	win->raise();*/
 	//
 	/* //TEST 2d TABLE!!!
 	QByteArray data;
@@ -271,7 +338,15 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 		{
 			if (m_rawDataView.contains(locid))
 			{
-				if (type != 1)
+				if (type == 1)
+				{
+					qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
+				}
+				else if (type == 3)
+				{
+					qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
+				}
+				else
 				{
 
 					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_ramMemoryList[i]->data());
@@ -290,6 +365,21 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 					connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
+					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
+					win->setGeometry(view->geometry());
+					m_rawDataView[locid] = view;
+					win->show();
+					win->raise();
+				}
+				else if (type == 3)
+				{
+					TableView3D *view = new TableView3D();
+					view->passData(locid,m_ramMemoryList[i]->data(),0);
+					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+					//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+					//connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
+					//connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
 					win->setGeometry(view->geometry());
@@ -321,7 +411,15 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 		{
 			if (m_rawDataView.contains(locid))
 			{
-				if (type != -1)
+				if (type == 1)
+				{
+					qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
+				}
+				else if (type == 3)
+				{
+					qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
+				}
+				else
 				{
 					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_flashMemoryList[i]->data());
 					//m_rawDataView[locid]->setData(locid,m_ramRawBlockList[i]->data);
@@ -999,7 +1097,15 @@ void MainWindow::updateDataWindows(unsigned short locationid)
 			}
 			else
 			{
-				qDebug() << "GUI Window open with memory location, but no valid window type found!";
+				TableView3D *tableview3d = qobject_cast<TableView3D*>(m_rawDataView[locationid]);
+				if (tableview3d)
+				{
+					tableview3d->passData(locationid,getLocalRamBlock(locationid),0);
+				}
+				else
+				{
+					qDebug() << "GUI Window open with memory location, but no valid window type found!";
+				}
 			}
 		}
 	}

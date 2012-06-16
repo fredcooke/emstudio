@@ -49,7 +49,8 @@ SOURCES += src/main.cpp\
     src/table2ddata.cpp \
     src/packetstatusview.cpp \
     src/aboutview.cpp \
-    src/memorylocation.cpp
+    src/memorylocation.cpp \
+    src/tableview3d.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -76,7 +77,8 @@ HEADERS  += src/mainwindow.h \
     src/table2ddata.h \
     src/packetstatusview.h \
     src/aboutview.h \
-    src/memorylocation.h
+    src/memorylocation.h \
+    src/tableview3d.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
@@ -88,7 +90,8 @@ FORMS    += src/mainwindow.ui \
     src/rawdataview.ui \
     src/tableview2d.ui \
     src/packetstatusview.ui \
-    src/aboutview.ui
+    src/aboutview.ui \
+    src/tableview3d.ui
 
 OTHER_FILES += \
     README.md
