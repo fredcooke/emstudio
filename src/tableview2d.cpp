@@ -73,6 +73,10 @@ void TableView2D::tableCellChanged(int row,int column)
 		return;
 	}
 	bool ok = false;
+	if (ui.tableWidget->item(row,column)->text().toInt(&ok) == currentvalue)
+	{
+		return;
+	}
 	if (ui.tableWidget->item(row,column)->text().toInt(&ok) > 65535)
 	{
 		QMessageBox::information(0,"Error",QString("Value entered too large! Value range 0-65535. Entered value:") + ui.tableWidget->item(row,column)->text());
@@ -109,7 +113,7 @@ void TableView2D::tableCellChanged(int row,int column)
 	QByteArray data;
 	data.append((char)((newval >> 8) & 0xFF));
 	data.append((char)(newval & 0xFF));
-	emit saveSingleData(m_locationid,data,column+(row * 32),2);
+	emit saveSingleData(m_locationid,data,(column*2)+(row * 32),2);
 }
 void TableView2D::resizeEvent(QResizeEvent *evt)
 {
@@ -126,6 +130,7 @@ void TableView2D::passData(unsigned short locationid,QByteArray data,int physica
 		qDebug() << "Passed a data pack to a 2d table that was of size" << data.size() << "should be 64!!!";
 		return;
 	}
+	qDebug() << "TableView2D::passData" << "0x" + QString::number(locationid,16).toUpper();
 	samples.clear();
 	m_locationid = locationid;
 	m_physicalid = physicallocation;
