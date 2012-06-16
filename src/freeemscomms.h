@@ -42,6 +42,7 @@ public:
 		UPDATE_BLOCK_IN_FLASH=0x0102,
 		RETRIEVE_BLOCK_IN_RAM=0x0104,
 		RETRIEVE_BLOCK_IN_FLASH=0x0106,
+		BURN_BLOCK_FROM_RAM_TO_FLASH=0x0108,
 		GET_LOCATION_ID_LIST=0xDA5E,
 		GET_DECODER_NAME=0xEEEE,
 		GET_FIRMWARE_BUILD_DATE=0xEEF0,
@@ -123,6 +124,7 @@ public:
 	int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
 	int retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size);
 	int retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size);
+	int burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size);
 	void setInterByteSendDelay(int milliseconds);
 protected:
 	void run();

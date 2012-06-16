@@ -276,6 +276,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
+					connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
 					win->setGeometry(view->geometry());
@@ -1109,6 +1110,12 @@ void MainWindow::pauseLogButtonClicked()
 {
 
 }
+void MainWindow::saveFlashLocationId(unsigned short locationid)
+{
+	qDebug() << "Burning block from ram to flash for locationid:" << "0x"+QString::number(locationid,16).toUpper();
+	emsComms->burnBlockFromRamToFlash(locationid,0,0);
+}
+
 void MainWindow::saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size)
 {
 	bool found = false;

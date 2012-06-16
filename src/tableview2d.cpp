@@ -12,6 +12,7 @@ TableView2D::TableView2D(QWidget *parent) : QWidget(parent)
 	ui.tableWidget->verticalHeader()->hide();
 	//ui.tableWidget->setColumnWidth(0,100);
 	connect(ui.savePushButton,SIGNAL(clicked()),this,SLOT(saveClicked()));
+	connect(ui.loadPushButton,SIGNAL(clicked()),this,SLOT(loadClicked()));
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	/*#include <qwt_plot.h>
@@ -54,6 +55,11 @@ void TableView2D::tableCurrentCellChanged(int currentrow,int currentcolumn,int p
 		return;
 	}
 	currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toInt();
+}
+
+void TableView2D::loadClicked()
+{
+	//emit reloadTableData(m_locationId);
 }
 
 void TableView2D::tableCellChanged(int row,int column)
@@ -162,7 +168,8 @@ TableView2D::~TableView2D()
 }
 void TableView2D::saveClicked()
 {
-	QByteArray data;
+	emit saveToFlash(m_locationid);
+	/*QByteArray data;
 	bool ok = false;
 	QByteArray first;
 	QByteArray second;
@@ -177,5 +184,5 @@ void TableView2D::saveClicked()
 	}
 	data.append(first);
 	data.append(second);
-	emit saveData(m_locationid,data,m_physicalid);
+	emit saveData(m_locationid,data,m_physicalid);*/
 }

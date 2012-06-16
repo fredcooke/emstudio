@@ -145,6 +145,7 @@ private slots:
 	void playLogButtonClicked();
 	void pauseLogButtonClicked();
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
+	void saveFlashLocationId(unsigned short locationid);
 	void stopLogButtonClicked();
 	void emsCommsConnected();
 	void unknownPacket(QByteArray header,QByteArray payload);

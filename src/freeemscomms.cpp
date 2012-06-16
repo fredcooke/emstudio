@@ -88,6 +88,21 @@ void FreeEmsComms::setBaud(int baudrate)
 {
 	serialThread->setBaud(baudrate);
 }
+int FreeEmsComms::burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size)
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = BURN_BLOCK_FROM_RAM_TO_FLASH;
+	req.addArg(location,sizeof(location));
+	req.addArg(offset,sizeof(offset));
+	req.addArg(size,sizeof(size));
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+
 int FreeEmsComms::updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)
 {
 	m_reqListMutex.lock();
@@ -544,6 +559,24 @@ void FreeEmsComms::run()
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0xEEF4;
 					if (!sendPacket(GET_OPERATING_SYSTEM))
+					{
+						qDebug() << "Error writing packet. Quitting thread";
+						return;
+					}
+					m_threadReqList.removeAt(i);
+					i--;
+				}
+			}
+			else if (m_threadReqList[i].type == BURN_BLOCK_FROM_RAM_TO_FLASH)
+			{
+				if (!m_waitingForResponse)
+				{
+					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = 0x0108;
+					//qDebug() << "Requesting location ID Info for:" << QString::number(locationid,16);
+					if (!sendPacket(BURN_BLOCK_FROM_RAM_TO_FLASH,m_threadReqList[i].args,m_threadReqList[i].argsize,false))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
 						return;
