@@ -148,7 +148,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 
 	//Load settings
-	QSettings settings("freeems","freetune");
+	QSettings settings("settings.ini",QSettings::IniFormat);
 	settings.beginGroup("comms");
 	m_comPort = settings.value("port","/dev/ttyUSB0").toString();
 	m_comBaud = settings.value("baud",115200).toInt();
@@ -251,7 +251,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	win->show();
 	win->raise();*/
 	//
-	//TEST 2d TABLE!!!
+	/*//TEST 2d TABLE!!!
 	QByteArray data;
 	for (int i=0;i<16;i++)
 	{
@@ -277,7 +277,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	win->setGeometry(view->geometry());
 	m_rawDataView[0xABCD] = view;
 	win->show();
-	win->raise();
+	win->raise();*/
 
 }
 void MainWindow::tableview2d_reloadTableData(unsigned short locationid)
@@ -763,7 +763,7 @@ void MainWindow::settingsSaveClicked()
 		subwin->deleteLater();
 	}*/
 	comSettingsWidget->hide();
-	QSettings settings("freeems","freetune");
+	QSettings settings("settings.ini",QSettings::IniFormat);
 	settings.beginGroup("comms");
 	settings.setValue("port",m_comPort);
 	settings.setValue("baud",m_comBaud);
