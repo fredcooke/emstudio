@@ -173,6 +173,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	menu_connectClicked(); //Connect on start.
 
+
+	//TEST 3D TABLE
+	/*QByteArray data;
+	unsigned short xlength = 16;
+	unsigned short ylength = 16;
+	QByteArray xdata;
+	QByteArray ydata;
+	QByteArray data;
+	data.append((char)(((i * 1000) >> 8) & 0xFF));
+	data.append((i * 1000) & 0xFF);*/
+	//
+	/* //TEST 2d TABLE!!!
 	QByteArray data;
 	for (int i=0;i<16;i++)
 	{
@@ -196,7 +208,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	win->setGeometry(view->geometry());
 	m_rawDataView[0xABCD] = view;
 	win->show();
-	win->raise();
+	win->raise();*/
 
 }
 void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,int physicallocation)
@@ -252,6 +264,7 @@ void MainWindow::menu_windows_PacketStatusClicked()
 void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 {
 	Q_UNUSED(type)
+	Q_UNUSED(isram)
 	for (int i=0;i<m_ramMemoryList.size();i++)
 	{
 		if (m_ramMemoryList[i]->locationid == locid)
@@ -352,6 +365,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 }
 void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation)
 {
+	Q_UNUSED(physicallocation)
 	markRamDirty();
 	bool found = false;
 	for (int i=0;i<m_ramMemoryList.size();i++)
@@ -474,6 +488,41 @@ bool MainWindow::hasLocalRamBlock(unsigned short id)
 		}
 	}
 	return false;
+}
+void MainWindow::setLocalRamBlock(unsigned short id,QByteArray data)
+{
+	for (int i=0;i<m_ramMemoryList.size();i++)
+	{
+		if (m_ramMemoryList[i]->locationid == id)
+		{
+			m_ramMemoryList[i]->setData(data);
+			return;
+		}
+	}
+}
+
+void MainWindow::setDeviceRamBlock(unsigned short id,QByteArray data)
+{
+	for (int i=0;i<m_deviceRamMemoryList.size();i++)
+	{
+		if (m_deviceRamMemoryList[i]->locationid == id)
+		{
+			m_deviceRamMemoryList[i]->setData(data);
+			return;
+		}
+	}
+}
+
+void MainWindow::setLocalFlashBlock(unsigned short id,QByteArray data)
+{
+	for (int i=0;i<m_flashMemoryList.size();i++)
+	{
+		if (m_flashMemoryList[i]->locationid == id)
+		{
+			m_flashMemoryList[i]->setData(data);
+			return;
+		}
+	}
 }
 
 bool MainWindow::hasLocalFlashBlock(unsigned short id)
@@ -1114,6 +1163,15 @@ void MainWindow::saveFlashLocationId(unsigned short locationid)
 {
 	qDebug() << "Burning block from ram to flash for locationid:" << "0x"+QString::number(locationid,16).toUpper();
 	emsComms->burnBlockFromRamToFlash(locationid,0,0);
+	if (hasLocalFlashBlock(locationid))
+	{
+		if(hasDeviceRamBlock(locationid))
+		{
+			setLocalFlashBlock(locationid,getDeviceRamBlock(locationid));
+			//getLocalFlashBlock(locationid);
+			//getDeviceRamBlock(locationid);
+		}
+	}
 }
 
 void MainWindow::saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size)
@@ -1138,6 +1196,7 @@ void MainWindow::saveSingleData(unsigned short locationid,QByteArray data, unsig
 		qDebug() << "Attempted to save data for single value at location id:" << "0x" + QString::number(locationid,16) << "but no valid location found in Ram list. Ram list size:" << m_ramMemoryList.size();
 	}
 	qDebug() << "Requesting to update single value at ram location:" << "0x" + QString::number(locationid,16).toUpper() << "data size:" << data.size();
+	qDebug() << "Offset:" << offset << "Size:" << size  <<  "Data:" << data;
 	m_currentRamLocationId = locationid;
 	emsComms->updateBlockInRam(locationid,offset,size,data);
 }

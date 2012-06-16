@@ -129,6 +129,8 @@ void TableView2D::passData(unsigned short locationid,QByteArray data,int physica
 	samples.clear();
 	m_locationid = locationid;
 	m_physicalid = physicallocation;
+	//connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+	disconnect(ui.tableWidget,SIGNAL(cellChanged(int,int)));
 	ui.tableWidget->clear();
 	ui.tableWidget->setColumnCount(0);
 	ui.tableWidget->setRowCount(2);
@@ -158,6 +160,7 @@ void TableView2D::passData(unsigned short locationid,QByteArray data,int physica
 		samples.append(QPointF(x,y));
 	}
 	//series->setSamples(vector);
+	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	curve->setSamples(samples);
 	ui.plot->replot();
 

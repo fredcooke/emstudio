@@ -105,9 +105,11 @@ private:
 	bool m_localRamDirty;
 	bool m_deviceFlashDirty;
 	bool hasDeviceRamBlock(unsigned short id);
-	bool hasDeviceFlashBlock(unsigned short id);
 	bool hasLocalRamBlock(unsigned short id);
 	bool hasLocalFlashBlock(unsigned short id);
+	void setLocalRamBlock(unsigned short id,QByteArray data);
+	void setDeviceRamBlock(unsigned short id,QByteArray data);
+	void setLocalFlashBlock(unsigned short id,QByteArray data);
 	QByteArray getLocalRamBlock(unsigned short id);
 	QByteArray getLocalFlashBlock(unsigned short id);
 	QByteArray getDeviceRamBlock(unsigned short id);
