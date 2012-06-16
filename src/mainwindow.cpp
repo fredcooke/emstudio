@@ -935,11 +935,8 @@ void MainWindow::updateRamLocation(unsigned short locationid)
 		}
 
 	}
-	else
-	{
-		//qDebug() << "No children for:" << "0x" + QString::number(m_currentRamLocationId,16).toUpper();
-		updateDataWindows(locationid);
-	}
+	//qDebug() << "No children for:" << "0x" + QString::number(m_currentRamLocationId,16).toUpper();
+	updateDataWindows(locationid);
 }
 
 void MainWindow::commandSuccessful(int sequencenumber)
