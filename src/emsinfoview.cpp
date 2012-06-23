@@ -23,22 +23,6 @@ EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
 	ui.locationIdInfoTableWidget->setColumnCount(16);
-	ui.locationIdInfoTableWidget->setColumnWidth(0,80);
-	ui.locationIdInfoTableWidget->setColumnWidth(1,80);
-	ui.locationIdInfoTableWidget->setColumnWidth(2,80);
-	ui.locationIdInfoTableWidget->setColumnWidth(3,80);
-	ui.locationIdInfoTableWidget->setColumnWidth(4,80);
-	ui.locationIdInfoTableWidget->setColumnWidth(5,100);
-	ui.locationIdInfoTableWidget->setColumnWidth(6,100);
-	ui.locationIdInfoTableWidget->setColumnWidth(7,80);
-	ui.locationIdInfoTableWidget->setColumnWidth(8,80);
-	ui.locationIdInfoTableWidget->setColumnWidth(9,80);
-	ui.locationIdInfoTableWidget->setColumnWidth(10,80);
-	ui.locationIdInfoTableWidget->setColumnWidth(11,80);
-	ui.locationIdInfoTableWidget->setColumnWidth(12,120);
-	ui.locationIdInfoTableWidget->setColumnWidth(13,120);
-	ui.locationIdInfoTableWidget->setColumnWidth(14,120);
-	ui.locationIdInfoTableWidget->setColumnWidth(15,120);
 
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Flags"));
@@ -280,6 +264,7 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,unsigned short rawFla
 	//Q_UNUSED(ramaddress)
 	//Q_UNUSED(flashaddress)
 	//Q_UNUSED(size)
+	ui.locationIdInfoTableWidget->resizeColumnsToContents();
 }
 void EmsInfoView::setInterfaceVersion(QString version)
 {

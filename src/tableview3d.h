@@ -14,7 +14,13 @@ public:
 	void passData(unsigned short locationid,QByteArray data,int physicallocation);
 private:
 	unsigned short m_locationId;
+	unsigned short currentvalue;
 	Ui::TableView3D ui;
+private slots:
+	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
+	void tableCellChanged(int row,int column);
+signals:
+	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
 };
 
 #endif // TABLEVIEW3D_H

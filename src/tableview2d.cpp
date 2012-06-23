@@ -98,13 +98,14 @@ void TableView2D::tableCellChanged(int row,int column)
 	data.append((char)((newval >> 8) & 0xFF));
 	data.append((char)(newval & 0xFF));
 	emit saveSingleData(m_locationid,data,(column*2)+(row * 32),2);
+	ui.tableWidget->resizeColumnsToContents();
 }
 void TableView2D::resizeEvent(QResizeEvent *evt)
 {
-	for (int i=0;i<ui.tableWidget->columnCount();i++)
+	/*for (int i=0;i<ui.tableWidget->columnCount();i++)
 	{
 		ui.tableWidget->setColumnWidth(i,(ui.tableWidget->width() / ui.tableWidget->columnCount())-1);
-	}
+	}*/
 }
 
 void TableView2D::passData(unsigned short locationid,QByteArray data,int physicallocation)
@@ -151,7 +152,7 @@ void TableView2D::passData(unsigned short locationid,QByteArray data,int physica
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	curve->setSamples(samples);
 	ui.plot->replot();
-
+	ui.tableWidget->resizeColumnsToContents();
 }
 
 TableView2D::~TableView2D()
