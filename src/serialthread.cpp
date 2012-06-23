@@ -97,9 +97,7 @@ void SerialThread::readSerial(int timeout)
 		else
 		{
 			m_logInFile->write((const char*)buffer,readlen);
-			m_logInOutFile->write((const char*)buffer,readlen);
 			m_logInFile->flush();
-			m_logInOutFile->flush();
 		}
 		if (readlen == 0)
 		{
@@ -114,6 +112,8 @@ void SerialThread::readSerial(int timeout)
 					//Start byte in the middle of a packet
 					//Clear out the buffer and start fresh
 					m_inescape = false;
+					m_logInOutFile->write((const char*)qbuffer.data(),qbuffer.size());
+					m_logInOutFile->flush();
 					qbuffer.clear();
 				}
 				//qbuffer.append(buffer[i]);
@@ -138,6 +138,8 @@ void SerialThread::readSerial(int timeout)
 				{
 					sum += qbuffer[i];
 				}
+				m_logInOutFile->write((const char*)qbuffer.data(),qbuffer.size());
+				m_logInOutFile->flush();
 				//qDebug() << "Payload sum:" << QString::number(sum);
 				//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
 				if (sum != (unsigned char)qbuffer[qbuffer.size()-1])
