@@ -138,7 +138,9 @@ void SerialThread::readSerial(int timeout)
 				{
 					sum += qbuffer[i];
 				}
+				m_logInOutFile->write(QByteArray().append(0xAA));
 				m_logInOutFile->write((const char*)qbuffer.data(),qbuffer.size());
+				m_logInOutFile->write(QByteArray().append(0xCC));
 				m_logInOutFile->flush();
 				//qDebug() << "Payload sum:" << QString::number(sum);
 				//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);

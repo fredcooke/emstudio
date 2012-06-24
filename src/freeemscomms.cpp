@@ -808,7 +808,7 @@ void FreeEmsComms::run()
 		if (QDateTime::currentDateTime().currentMSecsSinceEpoch() - m_timeoutMsecs > 500 && m_waitingForResponse)
 		{
 			//5 seconds
-			qDebug() << "TIMEOUT waiting for response to payload:" << QString::number(m_payloadWaitingForResponse);
+			qDebug() << "TIMEOUT waiting for response to payload:" << "0x" + QString::number(m_payloadWaitingForResponse,16).toUpper() << "Sequence:" << m_currentWaitingRequest.sequencenumber;
 			m_waitingForResponse = false;
 		}
 		while (serialThread->bufferSize() != 0)
@@ -923,7 +923,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					details += ",";
 				}
 				details += "}";
-				qDebug() << details;
+				//qDebug() << details;
 				QList<unsigned short> idlist;
 				for (int j=0;j<parsedPacket.payload.size();j+=2)
 				{
@@ -969,7 +969,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					unsigned short flashaddress;
 					unsigned short size;
 					test += parsedPacket.payload[1];
-					qDebug() << "Location ID Info for location:" << QString::number(locationid,16) << "Flags:" << QString::number(test,16);
+					//qDebug() << "Location ID Info for location:" << QString::number(locationid,16) << "Flags:" << QString::number(test,16);
 					for (int j=0;j<m_blockFlagList.size();j++)
 					{
 						if (test & m_blockFlagList[j])
