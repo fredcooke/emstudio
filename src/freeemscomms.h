@@ -129,7 +129,7 @@ public:
 protected:
 	void run();
 private:
-
+	bool sendPacket(RequestClass request,bool haslength);
 	qint64 m_timeoutMsecs;
 	QList<LocationIdFlags> m_blockFlagList;
 	int m_sequenceNumber;

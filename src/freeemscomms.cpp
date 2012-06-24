@@ -300,6 +300,16 @@ int FreeEmsComms::hardReset()
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
+bool FreeEmsComms::sendPacket(RequestClass request,bool haslength)
+{
+	if (!sendPacket(request.type,request.args,request.argsize,haslength))
+	{
+		return false;
+	}
+	qDebug() << "Sent packet" << "0x" + QString::number(request.type,16).toUpper() << "Sequence Number:" << request.sequencenumber;
+	return true;
+}
+
 bool FreeEmsComms::sendPacket(unsigned short payloadid,QList<QVariant> arglist,QList<int> argsizelist,bool haslength)
 {
 	if (arglist.size() != argsizelist.size())
@@ -490,7 +500,7 @@ void FreeEmsComms::run()
 					emit debugVerbose("GET_LOCATION_ID_LIST");
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0xDA5E;
-					if (!sendPacket(GET_LOCATION_ID_LIST,m_threadReqList[i].args,m_threadReqList[i].argsize,true))
+					if (!sendPacket(m_threadReqList[i],true))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
 						return;
@@ -576,7 +586,7 @@ void FreeEmsComms::run()
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0108;
 					//qDebug() << "Requesting location ID Info for:" << QString::number(locationid,16);
-					if (!sendPacket(BURN_BLOCK_FROM_RAM_TO_FLASH,m_threadReqList[i].args,m_threadReqList[i].argsize,false))
+					if (!sendPacket(m_threadReqList[i],false))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
 						return;
@@ -594,7 +604,8 @@ void FreeEmsComms::run()
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0xF8E0;
 					//qDebug() << "Requesting location ID Info for:" << QString::number(locationid,16);
-					if (!sendPacket(GET_LOCATION_ID_INFO,m_threadReqList[i].args,m_threadReqList[i].argsize,false))
+					//if (!sendPacket(GET_LOCATION_ID_INFO,m_threadReqList[i].args,m_threadReqList[i].argsize,false))
+					if (!sendPacket(m_threadReqList[i],false))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
 						return;
@@ -611,7 +622,7 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0100;
-					if (!sendPacket(UPDATE_BLOCK_IN_RAM,m_threadReqList[i].args,m_threadReqList[i].argsize,true))
+					if (!sendPacket(m_threadReqList[i],true))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
 						return;
@@ -629,7 +640,7 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0104;
-					if (!sendPacket(RETRIEVE_BLOCK_IN_RAM,m_threadReqList[i].args,m_threadReqList[i].argsize,false))
+					if (!sendPacket(m_threadReqList[i],false))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
 						return;
@@ -646,7 +657,7 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0102;
-					if (!sendPacket(UPDATE_BLOCK_IN_FLASH,m_threadReqList[i].args,m_threadReqList[i].argsize,true))
+					if (!sendPacket(m_threadReqList[i],true))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
 						return;
@@ -663,7 +674,7 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0106;
-					if (!sendPacket(RETRIEVE_BLOCK_IN_FLASH,m_threadReqList[i].args,m_threadReqList[i].argsize,false))
+					if (!sendPacket(m_threadReqList[i],false))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
 						return;
@@ -733,7 +744,7 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0006;
-					if (!sendPacket(ECHO_PACKET,m_threadReqList[i].args,m_threadReqList[i].argsize,true))
+					if (!sendPacket(m_threadReqList[i],true))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
 						return;
@@ -819,11 +830,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 
 		if (payloadid != 0x0191)
 		{
-			qDebug() << "Incoming packet:" << "0x" + QString::number(payloadid,16).toUpper();
-			if (m_waitingForResponse)
-			{
-				qDebug() << "Waiting for response:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "SEQ:" << m_currentWaitingRequest.sequencenumber;
-			}
+			//qDebug() << "Incoming packet:" << "0x" + QString::number(payloadid,16).toUpper();
 
 		}
 		if (m_waitingForResponse)
@@ -831,10 +838,10 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 
 			if (payloadid == m_payloadWaitingForResponse+1)
 			{
+				qDebug() << "Recieved Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
 				if (parsedPacket.isNAK)
 				{
 					//NAK to our packet
-
 					unsigned short errornum = parsedPacket.payload[0] << 8;
 					errornum += parsedPacket.payload[1];
 					emit commandFailed(m_currentWaitingRequest.sequencenumber,errornum);

@@ -157,6 +157,7 @@ private slots:
 	void menu_settingsClicked();
 	void menu_connectClicked();
 	void menu_aboutClicked();
+	void interrogateProgressViewCancelClicked();
 	void ui_saveDataButtonClicked();
 	void menu_disconnectClicked();
 	void settingsSaveClicked();

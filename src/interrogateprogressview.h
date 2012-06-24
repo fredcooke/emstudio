@@ -17,6 +17,10 @@ public:
 	int progress() { return ui.progressBar->value(); }
 private:
 	Ui::InterrogateProgressView ui;
+private slots:
+	void cancelClickedSlot();
+signals:
+	void cancelClicked();
 };
 
 #endif // INTERROGATEPROGRESSVIEW_H
