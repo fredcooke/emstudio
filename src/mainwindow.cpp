@@ -1063,12 +1063,13 @@ void MainWindow::emsCommsConnected()
 	this->setEnabled(false);
 	interrogationSequenceList.append(emsComms->getFirmwareVersion());
 	interrogationSequenceList.append(emsComms->getInterfaceVersion());
+	interrogationSequenceList.append(emsComms->getLocationIdList(0x00,0x00));
 	interrogationSequenceList.append(emsComms->getCompilerVersion());
 	interrogationSequenceList.append(emsComms->getDecoderName());
 	interrogationSequenceList.append(emsComms->getFirmwareBuildDate());
 	interrogationSequenceList.append(emsComms->getMaxPacketSize());
 	interrogationSequenceList.append(emsComms->getOperatingSystem());
-	interrogationSequenceList.append(emsComms->getLocationIdList(0x00,0x00));
+
 	progressView->setMax(8);
 	//progressView->setMax(progressView->max()+1);
 }
