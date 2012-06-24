@@ -1,13 +1,13 @@
 /***************************************************************************
 *   Copyright (C) 2012  Michael Carpenter (malcom2073)                     *
 *                                                                          *
-*   This file is a part of FreeTune                                        *
+*   This file is a part of EMStudio                                        *
 *                                                                          *
-*   FreeTune is free software: you can redistribute it and/or modify       *
+*   EMStudio is free software: you can redistribute it and/or modify       *
 *   it under the terms of the GNU General Public License version 2 as      *
 *   published by the Free Software Foundation.                             *
 *                                                                          *
-*   FreeTune is distributed in the hope that it will be useful,            *
+*   EMStudio is distributed in the hope that it will be useful,            *
 *   but WITHOUT ANY WARRANTY; without even the implied warranty of         *
 *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
 *   GNU General Public License for more details.                           *
@@ -954,8 +954,8 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 				details += "}";
 
 				unsigned short locationid = m_currentWaitingRequest.args[0].toInt();
-				qDebug() << "Payload:" << QString::number(locationid,16);
-				qDebug() << details;
+				//qDebug() << "Payload:" << QString::number(locationid,16);
+				//qDebug() << details;
 				//TODO double check to make sure that there aren't an odd number of items here...
 				//QList<unsigned short> idlist;
 				QList<LocationIdFlags> flaglist;
