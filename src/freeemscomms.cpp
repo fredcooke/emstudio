@@ -819,10 +819,10 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 
 		if (payloadid != 0x0191)
 		{
-			qDebug() << "Non debug packet:" << QString::number(payloadid);
+			qDebug() << "Incoming packet:" << "0x" + QString::number(payloadid,16).toUpper();
 			if (m_waitingForResponse)
 			{
-				qDebug() << "Waiting for response: " << QString::number(m_payloadWaitingForResponse);
+				qDebug() << "Waiting for response:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "SEQ:" << m_currentWaitingRequest.sequencenumber;
 			}
 
 		}

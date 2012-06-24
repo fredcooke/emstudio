@@ -30,13 +30,16 @@
 #define define2string(x) define2string_p(x)
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-
 	m_currentRamLocationId=0;
 	//populateDataFields();
 	m_localRamDirty = false;
 	m_deviceFlashDirty = false;
+	m_waitingForRamWriteConfirmation = false;
+	m_waitingForFlashWriteConfirmation = false;
 	ui.setupUi(this);
 	this->setWindowTitle(QString("EMStudio ") + QString(define2string(GIT_COMMIT)));
+	emsinfo.emstudioCommit = define2string(GIT_COMMIT);
+	emsinfo.emstudioHash = define2string(GIT_HASH);
 	ui.actionDisconnect->setEnabled(false);
 	connect(ui.actionSettings,SIGNAL(triggered()),this,SLOT(menu_settingsClicked()));
 	connect(ui.actionConnect,SIGNAL(triggered()),this,SLOT(menu_connectClicked()));
@@ -1013,7 +1016,10 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 		MemoryLocation *loc = new MemoryLocation();
 		loc->locationid = idlist[i];
 		m_tempMemoryList.append(loc);
-		m_locIdMsgList.append(emsComms->getLocationIdInfo(idlist[i]));
+		int seq = emsComms->getLocationIdInfo(idlist[i]);
+		progressView->setMax(progressView->max()+1);
+		m_locIdMsgList.append(seq);
+		interrogationSequenceList.append(seq);
 	}
 }
 void MainWindow::blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload)
@@ -1051,9 +1057,20 @@ void MainWindow::error(QString msg)
 }
 void MainWindow::emsCommsConnected()
 {
-	emsComms->getFirmwareVersion();
-	emsComms->getInterfaceVersion();
-	emsComms->getLocationIdList(0x00,0x00);
+	progressView = new InterrogateProgressView();
+	progressView->setMax(0);
+	progressView->show();
+	this->setEnabled(false);
+	interrogationSequenceList.append(emsComms->getFirmwareVersion());
+	interrogationSequenceList.append(emsComms->getInterfaceVersion());
+	interrogationSequenceList.append(emsComms->getCompilerVersion());
+	interrogationSequenceList.append(emsComms->getDecoderName());
+	interrogationSequenceList.append(emsComms->getFirmwareBuildDate());
+	interrogationSequenceList.append(emsComms->getMaxPacketSize());
+	interrogationSequenceList.append(emsComms->getOperatingSystem());
+	interrogationSequenceList.append(emsComms->getLocationIdList(0x00,0x00));
+	progressView->setMax(8);
+	//progressView->setMax(progressView->max()+1);
 }
 void MainWindow::checkSyncRequest()
 {
@@ -1139,9 +1156,11 @@ void MainWindow::commandSuccessful(int sequencenumber)
 	}
 	if (m_locIdInfoMsgList.contains(sequencenumber))
 	{
+
 		m_locIdInfoMsgList.removeOne(sequencenumber);
 		if (m_locIdInfoMsgList.size() == 0)
 		{
+			//progressView->setProgress(30);
 			//End of the location ID information messages.
 			checkRamFlashSync();
 		}
@@ -1151,21 +1170,48 @@ void MainWindow::commandSuccessful(int sequencenumber)
 		m_locIdMsgList.removeOne(sequencenumber);
 		if (m_locIdMsgList.size() == 0)
 		{
+			if (progressView)
+			{
+				//progressView->setProgress(90);
+			}
 			populateParentLists();
 			for (int i=0;i<m_deviceFlashMemoryList.size();i++)
 			{
 				if (!m_deviceFlashMemoryList[i]->hasParent)
 				{
-					m_locIdInfoMsgList.append(emsComms->retrieveBlockFromFlash(m_deviceFlashMemoryList[i]->locationid,0,0));
+					int seq = emsComms->retrieveBlockFromFlash(m_deviceFlashMemoryList[i]->locationid,0,0);
+					progressView->setMax(progressView->max()+1);
+					m_locIdInfoMsgList.append(seq);
+					interrogationSequenceList.append(seq);
 				}
 			}
 			for (int i=0;i<m_deviceRamMemoryList.size();i++)
 			{
 				if (!m_deviceRamMemoryList[i]->hasParent)
 				{
-					m_locIdInfoMsgList.append(emsComms->retrieveBlockFromRam(m_deviceRamMemoryList[i]->locationid,0,0));
+					int seq = emsComms->retrieveBlockFromRam(m_deviceRamMemoryList[i]->locationid,0,0);
+					progressView->setMax(progressView->max()+1);
+					m_locIdInfoMsgList.append(seq);
+					interrogationSequenceList.append(seq);
 				}
 			}
+		}
+	}
+	if (interrogationSequenceList.contains(sequencenumber))
+	{
+		progressView->setProgress(progressView->progress()+1);
+		interrogationSequenceList.removeOne(sequencenumber);
+		if (interrogationSequenceList.size() == 0)
+		{
+			progressView->hide();
+			progressView->deleteLater();
+			progressView=0;
+			this->setEnabled(true);
+			qDebug() << "Interrogation complete";
+		}
+		else
+		{
+			qDebug() << interrogationSequenceList.size() << "messages left to go. First one:" << interrogationSequenceList[0];
 		}
 	}
 }
@@ -1379,16 +1425,39 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 			{
 				if (!m_deviceFlashMemoryList[i]->hasParent)
 				{
-					m_locIdInfoMsgList.append(emsComms->retrieveBlockFromFlash(m_deviceFlashMemoryList[i]->locationid,0,0));
+					int seq = emsComms->retrieveBlockFromFlash(m_deviceFlashMemoryList[i]->locationid,0,0);
+					m_locIdInfoMsgList.append(seq);
+					progressView->setMax(progressView->max()+1);
+					interrogationSequenceList.append(seq);
 				}
 			}
 			for (int i=0;i<m_deviceRamMemoryList.size();i++)
 			{
 				if (!m_deviceRamMemoryList[i]->hasParent)
 				{
-					m_locIdInfoMsgList.append(emsComms->retrieveBlockFromRam(m_deviceRamMemoryList[i]->locationid,0,0));
+					int seq = emsComms->retrieveBlockFromRam(m_deviceRamMemoryList[i]->locationid,0,0);
+					m_locIdInfoMsgList.append(seq);
+					progressView->setMax(progressView->max()+1);
+					interrogationSequenceList.append(seq);
 				}
 			}
+		}
+	}
+	if (interrogationSequenceList.contains(sequencenumber))
+	{
+		progressView->setProgress(progressView->progress()+1);
+		interrogationSequenceList.removeOne(sequencenumber);
+		if (interrogationSequenceList.size() == 0)
+		{
+			progressView->hide();
+			progressView->deleteLater();
+			progressView=0;
+			this->setEnabled(true);
+			qDebug() << "Interrogation complete";
+		}
+		else
+		{
+			qDebug() << interrogationSequenceList.size() << "messages left to go. First one:" << interrogationSequenceList[0];
 		}
 	}
 

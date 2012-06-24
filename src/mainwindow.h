@@ -37,6 +37,7 @@
 #include "packetstatusview.h"
 #include "aboutview.h"
 #include "memorylocation.h"
+#include "interrogateprogressview.h"
 //#include "datarawview.h"
 
 
@@ -48,6 +49,21 @@ public:
 	QByteArray data;
 };
 
+class Interrogation
+{
+public:
+	QString firmwareVersion;
+	QString interfaceVersion;
+	QString compilerVersion;
+	QString firmwareBuildDate;
+	QString decoderName;
+	QString maxPacketSize;
+	QString operatingSystem;
+	QString emstudioBuilDate;
+	QString emstudioCommit;
+	QString emstudioHash;
+};
+
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -56,6 +72,7 @@ public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
 private:
+	Interrogation emsinfo;
 	unsigned short m_currentRamLocationId;
 	bool m_waitingForRamWriteConfirmation;
 	unsigned short m_currentFlashLocationId;
@@ -76,6 +93,8 @@ private:
 	FlagView *dataFlags;
 	PacketStatusView *packetStatus;
 	AboutView *aboutView;
+	InterrogateProgressView *progressView;
+	QList<int> interrogationSequenceList;
 	QMap<unsigned short,QWidget*> m_rawDataView;
 	QMdiSubWindow *tablesMdiWindow;
 	QMdiSubWindow *emsMdiWindow;

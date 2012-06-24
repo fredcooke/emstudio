@@ -50,7 +50,8 @@ SOURCES += src/main.cpp\
     src/packetstatusview.cpp \
     src/aboutview.cpp \
     src/memorylocation.cpp \
-    src/tableview3d.cpp
+    src/tableview3d.cpp \
+    src/interrogateprogressview.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -78,7 +79,8 @@ HEADERS  += src/mainwindow.h \
     src/packetstatusview.h \
     src/aboutview.h \
     src/memorylocation.h \
-    src/tableview3d.h
+    src/tableview3d.h \
+    src/interrogateprogressview.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
@@ -91,7 +93,8 @@ FORMS    += src/mainwindow.ui \
     src/tableview2d.ui \
     src/packetstatusview.ui \
     src/aboutview.ui \
-    src/tableview3d.ui
+    src/tableview3d.ui \
+    src/interrogateprogressview.ui
 
 OTHER_FILES += \
     README.md
