@@ -11,8 +11,9 @@ class RawDataView : public QWidget
 public:
 	explicit RawDataView(QWidget *parent = 0);
 	~RawDataView();
-	void setData(unsigned short locationid,QByteArray data);
+	void setData(unsigned short locationid,QByteArray data,bool isram);
 private:
+	bool m_isRam;
 	Ui::RawDataView ui;
 	unsigned short m_locationId;
 

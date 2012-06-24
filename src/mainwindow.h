@@ -58,12 +58,15 @@ public:
 private:
 	unsigned short m_currentRamLocationId;
 	bool m_waitingForRamWriteConfirmation;
+	unsigned short m_currentFlashLocationId;
+	bool m_waitingForFlashWriteConfirmation;
 	//QList<RawDataBlock*> m_ramRawBlockList;
 	//QList<RawDataBlock*> m_flashRawBlockList;
 	//QList<RawDataBlock*> m_deviceRamRawBlockList;
 	//QList<RawDataBlock*> m_deviceFlashRawBlockList;
 	QList<MemoryLocation*> m_ramMemoryList;
 	QList<MemoryLocation*> m_flashMemoryList;
+	QList<MemoryLocation*> m_deviceFlashMemoryList;
 	QList<MemoryLocation*> m_deviceRamMemoryList;
 	QList<MemoryLocation*> m_tempMemoryList;
 	//RawDataView *rawData;
@@ -108,6 +111,8 @@ private:
 	bool hasDeviceRamBlock(unsigned short id);
 	bool hasLocalRamBlock(unsigned short id);
 	bool hasLocalFlashBlock(unsigned short id);
+	bool hasDeviceFlashBlock(unsigned short id);
+	void setDeviceFlashBlock(unsigned short id,QByteArray data);
 	void setLocalRamBlock(unsigned short id,QByteArray data);
 	void setDeviceRamBlock(unsigned short id,QByteArray data);
 	void setLocalFlashBlock(unsigned short id,QByteArray data);
@@ -165,6 +170,7 @@ private slots:
 	void commandSuccessful(int sequencenumber);
 	void commandFailed(int sequencenumber,unsigned short errornum);
 	void interByteDelayChanged(int num);
+	void saveFlashLocationIdBlock(unsigned short locationid,QByteArray data);
 
 };
 
