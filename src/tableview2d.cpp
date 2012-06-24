@@ -119,7 +119,7 @@ void TableView2D::passData(unsigned short locationid,QByteArray data,int physica
 	samples.clear();
 	m_locationid = locationid;
 	m_physicalid = physicallocation;
-	disconnect(ui.tableWidget,SIGNAL(cellChanged(int,int)));
+	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 	ui.tableWidget->clear();
 	ui.tableWidget->setColumnCount(0);
 	ui.tableWidget->setRowCount(2);

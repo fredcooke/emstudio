@@ -31,8 +31,8 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	//qDebug() << "TableView2D::passData" << "0x" + QString::number(locationid,16).toUpper();
 	m_locationId = locationid;
 	//m_physicalid = physicallocation;
-	//connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-	//disconnect(ui.tableWidget,SIGNAL(cellChanged(int,int)));
+
+	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 	ui.tableWidget->clear();
 	ui.tableWidget->horizontalHeader()->hide();
 	ui.tableWidget->verticalHeader()->hide();
@@ -67,6 +67,7 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 		}
 	}
 	ui.tableWidget->resizeColumnsToContents();
+	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	//ui.tableWidget->setRowCount(2);
 	/*for (int i=0;i<data.size()/2;i+=2)
 	{
@@ -84,6 +85,11 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 }
 void TableView3D::tableCellChanged(int row,int column)
 {
+	if (row == ui.tableWidget->rowCount()-1 && column == 0)
+	{
+		ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+		return;
+	}
 	if (row == -1 || column == -1)
 	{
 		return;
@@ -134,6 +140,7 @@ void TableView3D::tableCellChanged(int row,int column)
 	QByteArray data;
 	data.append((char)((newval >> 8) & 0xFF));
 	data.append((char)(newval & 0xFF));
+	qDebug() << "Attempting to save data at:" << row << column;
 	if (column == 0)
 	{
 		emit saveSingleData(m_locationId,data,58+(((m_xAxisSize-1) - row)*2),2);

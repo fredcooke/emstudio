@@ -500,6 +500,7 @@ void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int p
 	}
 	qDebug() << "Requesting to update ram location:" << "0x" + QString::number(locationid,16).toUpper() << "data size:" << data.size();
 	m_currentRamLocationId = locationid;
+	m_waitingForRamWriteConfirmation=true;
 	emsComms->updateBlockInRam(locationid,0,data.size(),data);
 }
 
@@ -1055,8 +1056,9 @@ void MainWindow::updateRamLocation(unsigned short locationid)
 void MainWindow::commandSuccessful(int sequencenumber)
 {
 	qDebug() << "Command succesful:" << QString::number(sequencenumber);
-	if (m_currentRamLocationId != 0)
+	if (m_waitingForRamWriteConfirmation)
 	{
+		m_waitingForRamWriteConfirmation = false;
 		updateRamLocation(m_currentRamLocationId);
 		checkRamFlashSync();
 		m_currentRamLocationId=0;
@@ -1162,7 +1164,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 {
 	qDebug() << "Command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
 	bool found = false;
-	if (m_currentRamLocationId != 0)
+	if (m_waitingForRamWriteConfirmation)
 	{
 		for (int i=0;i<m_ramMemoryList.size();i++)
 		{
@@ -1327,6 +1329,7 @@ void MainWindow::saveSingleData(unsigned short locationid,QByteArray data, unsig
 	qDebug() << "Requesting to update single value at ram location:" << "0x" + QString::number(locationid,16).toUpper() << "data size:" << data.size();
 	qDebug() << "Offset:" << offset << "Size:" << size  <<  "Data:" << data;
 	m_currentRamLocationId = locationid;
+	m_waitingForRamWriteConfirmation = true;
 	emsComms->updateBlockInRam(locationid,offset,size,data);
 }
 

@@ -57,6 +57,7 @@ public:
 	~MainWindow();
 private:
 	unsigned short m_currentRamLocationId;
+	bool m_waitingForRamWriteConfirmation;
 	//QList<RawDataBlock*> m_ramRawBlockList;
 	//QList<RawDataBlock*> m_flashRawBlockList;
 	//QList<RawDataBlock*> m_deviceRamRawBlockList;
