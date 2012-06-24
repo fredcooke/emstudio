@@ -612,7 +612,14 @@ QByteArray MainWindow::getDeviceRamBlock(unsigned short id)
 
 QByteArray MainWindow::getDeviceFlashBlock(unsigned short id)
 {
-
+	for (int i=0;i<m_deviceFlashMemoryList.size();i++)
+	{
+		if (m_deviceFlashMemoryList[i]->locationid == id)
+		{
+			return m_deviceFlashMemoryList[i]->data();
+		}
+	}
+	return QByteArray();
 }
 
 bool MainWindow::hasDeviceRamBlock(unsigned short id)
