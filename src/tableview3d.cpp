@@ -64,9 +64,28 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 			//unsigned short val = (((unsigned char)data[4+((xaxissize+yaxissize)*2) + (i*(xaxissize*2)) + j]) << 8) + (unsigned char)data[5+((yaxissize+xaxissize)*2) + (i*((xaxissize)*2)) + j];
 			unsigned short val = (((unsigned char)data[100 + j + (i * xaxissize)]) << 8) + (unsigned char)data[101 + j + (i * xaxissize)];
 			ui.tableWidget->setItem((xaxissize-1)-((i/2)),(j/2)+1,new QTableWidgetItem(QString::number(val)));
+			if (val < 65535/4)
+			{
+				ui.tableWidget->item((xaxissize-1)-((i/2)),(j/2)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(65535.0/4.0))),255));
+			}
+			else if (val < ((65535/4)*2))
+			{
+				ui.tableWidget->item((xaxissize-1)-((i/2)),(j/2)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((65535/4.0)))/(65535.0/4.0)))));
+			}
+			else if (val < ((65535/4)*3))
+			{
+				ui.tableWidget->item((xaxissize-1)-((i/2)),(j/2)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((65535/4.0)*2))/(65535.0/4.0))),255,0));
+			}
+			else
+			{
+				ui.tableWidget->item((xaxissize-1)-((i/2)),(j/2)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((65535/4.0)*3))/(65535.0/4.0))),0));
+			}
+
 		}
 	}
 	ui.tableWidget->resizeColumnsToContents();
+	ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,0,new QTableWidgetItem());
+	ui.tableWidget->item(ui.tableWidget->rowCount()-1,0)->setFlags(ui.tableWidget->item(ui.tableWidget->rowCount()-1,0)->flags() & ~Qt::ItemIsEditable);
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	//ui.tableWidget->setRowCount(2);
 	/*for (int i=0;i<data.size()/2;i+=2)
@@ -87,7 +106,7 @@ void TableView3D::tableCellChanged(int row,int column)
 {
 	if (row == ui.tableWidget->rowCount()-1 && column == 0)
 	{
-		ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 		return;
 	}
 	if (row == -1 || column == -1)
