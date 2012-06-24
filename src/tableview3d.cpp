@@ -6,6 +6,8 @@ TableView3D::TableView3D(QWidget *parent) : QWidget(parent)
 	ui.setupUi(this);
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
+	connect(ui.savePushButton,SIGNAL(clicked()),this,SLOT(saveClicked()));
+	connect(ui.loadPushButton,SIGNAL(clicked()),this,SLOT(loadClicked()));
 }
 void TableView3D::tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn)
 {
@@ -15,7 +17,10 @@ void TableView3D::tableCurrentCellChanged(int currentrow,int currentcolumn,int p
 	}
 	currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toInt();
 }
-
+void TableView3D::loadClicked()
+{
+	emit reloadTableData(m_locationId);
+}
 void TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation)
 {
 	/*if (data.size() != 64)
@@ -36,6 +41,9 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	qDebug() << "XAxis:" << xaxissize;
 	qDebug() << "YAxis:" << yaxissize;
 
+	m_xAxisSize = xaxissize;
+	m_yAxisSize = yaxissize;
+
 	ui.tableWidget->setRowCount(yaxissize+1);
 	ui.tableWidget->setColumnCount(xaxissize+1);
 
@@ -54,8 +62,8 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 		for (int j=0;j<yaxissize*2;j+=2)
 		{
 			//unsigned short val = (((unsigned char)data[4+((xaxissize+yaxissize)*2) + (i*(xaxissize*2)) + j]) << 8) + (unsigned char)data[5+((yaxissize+xaxissize)*2) + (i*((xaxissize)*2)) + j];
-			unsigned short val = (((unsigned char)data[100 + j]) << 8) + (unsigned char)data[101 + j];
-			ui.tableWidget->setItem((j/2),(i/2)+1,new QTableWidgetItem(QString::number(val)));
+			unsigned short val = (((unsigned char)data[100 + j + (i * xaxissize)]) << 8) + (unsigned char)data[101 + j + (i * xaxissize)];
+			ui.tableWidget->setItem((xaxissize-1)-((i/2)),(j/2)+1,new QTableWidgetItem(QString::number(val)));
 		}
 	}
 	ui.tableWidget->resizeColumnsToContents();
@@ -126,8 +134,23 @@ void TableView3D::tableCellChanged(int row,int column)
 	QByteArray data;
 	data.append((char)((newval >> 8) & 0xFF));
 	data.append((char)(newval & 0xFF));
-	emit saveSingleData(m_locationId,data,(column*2)+(row * 32),2);
+	if (column == 0)
+	{
+		emit saveSingleData(m_locationId,data,58+(((m_xAxisSize-1) - row)*2),2);
+	}
+	else if (row == ui.tableWidget->rowCount()-1)
+	{
+		emit saveSingleData(m_locationId,data,4+((column-1)*2),2);
+	}
+	else
+	{
+		emit saveSingleData(m_locationId,data,100+((column-1)*2)+(((m_xAxisSize-1) - row) * 32),2);
+	}
 	ui.tableWidget->resizeColumnsToContents();
+}
+void TableView3D::saveClicked()
+{
+	emit saveToFlash(m_locationId);
 }
 TableView3D::~TableView3D()
 {

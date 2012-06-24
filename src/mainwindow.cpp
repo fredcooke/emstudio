@@ -394,7 +394,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 					//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
-					//connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
+					connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
 					win->setGeometry(view->geometry());
@@ -1161,16 +1161,19 @@ void MainWindow::checkRamFlashSync()
 void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 {
 	qDebug() << "Command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
+	bool found = false;
 	if (m_currentRamLocationId != 0)
 	{
 		for (int i=0;i<m_ramMemoryList.size();i++)
 		{
 			if (m_ramMemoryList[i]->locationid == m_currentRamLocationId)
 			{
+				found=true;
 				for (int j=0;j<m_deviceRamMemoryList.size();j++)
 				{
 					if (m_deviceRamMemoryList[j]->locationid == m_currentRamLocationId)
 					{
+						found = true;
 						qDebug() << "Data reverting for location id 0x" + QString::number(m_ramMemoryList[i]->locationid,16);
 						if (m_ramMemoryList[i]->data() == m_deviceRamMemoryList[j]->data())
 						{
@@ -1196,9 +1199,17 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 				break;
 			}
 		}
+		if (!found)
+		{
+			qDebug() << "Unable to find memory location " << QString::number(m_currentRamLocationId,16) << "in local or device memory!";
+		}
 		//Find all windows that use that location id
 		m_currentRamLocationId = 0;
 		//checkRamFlashSync();
+	}
+	else
+	{
+		qDebug() << "Error reverting! " << QString::number(m_currentRamLocationId,16) << "Location not found!";
 	}
 	if (m_locIdInfoMsgList.contains(sequencenumber))
 	{
