@@ -1064,6 +1064,18 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	emsComms->wait(5000);
 	emsComms->deleteLater();
 	emsComms = 0;
+
+	//Need to reset everything here.
+	m_ramMemoryList.clear();
+	m_flashMemoryList.clear();
+	m_deviceFlashMemoryList.clear();
+	m_deviceRamMemoryList.clear();
+	m_tempMemoryList.clear();
+	interrogationSequenceList.clear();
+	m_locIdMsgList.clear();
+	m_locIdInfoMsgList.clear();
+
+
 	emsComms = new FreeEmsComms(this);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
@@ -1088,6 +1100,7 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	progressView->deleteLater();
 	progressView=0;
 	this->setEnabled(true);
+	ui.actionConnect->setEnabled(true);
 }
 
 void MainWindow::emsCommsConnected()
