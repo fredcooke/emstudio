@@ -19,7 +19,7 @@ DEFINES += GIT_COMMIT=$$system(\"c:/program files/git/bin/git.exe\" describe --d
 DEFINES += GIT_HASH=$$system(\"c:/program files/git/bin/git.exe\" log -n 1 --pretty=format:%H)
 }
 unix {
-LIBS += -lqwt
+LIBS += -lqwt -lqjson
 INCLUDEPATH += /usr/include/qwt
 DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
 DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)

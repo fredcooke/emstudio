@@ -1043,7 +1043,9 @@ void MainWindow::interfaceVersion(QString version)
 	if (emsInfo)
 	{
 		emsInfo->setInterfaceVersion(version);
+
 	}
+	emsinfo.interfaceVersion = version;
 }
 void MainWindow::firmwareVersion(QString version)
 {
@@ -1053,6 +1055,7 @@ void MainWindow::firmwareVersion(QString version)
 	{
 		emsInfo->setFirmwareVersion(version);
 	}
+	emsinfo.firmwareVersion = version;
 }
 void MainWindow::error(QString msg)
 {
@@ -1079,8 +1082,11 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
+	connect(emsComms,SIGNAL(decoderName(QString)),this,SLOT(emsDecoderName(QString)));
 	connect(emsComms,SIGNAL(interfaceVersion(QString)),this,SLOT(interfaceVersion(QString)));
+	connect(emsComms,SIGNAL(operatingSystem(QString)),this,SLOT(emsOperatingSystem(QString)));
 	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)));
+	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));
 	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
@@ -1102,9 +1108,26 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	this->setEnabled(true);
 	ui.actionConnect->setEnabled(true);
 }
+void MainWindow::emsFirmwareBuildDate(QString date)
+{
+	emsinfo.firmwareBuildDate = date;
+}
+
+void MainWindow::emsDecoderName(QString name)
+{
+	emsinfo.decoderName = name;
+}
+
+void MainWindow::emsOperatingSystem(QString os)
+{
+	emsinfo.operatingSystem = os;
+}
 
 void MainWindow::emsCommsConnected()
 {
+	//New log and settings file here.
+
+
 	progressView = new InterrogateProgressView();
 	connect(progressView,SIGNAL(cancelClicked()),this,SLOT(interrogateProgressViewCancelClicked()));
 	progressView->setMaximum(0);
@@ -1204,13 +1227,17 @@ void MainWindow::commandSuccessful(int sequencenumber)
 		m_currentFlashLocationId=0;
 		return;
 	}
+	checkMessageCounters(sequencenumber);
+
+}
+void MainWindow::checkMessageCounters(int sequencenumber)
+{
 	if (m_locIdInfoMsgList.contains(sequencenumber))
 	{
-
 		m_locIdInfoMsgList.removeOne(sequencenumber);
 		if (m_locIdInfoMsgList.size() == 0)
 		{
-			//progressView->setProgress(30);
+			qDebug() << "All Ram and Flash locations updated";
 			//End of the location ID information messages.
 			checkRamFlashSync();
 		}
@@ -1220,10 +1247,7 @@ void MainWindow::commandSuccessful(int sequencenumber)
 		m_locIdMsgList.removeOne(sequencenumber);
 		if (m_locIdMsgList.size() == 0)
 		{
-			if (progressView)
-			{
-				//progressView->setProgress(90);
-			}
+			qDebug() << "All ID information recieved. Requesting Ram and Flash updates";
 			populateParentLists();
 			for (int i=0;i<m_deviceFlashMemoryList.size();i++)
 			{
@@ -1258,6 +1282,62 @@ void MainWindow::commandSuccessful(int sequencenumber)
 			progressView=0;
 			this->setEnabled(true);
 			qDebug() << "Interrogation complete";
+			//Write everything to the settings.
+			QString json = "";
+			json += "{";
+			QJson::Serializer jsonSerializer;
+			QVariantMap top;
+			top["firmwareversion"] = emsinfo.firmwareVersion;
+			top["interfaceversion"] = emsinfo.interfaceVersion;
+			top["compilerversion"] = emsinfo.compilerVersion;
+			top["firmwarebuilddate"] = emsinfo.firmwareBuildDate;
+			top["decodername"] = emsinfo.decoderName;
+			top["operatingsystem"] = emsinfo.operatingSystem;
+			top["emstudiohash"] = emsinfo.emstudioHash;
+			top["emstudiocommit"] = emsinfo.emstudioCommit;
+			QVariantMap memorylocations;
+			for (int i=0;i<m_deviceRamMemoryList.size();i++)
+			{
+				QVariantMap tmp;
+				tmp["flashaddress"] =  m_deviceRamMemoryList[i]->flashAddress;
+				tmp["flashpage"] = m_deviceRamMemoryList[i]->flashPage;
+				tmp["rampage"] = m_deviceRamMemoryList[i]->ramPage;
+				tmp["ramaddress"] = m_deviceRamMemoryList[i]->ramAddress;
+				tmp["hasparent"] = (m_deviceRamMemoryList[i]->hasParent) ? "true" : "false";
+				tmp["size"] = m_deviceRamMemoryList[i]->size;
+				QString memory = "";
+				for (int j=0;j<m_deviceRamMemoryList[i]->data().size();j++)
+				{
+					memory += QString("0x") + (((unsigned char)m_deviceRamMemoryList[i]->data()[j] <= 0xF) ? "0" : "") + QString::number((unsigned char)m_deviceRamMemoryList[i]->data()[j],16).toUpper() + ",";
+				}
+				memory = memory.mid(0,memory.length()-1);
+				tmp["data"] = memory;
+				//memorylocations["0x" + QString::number(m_deviceRamMemoryList[i]->locationid,16).toUpper()] = tmp;
+
+			}
+			for (int i=0;i<m_deviceFlashMemoryList.size();i++)
+			{
+				QVariantMap tmp;
+				tmp["flashaddress"] =  m_deviceFlashMemoryList[i]->flashAddress;
+				tmp["flashpage"] = m_deviceFlashMemoryList[i]->flashPage;
+				tmp["rampage"] = m_deviceFlashMemoryList[i]->ramPage;
+				tmp["ramaddress"] = m_deviceFlashMemoryList[i]->ramAddress;
+				tmp["hasparent"] = (m_deviceFlashMemoryList[i]->hasParent) ? "true" : "false";
+				tmp["size"] = m_deviceFlashMemoryList[i]->size;
+				QString memory = "";
+				for (int j=0;j<m_deviceFlashMemoryList[i]->data().size();j++)
+				{
+					memory += QString("0x") + (((unsigned char)m_deviceFlashMemoryList[i]->data()[j] <= 0xF) ? "0" : "") + QString::number((unsigned char)m_deviceFlashMemoryList[i]->data()[j],16).toUpper() + ",";
+				}
+				memory = memory.mid(0,memory.length()-1);
+				tmp["data"] = memory;
+				//memorylocations["0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper()] = tmp;
+			}
+			//top["memory"] = memorylocations;
+			QFile *settingsFile = new QFile(QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm.ss") + ".meta.json");
+			settingsFile->open(QIODevice::ReadWrite);
+			settingsFile->write(jsonSerializer.serialize(top));
+			settingsFile->close();
 		}
 		else
 		{
@@ -1265,6 +1345,7 @@ void MainWindow::commandSuccessful(int sequencenumber)
 		}
 	}
 }
+
 void MainWindow::updateDataWindows(unsigned short locationid)
 {
 	if (m_rawDataView.contains(locationid))
@@ -1454,62 +1535,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	{
 		qDebug() << "Error reverting! " << QString::number(m_currentFlashLocationId,16) << "Location not found!";
 	}
-	if (m_locIdInfoMsgList.contains(sequencenumber))
-	{
-		m_locIdInfoMsgList.removeOne(sequencenumber);
-		if (m_locIdInfoMsgList.size() == 0)
-		{
-			qDebug() << "All Ram and Flash locations updated";
-			//End of the location ID information messages.
-			checkRamFlashSync();
-		}
-	}
-	if (m_locIdMsgList.contains(sequencenumber))
-	{
-		m_locIdMsgList.removeOne(sequencenumber);
-		if (m_locIdMsgList.size() == 0)
-		{
-			qDebug() << "All ID information recieved. Requesting Ram and Flash updates";
-			populateParentLists();
-			for (int i=0;i<m_deviceFlashMemoryList.size();i++)
-			{
-				if (!m_deviceFlashMemoryList[i]->hasParent)
-				{
-					int seq = emsComms->retrieveBlockFromFlash(m_deviceFlashMemoryList[i]->locationid,0,0);
-					m_locIdInfoMsgList.append(seq);
-					progressView->setMaximum(progressView->maximum()+1);
-					interrogationSequenceList.append(seq);
-				}
-			}
-			for (int i=0;i<m_deviceRamMemoryList.size();i++)
-			{
-				if (!m_deviceRamMemoryList[i]->hasParent)
-				{
-					int seq = emsComms->retrieveBlockFromRam(m_deviceRamMemoryList[i]->locationid,0,0);
-					m_locIdInfoMsgList.append(seq);
-					progressView->setMaximum(progressView->maximum()+1);
-					interrogationSequenceList.append(seq);
-				}
-			}
-		}
-	}
-	if (interrogationSequenceList.contains(sequencenumber))
-	{
-		progressView->setProgress(progressView->progress()+1);
-		interrogationSequenceList.removeOne(sequencenumber);
-		if (interrogationSequenceList.size() == 0)
-		{
-			progressView->hide();
-			progressView->deleteLater();
-			progressView=0;
-			this->setEnabled(true);
-			qDebug() << "Interrogation complete";
-		}
-		else
-		{
-			qDebug() << interrogationSequenceList.size() << "messages left to go. First one:" << interrogationSequenceList[0];
-		}
-	}
+	checkMessageCounters(sequencenumber);
 
 }
 void MainWindow::populateParentLists()

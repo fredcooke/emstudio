@@ -27,6 +27,7 @@
 #include "freeemscomms.h"
 
 #include <QTimer>
+#include <qjson/serializer.h>
 #include "datapacketdecoder.h"
 #include "comsettings.h"
 #include "emsinfoview.h"
@@ -102,6 +103,8 @@ private:
 	QMdiSubWindow *gaugesMdiWindow;
 	QMdiSubWindow *packetStatusMdiWindow;
 	QMdiSubWindow *aboutMdiWindow;
+	//QFile *settingsFile;
+	void checkMessageCounters(int sequencenumber);
 	//QMdiSubWindow *rawMdiWindow;
 	//ComSettings *comSettings;
 	void populateParentLists();
@@ -143,6 +146,9 @@ private:
 	QList<int> m_locIdInfoMsgList;
 	void checkRamFlashSync();
 private slots:
+	void emsOperatingSystem(QString os);
+	void emsDecoderName(QString name);
+	void emsFirmwareBuildDate(QString date);
 	void checkSyncRequest();
 	void rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation);
 	void rawDataViewDestroyed(QObject *object);
