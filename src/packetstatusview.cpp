@@ -42,6 +42,16 @@ PacketStatusView::PacketStatusView(QWidget *parent) : QWidget(parent)
 	ui.decoderFailureTableWidget->setColumnWidth(0,1000);
 	ui.decoderFailureTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("Failed Packet Bytes"));
 }
+void PacketStatusView::clear()
+{
+	ui.packetCountTableWidget->clearContents();
+	ui.failedPacketTableWidget->clearContents();
+	ui.decoderFailureTableWidget->clearContents();
+	ui.packetCountTableWidget->setRowCount(0);
+	ui.failedPacketTableWidget->setRowCount(0);
+	ui.decoderFailureTableWidget->setRowCount(0);
+}
+
 void PacketStatusView::passPacketSent(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	for (int i=0;i<ui.packetCountTableWidget->rowCount();i++)

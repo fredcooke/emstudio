@@ -1075,7 +1075,6 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	m_locIdMsgList.clear();
 	m_locIdInfoMsgList.clear();
 
-
 	emsComms = new FreeEmsComms(this);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
@@ -1099,6 +1098,7 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	progressView->hide();
 	progressView->deleteLater();
 	progressView=0;
+	emsInfo->clear();
 	this->setEnabled(true);
 	ui.actionConnect->setEnabled(true);
 }

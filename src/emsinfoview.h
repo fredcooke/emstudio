@@ -33,6 +33,7 @@ public:
 	void setFirmwareVersion(QString firmware);
 	void setLocalRam(bool dirty);
 	void setDeviceFlash(bool dirty);
+	void clear();
 protected:
 	void closeEvent(QCloseEvent *event);
 public slots:

@@ -55,6 +55,13 @@ void EmsInfoView::setLocalRam(bool dirty)
 		ui.localRamLineEdit->setText("Local changes in device RAM");
 	}
 }
+void EmsInfoView::clear()
+{
+	ui.locationIdInfoTableWidget->clearContents();
+	ui.firmwareVersionLineEdit->clear();
+	ui.interfaceVersionLineEdit->clear();
+	ui.locationIdInfoTableWidget->setRowCount(0);
+}
 
 void EmsInfoView::setDeviceFlash(bool dirty)
 {

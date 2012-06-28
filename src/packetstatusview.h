@@ -28,6 +28,7 @@ class PacketStatusView : public QWidget
 public:
 	explicit PacketStatusView(QWidget *parent = 0);
 	~PacketStatusView();
+	void clear();
 public slots:
 	void passPacketSent(unsigned short locationid,QByteArray header,QByteArray payload);
 	void passPacketAck(unsigned short locationid,QByteArray header,QByteArray payload);
