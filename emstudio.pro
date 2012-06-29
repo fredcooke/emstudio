@@ -13,8 +13,8 @@ OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
 win32 {
-INCLUDEPATH += C:/libs/qwt/include
-LIBS += -LC:/libs/qwt/lib -lqwt
+INCLUDEPATH += C:/libs/qwt/include C:/libs/qjson/include
+LIBS += -LC:/libs/qwt/lib -lqwt -LC:/libs/qjson/lib -lqjson0
 DEFINES += GIT_COMMIT=$$system(\"c:/program files/git/bin/git.exe\" describe --dirty=-DEV --always)
 DEFINES += GIT_HASH=$$system(\"c:/program files/git/bin/git.exe\" log -n 1 --pretty=format:%H)
 }
