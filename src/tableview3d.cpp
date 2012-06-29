@@ -44,18 +44,18 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	m_xAxisSize = xaxissize;
 	m_yAxisSize = yaxissize;
 
-	ui.tableWidget->setRowCount(yaxissize+1);
-	ui.tableWidget->setColumnCount(xaxissize+1);
+	ui.tableWidget->setRowCount(xaxissize+1);
+	ui.tableWidget->setColumnCount(yaxissize+1);
 
 	for (int i=0;i<xaxissize*2;i+=2)
 	{
-		unsigned short val = (((unsigned char)data[4+i]) << 8) + (unsigned char)data[5+i];
-		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i/2)+1,new QTableWidgetItem(QString::number(val)));
+		unsigned short val = (((unsigned char)data[58+i]) << 8) + (unsigned char)data[59+i];
+		ui.tableWidget->setItem((xaxissize-1) - (i/2),0,new QTableWidgetItem(QString::number(val)));
 	}
 	for (int i=0;i<yaxissize*2;i+=2)
 	{
-		unsigned short val = (((unsigned char)data[58+i]) << 8) + (unsigned char)data[59+i];
-		ui.tableWidget->setItem((yaxissize-1) - (i/2),0,new QTableWidgetItem(QString::number(val)));
+		unsigned short val = (((unsigned char)data[4+i]) << 8) + (unsigned char)data[5+i];
+		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i/2)+1,new QTableWidgetItem(QString::number(val)));
 	}
 	for (int i=0;i<xaxissize*2;i+=2)
 	{
