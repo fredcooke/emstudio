@@ -33,9 +33,9 @@ void InterrogateProgressView::setProgress(int progress)
 	ui.progressBar->setValue(progress);
 }
 
-void InterrogateProgressView::setMax(int max)
+void InterrogateProgressView::setMaximum(int maximum)
 {
-	ui.progressBar->setMaximum(max);
+	ui.progressBar->setMaximum(maximum);
 }
 
 void InterrogateProgressView::cancelClickedSlot()

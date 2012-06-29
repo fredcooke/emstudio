@@ -1020,7 +1020,7 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 		loc->locationid = idlist[i];
 		m_tempMemoryList.append(loc);
 		int seq = emsComms->getLocationIdInfo(idlist[i]);
-		progressView->setMax(progressView->max()+1);
+		progressView->setMaximum(progressView->maximum()+1);
 		m_locIdMsgList.append(seq);
 		interrogationSequenceList.append(seq);
 	}
@@ -1107,7 +1107,7 @@ void MainWindow::emsCommsConnected()
 {
 	progressView = new InterrogateProgressView();
 	connect(progressView,SIGNAL(cancelClicked()),this,SLOT(interrogateProgressViewCancelClicked()));
-	progressView->setMax(0);
+	progressView->setMaximum(0);
 	progressView->show();
 	this->setEnabled(false);
 	interrogationSequenceList.append(emsComms->getFirmwareVersion());
@@ -1119,7 +1119,7 @@ void MainWindow::emsCommsConnected()
 	interrogationSequenceList.append(emsComms->getMaxPacketSize());
 	interrogationSequenceList.append(emsComms->getOperatingSystem());
 
-	progressView->setMax(8);
+	progressView->setMaximum(8);
 	//progressView->setMax(progressView->max()+1);
 }
 void MainWindow::checkSyncRequest()
@@ -1230,8 +1230,8 @@ void MainWindow::commandSuccessful(int sequencenumber)
 				if (!m_deviceFlashMemoryList[i]->hasParent)
 				{
 					int seq = emsComms->retrieveBlockFromFlash(m_deviceFlashMemoryList[i]->locationid,0,0);
-					progressView->setMax(progressView->max()+1);
 					m_locIdInfoMsgList.append(seq);
+					progressView->setMaximum(progressView->maximum()+1);
 					interrogationSequenceList.append(seq);
 				}
 			}
@@ -1240,8 +1240,8 @@ void MainWindow::commandSuccessful(int sequencenumber)
 				if (!m_deviceRamMemoryList[i]->hasParent)
 				{
 					int seq = emsComms->retrieveBlockFromRam(m_deviceRamMemoryList[i]->locationid,0,0);
-					progressView->setMax(progressView->max()+1);
 					m_locIdInfoMsgList.append(seq);
+					progressView->setMaximum(progressView->maximum()+1);
 					interrogationSequenceList.append(seq);
 				}
 			}
@@ -1477,7 +1477,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 				{
 					int seq = emsComms->retrieveBlockFromFlash(m_deviceFlashMemoryList[i]->locationid,0,0);
 					m_locIdInfoMsgList.append(seq);
-					progressView->setMax(progressView->max()+1);
+					progressView->setMaximum(progressView->maximum()+1);
 					interrogationSequenceList.append(seq);
 				}
 			}
@@ -1487,7 +1487,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 				{
 					int seq = emsComms->retrieveBlockFromRam(m_deviceRamMemoryList[i]->locationid,0,0);
 					m_locIdInfoMsgList.append(seq);
-					progressView->setMax(progressView->max()+1);
+					progressView->setMaximum(progressView->maximum()+1);
 					interrogationSequenceList.append(seq);
 				}
 			}

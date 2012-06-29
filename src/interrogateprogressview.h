@@ -30,8 +30,8 @@ public:
 	explicit InterrogateProgressView(QWidget *parent = 0);
 	~InterrogateProgressView();
 	void setProgress(int progress);
-	void setMax(int max);
-	int max() { return ui.progressBar->maximum(); }
+	void setMaximum(int maximum);
+	int maximum() { return ui.progressBar->maximum(); }
 	int progress() { return ui.progressBar->value(); }
 private:
 	Ui::InterrogateProgressView ui;
