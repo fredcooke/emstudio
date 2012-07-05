@@ -79,6 +79,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(logLoader,SIGNAL(logProgress(qlonglong,qlonglong)),this,SLOT(logProgress(qlonglong,qlonglong)));
 	*/
 	emsComms = new FreeEmsComms(this);
+	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm.ss");
+	emsComms->setLogFileName(m_logFileName);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
@@ -1089,6 +1091,8 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	m_locIdInfoMsgList.clear();
 
 	emsComms = new FreeEmsComms(this);
+	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm.ss");
+	emsComms->setLogFileName(m_logFileName);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
@@ -1136,7 +1140,6 @@ void MainWindow::emsOperatingSystem(QString os)
 void MainWindow::emsCommsConnected()
 {
 	//New log and settings file here.
-
 
 	progressView = new InterrogateProgressView();
 	connect(progressView,SIGNAL(cancelClicked()),this,SLOT(interrogateProgressViewCancelClicked()));
@@ -1345,7 +1348,7 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 				//memorylocations["0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper()] = tmp;
 			}
 			//top["memory"] = memorylocations;
-			QFile *settingsFile = new QFile(QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm.ss") + ".meta.json");
+			QFile *settingsFile = new QFile(m_logFileName + ".meta.json");
 			settingsFile->open(QIODevice::ReadWrite);
 			settingsFile->write(jsonSerializer.serialize(top));
 			settingsFile->close();

@@ -92,6 +92,7 @@ private:
 	GaugeView *dataGauges;
 	EmsInfoView *emsInfo;
 	FlagView *dataFlags;
+	QString m_logFileName;
 	PacketStatusView *packetStatus;
 	AboutView *aboutView;
 	InterrogateProgressView *progressView;

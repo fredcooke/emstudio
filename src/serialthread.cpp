@@ -26,6 +26,7 @@ SerialThread::SerialThread(QObject *parent) : QThread(parent)
 	m_logFileName = "IOLog";
 	m_inpacket = false;
 	m_inescape = false;
+	m_logFileName = "log";
 }
 void SerialThread::setPort(QString portname)
 {
@@ -39,6 +40,28 @@ void SerialThread::setBaud(int baudrate)
 void SerialThread::setLogFileName(QString filename)
 {
 	m_logFileName = filename;
+	if (m_logInFile || m_logInOutFile || m_logOutFile)
+	{
+		if (m_logInFile)
+		{
+			m_logInFile->close();
+		}
+		if (m_logInOutFile)
+		{
+			m_logInOutFile->close();
+		}
+		if (m_logOutFile)
+		{
+			m_logOutFile->close();
+		}
+		m_logInFile = new QFile(m_logFileName + ".in.bin");
+		m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		m_logInOutFile = new QFile(m_logFileName + ".inandout.bin");
+		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		m_logOutFile = new QFile(m_logFileName + ".out.bin");
+		m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+
+	}
 	//m_logFile = new QFile(m_logFileName);
 }
 void SerialThread::setInterByteSendDelay(int milliseconds)
@@ -50,11 +73,11 @@ void SerialThread::readSerial(int timeout)
 {
 	if (!m_logInFile || !m_logInOutFile)
 	{
-		m_logInFile = new QFile("log.in.log");
+		m_logInFile = new QFile(m_logFileName + ".in.bin");
 		m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-		m_logInOutFile = new QFile("log.inandout.log");
+		m_logInOutFile = new QFile(m_logFileName + ".inandout.bin");
 		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-		m_logOutFile = new QFile("log.out.log");
+		m_logOutFile = new QFile(m_logFileName + ".out.bin");
 		m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 
 	}
@@ -219,11 +242,11 @@ int SerialThread::writePacket(QByteArray packet)
 {
 	if (!m_logInFile || !m_logInOutFile)
 	{
-		m_logInFile = new QFile("log.in.log");
+		m_logInFile = new QFile(m_logFileName + ".in.log");
 		m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-		m_logInOutFile = new QFile("log.out.log");
+		m_logInOutFile = new QFile(m_logFileName + ".inandout.log");
 		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-		m_logOutFile = new QFile("log.out.log");
+		m_logOutFile = new QFile(m_logFileName + ".out.log");
 		m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 	}
 	m_logInOutFile->write(packet);
