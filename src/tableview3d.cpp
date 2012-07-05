@@ -49,12 +49,12 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 
 	for (int i=0;i<xaxissize*2;i+=2)
 	{
-		unsigned short val = (((unsigned char)data[58+i]) << 8) + (unsigned char)data[59+i];
+		unsigned short val = (((unsigned char)data[4+i]) << 8) + (unsigned char)data[5+i];
 		ui.tableWidget->setItem((xaxissize-1) - (i/2),0,new QTableWidgetItem(QString::number(val)));
 	}
 	for (int i=0;i<yaxissize*2;i+=2)
 	{
-		unsigned short val = (((unsigned char)data[4+i]) << 8) + (unsigned char)data[5+i];
+		unsigned short val = (((unsigned char)data[58+i]) << 8) + (unsigned char)data[59+i];
 		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i/2)+1,new QTableWidgetItem(QString::number(val)));
 	}
 	for (int i=0;i<xaxissize*2;i+=2)
@@ -62,7 +62,7 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 		for (int j=0;j<yaxissize*2;j+=2)
 		{
 			//unsigned short val = (((unsigned char)data[4+((xaxissize+yaxissize)*2) + (i*(xaxissize*2)) + j]) << 8) + (unsigned char)data[5+((yaxissize+xaxissize)*2) + (i*((xaxissize)*2)) + j];
-			unsigned short val = (((unsigned char)data[100 + j + (i * xaxissize)]) << 8) + (unsigned char)data[101 + j + (i * xaxissize)];
+			unsigned short val = (((unsigned char)data[100 + j + (i * yaxissize)]) << 8) + (unsigned char)data[101 + j + (i * yaxissize)];
 			ui.tableWidget->setItem((xaxissize-1)-((i/2)),(j/2)+1,new QTableWidgetItem(QString::number(val)));
 			if (val < 65535/4)
 			{
@@ -162,15 +162,15 @@ void TableView3D::tableCellChanged(int row,int column)
 	qDebug() << "Attempting to save data at:" << row << column;
 	if (column == 0)
 	{
-		emit saveSingleData(m_locationId,data,58+(((m_xAxisSize-1) - row)*2),2);
+		emit saveSingleData(m_locationId,data,4+(((m_xAxisSize-1) - row)*2),2);
 	}
 	else if (row == ui.tableWidget->rowCount()-1)
 	{
-		emit saveSingleData(m_locationId,data,4+((column-1)*2),2);
+		emit saveSingleData(m_locationId,data,58+((column-1)*2),2);
 	}
 	else
 	{
-		emit saveSingleData(m_locationId,data,100+((column-1)*2)+(((m_xAxisSize-1) - row) * 32),2);
+		emit saveSingleData(m_locationId,data,100+((column-1)*2)+(((m_xAxisSize-1) - row) * (m_yAxisSize*2)),2);
 	}
 	ui.tableWidget->resizeColumnsToContents();
 }

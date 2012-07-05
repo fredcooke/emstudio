@@ -215,10 +215,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	qDebug() <<"Start:" << QString::number((unsigned char)filebytes[0],16) << QString::number((unsigned char)filebytes[filebytes.length()-1],16);
 	//filebytes = filebytes.mid(6,filebytes.length()-7);
 	qDebug() <<"Start:" << QString::number((unsigned char)filebytes[0],16) << QString::number((unsigned char)filebytes[filebytes.length()-1],16);
+
 	//TEST 3D TABLE
 	QByteArray data;
-	unsigned short xlength = 16;
-	unsigned short ylength = 16;
+	unsigned short xlength = 24;
+	unsigned short ylength = 19;
 	QByteArray xdata;
 	QByteArray ydata;
 	data.append((char)(((xlength) >> 8) & 0xFF));
@@ -227,29 +228,38 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	data.append((ylength) & 0xFF);
 	for (int i=0;i<xlength;i++)
 	{
-		unsigned short r = i * 1000;
+		unsigned short r = i * (65535/xlength);
 		data.append((char)(((r) >> 8) & 0xFF));
 		data.append((r) & 0xFF);
 	}
+	for (int i=data.size();i<58;i++)
+	{
+		data.append((char)0x00);
+	}
 	for (int i=0;i<ylength;i++)
 	{
-		unsigned short r = i * 500;
+		unsigned short r = i * (65535/ylength);
 		data.append((char)(((r) >> 8) & 0xFF));
 		data.append((r) & 0xFF);
+	}
+	for (int i=data.size();i<100;i++)
+	{
+		data.append((char)0x00);
 	}
 	for (int i=0;i<xlength;i++)
 	{
 		for (int j=0;j<ylength;j++)
 		{
-			unsigned short r = rand();
+			unsigned short r = j*(65535/ylength);
 			data.append((char)(((r) >> 8) & 0xFF));
 			data.append((r) & 0xFF);
 		}
 	}
 	TableView3D *view  = new TableView3D();
-	view->passData(0xABCD,filebytes,0);
+	view->passData(0xABCD,data,0);
 	connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-	connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+	//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+	connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 	win->setWindowTitle("Ram Location 0x" + QString::number(0xABCD,16).toUpper());
 	win->setGeometry(view->geometry());
@@ -1282,6 +1292,7 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 			progressView=0;
 			this->setEnabled(true);
 			qDebug() << "Interrogation complete";
+			emsInfo->show();
 			//Write everything to the settings.
 			QString json = "";
 			json += "{";
@@ -1482,7 +1493,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	}
 	else
 	{
-		qDebug() << "Error reverting! " << QString::number(m_currentRamLocationId,16) << "Location not found!";
+		//qDebug() << "Error reverting! " << QString::number(m_currentRamLocationId,16) << "Location not found!";
 	}
 	if (m_waitingForFlashWriteConfirmation)
 	{
@@ -1533,7 +1544,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	}
 	else
 	{
-		qDebug() << "Error reverting! " << QString::number(m_currentFlashLocationId,16) << "Location not found!";
+		//qDebug() << "Error reverting! " << QString::number(m_currentFlashLocationId,16) << "Location not found!";
 	}
 	checkMessageCounters(sequencenumber);
 
