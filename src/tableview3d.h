@@ -20,6 +20,7 @@
 #define TABLEVIEW3D_H
 
 #include <QWidget>
+#include "table3ddata.h"
 #include "ui_tableview3d.h"
 
 class TableView3D : public QWidget
@@ -31,6 +32,7 @@ public:
 	~TableView3D();
 	void passData(unsigned short locationid,QByteArray data,int physicallocation);
 private:
+	Table3DData *tableData;
 	unsigned short m_locationId;
 	unsigned short currentvalue;
 	Ui::TableView3D ui;

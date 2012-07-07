@@ -4,6 +4,7 @@
 TableView3D::TableView3D(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
+	tableData=0;
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	connect(ui.savePushButton,SIGNAL(clicked()),this,SLOT(saveClicked()));
@@ -23,83 +24,57 @@ void TableView3D::loadClicked()
 }
 void TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation)
 {
-	/*if (data.size() != 64)
+	if (tableData)
 	{
-		qDebug() << "Passed a data pack to a 2d table that was of size" << data.size() << "should be 64!!!";
-		return;
-	}*/
-	//qDebug() << "TableView2D::passData" << "0x" + QString::number(locationid,16).toUpper();
+		tableData->deleteLater();
+	}
+	tableData = new Table3DData(locationid,data);
+	connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	m_locationId = locationid;
-	//m_physicalid = physicallocation;
 
 	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 	ui.tableWidget->clear();
 	ui.tableWidget->horizontalHeader()->hide();
 	ui.tableWidget->verticalHeader()->hide();
-	unsigned short xaxissize = (((unsigned char)data[0]) << 8) + (unsigned char)data[1];
-	unsigned short yaxissize = (((unsigned char)data[2]) << 8) + (unsigned char)data[3];
-	qDebug() << "XAxis:" << xaxissize;
-	qDebug() << "YAxis:" << yaxissize;
+	ui.tableWidget->setRowCount(tableData->rows()+1);
+	ui.tableWidget->setColumnCount(tableData->columns()+1);
 
-	m_xAxisSize = xaxissize;
-	m_yAxisSize = yaxissize;
-
-	ui.tableWidget->setRowCount(xaxissize+1);
-	ui.tableWidget->setColumnCount(yaxissize+1);
-
-	for (int i=0;i<xaxissize*2;i+=2)
+	for (int i=0;i<tableData->rows();i++)
 	{
-		unsigned short val = (((unsigned char)data[4+i]) << 8) + (unsigned char)data[5+i];
-		ui.tableWidget->setItem((xaxissize-1) - (i/2),0,new QTableWidgetItem(QString::number(val)));
+		ui.tableWidget->setItem((tableData->rows()-1)-(i),0,new QTableWidgetItem(QString::number(tableData->yAxis()[i])));
 	}
-	for (int i=0;i<yaxissize*2;i+=2)
+	for (int i=0;i<tableData->columns();i++)
 	{
-		unsigned short val = (((unsigned char)data[58+i]) << 8) + (unsigned char)data[59+i];
-		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i/2)+1,new QTableWidgetItem(QString::number(val)));
+		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(QString::number(tableData->xAxis()[i])));
 	}
-	for (int i=0;i<xaxissize*2;i+=2)
+	for (int i=0;i<tableData->rows();i++)
 	{
-		for (int j=0;j<yaxissize*2;j+=2)
+		for (int j=0;j<tableData->columns();j++)
 		{
-			//unsigned short val = (((unsigned char)data[4+((xaxissize+yaxissize)*2) + (i*(xaxissize*2)) + j]) << 8) + (unsigned char)data[5+((yaxissize+xaxissize)*2) + (i*((xaxissize)*2)) + j];
-			unsigned short val = (((unsigned char)data[100 + j + (i * yaxissize)]) << 8) + (unsigned char)data[101 + j + (i * yaxissize)];
-			ui.tableWidget->setItem((xaxissize-1)-((i/2)),(j/2)+1,new QTableWidgetItem(QString::number(val)));
+			unsigned short val = tableData->values()[i][j];
+			ui.tableWidget->setItem((tableData->rows()-1)-(i),j+1,new QTableWidgetItem(QString::number(val)));
 			if (val < 65535/4)
 			{
-				ui.tableWidget->item((xaxissize-1)-((i/2)),(j/2)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(65535.0/4.0))),255));
+				ui.tableWidget->item((tableData->rows()-1)-((i)),(j)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(65535.0/4.0))),255));
 			}
 			else if (val < ((65535/4)*2))
 			{
-				ui.tableWidget->item((xaxissize-1)-((i/2)),(j/2)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((65535/4.0)))/(65535.0/4.0)))));
+				ui.tableWidget->item((tableData->rows()-1)-((i)),(j)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((65535/4.0)))/(65535.0/4.0)))));
 			}
 			else if (val < ((65535/4)*3))
 			{
-				ui.tableWidget->item((xaxissize-1)-((i/2)),(j/2)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((65535/4.0)*2))/(65535.0/4.0))),255,0));
+				ui.tableWidget->item((tableData->rows()-1)-((i)),(j)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((65535/4.0)*2))/(65535.0/4.0))),255,0));
 			}
 			else
 			{
-				ui.tableWidget->item((xaxissize-1)-((i/2)),(j/2)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((65535/4.0)*3))/(65535.0/4.0))),0));
+				ui.tableWidget->item((tableData->rows()-1)-((i)),(j)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((65535/4.0)*3))/(65535.0/4.0))),0));
 			}
-
 		}
 	}
 	ui.tableWidget->resizeColumnsToContents();
 	ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,0,new QTableWidgetItem());
 	ui.tableWidget->item(ui.tableWidget->rowCount()-1,0)->setFlags(ui.tableWidget->item(ui.tableWidget->rowCount()-1,0)->flags() & ~Qt::ItemIsEditable);
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-	//ui.tableWidget->setRowCount(2);
-	/*for (int i=0;i<data.size()/2;i+=2)
-	{
-		unsigned short x = (((unsigned char)data[i]) << 8) + ((unsigned char)data[i+1]);
-		unsigned short y = (((unsigned char)data[(data.size()/2)+ i]) << 8) + ((unsigned char)data[(data.size()/2) + i+1]);
-		ui.tableWidget->setColumnCount(ui.tableWidget->columnCount()+1);
-		ui.tableWidget->setColumnWidth(ui.tableWidget->columnCount()-1,ui.tableWidget->width() / (data.size()/4));
-		ui.tableWidget->setItem(0,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(x)));
-		ui.tableWidget->setItem(1,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(y)));
-
-	}*/
-	//series->setSamples(vector);
-	//connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 
 }
 void TableView3D::tableCellChanged(int row,int column)
@@ -153,24 +128,17 @@ void TableView3D::tableCellChanged(int row,int column)
 		//ui.plot->replot();
 	}
 	//New value has been accepted. Let's write it.
-	//void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
-	//Data is 64
-	//offset = column + (row * 32), size == 2
-	QByteArray data;
-	data.append((char)((newval >> 8) & 0xFF));
-	data.append((char)(newval & 0xFF));
-	qDebug() << "Attempting to save data at:" << row << column;
-	if (column == 0)
+	if (row == ui.tableWidget->rowCount()-1)
 	{
-		emit saveSingleData(m_locationId,data,4+(((m_xAxisSize-1) - row)*2),2);
+		tableData->setXAxis(column-1,newval);
 	}
-	else if (row == ui.tableWidget->rowCount()-1)
+	else if (column == 0)
 	{
-		emit saveSingleData(m_locationId,data,58+((column-1)*2),2);
+		tableData->setYAxis(row,newval);
 	}
 	else
 	{
-		emit saveSingleData(m_locationId,data,100+((column-1)*2)+(((m_xAxisSize-1) - row) * (m_yAxisSize*2)),2);
+		tableData->setCell(row+1,column-1,newval);
 	}
 	ui.tableWidget->resizeColumnsToContents();
 }
