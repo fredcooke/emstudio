@@ -21,6 +21,7 @@
 
 #include <QWidget>
 #include <QResizeEvent>
+#include <table2ddata.h>
 #include "ui_tableview2d.h"
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
@@ -32,7 +33,9 @@ public:
 	explicit TableView2D(QWidget *parent = 0);
 	~TableView2D();
 	void passData(unsigned short locationid,QByteArray data,int physicallocation);
+	//void passData(unsigned short locationid,Table2DData data);
 private:
+	Table2DData *tableData;
 	QwtPlotCurve *curve;
 	QVector<QPointF> samples;
 	Ui::TableView2D ui;

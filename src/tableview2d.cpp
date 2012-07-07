@@ -24,6 +24,7 @@
 TableView2D::TableView2D(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
+	tableData=0;
 	//ui.tableWidget->setColumnCount(1);
 	ui.tableWidget->setRowCount(2);
 	ui.tableWidget->horizontalHeader()->hide();
@@ -109,13 +110,7 @@ void TableView2D::tableCellChanged(int row,int column)
 		ui.plot->replot();
 	}
 	//New value has been accepted. Let's write it.
-	//void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
-	//Data is 64
-	//offset = column + (row * 32), size == 2
-	QByteArray data;
-	data.append((char)((newval >> 8) & 0xFF));
-	data.append((char)(newval & 0xFF));
-	emit saveSingleData(m_locationid,data,(column*2)+(row * 32),2);
+	tableData->setCell(row,column,newval); //This will emit saveSingleData
 	ui.tableWidget->resizeColumnsToContents();
 }
 void TableView2D::resizeEvent(QResizeEvent *evt)
@@ -126,46 +121,43 @@ void TableView2D::resizeEvent(QResizeEvent *evt)
 	}*/
 }
 
-void TableView2D::passData(unsigned short locationid,QByteArray data,int physicallocation)
+void TableView2D::passData(unsigned short locationid,QByteArray rawdata,int physicallocation)
 {
-	if (data.size() != 64)
+	if (tableData)
 	{
-		qDebug() << "Passed a data pack to a 2d table that was of size" << data.size() << "should be 64!!!";
-		return;
+		tableData->deleteLater();
 	}
+	tableData = new Table2DData(locationid,rawdata);
+	connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	qDebug() << "TableView2D::passData" << "0x" + QString::number(locationid,16).toUpper();
 	samples.clear();
 	m_locationid = locationid;
-	m_physicalid = physicallocation;
 	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 	ui.tableWidget->clear();
 	ui.tableWidget->setColumnCount(0);
 	ui.tableWidget->setRowCount(2);
-	for (int i=0;i<data.size()/2;i+=2)
+	for (int i=0;i<tableData->columns();i++)
 	{
-		unsigned short x = (((unsigned char)data[i]) << 8) + ((unsigned char)data[i+1]);
-		unsigned short y = (((unsigned char)data[(data.size()/2)+ i]) << 8) + ((unsigned char)data[(data.size()/2) + i+1]);
 		ui.tableWidget->setColumnCount(ui.tableWidget->columnCount()+1);
-		ui.tableWidget->setColumnWidth(ui.tableWidget->columnCount()-1,ui.tableWidget->width() / (data.size()/4));
-		ui.tableWidget->setItem(0,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(x)));
-		ui.tableWidget->setItem(1,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(y)));
-		if (y < 65535/4)
+		ui.tableWidget->setItem(0,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->axis()[i])));
+		ui.tableWidget->setItem(1,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->values()[i])));
+		if (tableData->values()[i] < 65535/4)
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,(255*((y)/(65535.0/4.0))),255));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,(255*((tableData->values()[i])/(65535.0/4.0))),255));
 		}
-		else if (y < ((65535/4)*2))
+		else if (tableData->values()[i] < ((65535/4)*2))
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((y-((65535/4.0)))/(65535.0/4.0)))));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((tableData->values()[i]-((65535/4.0)))/(65535.0/4.0)))));
 		}
-		else if (y < ((65535/4)*3))
+		else if (tableData->values()[i] < ((65535/4)*3))
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb((255*((y-((65535/4.0)*2))/(65535.0/4.0))),255,0));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb((255*((tableData->values()[i]-((65535/4.0)*2))/(65535.0/4.0))),255,0));
 		}
 		else
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((y-((65535/4.0)*3))/(65535.0/4.0))),0));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((tableData->values()[i]-((65535/4.0)*3))/(65535.0/4.0))),0));
 		}
-		samples.append(QPointF(x,y));
+		samples.append(QPointF(tableData->axis()[i],tableData->values()[i]));
 	}
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	curve->setSamples(samples);
@@ -179,20 +171,4 @@ TableView2D::~TableView2D()
 void TableView2D::saveClicked()
 {
 	emit saveToFlash(m_locationid);
-	/*QByteArray data;
-	bool ok = false;
-	QByteArray first;
-	QByteArray second;
-	for (int i=0;i<ui.tableWidget->columnCount();i++)
-	{
-		unsigned short loc = ui.tableWidget->item(0,i)->text().toInt(&ok,10);
-		first.append((char)((loc >> 8) & 0xFF));
-		first.append((char)(loc & 0xFF));
-		unsigned short loc2 = ui.tableWidget->item(1,i)->text().toInt(&ok,10);
-		second.append((char)((loc2 >> 8) & 0xFF));
-		second.append((char)(loc2 & 0xFF));
-	}
-	data.append(first);
-	data.append(second);
-	emit saveData(m_locationid,data,m_physicalid);*/
 }

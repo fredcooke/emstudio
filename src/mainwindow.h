@@ -39,6 +39,7 @@
 #include "aboutview.h"
 #include "memorylocation.h"
 #include "interrogateprogressview.h"
+#include "table2ddata.h"
 //#include "datarawview.h"
 
 

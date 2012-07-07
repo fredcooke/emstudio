@@ -18,23 +18,32 @@
 
 #ifndef TABLE2DDATA_H
 #define TABLE2DDATA_H
+#include <QObject>
 #include <QString>
 #include <QList>
 #include <QByteArray>
 
-class Table2DData
+class Table2DData : public QObject
 {
+	Q_OBJECT
 public:
 	Table2DData();
 	Table2DData(unsigned short locationid,QByteArray payload);
 	void setData(unsigned short locationid,QByteArray payload);
 	QByteArray data();
+	QList<unsigned short> axis();
+	QList<unsigned short> values();
+	int columns();
+	int rows();
+	void setCell(int row, int column,unsigned short newval);
 private:
 	unsigned short m_locationId;
-	QList<unsigned short> m_xaxis;
-	QList<unsigned short> m_yaxis;
-	QString xAxisLabel;
-	QString yAxisLabel;
+	QList<unsigned short> m_axis;
+	QList<unsigned short> m_values;
+	QString axisLabel;
+	QString valuesLabel;
+signals:
+	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
 };
 
 #endif // TABLE2DDATA_H
