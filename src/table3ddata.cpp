@@ -35,29 +35,29 @@ void Table3DData::setData(unsigned short locationid,QByteArray data)
 		m_values.append(currrow);
 	}
 }
-void Table3DData::setXAxis(int column,unsigned short newval)
+void Table3DData::setXAxis(int index,unsigned short newval)
 {
 	QByteArray data;
 	data.append((char)((newval >> 8) & 0xFF));
 	data.append((char)(newval & 0xFF));
-	emit saveSingleData(m_locationId,data,4+(((m_xAxis.size()) - column)*2),2);
+	emit saveSingleData(m_locationId,data,4+(index*2),2);
 }
 
-void Table3DData::setYAxis(int row,unsigned short newval)
+void Table3DData::setYAxis(int index,unsigned short newval)
 {
 	QByteArray data;
 	data.append((char)((newval >> 8) & 0xFF));
 	data.append((char)(newval & 0xFF));
-	emit saveSingleData(m_locationId,data,58+((m_xAxis.size() - row)*2),2);
+	emit saveSingleData(m_locationId,data,58+(index*2),2);
 }
 
-void Table3DData::setCell(int row, int column,unsigned short newval)
+void Table3DData::setCell(int yIndex, int xIndex,unsigned short newval)
 {
 	QByteArray data;
 	data.append((char)((newval >> 8) & 0xFF));
 	data.append((char)(newval & 0xFF));
-	qDebug() << "Attempting to save data at:" << row << column;
-	emit saveSingleData(m_locationId,data,100+((column)*2)+(row * (m_xAxis.size()*2)),2);
+	qDebug() << "Attempting to save data at:" << yIndex << xIndex;
+	emit saveSingleData(m_locationId,data,100+(xIndex*2)+(yIndex * (m_xAxis.size()*2)),2);
 }
 QByteArray Table3DData::data()
 {

@@ -79,62 +79,57 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 }
 void TableView3D::tableCellChanged(int row,int column)
 {
+	// Ignore bottom right corner if the disallow on editing fails
 	if (row == ui.tableWidget->rowCount()-1 && column == 0)
 	{
-		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+		qDebug() << "This should not happen! Bottom right corner ignored!";
 		return;
 	}
+
 	if (row == -1 || column == -1)
 	{
+		qDebug() << "Negative array index! Should be unreachable code! FIXME!";
 		return;
 	}
+
 	if (row >= ui.tableWidget->rowCount() || column >= ui.tableWidget->columnCount())
 	{
+		qDebug() << "Larger than life, should be unreachable code! FIXME!";
 		return;
 	}
-	bool ok = false;
-	if (ui.tableWidget->item(row,column)->text().toInt(&ok) == currentvalue)
-	{
-		return;
-	}
-	if (ui.tableWidget->item(row,column)->text().toInt(&ok) > 65535)
-	{
-		QMessageBox::information(0,"Error",QString("Value entered too large! Value range 0-65535. Entered value:") + ui.tableWidget->item(row,column)->text());
-		ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-		return;
-	}
-	else if (ok == false)
+
+	bool conversionOk = false; // Note, value of this is irrelevant, overwritten during call in either case.
+	int tempValue = ui.tableWidget->item(row,column)->text().toInt(&conversionOk);
+
+	if (!conversionOk)
 	{
 		QMessageBox::information(0,"Error","Value entered is not a number!");
 		ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 		return;
 	}
-	unsigned short newval = ui.tableWidget->item(row,column)->text().toInt();
-	currentvalue = newval;
-	if (row == 0)
+
+
+	if (tempValue > 65535)
 	{
-		//samples.replace(column,QPointF(ui.tableWidget->item(row,column)->text().toInt(),samples.at(column).y()));
-		//curve->setSamples(samples);
-		//ui.plot->replot();
+		QMessageBox::information(0,"Error",QString("Value entered too large! Value range 0-65535. Entered value:") + ui.tableWidget->item(row,column)->text());
+		ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+		return;
 	}
-	else if (row == 1)
-	{
-		//samples.replace(column,QPointF(samples.at(column).x(),ui.tableWidget->item(row,column)->text().toInt()));
-		//curve->setSamples(samples);
-		//ui.plot->replot();
-	}
+
+	currentvalue = (unsigned short)tempValue;
+
 	//New value has been accepted. Let's write it.
 	if (row == ui.tableWidget->rowCount()-1)
 	{
-		tableData->setXAxis(column-1,newval);
+		tableData->setXAxis(column-1,currentvalue);
 	}
 	else if (column == 0)
 	{
-		tableData->setYAxis(row,newval);
+		tableData->setYAxis(ui.tableWidget->rowCount()-(row+2),currentvalue);
 	}
 	else
 	{
-		tableData->setCell(row+1,column-1,newval);
+		tableData->setCell(ui.tableWidget->rowCount()-(row+2),column-1,currentvalue);
 	}
 	ui.tableWidget->resizeColumnsToContents();
 }
