@@ -17,6 +17,12 @@ Makefile
 
 
 # Logs
-
+*.json
 *.log
 *.bin
+
+# User files
+*.tgz
+*.tar.gz
+*.png
+*.zip

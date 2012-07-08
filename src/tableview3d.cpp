@@ -47,27 +47,27 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	{
 		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(QString::number(tableData->xAxis()[i])));
 	}
-	for (int i=0;i<tableData->rows();i++)
+	for (int row=0;row<tableData->rows();row++)
 	{
-		for (int j=0;j<tableData->columns();j++)
+		for (int col=0;col<tableData->columns();col++)
 		{
-			unsigned short val = tableData->values()[i][j];
-			ui.tableWidget->setItem((tableData->rows()-1)-(i),j+1,new QTableWidgetItem(QString::number(val)));
-			if (val < 65535/4)
+			unsigned short val = tableData->values()[row][col];
+			ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(QString::number(val)));
+			if (val < 65536/4)
 			{
-				ui.tableWidget->item((tableData->rows()-1)-((i)),(j)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(65535.0/4.0))),255));
+				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(65535.0/4.0))),255));
 			}
-			else if (val < ((65535/4)*2))
+			else if (val < ((65536/4)*2))
 			{
-				ui.tableWidget->item((tableData->rows()-1)-((i)),(j)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((65535/4.0)))/(65535.0/4.0)))));
+				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((65535/4.0)))/(65535.0/4.0)))));
 			}
-			else if (val < ((65535/4)*3))
+			else if (val < ((65536/4)*3))
 			{
-				ui.tableWidget->item((tableData->rows()-1)-((i)),(j)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((65535/4.0)*2))/(65535.0/4.0))),255,0));
+				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((65535/4.0)*2))/(65535.0/4.0))),255,0));
 			}
 			else
 			{
-				ui.tableWidget->item((tableData->rows()-1)-((i)),(j)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((65535/4.0)*3))/(65535.0/4.0))),0));
+				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((65535/4.0)*3))/(65535.0/4.0))),0));
 			}
 		}
 	}
@@ -109,10 +109,6 @@ void TableView3D::tableCellChanged(int row,int column)
 		ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 		return;
 	}
-	/*if (samples.size() <= column)
-	{
-		return;
-	}*/
 	unsigned short newval = ui.tableWidget->item(row,column)->text().toInt();
 	currentvalue = newval;
 	if (row == 0)
