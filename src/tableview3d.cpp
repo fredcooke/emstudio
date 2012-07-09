@@ -51,6 +51,14 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	m_locationId = locationid;
 
 	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+	QList<QPair<int,int> > selectedlist;
+	if (ui.tableWidget->selectedItems().size() > 0)
+	{
+		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
+		{
+			selectedlist.append(QPair<int,int>(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column()));
+		}
+	}
 	ui.tableWidget->clear();
 	ui.tableWidget->horizontalHeader()->hide();
 	ui.tableWidget->verticalHeader()->hide();
@@ -92,6 +100,10 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	ui.tableWidget->resizeColumnsToContents();
 	ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,0,new QTableWidgetItem());
 	ui.tableWidget->item(ui.tableWidget->rowCount()-1,0)->setFlags(ui.tableWidget->item(ui.tableWidget->rowCount()-1,0)->flags() & ~Qt::ItemIsEditable);
+	for (int i=0;i<selectedlist.size();i++)
+	{
+		ui.tableWidget->item(selectedlist[i].first,selectedlist[i].second)->setSelected(true);
+	}
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 
 }
