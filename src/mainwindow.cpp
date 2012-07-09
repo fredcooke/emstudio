@@ -383,9 +383,13 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				{
 
 					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_ramMemoryList[i]->data(),true);
-					m_rawDataView[locid]->show();
-					m_rawDataView[locid]->raise();
 				}
+				m_rawDataView[locid]->show();
+				//m_rawDataView[locid]->activateWindow();
+				//m_rawDataView[locid]->mdiArea()->setActiveSubWindow(m_rawDataView[locid]);
+				m_rawDataView[locid]->raise();
+				QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::Show));
+				QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::WindowActivate));
 			}
 			else
 			{
@@ -403,7 +407,8 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					win->setGeometry(view->geometry());
 					m_rawDataView[locid] = view;
 					win->show();
-					win->raise();
+					QApplication::postEvent(win, new QEvent(QEvent::Show));
+					QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
 				}
 				else if (type == 3)
 				{
@@ -413,12 +418,14 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 					connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
+
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
 					win->setGeometry(view->geometry());
 					m_rawDataView[locid] = view;
 					win->show();
-					win->raise();
+					QApplication::postEvent(win, new QEvent(QEvent::Show));
+					QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
 				}
 				else
 				{
@@ -431,7 +438,8 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					win->setGeometry(view->geometry());
 					m_rawDataView[locid] = view;
 					win->show();
-					win->raise();
+					QApplication::postEvent(win, new QEvent(QEvent::Show));
+					QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
 				}
 			}
 			return;
@@ -456,9 +464,10 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				{
 					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_flashMemoryList[i]->data(),false);
 					//m_rawDataView[locid]->setData(locid,m_ramRawBlockList[i]->data);
-					m_rawDataView[locid]->show();
-					m_rawDataView[locid]->raise();
 				}
+				m_rawDataView[locid]->show();
+				QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::Show));
+				QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::WindowActivate));
 			}
 			else
 			{
@@ -474,7 +483,8 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					win->setGeometry(view->geometry());
 					m_rawDataView[locid] = view;
 					win->show();
-					win->raise();
+					QApplication::postEvent(win, new QEvent(QEvent::Show));
+					QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
 				}
 				else
 				{
@@ -487,7 +497,8 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					win->setGeometry(view->geometry());
 					m_rawDataView[locid] = view;
 					win->show();
-					win->raise();
+					QApplication::postEvent(win, new QEvent(QEvent::Show));
+					QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
 				}
 			}
 			return;
