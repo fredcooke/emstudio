@@ -82,7 +82,8 @@ HEADERS  += src/mainwindow.h \
     src/memorylocation.h \
     src/tableview3d.h \
     src/interrogateprogressview.h \
-    src/table3ddata.h
+    src/table3ddata.h \
+    src/headers.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \

@@ -25,11 +25,121 @@
 #include <QSettings>
 #include <tableview2d.h>
 #include <tableview3d.h>
-
+#include <qjson/parser.h>
 #define define2string_p(x) #x
 #define define2string(x) define2string_p(x)
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+	qDebug() << "Loading config file freeems.config.json";
+	QFile file("freeems.config.json");
+	file.open(QIODevice::ReadOnly);
+	QByteArray filebytes = file.readAll();
+	file.close();
+
+	QJson::Parser parser;
+	QVariant top = parser.parse(filebytes);
+	QVariantMap topmap = top.toMap();
+	QVariantMap errormap = topmap["errormap"].toMap();
+	QVariantMap::iterator i = errormap.begin();
+	while (i != errormap.end())
+	{
+		bool ok = false;
+		m_errorMap[i.value().toString().mid(2).toInt(&ok,16)] = i.key();
+		i++;
+	}
+
+	QVariantMap tables = topmap["tables"].toMap();
+	i = tables.begin();
+	while (i != tables.end())
+	{
+		//qDebug() << "Table:" << i.key();
+		QVariantMap tabledata = i.value().toMap();
+		if (tabledata["type"] == "3D")
+		{
+			Table3DMetaData meta;
+			QString id = tabledata["locationid"].toString();
+			QString xtitle = tabledata["xtitle"].toString();
+			QVariantMap xcalc = tabledata["xcalc"].toMap();
+			QString ytitle = tabledata["ytitle"].toString();
+			QVariantMap ycalc = tabledata["ycalc"].toMap();
+			QString ztitle = tabledata["ztitle"].toString();
+			QVariantMap zcalc = tabledata["zcalc"].toMap();
+			QVariantMap::iterator calci = xcalc.begin();
+			QList<QPair<QString,double> > xcalclist;
+			while (calci != xcalc.end())
+			{
+				xcalclist.append(QPair<QString,double>(calci.key(),calci.value().toDouble()));
+				qDebug() << "Calc:" << calci.key() << calci.value();
+				calci++;
+			}
+
+			calci = ycalc.begin();
+			QList<QPair<QString,double> > ycalclist;
+			while (calci != ycalc.end())
+			{
+				ycalclist.append(QPair<QString,double>(calci.key(),calci.value().toDouble()));
+				qDebug() << "Calc:" << calci.key() << calci.value();
+				calci++;
+			}
+			calci = zcalc.begin();
+			QList<QPair<QString,double> > zcalclist;
+			while (calci != zcalc.end())
+			{
+				zcalclist.append(QPair<QString,double>(calci.key(),calci.value().toDouble()));
+				qDebug() << "Calc:" << calci.key() << calci.value();
+				calci++;
+			}
+			bool ok = false;
+			meta.locationId = id.mid(2).toInt(&ok,16);
+			meta.tableTitle = i.key();
+			meta.xAxisCalc = xcalclist;
+			meta.xAxisTitle = xtitle;
+			meta.yAxisCalc = ycalclist;
+			meta.yAxisTitle = ytitle;
+			meta.zAxisCalc = zcalclist;
+			meta.zAxisTitle = ztitle;
+			m_table3DMetaData.append(meta);
+		}
+		else if (tabledata["type"] == "2D")
+		{
+			Table2DMetaData meta;
+			QString id = tabledata["locationid"].toString();
+			QString xtitle = tabledata["xtitle"].toString();
+			QVariantMap xcalc = tabledata["xcalc"].toMap();
+			QString ytitle = tabledata["ytitle"].toString();
+			QVariantMap ycalc = tabledata["ycalc"].toMap();
+
+			QVariantMap::iterator calci = xcalc.begin();
+			QList<QPair<QString,double> > xcalclist;
+			while (calci != xcalc.end())
+			{
+				xcalclist.append(QPair<QString,double>(calci.key(),calci.value().toDouble()));
+				qDebug() << "Calc:" << calci.key() << calci.value();
+				calci++;
+			}
+
+			calci = ycalc.begin();
+			QList<QPair<QString,double> > ycalclist;
+			while (calci != ycalc.end())
+			{
+				ycalclist.append(QPair<QString,double>(calci.key(),calci.value().toDouble()));
+				qDebug() << "Calc:" << calci.key() << calci.value();
+				calci++;
+			}
+			bool ok = false;
+			meta.locationId = id.mid(2).toInt(&ok,16);
+			meta.tableTitle = i.key();
+			meta.xAxisCalc = xcalclist;
+			meta.xAxisTitle = xtitle;
+			meta.yAxisCalc = ycalclist;
+			meta.yAxisTitle = ytitle;
+			m_table2DMetaData.append(meta);
+		}
+		i++;
+	}
+	qDebug() << m_errorMap.keys().size() << "Error Keys Loaded";
+	qDebug() << m_table3DMetaData.size() << "3D Tables Loaded";
+	qDebug() << m_table2DMetaData.size() << "2D Tables Loaded";
 	m_currentRamLocationId=0;
 	//populateDataFields();
 	m_localRamDirty = false;
@@ -377,7 +487,14 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				}
 				else if (type == 3)
 				{
-					qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
+					for (int j=0;j<m_table3DMetaData.size();j++)
+					{
+						if (m_table3DMetaData[j].locationId == locid)
+						{
+							qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0,m_table3DMetaData[j]);
+						}
+					}
+
 				}
 				else
 				{
@@ -413,7 +530,13 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				else if (type == 3)
 				{
 					TableView3D *view = new TableView3D();
-					view->passData(locid,m_ramMemoryList[i]->data(),0);
+					for (int j=0;j<m_table3DMetaData.size();j++)
+					{
+						if (m_table3DMetaData[j].locationId == locid)
+						{
+							view->passData(locid,m_ramMemoryList[i]->data(),0,m_table3DMetaData[j]);
+						}
+					}
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
@@ -458,7 +581,13 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				}
 				else if (type == 3)
 				{
-					qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
+					for (int j=0;j<m_table3DMetaData.size();j++)
+					{
+						if (m_table3DMetaData[j].locationId == locid)
+						{
+							qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0,m_table3DMetaData[j]);
+						}
+					}
 				}
 				else
 				{
@@ -1392,7 +1521,14 @@ void MainWindow::updateDataWindows(unsigned short locationid)
 				TableView3D *tableview3d = qobject_cast<TableView3D*>(m_rawDataView[locationid]);
 				if (tableview3d)
 				{
-					tableview3d->passData(locationid,getLocalRamBlock(locationid),0);
+					for (int j=0;j<m_table3DMetaData.size();j++)
+					{
+						if (m_table3DMetaData[j].locationId == locationid)
+						{
+							tableview3d->passData(locationid,getLocalRamBlock(locationid),0,m_table3DMetaData[j]);
+						}
+					}
+
 				}
 				else
 				{
@@ -1458,6 +1594,7 @@ void MainWindow::checkRamFlashSync()
 void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 {
 	qDebug() << "Command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
+	QMessageBox::information(0,"Command Failed","Command failed with error: " + m_errorMap[errornum]);
 	bool found = false;
 	if (m_waitingForRamWriteConfirmation)
 	{

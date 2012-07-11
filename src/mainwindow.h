@@ -28,6 +28,7 @@
 
 #include <QTimer>
 #include <qjson/serializer.h>
+#include "headers.h"
 #include "datapacketdecoder.h"
 #include "comsettings.h"
 #include "emsinfoview.h"
@@ -66,6 +67,7 @@ public:
 	QString emstudioHash;
 };
 
+
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -88,6 +90,9 @@ private:
 	QList<MemoryLocation*> m_deviceFlashMemoryList;
 	QList<MemoryLocation*> m_deviceRamMemoryList;
 	QList<MemoryLocation*> m_tempMemoryList;
+	QList<Table3DMetaData> m_table3DMetaData;
+	QList<Table2DMetaData> m_table2DMetaData;
+	QMap<unsigned short,QString> m_errorMap;
 	//RawDataView *rawData;
 	TableView *dataTables;
 	GaugeView *dataGauges;

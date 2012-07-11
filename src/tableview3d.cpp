@@ -40,8 +40,9 @@ void TableView3D::loadClicked()
 {
 	emit reloadTableData(m_locationId);
 }
-void TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation)
+void TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation,Table3DMetaData metadata)
 {
+	m_metaData = metadata;
 	if (tableData)
 	{
 		tableData->deleteLater();
@@ -67,33 +68,100 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 
 	for (int i=0;i<tableData->rows();i++)
 	{
-		ui.tableWidget->setItem((tableData->rows()-1)-(i),0,new QTableWidgetItem(QString::number(tableData->yAxis()[i])));
+		double val = (unsigned short)tableData->yAxis()[i];
+		for (int j=0;j<m_metaData.yAxisCalc.size();j++)
+		{
+			if (m_metaData.yAxisCalc[j].first == "add")
+			{
+				val += m_metaData.yAxisCalc[j].second;
+			}
+			else if (m_metaData.yAxisCalc[j].first == "sub")
+			{
+				val -= m_metaData.yAxisCalc[j].second;
+			}
+			else if (m_metaData.yAxisCalc[j].first == "mult")
+			{
+				val *= m_metaData.yAxisCalc[j].second;
+			}
+			else if (m_metaData.yAxisCalc[j].first == "div")
+			{
+				val /= m_metaData.yAxisCalc[j].second;
+			}
+		}
+		//ui.tableWidget->setItem((tableData->rows()-1)-(i),0,new QTableWidgetItem(QString::number(tableData->yAxis()[i])));
+		ui.tableWidget->setItem((tableData->rows()-1)-(i),0,new QTableWidgetItem(QString::number(val)));
 	}
 	for (int i=0;i<tableData->columns();i++)
 	{
-		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(QString::number(tableData->xAxis()[i])));
+		double val = (unsigned short)tableData->xAxis()[i];
+		for (int j=0;j<m_metaData.xAxisCalc.size();j++)
+		{
+			if (m_metaData.xAxisCalc[j].first == "add")
+			{
+				val += m_metaData.xAxisCalc[j].second;
+			}
+			else if (m_metaData.xAxisCalc[j].first == "sub")
+			{
+				val -= m_metaData.xAxisCalc[j].second;
+			}
+			else if (m_metaData.xAxisCalc[j].first == "mult")
+			{
+				val *= m_metaData.xAxisCalc[j].second;
+			}
+			else if (m_metaData.xAxisCalc[j].first == "div")
+			{
+				val /= m_metaData.xAxisCalc[j].second;
+			}
+		}
+		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(QString::number(val)));
+		//ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(QString::number(tableData->xAxis()[i])));
 	}
 	for (int row=0;row<tableData->rows();row++)
 	{
 		for (int col=0;col<tableData->columns();col++)
 		{
-			unsigned short val = tableData->values()[row][col];
+			double val = (unsigned short)tableData->values()[row][col];
+			unsigned short val2 = (unsigned short)tableData->values()[row][col];
+			double max = 65535;
+			for (int i=0;i<m_metaData.zAxisCalc.size();i++)
+			{
+				if (m_metaData.zAxisCalc[i].first == "add")
+				{
+					val += m_metaData.zAxisCalc[i].second;
+					max += m_metaData.zAxisCalc[i].second;
+				}
+				else if (m_metaData.zAxisCalc[i].first == "sub")
+				{
+					val -= m_metaData.zAxisCalc[i].second;
+					max -= m_metaData.zAxisCalc[i].second;
+				}
+				else if (m_metaData.zAxisCalc[i].first == "mult")
+				{
+					val *= m_metaData.zAxisCalc[i].second;
+					max *= m_metaData.zAxisCalc[i].second;
+				}
+				else if (m_metaData.zAxisCalc[i].first == "div")
+				{
+					val /= m_metaData.zAxisCalc[i].second;
+					max /= m_metaData.zAxisCalc[i].second;
+				}
+			}
 			ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(QString::number(val)));
-			if (val < 65536/4)
+			if (val < max/4)
 			{
-				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(65535.0/4.0))),255));
+				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(max/4.0))),255));
 			}
-			else if (val < ((65536/4)*2))
+			else if (val < ((max/4)*2))
 			{
-				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((65535/4.0)))/(65535.0/4.0)))));
+				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((max/4.0)))/(max/4.0)))));
 			}
-			else if (val < ((65536/4)*3))
+			else if (val < ((max/4)*3))
 			{
-				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((65535/4.0)*2))/(65535.0/4.0))),255,0));
+				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((max/4.0)*2))/(max/4.0))),255,0));
 			}
 			else
 			{
-				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((65535/4.0)*3))/(65535.0/4.0))),0));
+				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((max/4.0)*3))/(max/4.0))),0));
 			}
 		}
 	}
@@ -129,7 +197,31 @@ void TableView3D::tableCellChanged(int row,int column)
 	}
 
 	bool conversionOk = false; // Note, value of this is irrelevant, overwritten during call in either case.
-	int tempValue = ui.tableWidget->item(row,column)->text().toInt(&conversionOk);
+	double tempValue = ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
+	double oldValue = tempValue;
+	unsigned short newTempValue=0;
+	//Convert tempValue back to a proper unsigned short
+	for (int i=m_metaData.zAxisCalc.size()-1;i>=0;i--)
+	{
+		if (m_metaData.zAxisCalc[i].first == "add")
+		{
+			tempValue -= m_metaData.zAxisCalc[i].second;
+		}
+		else if (m_metaData.zAxisCalc[i].first == "sub")
+		{
+			tempValue += m_metaData.zAxisCalc[i].second;
+		}
+		else if (m_metaData.zAxisCalc[i].first == "mult")
+		{
+			tempValue /= m_metaData.zAxisCalc[i].second;
+		}
+		else if (m_metaData.zAxisCalc[i].first == "div")
+		{
+			tempValue *= m_metaData.zAxisCalc[i].second;
+		}
+	}
+	newTempValue = tempValue;
+
 
 	if (!conversionOk)
 	{
@@ -139,27 +231,27 @@ void TableView3D::tableCellChanged(int row,int column)
 	}
 
 
-	if (tempValue > 65535)
+	if (newTempValue > 65535)
 	{
 		QMessageBox::information(0,"Error",QString("Value entered too large! Value range 0-65535. Entered value:") + ui.tableWidget->item(row,column)->text());
 		ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 		return;
 	}
 
-	currentvalue = (unsigned short)tempValue;
+	currentvalue = oldValue;
 
 	//New value has been accepted. Let's write it.
 	if (row == ui.tableWidget->rowCount()-1)
 	{
-		tableData->setXAxis(column-1,currentvalue);
+		tableData->setXAxis(column-1,newTempValue);
 	}
 	else if (column == 0)
 	{
-		tableData->setYAxis(ui.tableWidget->rowCount()-(row+2),currentvalue);
+		tableData->setYAxis(ui.tableWidget->rowCount()-(row+2),newTempValue);
 	}
 	else
 	{
-		tableData->setCell(ui.tableWidget->rowCount()-(row+2),column-1,currentvalue);
+		tableData->setCell(ui.tableWidget->rowCount()-(row+2),column-1,newTempValue);
 	}
 	ui.tableWidget->resizeColumnsToContents();
 }
