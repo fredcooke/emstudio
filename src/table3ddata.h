@@ -21,7 +21,8 @@
 
 #include <QObject>
 #include "headers.h"
-class Table3DData : public QObject
+#include "tabledata.h"
+class Table3DData : public TableData
 {
 	Q_OBJECT
 public:
@@ -40,12 +41,6 @@ public:
 	double maxYAxis();
 	double maxZAxis();
 private:
-	double calcXAxis(unsigned short val);
-	double calcYAxis(unsigned short val);
-	double calcZAxis(unsigned short val);
-	unsigned short backConvertXAxis(double val);
-	unsigned short backConvertYAxis(double val);
-	unsigned short backConvertZAxis(double val);
 	unsigned short m_locationId;
 	QList<double> m_xAxis;
 	QList<double> m_yAxis;

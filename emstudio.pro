@@ -52,7 +52,8 @@ SOURCES += src/main.cpp\
     src/memorylocation.cpp \
     src/tableview3d.cpp \
     src/interrogateprogressview.cpp \
-    src/table3ddata.cpp
+    src/table3ddata.cpp \
+    src/tabledata.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -83,7 +84,8 @@ HEADERS  += src/mainwindow.h \
     src/tableview3d.h \
     src/interrogateprogressview.h \
     src/table3ddata.h \
-    src/headers.h
+    src/headers.h \
+    src/tabledata.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \

@@ -40,7 +40,7 @@ private:
 	unsigned short m_xAxisSize;
 	unsigned short m_yAxisSize;
 	Table3DMetaData m_metaData;
-
+	void setSilentValue(int row,int column,QString value);
 private slots:
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
 	void tableCellChanged(int row,int column);

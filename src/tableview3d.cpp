@@ -55,6 +55,8 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	m_locationId = locationid;
 
 	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+	ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+	//connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	QList<QPair<int,int> > selectedlist;
 	if (ui.tableWidget->selectedItems().size() > 0)
 	{
@@ -71,20 +73,20 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	for (int i=0;i<tableData->rows();i++)
 	{
 		//double val = tableData->yAxis()[i];
-		ui.tableWidget->setItem((tableData->rows()-1)-(i),0,new QTableWidgetItem(QString::number(tableData->yAxis()[i])));
+		ui.tableWidget->setItem((tableData->rows()-1)-(i),0,new QTableWidgetItem(QString::number(tableData->yAxis()[i],'f',2)));
 		//ui.tableWidget->setItem((tableData->rows()-1)-(i),0,new QTableWidgetItem(QString::number(val)));
 	}
 	for (int i=0;i<tableData->columns();i++)
 	{
 		//ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(QString::number(val)));
-		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(QString::number(tableData->xAxis()[i])));
+		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(QString::number(tableData->xAxis()[i],'f',2)));
 	}
 	for (int row=0;row<tableData->rows();row++)
 	{
 		for (int col=0;col<tableData->columns();col++)
 		{
 			double val = tableData->values()[row][col];
-			ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(QString::number(val)));
+			ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(QString::number(val,'f',2)));
 			if (val < tableData->maxZAxis()/4)
 			{
 				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxZAxis()/4.0))),255));
@@ -111,10 +113,12 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 		ui.tableWidget->item(selectedlist[i].first,selectedlist[i].second)->setSelected(true);
 	}
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 
 }
 void TableView3D::tableCellChanged(int row,int column)
 {
+
 	// Ignore bottom right corner if the disallow on editing fails
 	if (row == ui.tableWidget->rowCount()-1 && column == 0)
 	{
@@ -136,6 +140,9 @@ void TableView3D::tableCellChanged(int row,int column)
 
 	bool conversionOk = false; // Note, value of this is irrelevant, overwritten during call in either case.
 	double tempValue = ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
+
+	//qDebug() << "New Double value:" << tempValue;
+
 	double oldValue = tempValue;
 	//unsigned short newTempValue=0;
 
@@ -165,11 +172,13 @@ void TableView3D::tableCellChanged(int row,int column)
 	if (!conversionOk)
 	{
 		QMessageBox::information(0,"Error","Value entered is not a number!");
-		ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+		setSilentValue(row,column,QString::number(currentvalue,'f',2));
+		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 		return;
 	}
-
-	currentvalue = oldValue;
+	setSilentValue(row,column,QString::number(tempValue,'f',2));
+	//ui.tableWidget->item(row,column)->setText(QString::number(tempValue,'f',2));
+	tempValue = ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
 
 	//New value has been accepted. Let's write it.
 	if (row == ui.tableWidget->rowCount()-1)
@@ -180,6 +189,7 @@ void TableView3D::tableCellChanged(int row,int column)
 			ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 			return;
 		}
+		currentvalue = oldValue;
 		tableData->setXAxis(column-1,currentvalue);
 	}
 	else if (column == 0)
@@ -190,6 +200,7 @@ void TableView3D::tableCellChanged(int row,int column)
 			ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 			return;
 		}
+		currentvalue = oldValue;
 		tableData->setYAxis(ui.tableWidget->rowCount()-(row+2),currentvalue);
 	}
 	else
@@ -200,10 +211,21 @@ void TableView3D::tableCellChanged(int row,int column)
 			ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 			return;
 		}
+		currentvalue = oldValue;
 		tableData->setCell(ui.tableWidget->rowCount()-(row+2),column-1,currentvalue);
 	}
 	ui.tableWidget->resizeColumnsToContents();
 }
+void TableView3D::setSilentValue(int row,int column,QString value)
+{
+	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+	ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+	ui.tableWidget->item(row,column)->setText(value);
+	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
+}
+
+
 void TableView3D::saveClicked()
 {
 	emit saveToFlash(m_locationId);
