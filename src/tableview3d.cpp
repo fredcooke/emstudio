@@ -34,7 +34,7 @@ void TableView3D::tableCurrentCellChanged(int currentrow,int currentcolumn,int p
 	{
 		return;
 	}
-	currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toInt();
+	currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toDouble();
 }
 void TableView3D::loadClicked()
 {
