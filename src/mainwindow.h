@@ -156,6 +156,7 @@ private slots:
 	void emsOperatingSystem(QString os);
 	void emsDecoderName(QString name);
 	void emsFirmwareBuildDate(QString date);
+	void emsCompilerVersion(QString version);
 	void checkSyncRequest();
 	void rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation);
 	void rawDataViewDestroyed(QObject *object);
