@@ -20,30 +20,43 @@
 #define TABLE3DDATA_H
 
 #include <QObject>
-
+#include "headers.h"
 class Table3DData : public QObject
 {
 	Q_OBJECT
 public:
-	Table3DData(unsigned short locationid, QByteArray data);
-	void setData(unsigned short locationid,QByteArray payload);
+	Table3DData(unsigned short locationid, QByteArray data,Table3DMetaData metadata);
+	void setData(unsigned short locationid,QByteArray payload,Table3DMetaData metadata);
 	QByteArray data();
-	QList<unsigned short> xAxis();
-	QList<unsigned short> yAxis();
-	QList<QList<unsigned short> > values();
+	QList<double> xAxis();
+	QList<double> yAxis();
+	QList<QList<double> > values();
 	int columns();
 	int rows();
-	void setCell(int row, int column,unsigned short newval);
-	void setXAxis(int column,unsigned short newval);
-	void setYAxis(int row,unsigned short newval);
+	void setCell(int row, int column,double val);
+	void setXAxis(int column,double val);
+	void setYAxis(int row,double val);
+	double maxXAxis();
+	double maxYAxis();
+	double maxZAxis();
 private:
+	double calcXAxis(unsigned short val);
+	double calcYAxis(unsigned short val);
+	double calcZAxis(unsigned short val);
+	unsigned short backConvertXAxis(double val);
+	unsigned short backConvertYAxis(double val);
+	unsigned short backConvertZAxis(double val);
 	unsigned short m_locationId;
-	QList<unsigned short> m_xAxis;
-	QList<unsigned short> m_yAxis;
-	QList<QList<unsigned short> > m_values;
+	QList<double> m_xAxis;
+	QList<double> m_yAxis;
+	QList<QList<double> > m_values;
 	QString xAxisLabel;
 	QString yAxisLabel;
 	QString valuesLabel;
+	double m_maxXAxis;
+	double m_maxYAxis;
+	double m_maxZAxis;
+	Table3DMetaData m_metaData;
 signals:
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
 public slots:

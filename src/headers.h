@@ -1,5 +1,8 @@
 #ifndef HEADERS_H
 #define HEADERS_H
+#include <QPair>
+#include <QList>
+#include <QString>
 class Table3DMetaData
 {
 public:
