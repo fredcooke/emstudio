@@ -185,10 +185,19 @@ void TableView3D::tableCellChanged(int row,int column)
 	{
 		if (tempValue > tableData->maxXAxis())
 		{
-			QMessageBox::information(0,"Error",QString("Value entered too large! Value range 0-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 			return;
 		}
+		else if (tempValue < tableData->minXAxis())
+		{
+			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			return;
+		}
+
 		currentvalue = oldValue;
 		tableData->setXAxis(column-1,currentvalue);
 	}
@@ -196,8 +205,16 @@ void TableView3D::tableCellChanged(int row,int column)
 	{
 		if (tempValue > tableData->maxYAxis())
 		{
-			QMessageBox::information(0,"Error",QString("Value entered too large! Value range 0-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minYAxis()) + "-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
+			return;
+		}
+		else if (tempValue < tableData->minYAxis())
+		{
+			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minYAxis()) + "-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
 			return;
 		}
 		currentvalue = oldValue;
@@ -207,8 +224,16 @@ void TableView3D::tableCellChanged(int row,int column)
 	{
 		if (tempValue > tableData->maxZAxis())
 		{
-			QMessageBox::information(0,"Error",QString("Value entered too large! Value range 0-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
+			return;
+		}
+		if (tempValue < tableData->minZAxis())
+		{
+			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
 			return;
 		}
 		currentvalue = oldValue;

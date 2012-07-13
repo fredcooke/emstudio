@@ -40,6 +40,9 @@ public:
 	double maxXAxis();
 	double maxYAxis();
 	double maxZAxis();
+	double minXAxis();
+	double minYAxis();
+	double minZAxis();
 private:
 	unsigned short m_locationId;
 	QList<double> m_xAxis;
@@ -51,6 +54,9 @@ private:
 	double m_maxXAxis;
 	double m_maxYAxis;
 	double m_maxZAxis;
+	double m_minXAxis;
+	double m_minYAxis;
+	double m_minZAxis;
 	Table3DMetaData m_metaData;
 signals:
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);

@@ -36,6 +36,10 @@ void Table3DData::setData(unsigned short locationid,QByteArray data,Table3DMetaD
 	m_maxYAxis = calcAxis(65535,m_metaData.yAxisCalc);
 	m_maxZAxis = calcAxis(65535,m_metaData.zAxisCalc);
 
+	m_minXAxis = calcAxis(0,m_metaData.xAxisCalc);
+	m_minYAxis = calcAxis(0,m_metaData.yAxisCalc);
+	m_minZAxis = calcAxis(0,m_metaData.zAxisCalc);
+
 	for (int i=0;i<xaxissize*2;i+=2)
 	{
 		unsigned short val = (((unsigned char)data[4+i]) << 8) + (unsigned char)data[5+i];
@@ -70,6 +74,20 @@ double Table3DData::maxYAxis()
 double Table3DData::maxZAxis()
 {
 	return m_maxZAxis;
+}
+double Table3DData::minXAxis()
+{
+	return m_minXAxis;
+}
+
+double Table3DData::minYAxis()
+{
+	return m_minYAxis;
+}
+
+double Table3DData::minZAxis()
+{
+	return m_minZAxis;
 }
 void Table3DData::setXAxis(int index,double val)
 {
