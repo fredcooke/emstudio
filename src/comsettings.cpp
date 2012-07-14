@@ -41,6 +41,61 @@ void ComSettings::setComPort(QString port)
 {
 	ui.portNameLineEdit->setText(port);
 }
+QString ComSettings::getDataLogDir()
+{
+	return ui.datalogLocationLineEdit->text();
+}
+
+bool ComSettings::getSaveDataLogs()
+{
+	return (ui.saveDataLogCheckBox->checkState() == Qt::Checked);
+}
+
+bool ComSettings::getClearDataLogs()
+{
+	return (ui.clearDataLogsCheckBox->checkState() == Qt::Checked);
+}
+
+int ComSettings::getNumLogsToSave()
+{
+	return ui.logCountSpinBox->value();
+}
+
+void ComSettings::setDataLogDir(QString dir)
+{
+	ui.datalogLocationLineEdit->setText(dir);
+}
+
+void ComSettings::setSaveDataLogs(bool save)
+{
+	if (save)
+	{
+		ui.saveDataLogCheckBox->setCheckState(Qt::Checked);
+	}
+	else
+	{
+		ui.saveDataLogCheckBox->setCheckState(Qt::Unchecked);
+	}
+}
+
+void ComSettings::setClearDataLogs(bool clear)
+{
+	if (clear)
+	{
+		ui.clearDataLogsCheckBox->setCheckState(Qt::Checked);
+	}
+	else
+	{
+		ui.clearDataLogsCheckBox->setCheckState(Qt::Unchecked);
+	}
+}
+
+void ComSettings::setNumLogsToSave(int num)
+{
+	ui.logCountSpinBox->setValue(num);
+}
+
+
 int ComSettings::getInterByteDelay()
 {
 	return ui.interByteDelaySpinBox->value();

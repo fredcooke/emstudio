@@ -272,10 +272,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_comPort = settings.value("port","/dev/ttyUSB0").toString();
 	m_comBaud = settings.value("baud",115200).toInt();
 	m_comInterByte = settings.value("interbytedelay",0).toInt();
+	m_saveLogs = settings.value("savelogs",true).toBool();
+	m_clearLogs = settings.value("clearlogs",false).toBool();
+	m_logsToKeep = settings.value("logstokeep",0).toInt();
+	m_logDirectory = settings.value("logdir",".").toString();
 	settings.endGroup();
 
 	emsComms->setBaud(m_comBaud);
 	emsComms->setPort(m_comPort);
+	emsComms->setLogDirectory(m_logDirectory);
+	emsComms->setLogsEnabled(m_saveLogs);
+
 
 	pidcount = 0;
 
@@ -954,6 +961,14 @@ void MainWindow::menu_settingsClicked()
 	ComSettings *settings = new ComSettings();
 	settings->setComPort(m_comPort);
 	settings->setBaud(m_comBaud);
+	settings->setSaveDataLogs(m_saveLogs);
+	settings->setClearDataLogs(m_clearLogs);
+	settings->setNumLogsToSave(m_logsToKeep);
+	settings->setDataLogDir(m_logDirectory);
+	//m_saveLogs = settings.value("savelogs",true).toBool();
+	//m_clearLogs = settings.value("clearlogs",false).toBool();
+	//m_logsToKeep = settings.value("logstokeep",0).toInt();
+	//m_logDirectory = settings.value("logdir",".").toString();
 	connect(settings,SIGNAL(saveClicked()),this,SLOT(settingsSaveClicked()));
 	connect(settings,SIGNAL(cancelClicked()),this,SLOT(settingsCancelClicked()));
 	QMdiSubWindow *win = ui.mdiArea->addSubWindow(settings);
@@ -986,6 +1001,10 @@ void MainWindow::settingsSaveClicked()
 	m_comBaud = comSettingsWidget->getBaud();
 	m_comPort = comSettingsWidget->getComPort();
 	m_comInterByte = comSettingsWidget->getInterByteDelay();
+	m_saveLogs = comSettingsWidget->getSaveDataLogs();
+	m_clearLogs = comSettingsWidget->getClearDataLogs();
+	m_logsToKeep = comSettingsWidget->getNumLogsToSave();
+	m_logDirectory = comSettingsWidget->getDataLogDir();
 	/*if (!subwin)
 	{
 		subwin->deleteLater();
@@ -996,6 +1015,14 @@ void MainWindow::settingsSaveClicked()
 	settings.setValue("port",m_comPort);
 	settings.setValue("baud",m_comBaud);
 	settings.setValue("interbytedelay",m_comInterByte);
+	settings.setValue("savelogs",m_saveLogs);
+	settings.setValue("clearlogs",m_clearLogs);
+	settings.setValue("logstokeep",m_logsToKeep);
+	settings.setValue("logdir",m_logDirectory);
+	/*m_saveLogs = settings.value("savelogs",true).toBool();
+	m_clearLogs = settings.value("clearlogs",false).toBool();
+	m_logsToKeep = settings.value("logstokeep",0).toInt();
+	m_logDirectory = settings.value("logdir",".").toString();*/
 	settings.endGroup();
 	QMdiSubWindow *subwin = qobject_cast<QMdiSubWindow*>(comSettingsWidget->parent());
 	ui.mdiArea->removeSubWindow(subwin);
@@ -1259,6 +1286,8 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	emsComms->setBaud(m_comBaud);
 	emsComms->setPort(m_comPort);
+	emsComms->setLogDirectory(m_logDirectory);
+	emsComms->setLogsEnabled(m_saveLogs);
 	emsComms->start();
 	progressView->hide();
 	progressView->deleteLater();
@@ -1498,10 +1527,13 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 				//memorylocations["0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper()] = tmp;
 			}
 			//top["memory"] = memorylocations;
-			QFile *settingsFile = new QFile(m_logFileName + ".meta.json");
-			settingsFile->open(QIODevice::ReadWrite);
-			settingsFile->write(jsonSerializer.serialize(top));
-			settingsFile->close();
+			if (m_saveLogs)
+			{
+				QFile *settingsFile = new QFile(m_logFileName + ".meta.json");
+				settingsFile->open(QIODevice::ReadWrite);
+				settingsFile->write(jsonSerializer.serialize(top));
+				settingsFile->close();
+			}
 		}
 		else
 		{

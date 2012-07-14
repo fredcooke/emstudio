@@ -32,6 +32,14 @@ public:
 	QString getComPort();
 	void setComPort(QString port);
 	int getBaud();
+	QString getDataLogDir();
+	bool getSaveDataLogs();
+	bool getClearDataLogs();
+	int getNumLogsToSave();
+	void setDataLogDir(QString dir);
+	void setSaveDataLogs(bool save);
+	void setClearDataLogs(bool clear);
+	void setNumLogsToSave(int num);
 	void setBaud(int baud);
 	int getInterByteDelay();
 	void setInterByteDelay(int delay);

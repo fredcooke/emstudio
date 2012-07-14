@@ -27,10 +27,20 @@ SerialThread::SerialThread(QObject *parent) : QThread(parent)
 	m_inpacket = false;
 	m_inescape = false;
 	m_logFileName = "log";
+	m_logsEnabled = false;
 }
 void SerialThread::setPort(QString portname)
 {
 	m_portName = portname;
+}
+void SerialThread::setLogDirectory(QString dir)
+{
+	m_logDirectory = dir;
+}
+
+void SerialThread::setLogsEnabled(bool enabled)
+{
+	m_logsEnabled = enabled;
 }
 
 void SerialThread::setBaud(int baudrate)
@@ -54,13 +64,15 @@ void SerialThread::setLogFileName(QString filename)
 		{
 			m_logOutFile->close();
 		}
-		m_logInFile = new QFile(m_logFileName + ".in.bin");
-		m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-		m_logInOutFile = new QFile(m_logFileName + ".inandout.bin");
-		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-		m_logOutFile = new QFile(m_logFileName + ".out.bin");
-		m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-
+		if (m_logsEnabled)
+		{
+			m_logInFile = new QFile(m_logFileName + ".in.bin");
+			m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+			m_logInOutFile = new QFile(m_logFileName + ".inandout.bin");
+			m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+			m_logOutFile = new QFile(m_logFileName + ".out.bin");
+			m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		}
 	}
 	//m_logFile = new QFile(m_logFileName);
 }
@@ -73,12 +85,15 @@ void SerialThread::readSerial(int timeout)
 {
 	if (!m_logInFile || !m_logInOutFile)
 	{
-		m_logInFile = new QFile(m_logFileName + ".in.bin");
-		m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-		m_logInOutFile = new QFile(m_logFileName + ".inandout.bin");
-		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-		m_logOutFile = new QFile(m_logFileName + ".out.bin");
-		m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		if (m_logsEnabled)
+		{
+			m_logInFile = new QFile(m_logFileName + ".in.bin");
+			m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+			m_logInOutFile = new QFile(m_logFileName + ".inandout.bin");
+			m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+			m_logOutFile = new QFile(m_logFileName + ".out.bin");
+			m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		}
 
 	}
 	qint64 currms = QDateTime::currentMSecsSinceEpoch();
@@ -118,8 +133,11 @@ void SerialThread::readSerial(int timeout)
 		}
 		else
 		{
-			m_logInFile->write((const char*)buffer,readlen);
-			m_logInFile->flush();
+			if (m_logsEnabled)
+			{
+				m_logInFile->write((const char*)buffer,readlen);
+				m_logInFile->flush();
+			}
 		}
 		if (readlen == 0)
 		{
@@ -134,8 +152,11 @@ void SerialThread::readSerial(int timeout)
 					//Start byte in the middle of a packet
 					//Clear out the buffer and start fresh
 					m_inescape = false;
-					m_logInOutFile->write((const char*)qbuffer.data(),qbuffer.size());
-					m_logInOutFile->flush();
+					if (m_logsEnabled)
+					{
+						m_logInOutFile->write((const char*)qbuffer.data(),qbuffer.size());
+						m_logInOutFile->flush();
+					}
 					qbuffer.clear();
 				}
 				//qbuffer.append(buffer[i]);
@@ -160,10 +181,13 @@ void SerialThread::readSerial(int timeout)
 				{
 					sum += qbuffer[i];
 				}
-				m_logInOutFile->write(QByteArray().append(0xAA));
-				m_logInOutFile->write((const char*)qbuffer.data(),qbuffer.size());
-				m_logInOutFile->write(QByteArray().append(0xCC));
-				m_logInOutFile->flush();
+				if (m_logsEnabled)
+				{
+					m_logInOutFile->write(QByteArray().append(0xAA));
+					m_logInOutFile->write((const char*)qbuffer.data(),qbuffer.size());
+					m_logInOutFile->write(QByteArray().append(0xCC));
+					m_logInOutFile->flush();
+				}
 				//qDebug() << "Payload sum:" << QString::number(sum);
 				//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
 				if (sum != (unsigned char)qbuffer[qbuffer.size()-1])
@@ -242,17 +266,23 @@ int SerialThread::writePacket(QByteArray packet)
 {
 	if (!m_logInFile || !m_logInOutFile)
 	{
-		m_logInFile = new QFile(m_logFileName + ".in.log");
-		m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-		m_logInOutFile = new QFile(m_logFileName + ".inandout.log");
-		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-		m_logOutFile = new QFile(m_logFileName + ".out.log");
-		m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		if (m_logsEnabled)
+		{
+			m_logInFile = new QFile(m_logFileName + ".in.log");
+			m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+			m_logInOutFile = new QFile(m_logFileName + ".inandout.log");
+			m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+			m_logOutFile = new QFile(m_logFileName + ".out.log");
+			m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		}
 	}
-	m_logInOutFile->write(packet);
-	m_logInOutFile->flush();
-	m_logOutFile->write(packet);
-	m_logOutFile->flush();
+	if (m_logsEnabled)
+	{
+		m_logInOutFile->write(packet);
+		m_logInOutFile->flush();
+		m_logOutFile->write(packet);
+		m_logOutFile->flush();
+	}
 #ifdef Q_OS_WIN32
 	int len=0;
 	for (int i=0;i<packet.size();i++)

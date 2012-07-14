@@ -96,6 +96,8 @@ public:
 	};
 
 	FreeEmsComms(QObject *parent = 0);
+	void setLogsEnabled(bool enabled);
+	void setLogDirectory(QString dir);
 	void setPort(QString portname);
 	void setBaud(int baudrate);
 	void setLogFileName(QString filename);

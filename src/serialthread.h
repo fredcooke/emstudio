@@ -40,6 +40,8 @@ public:
     SerialThread(QObject *parent=0);
     void setLogFileName(QString filename);
     void setPort(QString portname);
+    void setLogDirectory(QString dir);
+    void setLogsEnabled(bool enabled);
     void setBaud(int baudrate);
     int openPort(QString portName,int baudrate);
     void closePort();
@@ -50,6 +52,8 @@ public:
     int bufferSize() { return m_queuedMessages.size(); }
     void setInterByteSendDelay(int milliseconds);
 private:
+    bool m_logsEnabled;
+    QString m_logDirectory;
     bool m_inpacket;
     bool m_inescape;
     int m_interByteSendDelay;

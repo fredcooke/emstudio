@@ -128,6 +128,10 @@ private:
 	QString m_comPort;
 	int m_comBaud;
 	int m_comInterByte;
+	bool m_saveLogs;
+	bool m_clearLogs;
+	int m_logsToKeep;
+	QString m_logDirectory;
 	QString m_firmwareVersion;
 	QString m_interfaceVersion;
 	QFile *logfile;

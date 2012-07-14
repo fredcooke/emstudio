@@ -26,7 +26,6 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 	qRegisterMetaType<QList<FreeEmsComms::LocationIdFlags> >("QList<FreeEmsComms::LocationIdFlags>");
 	serialThread = new SerialThread(this);
 	connect(serialThread,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
-
 	logLoader = new LogLoader(this);
 	connect(logLoader,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
 	m_waitingForResponse = false;
@@ -77,6 +76,15 @@ void FreeEmsComms::loadLog(QString filename)
 void FreeEmsComms::playLog()
 {
 	logLoader->start();
+}
+void FreeEmsComms::setLogsEnabled(bool enabled)
+{
+	serialThread->setLogsEnabled(enabled);
+}
+
+void FreeEmsComms::setLogDirectory(QString dir)
+{
+	serialThread->setLogDirectory(dir);
 }
 
 void FreeEmsComms::setPort(QString portname)
