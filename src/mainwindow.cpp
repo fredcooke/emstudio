@@ -426,8 +426,14 @@ void MainWindow::tableview2d_reloadTableData(unsigned short locationid)
 		TableView2D *table = qobject_cast<TableView2D*>(sender());
 		if (table)
 		{
-			table->passData(locationid,getLocalFlashBlock(locationid),0);
-			emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
+			for (int j=0;j<m_table2DMetaData.size();j++)
+			{
+				if (m_table2DMetaData[j].locationId == locationid)
+				{
+					table->passData(locationid,getLocalFlashBlock(locationid),0,m_table2DMetaData[j]);
+					emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
+				}
+			}
 		}
 	}
 }
@@ -494,7 +500,13 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 			{
 				if (type == 1)
 				{
-					qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
+					for (int j=0;j<m_table2DMetaData.size();j++)
+					{
+						if (m_table2DMetaData[j].locationId == locid)
+						{
+							qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0,m_table2DMetaData[j]);
+						}
+					}
 				}
 				else if (type == 3)
 				{
@@ -525,7 +537,13 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				{
 					qDebug() << "Creating new table view for location: 0x" << QString::number(locid,16).toUpper();
 					TableView2D *view = new TableView2D();
-					view->passData(locid,m_ramMemoryList[i]->data(),0);
+					for (int j=0;j<m_table2DMetaData.size();j++)
+					{
+						if (m_table2DMetaData[j].locationId == locid)
+						{
+							view->passData(locid,m_ramMemoryList[i]->data(),0,m_table2DMetaData[j]);
+						}
+					}
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 					//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
@@ -588,7 +606,13 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 			{
 				if (type == 1)
 				{
-					qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
+					for (int j=0;j<m_table2DMetaData.size();j++)
+					{
+						if (m_table2DMetaData[j].locationId == locid)
+						{
+							qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0,m_table2DMetaData[j]);
+						}
+					}
 				}
 				else if (type == 3)
 				{
@@ -614,7 +638,13 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				if (type == 1)
 				{
 					TableView2D *view = new TableView2D();
-					view->passData(locid,m_flashMemoryList[i]->data(),0);
+					for (int j=0;j<m_table2DMetaData.size();j++)
+					{
+						if (m_table2DMetaData[j].locationId == locid)
+						{
+							view->passData(locid,m_flashMemoryList[i]->data(),0,m_table2DMetaData[j]);
+						}
+					}
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
@@ -1556,7 +1586,13 @@ void MainWindow::updateDataWindows(unsigned short locationid)
 			TableView2D *tableview = qobject_cast<TableView2D*>(m_rawDataView[locationid]);
 			if (tableview)
 			{
-				tableview->passData(locationid,getLocalRamBlock(locationid),0);
+				for (int j=0;j<m_table2DMetaData.size();j++)
+				{
+					if (m_table2DMetaData[j].locationId == locationid)
+					{
+						tableview->passData(locationid,getLocalRamBlock(locationid),0,m_table2DMetaData[j]);
+					}
+				}
 			}
 			else
 			{

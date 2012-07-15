@@ -22,24 +22,35 @@
 #include <QString>
 #include <QList>
 #include <QByteArray>
-
-class Table2DData : public QObject
+#include "tabledata.h"
+#include "headers.h"
+class Table2DData : public TableData
 {
 	Q_OBJECT
 public:
 	Table2DData();
-	Table2DData(unsigned short locationid,QByteArray payload);
-	void setData(unsigned short locationid,QByteArray payload);
-	QByteArray data();
-	QList<unsigned short> axis();
-	QList<unsigned short> values();
+	Table2DData(unsigned short locationid,QByteArray payload,Table2DMetaData metadata);
+	void setData(unsigned short locationid,QByteArray payload,Table2DMetaData metadata);
+	//QByteArray data();
+	double maxXAxis();
+	double maxYAxis();
+	double minXAxis();
+	double minYAxis();
+	QList<double> axis();
+	QList<double> values();
 	int columns();
 	int rows();
-	void setCell(int row, int column,unsigned short newval);
+	void setCell(int row, int column,double newval);
 private:
+	double m_maxXAxis;
+	double m_maxYAxis;
+	double m_minXAxis;
+	double m_minYAxis;
+
+	Table2DMetaData m_metaData;
 	unsigned short m_locationId;
-	QList<unsigned short> m_axis;
-	QList<unsigned short> m_values;
+	QList<double> m_axis;
+	QList<double> m_values;
 	QString axisLabel;
 	QString valuesLabel;
 signals:

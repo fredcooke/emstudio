@@ -118,57 +118,25 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 }
 void TableView3D::tableCellChanged(int row,int column)
 {
-
+	if (row == -1 || column == -1)
+	{
+		qDebug() << "Negative array index! Should be unreachable code! FIXME!";
+		return;
+	}
+	if (row >= ui.tableWidget->rowCount() || column >= ui.tableWidget->columnCount())
+	{
+		qDebug() << "Larger than life, should be unreachable code! FIXME!";
+		return;
+	}
 	// Ignore bottom right corner if the disallow on editing fails
 	if (row == ui.tableWidget->rowCount()-1 && column == 0)
 	{
 		qDebug() << "This should not happen! Bottom right corner ignored!";
 		return;
 	}
-
-	if (row == -1 || column == -1)
-	{
-		qDebug() << "Negative array index! Should be unreachable code! FIXME!";
-		return;
-	}
-
-	if (row >= ui.tableWidget->rowCount() || column >= ui.tableWidget->columnCount())
-	{
-		qDebug() << "Larger than life, should be unreachable code! FIXME!";
-		return;
-	}
-
-	bool conversionOk = false; // Note, value of this is irrelevant, overwritten during call in either case.
+	bool conversionOk = false; // Note, value of this is irrelevant, overwritten during call in either case, but throws a compiler error if not set.
 	double tempValue = ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
-
-	//qDebug() << "New Double value:" << tempValue;
-
 	double oldValue = tempValue;
-	//unsigned short newTempValue=0;
-
-	//Convert tempValue back to a proper unsigned short
-	/*for (int i=m_metaData.zAxisCalc.size()-1;i>=0;i--)
-	{
-		if (m_metaData.zAxisCalc[i].first == "add")
-		{
-			tempValue -= m_metaData.zAxisCalc[i].second;
-		}
-		else if (m_metaData.zAxisCalc[i].first == "sub")
-		{
-			tempValue += m_metaData.zAxisCalc[i].second;
-		}
-		else if (m_metaData.zAxisCalc[i].first == "mult")
-		{
-			tempValue /= m_metaData.zAxisCalc[i].second;
-		}
-		else if (m_metaData.zAxisCalc[i].first == "div")
-		{
-			tempValue *= m_metaData.zAxisCalc[i].second;
-		}
-	}*/
-	//newTempValue = tempValue;
-
-
 	if (!conversionOk)
 	{
 		QMessageBox::information(0,"Error","Value entered is not a number!");

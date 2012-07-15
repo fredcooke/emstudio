@@ -25,6 +25,8 @@
 #include "ui_tableview2d.h"
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+#include "headers.h"
+
 class TableView2D : public QWidget
 {
 	Q_OBJECT
@@ -32,16 +34,18 @@ class TableView2D : public QWidget
 public:
 	explicit TableView2D(QWidget *parent = 0);
 	~TableView2D();
-	void passData(unsigned short locationid,QByteArray data,int physicallocation);
+	void passData(unsigned short locationid,QByteArray data,int physicallocation,Table2DMetaData metadata);
 	//void passData(unsigned short locationid,Table2DData data);
 private:
 	Table2DData *tableData;
+	void setSilentValue(int row,int column,QString value);
+	Table2DMetaData m_metaData;
 	QwtPlotCurve *curve;
 	QVector<QPointF> samples;
 	Ui::TableView2D ui;
 	unsigned short m_locationid;
 	int m_physicalid;
-	unsigned short currentvalue;
+	double currentvalue;
 protected:
 	void resizeEvent(QResizeEvent *evt);
 private slots:

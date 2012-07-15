@@ -56,7 +56,7 @@ void TableView2D::tableCurrentCellChanged(int currentrow,int currentcolumn,int p
 	{
 		return;
 	}
-	currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toInt();
+	currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toDouble();
 }
 
 void TableView2D::loadClicked()
@@ -68,50 +68,84 @@ void TableView2D::tableCellChanged(int row,int column)
 {
 	if (row == -1 || column == -1)
 	{
+		qDebug() << "Negative array index! Should be unreachable code! FIXME!";
 		return;
 	}
 	if (row >= ui.tableWidget->rowCount() || column >= ui.tableWidget->columnCount())
 	{
+		qDebug() << "Larger than life, should be unreachable code! FIXME!";
 		return;
 	}
-	bool ok = false;
-	if (ui.tableWidget->item(row,column)->text().toInt(&ok) == currentvalue)
-	{
-		return;
-	}
-	if (ui.tableWidget->item(row,column)->text().toInt(&ok) > 65535)
-	{
-		QMessageBox::information(0,"Error",QString("Value entered too large! Value range 0-65535. Entered value:") + ui.tableWidget->item(row,column)->text());
-		ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-		return;
-	}
-	else if (ok == false)
+	bool conversionOk = false;
+	double tempValue=ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
+	double oldValue = tempValue;
+	if (!conversionOk)
 	{
 		QMessageBox::information(0,"Error","Value entered is not a number!");
-		ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+		setSilentValue(row,column,QString::number(currentvalue,'f',2));
+		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 		return;
 	}
+	//qDebug() << "New Value:" << tempValue;
+	setSilentValue(row,column,QString::number(tempValue,'f',2));
+	tempValue = ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
+	//qDebug() << "Brand New Value:" << tempValue;
+	//New value has been accepted. Let's write it.
 	if (samples.size() <= column)
 	{
 		return;
 	}
-	unsigned short newval = ui.tableWidget->item(row,column)->text().toInt();
-	currentvalue = newval;
+	//unsigned short newval = ui.tableWidget->item(row,column)->text().toInt();
+	//currentvalue = newval;
 	if (row == 0)
 	{
+		if (tempValue > tableData->maxXAxis())
+		{
+			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			return;
+		}
+		else if (tempValue < tableData->minXAxis())
+		{
+			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			return;
+		}
+
+		currentvalue = oldValue;
+		//tableData->setXAxis(column-1,currentvalue);
+
+
 		samples.replace(column,QPointF(ui.tableWidget->item(row,column)->text().toInt(),samples.at(column).y()));
 		curve->setSamples(samples);
 		ui.plot->replot();
 	}
 	else if (row == 1)
 	{
+		if (tempValue > tableData->maxXAxis())
+		{
+			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			return;
+		}
+		else if (tempValue < tableData->minXAxis())
+		{
+			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			return;
+		}
+		currentvalue = oldValue;
 		samples.replace(column,QPointF(samples.at(column).x(),ui.tableWidget->item(row,column)->text().toInt()));
 		curve->setSamples(samples);
 		ui.plot->replot();
 	}
 	//New value has been accepted. Let's write it.
-	tableData->setCell(row,column,newval); //This will emit saveSingleData
-	ui.tableWidget->resizeColumnsToContents();
+	tableData->setCell(row,column,oldValue); //This will emit saveSingleData
+	//ui.tableWidget->resizeColumnsToContents();
 }
 void TableView2D::resizeEvent(QResizeEvent *evt)
 {
@@ -120,14 +154,23 @@ void TableView2D::resizeEvent(QResizeEvent *evt)
 		ui.tableWidget->setColumnWidth(i,(ui.tableWidget->width() / ui.tableWidget->columnCount())-1);
 	}*/
 }
-
-void TableView2D::passData(unsigned short locationid,QByteArray rawdata,int physicallocation)
+void TableView2D::setSilentValue(int row,int column,QString value)
 {
+	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+	ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+	ui.tableWidget->item(row,column)->setText(value);
+	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
+}
+
+void TableView2D::passData(unsigned short locationid,QByteArray rawdata,int physicallocation,Table2DMetaData metadata)
+{
+	m_metaData = metadata;
 	if (tableData)
 	{
 		tableData->deleteLater();
 	}
-	tableData = new Table2DData(locationid,rawdata);
+	tableData = new Table2DData(locationid,rawdata,m_metaData);
 	connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	qDebug() << "TableView2D::passData" << "0x" + QString::number(locationid,16).toUpper();
 	samples.clear();

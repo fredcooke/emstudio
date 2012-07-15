@@ -33,7 +33,7 @@
   "locationid" : "0x0100",
   "type" : "2D",
   "xtitle" : "volts",
-  "xcalc" : { "div" : "2.0"},
+  "xcalc" : { "div" : "1000.0"},
   "ytitle" : "pw",
   "ycalc" : {"div" : "1250.0"}
  },
@@ -41,7 +41,7 @@
   "locationid" : "0x0102",
   "type" : "2D",
   "xtitle" : "volts",
-  "xcalc" : { "div" : "2.0"},
+  "xcalc" : { "div" : "1000.0"},
   "ytitle" : "pw",
   "ycalc" : { "div" : "1250.0"}
  },
@@ -49,7 +49,7 @@
   "locationid" : "0x0108",
   "type" : "2D",
   "xtitle" : "temp",
-  "xcalc" : { "div" : "2.0"},
+  "xcalc" : { "div" : "100.0", "sub" : "273.15" },
   "ytitle" : "pw",
   "ycalc" : { "div" : "1250.0"}
  },
@@ -57,7 +57,7 @@
   "locationid" : "0x010A",
   "type" : "2D",
   "xtitle" : "temp",
-  "xcalc" : { "div" : "2.0"},
+  "xcalc" : { "div" : "100.0", "sub" : "273.15" },
   "ytitle" : "enrich",
   "ycalc" : { "div" : "163.84"}
  }
