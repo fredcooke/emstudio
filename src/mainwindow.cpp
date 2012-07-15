@@ -537,11 +537,13 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				{
 					qDebug() << "Creating new table view for location: 0x" << QString::number(locid,16).toUpper();
 					TableView2D *view = new TableView2D();
+					QString title;
 					for (int j=0;j<m_table2DMetaData.size();j++)
 					{
 						if (m_table2DMetaData[j].locationId == locid)
 						{
 							view->passData(locid,m_ramMemoryList[i]->data(),0,m_table2DMetaData[j]);
+							title = m_table2DMetaData[j].tableTitle;
 						}
 					}
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
@@ -549,7 +551,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 					connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
+					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
 					win->setGeometry(view->geometry());
 					m_rawDataView[locid] = view;
 					win->show();
@@ -559,11 +561,13 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				else if (type == 3)
 				{
 					TableView3D *view = new TableView3D();
+					QString title;
 					for (int j=0;j<m_table3DMetaData.size();j++)
 					{
 						if (m_table3DMetaData[j].locationId == locid)
 						{
 							view->passData(locid,m_ramMemoryList[i]->data(),0,m_table3DMetaData[j]);
+							title = m_table3DMetaData[j].tableTitle;
 						}
 					}
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
@@ -572,7 +576,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
 
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
+					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
 					win->setGeometry(view->geometry());
 					m_rawDataView[locid] = view;
 					win->show();
