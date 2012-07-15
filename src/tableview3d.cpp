@@ -42,6 +42,11 @@ void TableView3D::loadClicked()
 {
 	emit reloadTableData(m_locationId);
 }
+void TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation)
+{
+	passData(locationid,data,physicallocation,Table3DMetaData());
+}
+
 void TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation,Table3DMetaData metadata)
 {
 	Q_UNUSED(physicallocation)

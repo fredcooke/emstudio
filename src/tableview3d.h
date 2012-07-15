@@ -32,6 +32,7 @@ public:
 	explicit TableView3D(QWidget *parent = 0);
 	~TableView3D();
 	void passData(unsigned short locationid,QByteArray data,int physicallocation,Table3DMetaData metadata);
+	void passData(unsigned short locationid,QByteArray data,int physicallocation);
 private:
 	Table3DData *tableData;
 	unsigned short m_locationId;

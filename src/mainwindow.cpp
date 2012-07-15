@@ -432,8 +432,11 @@ void MainWindow::tableview2d_reloadTableData(unsigned short locationid)
 				{
 					table->passData(locationid,getLocalFlashBlock(locationid),0,m_table2DMetaData[j]);
 					emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
+					return;
 				}
 			}
+			table->passData(locationid,getLocalFlashBlock(locationid),0);
+			emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
 		}
 	}
 }
@@ -500,28 +503,39 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 			{
 				if (type == 1)
 				{
+					bool found = false;
 					for (int j=0;j<m_table2DMetaData.size();j++)
 					{
 						if (m_table2DMetaData[j].locationId == locid)
 						{
+							found = true;
 							qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0,m_table2DMetaData[j]);
 						}
+					}
+					if (!found)
+					{
+						qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
 					}
 				}
 				else if (type == 3)
 				{
+					bool found = false;
 					for (int j=0;j<m_table3DMetaData.size();j++)
 					{
 						if (m_table3DMetaData[j].locationId == locid)
 						{
+							found = true;
 							qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0,m_table3DMetaData[j]);
 						}
+					}
+					if (!found)
+					{
+						qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
 					}
 
 				}
 				else
 				{
-
 					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_ramMemoryList[i]->data(),true);
 				}
 				m_rawDataView[locid]->show();
@@ -538,13 +552,19 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					qDebug() << "Creating new table view for location: 0x" << QString::number(locid,16).toUpper();
 					TableView2D *view = new TableView2D();
 					QString title;
+					bool found = false;
 					for (int j=0;j<m_table2DMetaData.size();j++)
 					{
 						if (m_table2DMetaData[j].locationId == locid)
 						{
+							found = true;
 							view->passData(locid,m_ramMemoryList[i]->data(),0,m_table2DMetaData[j]);
 							title = m_table2DMetaData[j].tableTitle;
 						}
+					}
+					if (!found)
+					{
+						view->passData(locid,m_ramMemoryList[i]->data(),0);
 					}
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 					//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
@@ -562,13 +582,19 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				{
 					TableView3D *view = new TableView3D();
 					QString title;
+					bool found = false;
 					for (int j=0;j<m_table3DMetaData.size();j++)
 					{
 						if (m_table3DMetaData[j].locationId == locid)
 						{
+							found = true;
 							view->passData(locid,m_ramMemoryList[i]->data(),0,m_table3DMetaData[j]);
 							title = m_table3DMetaData[j].tableTitle;
 						}
+					}
+					if (!found)
+					{
+						view->passData(locid,m_ramMemoryList[i]->data(),0);
 					}
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
@@ -610,22 +636,34 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 			{
 				if (type == 1)
 				{
+					bool found = false;
 					for (int j=0;j<m_table2DMetaData.size();j++)
 					{
 						if (m_table2DMetaData[j].locationId == locid)
 						{
+							found = true;
 							qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0,m_table2DMetaData[j]);
 						}
+					}
+					if (!found)
+					{
+						qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
 					}
 				}
 				else if (type == 3)
 				{
+					bool found = false;
 					for (int j=0;j<m_table3DMetaData.size();j++)
 					{
 						if (m_table3DMetaData[j].locationId == locid)
 						{
+							found = true;
 							qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0,m_table3DMetaData[j]);
 						}
+					}
+					if (!found)
+					{
+						qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
 					}
 				}
 				else
@@ -642,12 +680,18 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				if (type == 1)
 				{
 					TableView2D *view = new TableView2D();
+					bool found = false;
 					for (int j=0;j<m_table2DMetaData.size();j++)
 					{
 						if (m_table2DMetaData[j].locationId == locid)
 						{
+							found = true;
 							view->passData(locid,m_flashMemoryList[i]->data(),0,m_table2DMetaData[j]);
 						}
+					}
+					if (!found)
+					{
+						view->passData(locid,m_flashMemoryList[i]->data(),0);
 					}
 					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));

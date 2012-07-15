@@ -162,6 +162,10 @@ void TableView2D::setSilentValue(int row,int column,QString value)
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 }
+void TableView2D::passData(unsigned short locationid,QByteArray data,int physicallocation)
+{
+	passData(locationid,data,physicallocation,Table2DMetaData());
+}
 
 void TableView2D::passData(unsigned short locationid,QByteArray rawdata,int physicallocation,Table2DMetaData metadata)
 {
