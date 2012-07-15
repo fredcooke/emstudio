@@ -210,7 +210,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	//connect(emsComms,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
 
 	emsInfo = new EmsInfoView();
-	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,QString,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,QString,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 
 	emsInfo->setFirmwareVersion(m_firmwareVersion);
 	emsInfo->setInterfaceVersion(m_interfaceVersion);
@@ -1072,7 +1072,23 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 	Q_UNUSED(flashpage)
 	Q_UNUSED(ramaddress)
 	Q_UNUSED(flashaddress)
-
+	QString title;
+	for (int i=0;i<m_table3DMetaData.size();i++)
+	{
+		if (locationid == m_table3DMetaData[i].locationId)
+		{
+			title = m_table3DMetaData[i].tableTitle;
+		}
+	}
+	for (int i=0;i<m_table2DMetaData.size();i++)
+	{
+		if (locationid == m_table2DMetaData[i].locationId)
+		{
+			title = m_table2DMetaData[i].tableTitle;
+		}
+	}
+	qDebug() << "Found location ID info";
+	emsInfo->locationIdInfo(locationid,title,rawFlags,flags,parent,rampage,flashpage,ramaddress,flashaddress,size);
 	if (flags.contains(FreeEmsComms::BLOCK_IS_RAM) && flags.contains((FreeEmsComms::BLOCK_IS_FLASH)))
 	{
 		MemoryLocation *loc = new MemoryLocation();
@@ -1317,7 +1333,7 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
 	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
-	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,QString,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,QString,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	emsComms->setBaud(m_comBaud);
 	emsComms->setPort(m_comPort);
 	emsComms->setLogDirectory(m_logDirectory);

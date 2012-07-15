@@ -38,7 +38,7 @@ protected:
 	void closeEvent(QCloseEvent *event);
 public slots:
 	void locationInfoWidgetDoubleClicked(int row, int column);
-	void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
+	void locationIdInfo(unsigned short locationid,QString title,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 private:
 	Ui::EmsInfo ui;
 signals:
