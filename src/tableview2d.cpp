@@ -144,7 +144,7 @@ void TableView2D::tableCellChanged(int row,int column)
 		ui.plot->replot();
 	}
 	//New value has been accepted. Let's write it.
-	tableData->setCell(row,column,oldValue); //This will emit saveSingleData
+	//tableData->setCell(row,column,oldValue); //This will emit saveSingleData
 	//ui.tableWidget->resizeColumnsToContents();
 }
 void TableView2D::resizeEvent(QResizeEvent *evt)
@@ -182,23 +182,24 @@ void TableView2D::passData(unsigned short locationid,QByteArray rawdata,int phys
 	for (int i=0;i<tableData->columns();i++)
 	{
 		ui.tableWidget->setColumnCount(ui.tableWidget->columnCount()+1);
-		ui.tableWidget->setItem(0,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->axis()[i])));
-		ui.tableWidget->setItem(1,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->values()[i])));
-		if (tableData->values()[i] < 65535/4)
+		ui.tableWidget->setItem(0,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->axis()[i],'f',2)));
+		ui.tableWidget->setItem(1,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->values()[i],'f',2)));
+
+		if (tableData->values()[i] < tableData->maxXAxis()/4)
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,(255*((tableData->values()[i])/(65535.0/4.0))),255));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,(255*((tableData->values()[i])/(tableData->maxXAxis()/4.0))),255));
 		}
-		else if (tableData->values()[i] < ((65535/4)*2))
+		else if (tableData->values()[i] < ((tableData->maxXAxis()/4)*2))
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((tableData->values()[i]-((65535/4.0)))/(65535.0/4.0)))));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((tableData->values()[i]-((tableData->maxXAxis()/4.0)))/(tableData->maxXAxis()/4.0)))));
 		}
-		else if (tableData->values()[i] < ((65535/4)*3))
+		else if (tableData->values()[i] < ((tableData->maxXAxis()/4)*3))
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb((255*((tableData->values()[i]-((65535/4.0)*2))/(65535.0/4.0))),255,0));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb((255*((tableData->values()[i]-((tableData->maxXAxis()/4.0)*2))/(tableData->maxXAxis()/4.0))),255,0));
 		}
 		else
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((tableData->values()[i]-((65535/4.0)*3))/(65535.0/4.0))),0));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((tableData->values()[i]-((tableData->maxXAxis()/4.0)*3))/(tableData->maxXAxis()/4.0))),0));
 		}
 		samples.append(QPointF(tableData->axis()[i],tableData->values()[i]));
 	}
