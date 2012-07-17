@@ -92,6 +92,8 @@ private:
 	QList<MemoryLocation*> m_tempMemoryList;
 	QList<Table3DMetaData> m_table3DMetaData;
 	QList<Table2DMetaData> m_table2DMetaData;
+	QList<ConfigData> m_configMetaData;
+	QList<ReadOnlyRamData> m_readOnlyMetaData;
 	QMap<unsigned short,QString> m_errorMap;
 	//RawDataView *rawData;
 	TableView *dataTables;

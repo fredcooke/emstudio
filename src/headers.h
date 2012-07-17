@@ -3,6 +3,32 @@
 #include <QPair>
 #include <QList>
 #include <QString>
+class ConfigData
+{
+public:
+	QString configTitle;
+	QString configDescription;
+	unsigned short locationId;
+	unsigned char offset;
+	unsigned char elementSize;
+	QList<QPair<QString,double> > elementCalc;
+	QString type;
+	unsigned char arraySize;
+
+};
+
+
+class ReadOnlyRamData
+{
+public:
+	QString dataTitle;
+	QString dataDescription;
+	unsigned short locationId;
+	unsigned char offset;
+	unsigned char size;
+	QList<QPair<QString,double> > calc;
+};
+
 class Table3DMetaData
 {
 public:

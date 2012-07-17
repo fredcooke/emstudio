@@ -48,6 +48,73 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 		i++;
 	}
 
+	QVariantMap ramvars = topmap["ramvars"].toMap();
+	i = ramvars.begin();
+	while (i != ramvars.end())
+	{
+		bool ok = false;
+		unsigned short locid = i.key().mid(2).toInt(&ok,16);
+		QVariantList locidmap = i.value().toList();
+		int offset = 0;
+		for (int j=0;j<locidmap.size();j++)
+		{
+			QVariantMap newlocidmap = locidmap[j].toMap();
+			ReadOnlyRamData rdata;
+			rdata.dataTitle = newlocidmap["name"].toString();
+			rdata.dataDescription = newlocidmap["title"].toString();
+			rdata.locationId = locid;
+			rdata.offset = offset;
+			rdata.size = newlocidmap["size"].toInt();
+			offset += rdata.size;
+			m_readOnlyMetaData.append(rdata);
+		}
+		/*QVariantMap::iterator j = locidmap.begin();
+		while (j != locidmap.end())
+		{
+			if (j.key() == "title")
+			{
+				QString title = j.value().toString();
+				qDebug() << "Location title:" << title;
+			}
+			else
+			{
+				qDebug() << j.key();
+				QVariantMap valuemap = j.value().toMap();
+				if (valuemap.contains("type"))
+				{
+					ConfigData cdata;
+					cdata.configDescription = valuemap["title"].toString();
+					cdata.configTitle = j.key();
+					cdata.elementSize = valuemap["size"].toInt();
+					cdata.locationId = locid;
+					cdata.offset = valuemap["offset"].toInt();
+					cdata.type = valuemap["type"].toString();
+					QVariantMap calcmap = valuemap["calc"].toMap();
+					QList<QPair<QString,double> > calclist;
+					QVariantMap::iterator k = calcmap.begin();
+					while (k != calcmap.end())
+					{
+						calclist.append(QPair<QString,double>(k.key(),k.value().toDouble()));
+						k++;
+					}
+					cdata.elementCalc = calclist;
+					if (valuemap["type"] == "value")
+					{
+
+					}
+					else if (valuemap["type"] == "array")
+					{
+						cdata.arraySize = valuemap["arraysize"].toInt();
+					}
+					m_configMetaData.append(cdata);
+				}
+
+			}
+			j++;
+		}*/
+		i++;
+	}
+	qDebug() << m_readOnlyMetaData.size() << "Ram entries found";
 	QVariantMap tables = topmap["tables"].toMap();
 	i = tables.begin();
 	while (i != tables.end())
@@ -59,36 +126,29 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 			Table3DMetaData meta;
 			QString id = tabledata["locationid"].toString();
 			QString xtitle = tabledata["xtitle"].toString();
-			QVariantMap xcalc = tabledata["xcalc"].toMap();
+			QVariantList xcalc = tabledata["xcalc"].toList();
 			QString ytitle = tabledata["ytitle"].toString();
-			QVariantMap ycalc = tabledata["ycalc"].toMap();
+			QVariantList ycalc = tabledata["ycalc"].toList();
 			QString ztitle = tabledata["ztitle"].toString();
-			QVariantMap zcalc = tabledata["zcalc"].toMap();
-			QVariantMap::iterator calci = xcalc.begin();
+			QVariantList zcalc = tabledata["zcalc"].toList();
+			//QVariantMap::iterator calci = xcalc.begin();
 			QList<QPair<QString,double> > xcalclist;
-			while (calci != xcalc.end())
+			QList<QPair<QString,double> > ycalclist;
+			QList<QPair<QString,double> > zcalclist;
+			for (int j=0;j<xcalc.size();j++)
 			{
-				xcalclist.append(QPair<QString,double>(calci.key(),calci.value().toDouble()));
-				qDebug() << "Calc:" << calci.key() << calci.value();
-				calci++;
+				qDebug() << "XCalc:" << xcalc[j].toMap()["type"].toString() << xcalc[j].toMap()["value"].toDouble();
+				xcalclist.append(QPair<QString,double>(xcalc[j].toMap()["type"].toString(),xcalc[j].toMap()["value"].toDouble()));
+			}
+			for (int j=0;j<ycalc.size();j++)
+			{
+				ycalclist.append(QPair<QString,double>(ycalc[j].toMap()["type"].toString(),ycalc[j].toMap()["value"].toDouble()));
+			}
+			for (int j=0;j<zcalc.size();j++)
+			{
+				zcalclist.append(QPair<QString,double>(zcalc[j].toMap()["type"].toString(),zcalc[j].toMap()["value"].toDouble()));
 			}
 
-			calci = ycalc.begin();
-			QList<QPair<QString,double> > ycalclist;
-			while (calci != ycalc.end())
-			{
-				ycalclist.append(QPair<QString,double>(calci.key(),calci.value().toDouble()));
-				qDebug() << "Calc:" << calci.key() << calci.value();
-				calci++;
-			}
-			calci = zcalc.begin();
-			QList<QPair<QString,double> > zcalclist;
-			while (calci != zcalc.end())
-			{
-				zcalclist.append(QPair<QString,double>(calci.key(),calci.value().toDouble()));
-				qDebug() << "Calc:" << calci.key() << calci.value();
-				calci++;
-			}
 			bool ok = false;
 			meta.locationId = id.mid(2).toInt(&ok,16);
 			meta.tableTitle = i.key();
@@ -140,6 +200,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	qDebug() << m_errorMap.keys().size() << "Error Keys Loaded";
 	qDebug() << m_table3DMetaData.size() << "3D Tables Loaded";
 	qDebug() << m_table2DMetaData.size() << "2D Tables Loaded";
+	//return;
 	m_currentRamLocationId=0;
 	//populateDataFields();
 	m_localRamDirty = false;

@@ -3,63 +3,133 @@
   "locationid" : "0x0000",
   "type" : "3D",
   "xtitle" : "rpm",
-  "xcalc" : { "div" : "2.0" },
+  "xcalc" : [{"type" : "div", "value" : "2.0"}],
   "ytitle" : "load",
-  "ycalc" : { "div" : "100.0"},
+  "ycalc" : [{"type" : "div", "value" : "100.0"}],
   "ztitle" : "VE",
-  "zcalc" : { "div" : "512.0" }
+  "zcalc" : [{"type" : "div","value" : "512.0"}]
  },
  "Lambda Table" : {
   "locationid" : "0x0006",
   "type" : "3D",
   "xtitle" : "rpm",
-  "xcalc" : { "div" : "2.0" },
+  "xcalc" : [{ "type":"div","value" : "2.0" }],
   "ytitle" : "load",
-  "ycalc" : { "div" : "100.0"},
+  "ycalc" : [{ "type":"div","value" : "100.0"}],
   "ztitle" : "Lambda",
-  "zcalc" : {"div" : "32768.0"}
+  "zcalc" : [{"type":"div","value" : "32768.0"}]
  },
  "Timing Table" : {
   "locationid" : "0x0008",
   "type" : "3D",
   "xtitle" : "rpm",
-  "xcalc" : { "div" : "2.0"},
+  "xcalc" : [{ "type":"div","value" : "2.0"}],
   "ytitle" : "load",
-  "ycalc" : { "div" : "100.0" },
+  "ycalc" : [{ "type":"div","value" : "100.0" }],
   "ztitle" : "Timing",
-  "zcalc" : { "div" : "1024.0"}
+  "zcalc" : [{ "type":"div","value" : "1024.0"}]
  },
  "Dwell VS Voltage Table" : {
   "locationid" : "0x0100",
   "type" : "2D",
   "xtitle" : "volts",
-  "xcalc" : { "div" : "1000.0"},
+  "xcalc" : [{ "type":"div","value" : "1000.0"}],
   "ytitle" : "pw",
-  "ycalc" : {"div" : "1250.0"}
+  "ycalc" : [{"type":"div","value" : "1250.0"}]
  },
  "Injector Dead Time Table" : {
   "locationid" : "0x0102",
   "type" : "2D",
   "xtitle" : "volts",
-  "xcalc" : { "div" : "1000.0"},
+  "xcalc" : [{ "type":"div","value" : "1000.0"}],
   "ytitle" : "pw",
-  "ycalc" : { "div" : "1250.0"}
+  "ycalc" : [{"type":"div","value" : "1250.0"}]
  },
  "Priming Volume Table" : {
   "locationid" : "0x0108",
   "type" : "2D",
   "xtitle" : "temp",
-  "xcalc" : { "div" : "100.0", "sub" : "273.15" },
+  "xcalc" : [{ "type":"div","value" : "100.0"}, {"type":"sub","value" : "273.15" }],
   "ytitle" : "pw",
-  "ycalc" : { "div" : "1250.0"}
+  "ycalc" : [{ "type": "div","value" : "1250.0"}]
  },
  "Engine Temp Enrichment Table" : {
   "locationid" : "0x010A",
   "type" : "2D",
   "xtitle" : "temp",
-  "xcalc" : { "div" : "100.0", "sub" : "273.15" },
+  "xcalc" : [{ "type":"div","value" : "100.0"}, {"type":"sub","value" : "273.15" }],
   "ytitle" : "enrich",
-  "ycalc" : { "div" : "163.84"}
+  "ycalc" : [{ "type":"div","value" : "163.84"}]
+ }
+},
+"ramvars" : {
+ "0xF001" : [
+ {
+   "name" : "IAT",
+   "title" : "Intake Air Temp",
+   "calc" : [{"type":"div","value" : "100.0"}],
+   "type" : "value",
+   "size" : "2"
+  },
+  {
+   "name" : "CHT",
+   "title" : "Coolant/Head Temperature",
+   "calc" : [{"type":"div","value" : "100.0"}],
+   "type" : "value",
+   "size" : "2"
+  },
+  {
+   "name" : "TPS",
+   "title" : "Throttle Position Sensor",
+   "calc" : [ {"type":"div","value" : "640.0"} ],
+   "type" : "value",
+   "size" : "2"
+  },
+  {
+   "name" : "EGO",
+   "title" : "Exhaust Gas Oxygen",
+   "calc" : [ {"type":"div","value" : "32768.0"} ],
+   "type" : "value",
+   "size" : "2"
+  }
+ ]
+},
+"config" : {
+ "0xC003" : {
+  "title" : "Scheduler Settings",
+  "anglesOfTDC" : {
+   "size" : "2",
+   "title" : "The effective TDC angle of the event in question.",
+   "type" : "array",
+   "arraysize" : "24"
+  },
+  "outputEventPinNumbers" : {
+    "size" : "1",
+    "title" : "Which of the 6 pins should be associated with this event.",
+    "type" : "array",
+    "arraysize" : "24"
+  },
+  "schedulingConfigurationBits " : {
+   "size" : "1",
+   "title" : "0 = ignition, 1 = injection",
+   "type" : "array",
+   "arraysize" : "24"
+  },
+  "decoderEngineOffset" : {
+   "calc" : { "div" : "50.0" },
+   "size" : "2",
+   "type" : "value"
+  },
+  "numberOfConfiguredOutputEvents" : {
+   "size" : "1",
+   "type" : "value",
+   "title" : "Should match the used section of the three arrays above."
+  },
+  "numberOfInjectionsPerEngineCycle" : {
+   "size" : "1",
+   "type" : "value",
+   "title" : "How much to divide the fuel pulse width by to get the per injection fuel pulse width."
+  }
  }
 },
 "errormap" : {
