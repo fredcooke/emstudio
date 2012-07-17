@@ -54,6 +54,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	{
 		bool ok = false;
 		unsigned short locid = i.key().mid(2).toInt(&ok,16);
+		m_readOnlyMetaDataMap[locid] = QList<ReadOnlyRamData>();
 		QVariantList locidmap = i.value().toList();
 		int offset = 0;
 		for (int j=0;j<locidmap.size();j++)
@@ -67,6 +68,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 			rdata.size = newlocidmap["size"].toInt();
 			offset += rdata.size;
 			m_readOnlyMetaData.append(rdata);
+			m_readOnlyMetaDataMap[locid].append(rdata);
+
 		}
 		/*QVariantMap::iterator j = locidmap.begin();
 		while (j != locidmap.end())
@@ -672,17 +675,35 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				}
 				else
 				{
-					RawDataView *view = new RawDataView();
-					view->setData(locid,m_ramMemoryList[i]->data(),true);
-					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
-					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-					win->setWindowTitle("Ram Location: 0x" + QString::number(locid,16).toUpper());
-					win->setGeometry(view->geometry());
-					m_rawDataView[locid] = view;
-					win->show();
-					QApplication::postEvent(win, new QEvent(QEvent::Show));
-					QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+					if (m_readOnlyMetaDataMap.contains(locid))
+					{
+						//m_readOnlyMetaDataMap[locid]
+						ReadOnlyRamView *view = new ReadOnlyRamView();
+						view->passData(locid,m_ramMemoryList[i]->data(),m_readOnlyMetaDataMap[locid]);
+						connect(view,SIGNAL(readRamLocation(unsigned short)),this,SLOT(reloadLocationId(unsigned short)));
+						connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+						QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+						win->setWindowTitle("Ram Location: 0x" + QString::number(locid,16).toUpper());
+						win->setGeometry(view->geometry());
+						m_rawDataView[locid] = view;
+						win->show();
+						QApplication::postEvent(win, new QEvent(QEvent::Show));
+						QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+					}
+					else
+					{
+						RawDataView *view = new RawDataView();
+						view->setData(locid,m_ramMemoryList[i]->data(),true);
+						connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+						connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+						QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+						win->setWindowTitle("Ram Location: 0x" + QString::number(locid,16).toUpper());
+						win->setGeometry(view->geometry());
+						m_rawDataView[locid] = view;
+						win->show();
+						QApplication::postEvent(win, new QEvent(QEvent::Show));
+						QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+					}
 				}
 			}
 			return;
@@ -1059,7 +1080,7 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 
 			}
 		}
-
+		updateDataWindows(locationid);
 	}
 	return;
 }
@@ -1696,6 +1717,10 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 		}
 	}
 }
+void MainWindow::reloadLocationId(unsigned short locationid)
+{
+	emsComms->retrieveBlockFromRam(locationid,0,0);
+}
 
 void MainWindow::updateDataWindows(unsigned short locationid)
 {
@@ -1735,7 +1760,15 @@ void MainWindow::updateDataWindows(unsigned short locationid)
 				}
 				else
 				{
-					qDebug() << "GUI Window open with memory location, but no valid window type found!";
+					ReadOnlyRamView *readonlyview = qobject_cast<ReadOnlyRamView*>(m_rawDataView[locationid]);
+					if (readonlyview)
+					{
+						readonlyview->passData(locationid,getLocalRamBlock(locationid),m_readOnlyMetaDataMap[locationid]);
+					}
+					else
+					{
+						qDebug() << "GUI Window open with memory location, but no valid window type found!";
+					}
 				}
 			}
 		}

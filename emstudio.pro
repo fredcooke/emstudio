@@ -53,7 +53,8 @@ SOURCES += src/main.cpp\
     src/tableview3d.cpp \
     src/interrogateprogressview.cpp \
     src/table3ddata.cpp \
-    src/tabledata.cpp
+    src/tabledata.cpp \
+    src/readonlyramview.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -85,7 +86,8 @@ HEADERS  += src/mainwindow.h \
     src/interrogateprogressview.h \
     src/table3ddata.h \
     src/headers.h \
-    src/tabledata.h
+    src/tabledata.h \
+    src/readonlyramview.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
@@ -99,7 +101,8 @@ FORMS    += src/mainwindow.ui \
     src/packetstatusview.ui \
     src/aboutview.ui \
     src/tableview3d.ui \
-    src/interrogateprogressview.ui
+    src/interrogateprogressview.ui \
+    src/readonlyramview.ui
 
 OTHER_FILES += \
     README.md

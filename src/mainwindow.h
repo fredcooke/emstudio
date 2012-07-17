@@ -41,6 +41,7 @@
 #include "memorylocation.h"
 #include "interrogateprogressview.h"
 #include "table2ddata.h"
+#include "readonlyramview.h"
 //#include "datarawview.h"
 
 
@@ -94,6 +95,7 @@ private:
 	QList<Table2DMetaData> m_table2DMetaData;
 	QList<ConfigData> m_configMetaData;
 	QList<ReadOnlyRamData> m_readOnlyMetaData;
+	QMap<unsigned short,QList<ReadOnlyRamData> > m_readOnlyMetaDataMap;
 	QMap<unsigned short,QString> m_errorMap;
 	//RawDataView *rawData;
 	TableView *dataTables;
@@ -211,6 +213,7 @@ private slots:
 	void commandFailed(int sequencenumber,unsigned short errornum);
 	void interByteDelayChanged(int num);
 	void saveFlashLocationIdBlock(unsigned short locationid,QByteArray data);
+	void reloadLocationId(unsigned short locationid);
 
 };
 
