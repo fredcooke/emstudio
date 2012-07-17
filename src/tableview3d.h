@@ -34,6 +34,7 @@ public:
 	void passData(unsigned short locationid,QByteArray data,int physicallocation,Table3DMetaData metadata);
 	void passData(unsigned short locationid,QByteArray data,int physicallocation);
 private:
+	bool metaDataValid;
 	Table3DData *tableData;
 	unsigned short m_locationId;
 	double  currentvalue;
@@ -42,6 +43,7 @@ private:
 	unsigned short m_yAxisSize;
 	Table3DMetaData m_metaData;
 	void setSilentValue(int row,int column,QString value);
+	QString formatNumber(double num);
 private slots:
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
 	void tableCellChanged(int row,int column);
