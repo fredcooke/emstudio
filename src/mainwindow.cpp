@@ -1072,9 +1072,16 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 				{
 					if (getDeviceRamBlock(locationid) != payload)
 					{
-						qDebug() << "Ram block on device does not match ram block on tuner! This should not happen!";
+						qDebug() << "Ram block on device does not match ram block on tuner! This should ONLY happen during a manual update!";
 						qDebug() << "Tuner ram size:" << m_deviceRamMemoryList[i]->data().size();
 						m_deviceRamMemoryList[i]->setData(payload);
+						for (int k=0;k<m_ramMemoryList.size();k++)
+						{
+							if (m_ramMemoryList[k]->locationid == locationid)
+							{
+								m_ramMemoryList[k]->setData(payload);
+							}
+						}
 					}
 				}
 
