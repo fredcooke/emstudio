@@ -215,7 +215,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionConnect,SIGNAL(triggered()),this,SLOT(menu_connectClicked()));
 	connect(ui.actionDisconnect,SIGNAL(triggered()),this,SLOT(menu_disconnectClicked()));
 	connect(ui.actionEMS_Info,SIGNAL(triggered()),this,SLOT(menu_windows_EmsInfoClicked()));
-	connect(ui.actionGauges,SIGNAL(triggered()),this,SLOT(menu_windows_GaugateesClicked()));
+	connect(ui.actionGauges,SIGNAL(triggered()),this,SLOT(menu_windows_GaugesClicked()));
 	connect(ui.actionTables,SIGNAL(triggered()),this,SLOT(menu_windows_TablesClicked()));
 	connect(ui.actionFlags,SIGNAL(triggered()),this,SLOT(menu_windows_FlagsClicked()));
 	connect(ui.actionExit_3,SIGNAL(triggered()),this,SLOT(close()));
