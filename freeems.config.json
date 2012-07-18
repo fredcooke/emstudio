@@ -60,6 +60,14 @@
   "xcalc" : [{ "type":"div","value" : "100.0"}, {"type":"sub","value" : "273.15" }],
   "ytitle" : "enrich",
   "ycalc" : [{ "type":"div","value" : "163.84"}]
+ },
+ "RPM Based Dwell Table" : {
+  "locationid" : "0x010C",
+  "type" : "2D",
+  "xtitle" : "RPM",
+  "xcalc" : [{ "type":"div","value" : "2.0"}],
+  "ytitle" : "Dwell (ms)",
+  "ycalc" : [{ "type":"div","value" : "1250.0"}]
  }
 },
 "ramvars" : {
