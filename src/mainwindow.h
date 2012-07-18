@@ -76,6 +76,8 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
+	void setDevice(QString dev);
+	void connectToEms();
 private:
 	Interrogation emsinfo;
 	unsigned short m_currentRamLocationId;
@@ -160,6 +162,7 @@ private:
 	QList<int> m_locIdMsgList;
 	QList<int> m_locIdInfoMsgList;
 	void checkRamFlashSync();
+
 private slots:
 	void emsOperatingSystem(QString os);
 	void emsDecoderName(QString name);
@@ -213,7 +216,8 @@ private slots:
 	void commandFailed(int sequencenumber,unsigned short errornum);
 	void interByteDelayChanged(int num);
 	void saveFlashLocationIdBlock(unsigned short locationid,QByteArray data);
-	void reloadLocationId(unsigned short locationid);
+	void retrieveRamLocationId(unsigned short locationid);
+	void retrieveFlashLocationId(unsigned short locationid);
 
 };
 

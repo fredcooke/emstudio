@@ -360,12 +360,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	statusBar()->addWidget(ui.ppsLabel);
 	statusBar()->addWidget(ui.statusLabel);
-	emsComms->start();
+
 
 	logfile = new QFile("myoutput.log");
 	logfile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 
-	menu_connectClicked(); //Connect on start.
+
 
 	/*QFile file("log.inandout.log");
 	file.open(QIODevice::ReadOnly);
@@ -481,8 +481,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_rawDataView[0xABCD] = view;
 	win->show();
 	win->raise();*/
-
 }
+void MainWindow::setDevice(QString dev)
+{
+	m_comPort = dev;
+	emsComms->setPort(dev);
+}
+
+void MainWindow::connectToEms()
+{
+	emsComms->start();
+	menu_connectClicked();
+}
+
 void MainWindow::tableview2d_reloadTableData(unsigned short locationid)
 {
 	if (hasLocalFlashBlock(locationid))
@@ -634,6 +645,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 					connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
+					connect(view,SIGNAL(reloadTableData(unsigned short)),this,SLOT(reloadLocationId(unsigned short)));
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
 					win->setGeometry(view->geometry());
@@ -1724,7 +1736,13 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 		}
 	}
 }
-void MainWindow::reloadLocationId(unsigned short locationid)
+
+void MainWindow::retrieveFlashLocationId(unsigned short locationid)
+{
+	emsComms->retrieveBlockFromFlash(locationid,0,0);
+}
+
+void MainWindow::retrieveRamLocationId(unsigned short locationid)
 {
 	emsComms->retrieveBlockFromRam(locationid,0,0);
 }

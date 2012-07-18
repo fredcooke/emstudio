@@ -17,25 +17,28 @@
 ****************************************************************************/
 #include <QtGui/QApplication>
 #include "mainwindow.h"
-#include <QVariant>
+#include <QString>
 int main(int argc, char *argv[])
 {
-
-	QVariantList v;
-	v.append((QChar)'c');
-	v.append("s");
-	v.append(1);
-
-	for (int i=0;i<v.size();i++)
-	{
-		QVariant d;
-
-		qDebug() << v[i].type();
-	}
-
-
 	QApplication a(argc, argv);
+	QString port = "";
+	if (argc > 1)
+	{
+		QString arg = QString(argv[1]);
+		if (arg.contains("="))
+		{
+			if (arg.split("=")[0] == "--dev")
+			{
+				port = arg.split("=")[1];
+			}
+		}
+	}
 	MainWindow w;
+	if (port != "")
+	{
+		w.setDevice(port);
+	}
+	w.connectToEms();
 	w.show();
 	return a.exec();
 }
