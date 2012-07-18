@@ -162,11 +162,12 @@ private:
 	QList<int> m_locIdMsgList;
 	QList<int> m_locIdInfoMsgList;
 	void checkRamFlashSync();
-
+	bool m_interrogationInProgress;
 private slots:
 	void emsOperatingSystem(QString os);
 	void emsDecoderName(QString name);
 	void emsFirmwareBuildDate(QString date);
+	void emsCommsDisconnected();
 	void emsCompilerVersion(QString version);
 	void checkSyncRequest();
 	void rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation);

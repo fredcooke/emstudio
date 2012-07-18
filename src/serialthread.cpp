@@ -28,6 +28,7 @@ SerialThread::SerialThread(QObject *parent) : QThread(parent)
 	m_inescape = false;
 	m_logFileName = "log";
 	m_logsEnabled = false;
+	m_packetErrorCount=0;
 }
 void SerialThread::setPort(QString portname)
 {
@@ -81,7 +82,7 @@ void SerialThread::setInterByteSendDelay(int milliseconds)
 	m_interByteSendDelay = milliseconds;
 }
 
-void SerialThread::readSerial(int timeout)
+int SerialThread::readSerial(int timeout)
 {
 	if (!m_logInFile || !m_logInOutFile)
 	{
@@ -158,6 +159,8 @@ void SerialThread::readSerial(int timeout)
 						m_logInOutFile->flush();
 					}
 					qbuffer.clear();
+					qDebug() << "Buffer error";
+					m_packetErrorCount++;
 				}
 				//qbuffer.append(buffer[i]);
 				//qDebug() << "Start of packet";
@@ -193,10 +196,12 @@ void SerialThread::readSerial(int timeout)
 				if (sum != (unsigned char)qbuffer[qbuffer.size()-1])
 				{
 					qDebug() << "BAD CHECKSUM!";
+					m_packetErrorCount++;
 					//return QPair<QByteArray,QByteArray>();
 				}
 				else
 				{
+					m_packetErrorCount=0;
 					m_queuedMessages.append(qbuffer.mid(0,qbuffer.length()-1));
 				}
 				//return qbuffer;
@@ -243,6 +248,7 @@ void SerialThread::readSerial(int timeout)
 					else
 					{
 						qDebug() << "Error, escaped character is not valid!:" << QString::number(buffer[i],16);
+						m_packetErrorCount++;
 					}
 					m_inescape = false;
 				}
@@ -261,6 +267,7 @@ void SerialThread::readSerial(int timeout)
 	//m_buffer.write(buffer,readlen);
 	//	m_buffer.append((const char*)buffer,readlen);
 	}
+	return m_packetErrorCount;
 }
 int SerialThread::writePacket(QByteArray packet)
 {

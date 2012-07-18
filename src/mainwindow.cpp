@@ -30,6 +30,7 @@
 #define define2string(x) define2string_p(x)
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+	m_interrogationInProgress = false;
 	qDebug() << "Loading config file freeems.config.json";
 	QFile file("freeems.config.json");
 	file.open(QIODevice::ReadOnly);
@@ -252,6 +253,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
+	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
 	connect(emsComms,SIGNAL(compilerVersion(QString)),this,SLOT(emsCompilerVersion(QString)));
@@ -478,6 +480,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	win->show();
 	win->raise();*/
 }
+void MainWindow::emsCommsDisconnected()
+{
+	ui.actionConnect->setEnabled(true);
+	ui.actionDisconnect->setEnabled(false);
+	if (progressView)
+	{
+		progressView->hide();
+		progressView->deleteLater();
+		progressView=0;
+	}
+}
+
 void MainWindow::setDevice(QString dev)
 {
 	m_comPort = dev;
@@ -1155,6 +1169,7 @@ void MainWindow::menu_settingsClicked()
 void MainWindow::menu_connectClicked()
 {
 	ui.actionConnect->setEnabled(false);
+	m_interrogationInProgress = true;
 	emsComms->connectSerial(m_comPort,m_comBaud);
 }
 
@@ -1456,6 +1471,7 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
+	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
 	connect(emsComms,SIGNAL(decoderName(QString)),this,SLOT(emsDecoderName(QString)));
@@ -1660,6 +1676,7 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 		interrogationSequenceList.removeOne(sequencenumber);
 		if (interrogationSequenceList.size() == 0)
 		{
+			m_interrogationInProgress = false;
 			progressView->hide();
 			progressView->deleteLater();
 			progressView=0;
@@ -1851,7 +1868,10 @@ void MainWindow::checkRamFlashSync()
 void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 {
 	qDebug() << "Command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
-	QMessageBox::information(0,"Command Failed","Command failed with error: " + m_errorMap[errornum]);
+	if (!m_interrogationInProgress)
+	{
+		QMessageBox::information(0,"Command Failed","Command failed with error: " + m_errorMap[errornum]);
+	}
 	bool found = false;
 	if (m_waitingForRamWriteConfirmation)
 	{

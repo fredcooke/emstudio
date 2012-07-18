@@ -46,12 +46,13 @@ public:
     int openPort(QString portName,int baudrate);
     void closePort();
     QByteArray readPacket();
-    void readSerial(int timeout);
+    int readSerial(int timeout);
     int writePacket(QByteArray packet);
     //void sendMessageForResponse(QByteArray header,QByteArray payload);
     int bufferSize() { return m_queuedMessages.size(); }
     void setInterByteSendDelay(int milliseconds);
 private:
+    unsigned int m_packetErrorCount;
     bool m_logsEnabled;
     QString m_logDirectory;
     bool m_inpacket;

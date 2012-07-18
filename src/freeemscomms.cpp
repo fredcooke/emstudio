@@ -807,7 +807,15 @@ void FreeEmsComms::run()
 		if (serialconnected)
 		{
 			//qDebug() << "Attempting to read:";
-			serialThread->readSerial(20);
+			if (serialThread->readSerial(20) > 20)
+			{
+				//1000 errors with no good packets.
+				qDebug() << "Packet read error!";
+				emit debugVerbose("SERIAL_DISCONNECT");
+				serialThread->closePort();
+				serialconnected = false;
+				emit disconnected();
+			}
 			//qDebug() << "finished attempting to read";
 		}
 		else
