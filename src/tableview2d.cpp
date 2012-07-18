@@ -115,7 +115,7 @@ void TableView2D::tableCellChanged(int row,int column)
 		}
 
 		currentvalue = oldValue;
-		//tableData->setXAxis(column-1,currentvalue);
+		//tableData->setCell(0,column,currentvalue);
 
 
 		samples.replace(column,QPointF(ui.tableWidget->item(row,column)->text().toInt(),samples.at(column).y()));
@@ -138,13 +138,14 @@ void TableView2D::tableCellChanged(int row,int column)
 			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 			return;
 		}
+		//tableData->setXAxis(column,currentvalue);
 		currentvalue = oldValue;
 		samples.replace(column,QPointF(samples.at(column).x(),ui.tableWidget->item(row,column)->text().toInt()));
 		curve->setSamples(samples);
 		ui.plot->replot();
 	}
 	//New value has been accepted. Let's write it.
-	//tableData->setCell(row,column,oldValue); //This will emit saveSingleData
+	tableData->setCell(row,column,oldValue); //This will emit saveSingleData
 	//ui.tableWidget->resizeColumnsToContents();
 }
 void TableView2D::resizeEvent(QResizeEvent *evt)

@@ -168,26 +168,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 			Table2DMetaData meta;
 			QString id = tabledata["locationid"].toString();
 			QString xtitle = tabledata["xtitle"].toString();
-			QVariantMap xcalc = tabledata["xcalc"].toMap();
+			QVariantList xcalc = tabledata["xcalc"].toList();
 			QString ytitle = tabledata["ytitle"].toString();
-			QVariantMap ycalc = tabledata["ycalc"].toMap();
+			QVariantList ycalc = tabledata["ycalc"].toList();
 
-			QVariantMap::iterator calci = xcalc.begin();
+
 			QList<QPair<QString,double> > xcalclist;
-			while (calci != xcalc.end())
-			{
-				xcalclist.append(QPair<QString,double>(calci.key(),calci.value().toDouble()));
-				qDebug() << "Calc:" << calci.key() << calci.value();
-				calci++;
-			}
-
-			calci = ycalc.begin();
 			QList<QPair<QString,double> > ycalclist;
-			while (calci != ycalc.end())
+
+			for (int j=0;j<xcalc.size();j++)
 			{
-				ycalclist.append(QPair<QString,double>(calci.key(),calci.value().toDouble()));
-				qDebug() << "Calc:" << calci.key() << calci.value();
-				calci++;
+				qDebug() << "XCalc:" << xcalc[j].toMap()["type"].toString() << xcalc[j].toMap()["value"].toDouble();
+				xcalclist.append(QPair<QString,double>(xcalc[j].toMap()["type"].toString(),xcalc[j].toMap()["value"].toDouble()));
+			}
+			for (int j=0;j<ycalc.size();j++)
+			{
+				ycalclist.append(QPair<QString,double>(ycalc[j].toMap()["type"].toString(),ycalc[j].toMap()["value"].toDouble()));
 			}
 			bool ok = false;
 			meta.locationId = id.mid(2).toInt(&ok,16);
@@ -219,7 +215,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionConnect,SIGNAL(triggered()),this,SLOT(menu_connectClicked()));
 	connect(ui.actionDisconnect,SIGNAL(triggered()),this,SLOT(menu_disconnectClicked()));
 	connect(ui.actionEMS_Info,SIGNAL(triggered()),this,SLOT(menu_windows_EmsInfoClicked()));
-	connect(ui.actionGauges,SIGNAL(triggered()),this,SLOT(menu_windows_GaugesClicked()));
+	connect(ui.actionGauges,SIGNAL(triggered()),this,SLOT(menu_windows_GaugateesClicked()));
 	connect(ui.actionTables,SIGNAL(triggered()),this,SLOT(menu_windows_TablesClicked()));
 	connect(ui.actionFlags,SIGNAL(triggered()),this,SLOT(menu_windows_FlagsClicked()));
 	connect(ui.actionExit_3,SIGNAL(triggered()),this,SLOT(close()));
@@ -645,7 +641,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 					connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
-					connect(view,SIGNAL(reloadTableData(unsigned short)),this,SLOT(reloadLocationId(unsigned short)));
+					//connect(view,SIGNAL(reloadTableData(unsigned short)),this,SLOT(reloadLocationId(unsigned short)));
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
 					win->setGeometry(view->geometry());
