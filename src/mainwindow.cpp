@@ -30,6 +30,7 @@
 #define define2string(x) define2string_p(x)
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+	progressView=0;
 	m_interrogationInProgress = false;
 	qDebug() << "Loading config file freeems.config.json";
 	QFile file("freeems.config.json");
