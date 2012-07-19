@@ -88,6 +88,12 @@ public:
 	class RequestClass
 	{
 	public:
+		RequestClass()
+		{
+			retryCount=0;
+		}
+
+		unsigned char retryCount;
 		RequestType type;
 		QList<QVariant> args;
 		QList<int> argsize;
