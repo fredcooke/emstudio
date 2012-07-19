@@ -44,44 +44,46 @@ void TableView3D::tableCurrentCellChanged(int currentrow,int currentcolumn,int p
 }
 void TableView3D::exportClicked()
 {
+	//Create a JSON file similar to MTX's yaml format.
 	QVariantMap topmap;
+	QVariantMap x;
+	QVariantMap y;
+	QVariantMap z;
+	QVariantList xlist;
+	QVariantList ylist;
+	QVariantList zlist;
+
 	topmap["3DTable"] = "";
 	topmap["title"] = m_metaData.tableTitle;
 	topmap["description"] = m_metaData.tableTitle;
-	QVariantMap x;
 	x["unit"] = m_metaData.xAxisTitle;
 	x["label"] = m_metaData.xAxisTitle;
-	QVariantList xlist;
-	for (int i=1;i<ui.tableWidget->columnCount();i++)
-	{
-		xlist.append(ui.tableWidget->item(ui.tableWidget->rowCount()-1,i)->text().toDouble());
-	}
-	x["values"] = xlist;
-	QVariantMap y;
 	y["unit"] = m_metaData.yAxisTitle;
 	y["label"] = m_metaData.yAxisTitle;
-	QVariantList ylist;
-	for (int i=0;i<ui.tableWidget->rowCount()-1;i++)
-	{
-		ylist.append(ui.tableWidget->item(i,0)->text().toDouble());
-	}
-	y["values"] = ylist;
-	QVariantMap z;
 	z["unit"] = m_metaData.zAxisTitle;
 	z["label"] = m_metaData.zAxisTitle;
-	QVariantList zlist;
+
+	for (int i=1;i<ui.tableWidget->columnCount();i++)
+	{
+		//Reformat the number to be XXXX.XX to make Fred happy.
+		double val = ui.tableWidget->item(ui.tableWidget->rowCount()-1,i)->text().toDouble();
+		xlist.append(QString::number(val,'f',2));
+	}
+	for (int i=0;i<ui.tableWidget->rowCount()-1;i++)
+	{
+		//Reformat the number to be XXXX.XX to make Fred happy.
+		double val = ui.tableWidget->item(i,0)->text().toDouble();
+		ylist.append(QString::number(val,'f',2));
+	}
 	for (int j=0;j<ui.tableWidget->rowCount()-1;j++)
 	{
 		QVariantList zrow;
-		/*for (int i=1;i<ui.tableWidget->columnCount();i++)
-		{
-			zrow.append(QString::number(j) + ":ZDATA:" + QString::number(i));
-			//zrow.append(ui.tableWidget->item(j,i)->text().toDouble());
-		}*/
 		zlist.append(QString::number(j) + ":ZROW");
 	}
+
+	y["values"] = ylist;
+	x["values"] = xlist;
 	z["values"] = zlist;
-	//topmap["X"];
 	topmap["X"] = x;
 	topmap["Y"] = y;
 	topmap["Z"] = z;
@@ -90,11 +92,15 @@ void TableView3D::exportClicked()
 	QByteArray serialized = serializer.serialize(topmap);
 
 	//This hack is to fix a QJson issue with lists in lists.
+	//This will allow for embedded lists, such as [[0,1,2,3],[4,5,6,7]],
+	//which QJson interprets (wrongly) as [0,1,2,3,4,5,6,7]
 	for (int j=0;j<ui.tableWidget->rowCount()-1;j++)
 	{
 		QString list = "[";
 		for (int i=1;i<ui.tableWidget->columnCount();i++)
 		{
+			//No need to reformat number, since we are treating it as a string and using it
+			//directly from ui.tableWidget
 			list += ui.tableWidget->item(j,i)->text() + ",";
 		}
 		list = list.mid(0,list.length()-1);
@@ -104,8 +110,14 @@ void TableView3D::exportClicked()
 	}
 	//End of hack
 
+
+	//TODO: Open a message box and allow the user to select where they want to save the file.
 	QFile file("testoutput.json");
-	file.open(QIODevice::ReadWrite | QIODevice::Truncate);
+	if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
+	{
+		qDebug() << "Unable to open file to output JSON!";
+		return;
+	}
 	file.write(serialized);
 	file.close();
 }
