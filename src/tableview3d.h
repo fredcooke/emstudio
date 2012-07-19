@@ -49,6 +49,7 @@ private slots:
 	void tableCellChanged(int row,int column);
 	void saveClicked();
 	void loadClicked();
+	void exportClicked();
 signals:
 	void saveToFlash(unsigned short locationid);
 	void reloadTableData(unsigned short locationid);

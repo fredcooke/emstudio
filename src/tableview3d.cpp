@@ -19,6 +19,8 @@
 #include "tableview3d.h"
 #include <QDebug>
 #include <QMessageBox>
+#include <QFile>
+#include <qjson/serializer.h>
 TableView3D::TableView3D(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
@@ -27,6 +29,7 @@ TableView3D::TableView3D(QWidget *parent) : QWidget(parent)
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	connect(ui.savePushButton,SIGNAL(clicked()),this,SLOT(saveClicked()));
 	connect(ui.loadPushButton,SIGNAL(clicked()),this,SLOT(loadClicked()));
+	connect(ui.exportPushButton,SIGNAL(clicked()),this,SLOT(exportClicked()));
 	metaDataValid = true;
 }
 void TableView3D::tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn)
@@ -39,6 +42,57 @@ void TableView3D::tableCurrentCellChanged(int currentrow,int currentcolumn,int p
 	}
 	currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toDouble();
 }
+void TableView3D::exportClicked()
+{
+	QVariantMap topmap;
+	topmap["3DTable"] = "";
+	topmap["title"] = m_metaData.tableTitle;
+	topmap["description"] = m_metaData.tableTitle;
+	QVariantMap x;
+	x["unit"] = m_metaData.xAxisTitle;
+	x["label"] = m_metaData.xAxisTitle;
+	QVariantList xlist;
+	for (int i=1;i<ui.tableWidget->columnCount();i++)
+	{
+		xlist.append(ui.tableWidget->item(ui.tableWidget->rowCount()-1,i)->text().toDouble());
+	}
+	x["values"] = xlist;
+	QVariantMap y;
+	y["unit"] = m_metaData.yAxisTitle;
+	y["label"] = m_metaData.yAxisTitle;
+	QVariantList ylist;
+	for (int i=0;i<ui.tableWidget->rowCount()-1;i++)
+	{
+		ylist.append(ui.tableWidget->item(i,0)->text().toDouble());
+	}
+	y["values"] = ylist;
+	QVariantMap z;
+	z["unit"] = m_metaData.zAxisTitle;
+	z["label"] = m_metaData.zAxisTitle;
+	QVariantList zlist;
+	for (int j=0;j<ui.tableWidget->rowCount()-1;j++)
+	{
+		QVariantList zrow;
+		for (int i=1;i<ui.tableWidget->columnCount();i++)
+		{
+			zrow.append(ui.tableWidget->item(j,i)->text().toDouble());
+		}
+		zlist.append(zrow);
+	}
+	z["values"] = zlist;
+	//topmap["X"];
+	topmap["X"] = x;
+	topmap["Y"] = y;
+	topmap["Z"] = z;
+
+	QJson::Serializer serializer;
+	QByteArray serialized = serializer.serialize(topmap);
+	QFile file("testoutput.json");
+	file.open(QIODevice::ReadWrite | QIODevice::Truncate);
+	file.write(serialized);
+	file.close();
+}
+
 void TableView3D::loadClicked()
 {
 	emit reloadTableData(m_locationId);
