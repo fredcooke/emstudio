@@ -826,8 +826,19 @@ void FreeEmsComms::run()
 		{
 			//5 seconds
 			qDebug() << "TIMEOUT waiting for response to payload:" << "0x" + QString::number(m_payloadWaitingForResponse,16).toUpper() << "Sequence:" << m_currentWaitingRequest.sequencenumber;
-			emit commandFailed(m_currentWaitingRequest.sequencenumber,0);
-			m_waitingForResponse = false;
+			if (m_currentWaitingRequest.retryCount >= 2)
+			{
+				qDebug() << "No retries left!";
+				emit commandFailed(m_currentWaitingRequest.sequencenumber,0);
+				m_waitingForResponse = false;
+			}
+			else
+			{
+				qDebug() << "Retrying";
+				m_waitingForResponse = false;
+				m_currentWaitingRequest.retryCount++;
+				m_threadReqList.insert(0,m_currentWaitingRequest);
+			}
 			//TODO: Requeue the command for retry.
 		}
 		while (serialThread->bufferSize() != 0)
