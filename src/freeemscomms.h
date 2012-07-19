@@ -173,6 +173,7 @@ signals:
 	void error(QString msg);
 	void commandSuccessful(int sequencenumber);
 	void commandFailed(int sequencenumber,unsigned short errornum);
+	void commandTimedOut(int sequencenumber);
 	//void updateBlockInRamFailed(int location,int offset,int size,QByteArray data);
 	//void updateBlockInRamSucceeded();
 public slots:

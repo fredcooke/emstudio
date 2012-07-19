@@ -253,6 +253,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsComms = new FreeEmsComms(this);
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
+	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
@@ -481,6 +482,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	win->show();
 	win->raise();*/
 }
+
+
 void MainWindow::emsCommsDisconnected()
 {
 	ui.actionConnect->setEnabled(true);
@@ -1483,6 +1486,7 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));
 	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
+	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
@@ -1609,7 +1613,30 @@ void MainWindow::updateRamLocation(unsigned short locationid)
 	//qDebug() << "No children for:" << "0x" + QString::number(m_currentRamLocationId,16).toUpper();
 	updateDataWindows(locationid);
 }
+void MainWindow::commandTimedOut(int sequencenumber)
+{
+	qDebug() << "Command timed out:" << QString::number(sequencenumber);
+	if (m_waitingForRamWriteConfirmation)
+	{
+		m_waitingForRamWriteConfirmation = false;
+		m_currentRamLocationId=0;
+		return;
+	}
+	if (m_waitingForFlashWriteConfirmation)
+	{
+		m_waitingForFlashWriteConfirmation = false;
+		m_currentFlashLocationId=0;
+		return;
+	}
+	if (m_interrogationInProgress)
+	{
+		//If interrogation is in progress, we need to stop, since something has gone
+		//horribly wrong.
+		interrogateProgressViewCancelClicked();
+		QMessageBox::information(0,"Error","Something has gone serious wrong, one of the commands timed out during interrogation. This should be properly investigated before continuing");
+	}
 
+}
 void MainWindow::commandSuccessful(int sequencenumber)
 {
 	qDebug() << "Command succesful:" << QString::number(sequencenumber);

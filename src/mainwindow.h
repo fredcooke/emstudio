@@ -215,6 +215,7 @@ private slots:
 	void error(QString msg);
 	void commandSuccessful(int sequencenumber);
 	void commandFailed(int sequencenumber,unsigned short errornum);
+	void commandTimedOut(int sequencenumber);
 	void interByteDelayChanged(int num);
 	void saveFlashLocationIdBlock(unsigned short locationid,QByteArray data);
 	void retrieveRamLocationId(unsigned short locationid);

@@ -829,7 +829,8 @@ void FreeEmsComms::run()
 			if (m_currentWaitingRequest.retryCount >= 2)
 			{
 				qDebug() << "No retries left!";
-				emit commandFailed(m_currentWaitingRequest.sequencenumber,0);
+				//emit commandFailed(m_currentWaitingRequest.sequencenumber,0);
+				emit commandTimedOut(m_currentWaitingRequest.sequencenumber);
 				m_waitingForResponse = false;
 			}
 			else
