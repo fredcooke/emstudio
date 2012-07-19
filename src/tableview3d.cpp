@@ -73,11 +73,12 @@ void TableView3D::exportClicked()
 	for (int j=0;j<ui.tableWidget->rowCount()-1;j++)
 	{
 		QVariantList zrow;
-		for (int i=1;i<ui.tableWidget->columnCount();i++)
+		/*for (int i=1;i<ui.tableWidget->columnCount();i++)
 		{
-			zrow.append(ui.tableWidget->item(j,i)->text().toDouble());
-		}
-		zlist.append(zrow);
+			zrow.append(QString::number(j) + ":ZDATA:" + QString::number(i));
+			//zrow.append(ui.tableWidget->item(j,i)->text().toDouble());
+		}*/
+		zlist.append(QString::number(j) + ":ZROW");
 	}
 	z["values"] = zlist;
 	//topmap["X"];
@@ -87,6 +88,22 @@ void TableView3D::exportClicked()
 
 	QJson::Serializer serializer;
 	QByteArray serialized = serializer.serialize(topmap);
+
+	//This hack is to fix a QJson issue with lists in lists.
+	for (int j=0;j<ui.tableWidget->rowCount()-1;j++)
+	{
+		QString list = "[";
+		for (int i=1;i<ui.tableWidget->columnCount();i++)
+		{
+			list += ui.tableWidget->item(j,i)->text() + ",";
+		}
+		list = list.mid(0,list.length()-1);
+		list += "]";
+		QString before = "\"" + QString::number(j) + ":ZROW\"";
+		serialized.replace(before,list.toAscii());
+	}
+	//End of hack
+
 	QFile file("testoutput.json");
 	file.open(QIODevice::ReadWrite | QIODevice::Truncate);
 	file.write(serialized);
