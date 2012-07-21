@@ -50,6 +50,7 @@ private slots:
 	void saveClicked();
 	void loadClicked();
 	void exportClicked();
+	void exportJson(QString filename);
 signals:
 	void saveToFlash(unsigned short locationid);
 	void reloadTableData(unsigned short locationid);

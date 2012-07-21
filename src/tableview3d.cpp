@@ -20,6 +20,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFile>
+#include <QFileDialog>
 #include <qjson/serializer.h>
 TableView3D::TableView3D(QWidget *parent) : QWidget(parent)
 {
@@ -42,7 +43,7 @@ void TableView3D::tableCurrentCellChanged(int currentrow,int currentcolumn,int p
 	}
 	currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toDouble();
 }
-void TableView3D::exportClicked()
+void TableView3D::exportJson(QString filename)
 {
 	//Create a JSON file similar to MTX's yaml format.
 	QVariantMap topmap;
@@ -96,7 +97,7 @@ void TableView3D::exportClicked()
 	QByteArray serialized = serializer.serialize(topmap);
 
 	//TODO: Open a message box and allow the user to select where they want to save the file.
-	QFile file("testoutput.json");
+	QFile file(filename);
 	if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
 	{
 		qDebug() << "Unable to open file to output JSON!";
@@ -104,6 +105,16 @@ void TableView3D::exportClicked()
 	}
 	file.write(serialized);
 	file.close();
+}
+
+void TableView3D::exportClicked()
+{
+	QString filename = QFileDialog::getOpenFileName(this,"Save Json File",".","Json Files (*.json)");
+	if (filename == "")
+	{
+		return;
+	}
+	exportJson(filename);
 }
 
 void TableView3D::loadClicked()
