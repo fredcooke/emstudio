@@ -1444,6 +1444,7 @@ void MainWindow::firmwareVersion(QString version)
 {
 	//ui.firmwareVersionLineEdit->setText(version);
 	m_firmwareVersion = version;
+	this->setWindowTitle(QString("EMStudio ") + QString(define2string(GIT_COMMIT)) + " Firmware: " + version);
 	if (emsInfo)
 	{
 		emsInfo->setFirmwareVersion(version);
