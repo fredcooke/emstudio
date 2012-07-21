@@ -78,7 +78,11 @@ void TableView3D::exportClicked()
 	for (int j=0;j<ui.tableWidget->rowCount()-1;j++)
 	{
 		QVariantList zrow;
-		zlist.append(QString::number(j) + ":ZROW");
+		for (int i=1;i<ui.tableWidget->columnCount();i++)
+		{
+			zrow.append(ui.tableWidget->item(j,i)->text());
+		}
+		zlist.append((QVariant)zrow);
 	}
 
 	y["values"] = ylist;
@@ -90,26 +94,6 @@ void TableView3D::exportClicked()
 
 	QJson::Serializer serializer;
 	QByteArray serialized = serializer.serialize(topmap);
-
-	//This hack is to fix a QJson issue with lists in lists.
-	//This will allow for embedded lists, such as [[0,1,2,3],[4,5,6,7]],
-	//which QJson interprets (wrongly) as [0,1,2,3,4,5,6,7]
-	for (int j=0;j<ui.tableWidget->rowCount()-1;j++)
-	{
-		QString list = "[";
-		for (int i=1;i<ui.tableWidget->columnCount();i++)
-		{
-			//No need to reformat number, since we are treating it as a string and using it
-			//directly from ui.tableWidget
-			list += ui.tableWidget->item(j,i)->text() + ",";
-		}
-		list = list.mid(0,list.length()-1);
-		list += "]";
-		QString before = "\"" + QString::number(j) + ":ZROW\"";
-		serialized.replace(before,list.toAscii());
-	}
-	//End of hack
-
 
 	//TODO: Open a message box and allow the user to select where they want to save the file.
 	QFile file("testoutput.json");
