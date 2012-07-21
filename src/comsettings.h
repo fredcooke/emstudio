@@ -43,6 +43,8 @@ public:
 	void setBaud(int baud);
 	int getInterByteDelay();
 	void setInterByteDelay(int delay);
+private slots:
+	void browseLogFolderClicked();
 private:
 	Ui::ComSettings ui;
 signals:

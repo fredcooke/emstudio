@@ -17,13 +17,13 @@
 ****************************************************************************/
 
 #include "comsettings.h"
-
-
+#include <QFileDialog>
 ComSettings::ComSettings(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
 	connect(ui.cancelPushButton,SIGNAL(clicked()),this,SIGNAL(cancelClicked()));
 	connect(ui.savePushButton,SIGNAL(clicked()),this,SIGNAL(saveClicked()));
+	connect(ui.datalogLocationBrowseButton,SIGNAL(clicked()),this,SLOT(browseLogFolderClicked()));
 }
 
 ComSettings::~ComSettings()
@@ -33,6 +33,16 @@ void ComSettings::setInterByteDelay(int delay)
 {
 	ui.interByteDelaySpinBox->setValue(delay);
 }
+void ComSettings::browseLogFolderClicked()
+{
+	QString dir = QFileDialog::getExistingDirectory(this,"Select Log Folder",".");
+	if (dir == "")
+	{
+		return;
+	}
+	ui.datalogLocationLineEdit->setText(dir);
+}
+
 void ComSettings::setBaud(int baud)
 {
 	ui.baudRateLineEdit->setText(QString::number(baud));
