@@ -52,6 +52,7 @@ public:
     int bufferSize() { return m_queuedMessages.size(); }
     void setInterByteSendDelay(int milliseconds);
 private:
+    void openLogs();
     unsigned int m_packetErrorCount;
     bool m_logsEnabled;
     QString m_logDirectory;
