@@ -251,7 +251,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(logLoader,SIGNAL(logProgress(qlonglong,qlonglong)),this,SLOT(logProgress(qlonglong,qlonglong)));
 	*/
 	emsComms = new FreeEmsComms(this);
-	m_logFileName = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss");
+	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
 	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
