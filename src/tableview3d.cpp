@@ -109,7 +109,7 @@ void TableView3D::exportJson(QString filename)
 
 void TableView3D::exportClicked()
 {
-	QString filename = QFileDialog::getOpenFileName(this,"Save Json File",".","Json Files (*.json)");
+	QString filename = QFileDialog::getSaveFileName(this,"Save Json File",".","Json Files (*.json)");
 	if (filename == "")
 	{
 		return;
