@@ -156,8 +156,16 @@ int SerialThread::readSerial(int timeout)
 					m_inescape = false;
 					if (m_logsEnabled)
 					{
-						m_logInOutFile->write((const char*)qbuffer.data(),qbuffer.size());
+						m_logWriteMutex.lock();
+						m_logInOutFile->write(QByteArray().append(0xAA));
+						QByteArray nbuffer(qbuffer);
+						nbuffer.replace(0xBB,QByteArray().append(0xBB).append(0x44));
+						nbuffer.replace(0xAA,QByteArray().append(0xBB).append(0x55));
+						nbuffer.replace(0xCC,QByteArray().append(0xBB).append(0x33));
+						m_logInOutFile->write((const char*)nbuffer.data(),nbuffer.size());
+						m_logInOutFile->write(QByteArray().append(0xCC));
 						m_logInOutFile->flush();
+						m_logWriteMutex.unlock();
 					}
 					qbuffer.clear();
 					qDebug() << "Buffer error";
@@ -187,10 +195,16 @@ int SerialThread::readSerial(int timeout)
 				}
 				if (m_logsEnabled)
 				{
+					m_logWriteMutex.lock();
 					m_logInOutFile->write(QByteArray().append(0xAA));
-					m_logInOutFile->write((const char*)qbuffer.data(),qbuffer.size());
+					QByteArray nbuffer(qbuffer);
+					nbuffer.replace(0xBB,QByteArray().append(0xBB).append(0x44));
+					nbuffer.replace(0xAA,QByteArray().append(0xBB).append(0x55));
+					nbuffer.replace(0xCC,QByteArray().append(0xBB).append(0x33));
+					m_logInOutFile->write((const char*)nbuffer.data(),nbuffer.size());
 					m_logInOutFile->write(QByteArray().append(0xCC));
 					m_logInOutFile->flush();
+					m_logWriteMutex.unlock();
 				}
 				//qDebug() << "Payload sum:" << QString::number(sum);
 				//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
@@ -281,10 +295,12 @@ int SerialThread::writePacket(QByteArray packet)
 	}
 	if (m_logsEnabled)
 	{
+		m_logWriteMutex.lock();
 		m_logInOutFile->write(packet);
 		m_logInOutFile->flush();
 		m_logOutFile->write(packet);
 		m_logOutFile->flush();
+		m_logWriteMutex.unlock();
 	}
 #ifdef Q_OS_WIN32
 	int len=0;

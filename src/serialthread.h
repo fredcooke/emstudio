@@ -21,6 +21,7 @@
 #include <QThread>
 #include <QFile>
 #include <QDebug>
+#include <QMutex>
 #include <qglobal.h>
 #ifdef Q_OS_WIN32
 #include <windows.h>
@@ -51,6 +52,7 @@ public:
     //void sendMessageForResponse(QByteArray header,QByteArray payload);
     int bufferSize() { return m_queuedMessages.size(); }
     void setInterByteSendDelay(int milliseconds);
+    QMutex m_logWriteMutex;
 private:
     void openLogs();
     unsigned int m_packetErrorCount;
