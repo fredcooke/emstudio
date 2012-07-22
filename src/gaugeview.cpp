@@ -22,7 +22,7 @@ GaugeView::GaugeView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
 	widget = new GaugeWidget(this);
-	widget->setGeometry(0,0,1200,600);
+	widget->setGeometry(0,0,1200,700);
 	widget->show();
 
 	guiUpdateTimer = new QTimer(this);

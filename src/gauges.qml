@@ -5,7 +5,7 @@ Rectangle {
 	x:0
 	y:0
 	width: 1280
-	height: 800
+	height: 900
 	color: "black"
 
 	GaugeImage {
@@ -92,5 +92,81 @@ Rectangle {
 		Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["MAP_DURATION"] ? propertyMap["MAP_DURATION"] : 50) } }
 		m_value: (propertyMap["MAP"] ? propertyMap["MAP"] : 0)
 	}
-
+	Rectangle {
+		x:900
+		y:0
+		width:120
+		height:60
+		color:"grey"
+		Rectangle {
+			x:5
+			y:5
+			width:110
+			height:50
+			color:"black"
+			Text {
+				x:0
+				y:35
+				font.pixelSize:13
+				color:"white"
+				text: "Intake Air Temp (C)"
+			}
+			Text {
+				x:10
+				y:3
+				font.pixelSize:30
+				color:"white"
+				text: Math.round(((propertyMap["IAT"] ? propertyMap["IAT"] : "0.0")*100))/100;
+			}
+		}
+	}
+	Rectangle {
+		x:0
+		y:600
+		width:300
+		height:60
+		color:"grey"
+		Rectangle {
+			x:1
+			y:1
+			width:parent.width-2
+			height:parent.height-2
+			color:"black"
+			Text {
+				x:10
+				y:0
+				font.pixelSize:30
+				color:"white"
+				text: Math.round(((propertyMap["IAT"] ? propertyMap["IAT"] : "0.0")*100))/100;
+			}
+			Text {
+				x:0
+				y:35
+				font.pixelSize:13
+				color:"white"
+				text: "Intake Air Temp (C)"
+			}
+			Rectangle {
+				x:125
+				y:(parent.height/2)-10
+				width:parent.width-125
+				height:20
+				color:"grey"
+				Rectangle {
+					x:1
+					y:1
+					width:parent.width-2
+					height:18
+					color:"black"
+				}
+				Rectangle {
+					x:1
+					y:1
+					width:(parent.width-125 * (propertyMap["IAT"] / 655.35))
+					height:18
+					color:(propertyMap["IAT"] < 370 ? "green" : propertyMap["IAT"] < 390 ? "yellow" : propertyMap["IAT"] < 410 ? "orange" : "red")
+				}
+			}
+		}
+	}
 }
