@@ -44,6 +44,7 @@ private:
 	Table3DMetaData m_metaData;
 	void setSilentValue(int row,int column,QString value);
 	QString formatNumber(double num);
+	void resizeColumnWidths();
 private slots:
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
 	void tableCellChanged(int row,int column);
