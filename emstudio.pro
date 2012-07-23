@@ -13,16 +13,20 @@ OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
 win32 {
-INCLUDEPATH += C:/libs/qwt/include C:/libs/qjson/include
-LIBS += -LC:/libs/qwt/lib -lqwt -LC:/libs/qjson/lib -lqjson0
-DEFINES += GIT_COMMIT=$$system(\"c:/program files/git/bin/git.exe\" describe --dirty=-DEV --always)
-DEFINES += GIT_HASH=$$system(\"c:/program files/git/bin/git.exe\" log -n 1 --pretty=format:%H)
+	INCLUDEPATH += C:/libs/qwt/include C:/libs/qjson/include
+	LIBS += -LC:/libs/qwt/lib -lqwt -LC:/libs/qjson/lib -lqjson0
+	DEFINES += GIT_COMMIT=$$system(\"c:/program files/git/bin/git.exe\" describe --dirty=-DEV --always)
+	DEFINES += GIT_HASH=$$system(\"c:/program files/git/bin/git.exe\" log -n 1 --pretty=format:%H)
 }
 unix {
-LIBS += -lqwt -lqjson
-INCLUDEPATH += /usr/include/qwt
-DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
-DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+	LIBS += -lqwt -lqjson
+	INCLUDEPATH += /usr/include/qwt
+	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
+	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+}
+mac {
+	INCLUDEPATH += /opt/local/include
+	INCLUDEPATH += /opt/local/include/qwt
 }
 SOURCES += src/main.cpp\
 	src/mainwindow.cpp \
