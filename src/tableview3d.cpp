@@ -190,8 +190,8 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 			}
 		}
 	}
-	ui.tableWidget->resizeColumnsToContents();
-	//resizeColumnWidths();
+	//ui.tableWidget->resizeColumnsToContents();
+	resizeColumnWidths();
 	ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,0,new QTableWidgetItem());
 	ui.tableWidget->item(ui.tableWidget->rowCount()-1,0)->setFlags(ui.tableWidget->item(ui.tableWidget->rowCount()-1,0)->flags() & ~Qt::ItemIsEditable);
 	for (int i=0;i<selectedlist.size();i++)
@@ -222,7 +222,8 @@ void TableView3D::resizeColumnWidths()
 		{
 			if (ui.tableWidget->item(j,i))
 			{
-				unsigned int test = ui.tableWidget->fontMetrics().width(ui.tableWidget->item(j,i)->text());
+				//1.3 is required to make text show correctly
+				unsigned int test = ui.tableWidget->fontMetrics().width(ui.tableWidget->item(j,i)->text()) * 1.2;
 				if (test > max)
 				{
 					max = test;
@@ -327,8 +328,8 @@ void TableView3D::tableCellChanged(int row,int column)
 		currentvalue = oldValue;
 		tableData->setCell(ui.tableWidget->rowCount()-(row+2),column-1,currentvalue);
 	}
-	ui.tableWidget->resizeColumnsToContents();
-	//resizeColumnWidths();
+	//ui.tableWidget->resizeColumnsToContents();
+	resizeColumnWidths();
 }
 void TableView3D::setSilentValue(int row,int column,QString value)
 {

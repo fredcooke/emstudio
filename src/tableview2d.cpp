@@ -58,7 +58,29 @@ void TableView2D::tableCurrentCellChanged(int currentrow,int currentcolumn,int p
 	}
 	currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toDouble();
 }
-
+void TableView2D::resizeColumnWidths()
+{
+	unsigned int max = 0;
+	for (int i=0;i<ui.tableWidget->columnCount();i++)
+	{
+		for (int j=0;j<ui.tableWidget->rowCount();j++)
+		{
+			if (ui.tableWidget->item(j,i))
+			{
+				//1.3 is required to make text show correctly
+				unsigned int test = ui.tableWidget->fontMetrics().width(ui.tableWidget->item(j,i)->text()) * 1.3;
+				if (test > max)
+				{
+					max = test;
+				}
+			}
+		}
+	}
+	for (int i=0;i<ui.tableWidget->columnCount();i++)
+	{
+		ui.tableWidget->setColumnWidth(i,max);
+	}
+}
 void TableView2D::loadClicked()
 {
 	emit reloadTableData(m_locationid);
@@ -147,6 +169,7 @@ void TableView2D::tableCellChanged(int row,int column)
 	//New value has been accepted. Let's write it.
 	tableData->setCell(row,column,oldValue); //This will emit saveSingleData
 	//ui.tableWidget->resizeColumnsToContents();
+	resizeColumnWidths();
 }
 void TableView2D::resizeEvent(QResizeEvent *evt)
 {
@@ -154,6 +177,7 @@ void TableView2D::resizeEvent(QResizeEvent *evt)
 	{
 		ui.tableWidget->setColumnWidth(i,(ui.tableWidget->width() / ui.tableWidget->columnCount())-1);
 	}*/
+	resizeColumnWidths();
 }
 void TableView2D::setSilentValue(int row,int column,QString value)
 {
@@ -211,7 +235,8 @@ void TableView2D::passData(unsigned short locationid,QByteArray rawdata,int phys
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	curve->setSamples(samples);
 	ui.plot->replot();
-	ui.tableWidget->resizeColumnsToContents();
+	//ui.tableWidget->resizeColumnsToContents();
+	resizeColumnWidths();
 }
 
 TableView2D::~TableView2D()

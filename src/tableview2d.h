@@ -47,6 +47,7 @@ private:
 	unsigned short m_locationid;
 	int m_physicalid;
 	double currentvalue;
+	void resizeColumnWidths();
 protected:
 	void resizeEvent(QResizeEvent *evt);
 private slots:
