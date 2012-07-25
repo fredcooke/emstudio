@@ -1,0 +1,15 @@
+Source: emstudio
+Section: unknown
+Priority: extra
+Maintainer: Michael Carpenter <malcom2073@gmail.com>
+Build-Depends: debhelper (>= 8.0.0), libqt4-core (>= 4.8.0), libqt4-declarative (>= 4.8.0), libqt4-gui (>= 4.8.0), libqwt5-qt4(>=5.2.1), libqt4-opengl (>=4.8.0), libqjson0 (>=0.7.1)
+Standards-Version: 3.9.2
+Homepage: http://emstune.com
+#Vcs-Git: git://git.debian.org/collab-maint/emstudio.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/emstudio.git;a=summary
+
+Package: emstudio
+Architecture: any
+Depends: libqt4-core (>= 4.8.0), libqt4-declarative (>= 4.8.0), libqt4-gui (>= 4.8.0), libqwt5-qt4(>=5.2.1), libqt4-opengl (>=4.8.0), libqjson0 (>=0.7.1)
+Description: FreeEMS Tuning Application
+ <insert long description, indented with spaces>
