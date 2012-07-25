@@ -22,7 +22,7 @@ class DataField
 {
 public:
 	DataField();
-	DataField(QString shortname,QString description,int offset,int size,double div,double min=0,double max=0,double addoffset=0,bool isFlags=false,int bit=0);
+	DataField(QString shortname,QString description,int offset,int size,double div,double addoffset=0,double min=0,double max=0,bool isFlags=false,int bit=0);
 	float getValue(QByteArray *payload);
 	QString description() { return m_description; }
 	QString name() { return m_name; }

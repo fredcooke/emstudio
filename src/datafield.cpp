@@ -20,7 +20,7 @@
 DataField::DataField()
 {
 }
-DataField::DataField(QString shortname,QString description,int offset,int size,double div,double min,double max,double addoffset,bool isFlags,int bit)
+DataField::DataField(QString shortname,QString description,int offset,int size,double div,double addoffset,double min,double max,bool isFlags,int bit)
 {
 	m_offset = offset;
 	m_size = size;
