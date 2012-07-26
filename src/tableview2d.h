@@ -48,6 +48,8 @@ private:
 	int m_physicalid;
 	double currentvalue;
 	void resizeColumnWidths();
+	int m_currRow;
+	int m_currCol;
 protected:
 	void resizeEvent(QResizeEvent *evt);
 private slots:

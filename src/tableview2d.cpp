@@ -56,6 +56,8 @@ void TableView2D::tableCurrentCellChanged(int currentrow,int currentcolumn,int p
 	{
 		return;
 	}
+	m_currRow = currentrow;
+	m_currCol = currentcolumn;
 	currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toDouble();
 }
 void TableView2D::resizeColumnWidths()
@@ -243,6 +245,7 @@ void TableView2D::passData(unsigned short locationid,QByteArray rawdata,int phys
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	curve->setSamples(samples);
 	ui.plot->replot();
+	ui.tableWidget->setCurrentCell(m_currRow,m_currCol);
 	//ui.tableWidget->resizeColumnsToContents();
 	resizeColumnWidths();
 }
