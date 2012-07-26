@@ -45,6 +45,8 @@ private:
 	void setSilentValue(int row,int column,QString value);
 	QString formatNumber(double num,int prec=2);
 	void resizeColumnWidths();
+	int m_currRow;
+	int m_currCol;
 private slots:
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
 	void tableCellChanged(int row,int column);

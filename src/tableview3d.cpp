@@ -41,6 +41,8 @@ void TableView3D::tableCurrentCellChanged(int currentrow,int currentcolumn,int p
 	{
 		return;
 	}
+	m_currRow = currentrow;
+	m_currCol = currentcolumn;
 	currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toDouble();
 }
 void TableView3D::exportJson(QString filename)
@@ -208,6 +210,8 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	{
 		ui.tableWidget->item(selectedlist[i].first,selectedlist[i].second)->setSelected(true);
 	}
+	ui.tableWidget->setCurrentCell(m_currRow,m_currCol);
+	selectedlist.clear();
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 
@@ -233,7 +237,7 @@ void TableView3D::resizeColumnWidths()
 			if (ui.tableWidget->item(j,i))
 			{
 				//1.3 is required to make text show correctly
-				unsigned int test = ui.tableWidget->fontMetrics().width(ui.tableWidget->item(j,i)->text()) * 1.2;
+				unsigned int test = ui.tableWidget->fontMetrics().width(ui.tableWidget->item(j,i)->text()) * 1.3;
 				if (test > max)
 				{
 					max = test;
