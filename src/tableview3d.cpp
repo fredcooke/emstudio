@@ -119,7 +119,16 @@ void TableView3D::exportClicked()
 
 void TableView3D::loadClicked()
 {
-	emit reloadTableData(m_locationId);
+	if (QMessageBox::information(0,"Warning","Doing this will reload the table from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+	{
+		qDebug() << "Ok";
+		emit reloadTableData(m_locationId);
+	}
+	else
+	{
+		qDebug() << "Not ok";
+	}
+
 }
 void TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation)
 {

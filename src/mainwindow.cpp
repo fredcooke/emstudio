@@ -507,6 +507,29 @@ void MainWindow::connectToEms()
 	emsComms->start();
 	menu_connectClicked();
 }
+void MainWindow::tableview3d_reloadTableData(unsigned short locationid)
+{
+	if (hasLocalFlashBlock(locationid))
+	{
+		TableView3D *table = qobject_cast<TableView3D*>(sender());
+		if (table)
+		{
+			for (int j=0;j<m_table3DMetaData.size();j++)
+			{
+				if (m_table3DMetaData[j].locationId == locationid)
+				{
+					table->passData(locationid,getLocalFlashBlock(locationid),0,m_table3DMetaData[j]);
+					emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
+					setLocalRamBlock(locationid,getLocalFlashBlock(locationid));
+					return;
+				}
+			}
+			table->passData(locationid,getLocalFlashBlock(locationid),0);
+			setLocalRamBlock(locationid,getLocalFlashBlock(locationid));
+			emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
+		}
+	}
+}
 
 void MainWindow::tableview2d_reloadTableData(unsigned short locationid)
 {
@@ -659,7 +682,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 					connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
-					//connect(view,SIGNAL(reloadTableData(unsigned short)),this,SLOT(reloadLocationId(unsigned short)));
+					connect(view,SIGNAL(reloadTableData(unsigned short)),this,SLOT(tableview2d_reloadTableData(unsigned short)));
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
 					win->setGeometry(view->geometry());
@@ -690,7 +713,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 					connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
-
+					connect(view,SIGNAL(reloadTableData(unsigned short)),this,SLOT(tableview3d_reloadTableData(unsigned short)));
 					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
 					win->setGeometry(view->geometry());
