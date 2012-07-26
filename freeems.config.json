@@ -118,7 +118,98 @@
    "calc" : [ {"type":"div","value" : "32768.0"} ],
    "type" : "value",
    "size" : "2"
-  }
+  },
+  {
+    "name":"MAP",
+    "title" : "Manifold Absolute Pressure",
+    "calc" : [ {"type":"div","value":"100.0"}],
+    "type":"value",
+    "size":"2"
+   },
+  {
+    "name":"AAP",
+    "title" : "Atmospheric Absolute Pressure",
+    "calc" : [ {"type":"div","value":"100.0"}],
+    "type":"value",
+    "size":"2"
+   },
+  {
+    "name":"BRV",
+    "title" : "Battery Reference Voltage",
+    "calc" : [ {"type":"div","value":"1000.0"}],
+    "type":"value",
+    "size":"2"
+   },
+  {
+    "name":"MAT",
+    "title" : "Manifold Air Temperature",
+    "calc" : [ {"type":"div","value":"100.0"}],
+    "type":"value",
+    "size":"2"
+   },
+  {
+    "name":"EGO2",
+    "title" : "Exhaust Gas Oxygen 2",
+    "calc" : [ {"type":"div","value":"32768.0"}],
+    "type":"value",
+    "size":"2"
+   },
+  {
+    "name":"IAP",
+    "title" : "Intercooler Absolute Pressure",
+    "calc" : [ {"type":"div","value":"100.0"}],
+    "type":"value",
+    "size":"2"
+   },
+  {
+    "name":"MAF",
+    "title" : "Mass Air Flow",
+    "calc" : [],
+    "type":"value",
+    "size":"2"
+   },
+  {
+    "name":"DMAP",
+    "title" : "Delta MAP",
+    "calc" : [ ],
+    "type":"value",
+    "size":"2"
+   },
+  {
+    "name":"DTPS",
+    "title" : "Delta TPS",
+    "calc" : [ ],
+    "type":"value",
+    "size":"2"
+   },
+  {
+    "name":"RPM",
+    "title" : "Revolutions Per Minute",
+    "calc" : [ {"type":"div","value":"2.0"}],
+    "type":"value",
+    "size":"2"
+   },
+  {
+    "name":"DRPM",
+    "title" : "Delta RPM",
+    "calc" : [ {"type":"div","value":"2.0"}],
+    "type":"value",
+    "size":"2"
+   },
+  {
+    "name":"DDRPM",
+    "title" : "Delta Delta RPM",
+    "calc" : [ {"type":"div","value":"2.0"}],
+    "type":"value",
+    "size":"2"
+   }
+  {
+    "name":"MAP",
+    "title" : "Manifold Absolute Pressure",
+    "calc" : [ {"type":"div","value":"100.0"}],
+    "type":"value",
+    "size":"2"
+   }
  ]
 },
 "config" : {
