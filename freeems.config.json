@@ -164,21 +164,21 @@
   {
     "name":"MAF",
     "title" : "Mass Air Flow",
-    "calc" : "",
+    "calc" : [],
     "type":"value",
     "size":"2"
    },
   {
     "name":"DMAP",
     "title" : "Delta MAP",
-    "calc" : "",
+    "calc" : [],
     "type":"value",
     "size":"2"
    },
   {
     "name":"DTPS",
     "title" : "Delta TPS",
-    "calc" : "",
+    "calc" : [],
     "type":"value",
     "size":"2"
    },
