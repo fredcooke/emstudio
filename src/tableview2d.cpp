@@ -219,8 +219,8 @@ void TableView2D::passData(unsigned short locationid,QByteArray rawdata,int phys
 	for (int i=0;i<tableData->columns();i++)
 	{
 		ui.tableWidget->setColumnCount(ui.tableWidget->columnCount()+1);
-		ui.tableWidget->setItem(0,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->axis()[i],'f',2)));
-		ui.tableWidget->setItem(1,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->values()[i],'f',2)));
+		ui.tableWidget->setItem(0,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->axis()[i],'f',m_metaData.yDp)));
+		ui.tableWidget->setItem(1,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->values()[i],'f',m_metaData.xDp)));
 
 		if (tableData->values()[i] < tableData->maxXAxis()/4)
 		{

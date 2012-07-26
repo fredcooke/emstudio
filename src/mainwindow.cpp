@@ -132,10 +132,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 			QString id = tabledata["locationid"].toString();
 			QString xtitle = tabledata["xtitle"].toString();
 			QVariantList xcalc = tabledata["xcalc"].toList();
+			QString xdp = tabledata["xdp"].toString();
+
 			QString ytitle = tabledata["ytitle"].toString();
 			QVariantList ycalc = tabledata["ycalc"].toList();
+			QString ydp = tabledata["ydp"].toString();
+
 			QString ztitle = tabledata["ztitle"].toString();
 			QVariantList zcalc = tabledata["zcalc"].toList();
+			QString zdp = tabledata["zdp"].toString();
+
 			//QVariantMap::iterator calci = xcalc.begin();
 			QList<QPair<QString,double> > xcalclist;
 			QList<QPair<QString,double> > ycalclist;
@@ -159,10 +165,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 			meta.tableTitle = i.key();
 			meta.xAxisCalc = xcalclist;
 			meta.xAxisTitle = xtitle;
+			meta.xDp = xdp.toInt();
 			meta.yAxisCalc = ycalclist;
 			meta.yAxisTitle = ytitle;
+			meta.yDp = ydp.toInt();
 			meta.zAxisCalc = zcalclist;
 			meta.zAxisTitle = ztitle;
+			meta.zDp = zdp.toInt();
 			m_table3DMetaData.append(meta);
 		}
 		else if (tabledata["type"] == "2D")
@@ -171,8 +180,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 			QString id = tabledata["locationid"].toString();
 			QString xtitle = tabledata["xtitle"].toString();
 			QVariantList xcalc = tabledata["xcalc"].toList();
+			QString xdp = tabledata["xdp"].toString();
 			QString ytitle = tabledata["ytitle"].toString();
 			QVariantList ycalc = tabledata["ycalc"].toList();
+			QString ydp = tabledata["ydp"].toString();
 
 
 			QList<QPair<QString,double> > xcalclist;
@@ -192,8 +203,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 			meta.tableTitle = i.key();
 			meta.xAxisCalc = xcalclist;
 			meta.xAxisTitle = xtitle;
+			meta.xDp = xdp.toInt();
 			meta.yAxisCalc = ycalclist;
 			meta.yAxisTitle = ytitle;
+			meta.yDp = ydp.toInt();
 			m_table2DMetaData.append(meta);
 		}
 		i++;

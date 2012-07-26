@@ -4,70 +4,89 @@
   "type" : "3D",
   "xtitle" : "rpm",
   "xcalc" : [{"type" : "div", "value" : "2.0"}],
+  "xdp" : "2",
   "ytitle" : "load",
   "ycalc" : [{"type" : "div", "value" : "100.0"}],
+  "ydp" : "2",
   "ztitle" : "VE",
-  "zcalc" : [{"type" : "div","value" : "512.0"}]
+  "zcalc" : [{"type" : "div","value" : "512.0"}],
+  "zdp" : "2"
  },
  "Lambda Table" : {
   "locationid" : "0x0006",
   "type" : "3D",
   "xtitle" : "rpm",
   "xcalc" : [{ "type":"div","value" : "2.0" }],
+  "xdp" : "2",
   "ytitle" : "load",
   "ycalc" : [{ "type":"div","value" : "100.0"}],
+  "ydp" : "2",
   "ztitle" : "Lambda",
-  "zcalc" : [{"type":"div","value" : "32768.0"}]
+  "zcalc" : [{"type":"div","value" : "32768.0"}],
+  "zdp" : "2"
  },
  "Timing Table" : {
   "locationid" : "0x0008",
   "type" : "3D",
   "xtitle" : "rpm",
   "xcalc" : [{ "type":"div","value" : "2.0"}],
+  "xdp" : "2",
   "ytitle" : "load",
   "ycalc" : [{ "type":"div","value" : "100.0" }],
+  "ydp" : "2",
   "ztitle" : "Timing",
-  "zcalc" : [{ "type":"div","value" : "1024.0"}]
+  "zcalc" : [{ "type":"div","value" : "1024.0"}],
+  "zdp" : "2"
  },
  "Dwell VS Voltage Table" : {
   "locationid" : "0x0100",
   "type" : "2D",
   "xtitle" : "volts",
   "xcalc" : [{ "type":"div","value" : "1000.0"}],
+  "xdp" : "2",
   "ytitle" : "pw",
-  "ycalc" : [{"type":"div","value" : "1250.0"}]
+  "ycalc" : [{"type":"div","value" : "1250.0"}],
+  "ydp" : "2"
  },
  "Injector Dead Time Table" : {
   "locationid" : "0x0102",
   "type" : "2D",
   "xtitle" : "volts",
   "xcalc" : [{ "type":"div","value" : "1000.0"}],
+  "xdp" : "2",
   "ytitle" : "pw",
-  "ycalc" : [{"type":"div","value" : "1250.0"}]
+  "ycalc" : [{"type":"div","value" : "1250.0"}],
+  "ydp" : "2"
  },
  "Priming Volume Table" : {
   "locationid" : "0x0108",
   "type" : "2D",
   "xtitle" : "temp",
   "xcalc" : [{ "type":"div","value" : "100.0"}, {"type":"sub","value" : "273.15" }],
+  "xdp" : "2",
   "ytitle" : "pw",
-  "ycalc" : [{ "type": "div","value" : "1250.0"}]
+  "ycalc" : [{ "type": "div","value" : "1250.0"}],
+  "ydp" : "2"
  },
  "Engine Temp Enrichment Table" : {
   "locationid" : "0x010A",
   "type" : "2D",
   "xtitle" : "temp",
   "xcalc" : [{ "type":"div","value" : "100.0"}, {"type":"sub","value" : "273.15" }],
+  "xdp" : "2",
   "ytitle" : "enrich",
-  "ycalc" : [{ "type":"div","value" : "163.84"}]
+  "ycalc" : [{ "type":"div","value" : "163.84"}],
+  "ydp" : "2"
  },
  "RPM Based Dwell Table" : {
   "locationid" : "0x010C",
   "type" : "2D",
   "xtitle" : "RPM",
   "xcalc" : [{ "type":"div","value" : "2.0"}],
+  "xdp" : "2",
   "ytitle" : "Dwell (ms)",
-  "ycalc" : [{ "type":"div","value" : "1250.0"}]
+  "ycalc" : [{ "type":"div","value" : "1250.0"}],
+  "ydp" : "2"
  }
 },
 "ramvars" : {

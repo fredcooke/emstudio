@@ -43,7 +43,7 @@ private:
 	unsigned short m_yAxisSize;
 	Table3DMetaData m_metaData;
 	void setSilentValue(int row,int column,QString value);
-	QString formatNumber(double num);
+	QString formatNumber(double num,int prec=2);
 	void resizeColumnWidths();
 private slots:
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);

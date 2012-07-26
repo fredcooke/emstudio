@@ -167,20 +167,21 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	for (int i=0;i<tableData->rows();i++)
 	{
 		//double val = tableData->yAxis()[i];
-		ui.tableWidget->setItem((tableData->rows()-1)-(i),0,new QTableWidgetItem(formatNumber(tableData->yAxis()[i])));
+
+		ui.tableWidget->setItem((tableData->rows()-1)-(i),0,new QTableWidgetItem(formatNumber(tableData->yAxis()[i],m_metaData.yDp)));
 		//ui.tableWidget->setItem((tableData->rows()-1)-(i),0,new QTableWidgetItem(QString::number(val)));
 	}
 	for (int i=0;i<tableData->columns();i++)
 	{
 		//ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(QString::number(val)));
-		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(formatNumber(tableData->xAxis()[i])));
+		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(formatNumber(tableData->xAxis()[i],m_metaData.xDp)));
 	}
 	for (int row=0;row<tableData->rows();row++)
 	{
 		for (int col=0;col<tableData->columns();col++)
 		{
 			double val = tableData->values()[row][col];
-			ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val)));
+			ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
 			if (val < tableData->maxZAxis()/4)
 			{
 				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxZAxis()/4.0))),255));
@@ -211,11 +212,11 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 
 }
-QString TableView3D::formatNumber(double num)
+QString TableView3D::formatNumber(double num,int prec)
 {
 	if (metaDataValid)
 	{
-		return QString::number(num,'f',2);
+		return QString::number(num,'f',prec);
 	}
 	else
 	{

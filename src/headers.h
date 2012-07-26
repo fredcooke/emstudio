@@ -32,11 +32,15 @@ public:
 class Table3DMetaData
 {
 public:
+	Table3DMetaData() { xDp=2; yDp=2; zDp=2;}
 	QString tableTitle;
 	unsigned short locationId;
 	QString xAxisTitle;
 	QString yAxisTitle;
 	QString zAxisTitle;
+	int xDp;
+	int yDp;
+	int zDp;
 	QList<QPair<QString,double> > xAxisCalc;
 	QList<QPair<QString,double> > yAxisCalc;
 	QList<QPair<QString,double> > zAxisCalc;
@@ -44,10 +48,13 @@ public:
 class Table2DMetaData
 {
 public:
+	Table2DMetaData() { xDp=2; yDp=2; }
 	QString tableTitle;
 	unsigned short locationId;
 	QString xAxisTitle;
 	QString yAxisTitle;
+	int xDp;
+	int yDp;
 	QList<QPair<QString,double> > xAxisCalc;
 	QList<QPair<QString,double> > yAxisCalc;
 };
