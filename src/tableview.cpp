@@ -64,7 +64,9 @@ void TableView::guiUpdateTimerTick()
 		if (i.value().type() == QVariant::Double)
 		{
 			//widget->propertyMap.setProperty(i.key().toAscii(),QVariant::fromValue(i.value()));
-			ui.tableWidget->item(m_nameToIndexMap[i.key()],1)->setText(i.value().toString());
+			double val = i.value().toDouble();
+			QString valstr = QString::number(val,'f',2);
+			ui.tableWidget->item(m_nameToIndexMap[i.key()],1)->setText(valstr);
 		}
 		//qDebug() << i.key() << m_nameToIndexMap[i.key()] << i.value();
 		i++;
