@@ -40,6 +40,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	QJson::Parser parser;
 	QVariant top = parser.parse(filebytes);
+	if (!top.isValid())
+	{
+		qDebug() << "Error parsing JSON";
+		qDebug() << "Line number:" << parser.errorLine() << "error:" << parser.errorString();
+		return;
+	}
 	QVariantMap topmap = top.toMap();
 	QVariantMap errormap = topmap["errormap"].toMap();
 	QVariantMap::iterator i = errormap.begin();
