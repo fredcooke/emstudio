@@ -544,11 +544,13 @@ void MainWindow::tableview2d_reloadTableData(unsigned short locationid)
 				{
 					table->passData(locationid,getLocalFlashBlock(locationid),0,m_table2DMetaData[j]);
 					emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
+					setLocalRamBlock(locationid,getLocalFlashBlock(locationid));
 					return;
 				}
 			}
 			table->passData(locationid,getLocalFlashBlock(locationid),0);
 			emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
+			setLocalRamBlock(locationid,getLocalFlashBlock(locationid));
 		}
 	}
 }

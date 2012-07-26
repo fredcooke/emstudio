@@ -83,7 +83,15 @@ void TableView2D::resizeColumnWidths()
 }
 void TableView2D::loadClicked()
 {
-	emit reloadTableData(m_locationid);
+	if (QMessageBox::information(0,"Warning","Doing this will reload the table from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+	{
+		qDebug() << "Ok";
+		emit reloadTableData(m_locationid);
+	}
+	else
+	{
+		qDebug() << "Not ok";
+	}
 }
 
 void TableView2D::tableCellChanged(int row,int column)
