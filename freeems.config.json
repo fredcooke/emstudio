@@ -202,13 +202,6 @@
     "calc" : [ {"type":"div","value":"2.0"}],
     "type":"value",
     "size":"2"
-   },
-  {
-    "name":"MAP",
-    "title" : "Manifold Absolute Pressure",
-    "calc" : [ {"type":"div","value":"100.0"}],
-    "type":"value",
-    "size":"2"
    }
  ]
 },
