@@ -747,6 +747,19 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				{
 					if (m_readOnlyMetaDataMap.contains(locid))
 					{
+						unsigned int length=0;
+						for (int j=0;j<m_readOnlyMetaDataMap[locid].size();j++)
+						{
+							length += m_readOnlyMetaDataMap[locid][j].size;
+						}
+						if (m_ramMemoryList[i]->data().size() != length)
+						{
+							//Wrong size!
+							qDebug() << "Invalid meta data size for location id:" << "0x" + QString::number(locid,16).toUpper();
+							qDebug() << "Expected:" << length << "Got:" << m_ramMemoryList[i]->data().size();
+							QMessageBox::information(this,"Error",QString("Meta data indicates this location ID should be ") + QString::number(length) + " however it is " + QString::number(m_ramMemoryList[i]->data().size()) + ". Unable to load memory location. Please fix your config.json file");
+							return;
+						}
 						//m_readOnlyMetaDataMap[locid]
 						ReadOnlyRamView *view = new ReadOnlyRamView();
 						view->passData(locid,m_ramMemoryList[i]->data(),m_readOnlyMetaDataMap[locid]);
