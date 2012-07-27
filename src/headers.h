@@ -28,6 +28,13 @@ public:
 	unsigned char size;
 	QList<QPair<QString,double> > calc;
 };
+class ReadOnlyRamBlock
+{
+public:
+	QString title;
+	unsigned short locationid;
+	QList<ReadOnlyRamData> m_ramData;
+};
 
 class Table3DMetaData
 {

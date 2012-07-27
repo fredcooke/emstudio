@@ -62,8 +62,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	{
 		bool ok = false;
 		unsigned short locid = i.key().mid(2).toInt(&ok,16);
-		m_readOnlyMetaDataMap[locid] = QList<ReadOnlyRamData>();
-		QVariantList locidmap = i.value().toList();
+		m_readOnlyMetaDataMap[locid] = ReadOnlyRamBlock();
+		QVariantMap locidlist = i.value().toMap();
+		QString title = locidlist["title"].toString();
+		m_readOnlyMetaDataMap[locid].title = title;
+		QVariantList locidmap = locidlist["vars"].toList();
 		int offset = 0;
 		for (int j=0;j<locidmap.size();j++)
 		{
@@ -75,8 +78,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 			rdata.offset = offset;
 			rdata.size = newlocidmap["size"].toInt();
 			offset += rdata.size;
+			m_readOnlyMetaDataMap[locid].m_ramData.append(rdata);
 			m_readOnlyMetaData.append(rdata);
-			m_readOnlyMetaDataMap[locid].append(rdata);
+			//m_readOnlyMetaDataMap[locid].append(rdata);
 
 		}
 		/*QVariantMap::iterator j = locidmap.begin();
@@ -748,9 +752,9 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 					if (m_readOnlyMetaDataMap.contains(locid))
 					{
 						unsigned int length=0;
-						for (int j=0;j<m_readOnlyMetaDataMap[locid].size();j++)
+						for (int j=0;j<m_readOnlyMetaDataMap[locid].m_ramData.size();j++)
 						{
-							length += m_readOnlyMetaDataMap[locid][j].size;
+							length += m_readOnlyMetaDataMap[locid].m_ramData[j].size;
 						}
 						if (m_ramMemoryList[i]->data().size() != length)
 						{
@@ -762,7 +766,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 						}
 						//m_readOnlyMetaDataMap[locid]
 						ReadOnlyRamView *view = new ReadOnlyRamView();
-						view->passData(locid,m_ramMemoryList[i]->data(),m_readOnlyMetaDataMap[locid]);
+						view->passData(locid,m_ramMemoryList[i]->data(),m_readOnlyMetaDataMap[locid].m_ramData);
 						connect(view,SIGNAL(readRamLocation(unsigned short)),this,SLOT(reloadLocationId(unsigned short)));
 						connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 						QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
@@ -1303,6 +1307,11 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 		{
 			title = m_table2DMetaData[i].tableTitle;
 		}
+	}
+	if (m_readOnlyMetaDataMap.contains(locationid))
+	{
+		title = m_readOnlyMetaDataMap[locationid].title;
+		//m_readOnlyMetaDataMap[locationid]
 	}
 	qDebug() << "Found location ID info";
 	emsInfo->locationIdInfo(locationid,title,rawFlags,flags,parent,rampage,flashpage,ramaddress,flashaddress,size);
@@ -1887,7 +1896,7 @@ void MainWindow::updateDataWindows(unsigned short locationid)
 					ReadOnlyRamView *readonlyview = qobject_cast<ReadOnlyRamView*>(m_rawDataView[locationid]);
 					if (readonlyview)
 					{
-						readonlyview->passData(locationid,getLocalRamBlock(locationid),m_readOnlyMetaDataMap[locationid]);
+						readonlyview->passData(locationid,getLocalRamBlock(locationid),m_readOnlyMetaDataMap[locationid].m_ramData);
 					}
 					else
 					{
