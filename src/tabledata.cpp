@@ -38,7 +38,7 @@ unsigned short TableData::backConvertAxis(double val,QList<QPair<QString,double>
 		return val;
 	}
 	double newval = val;
-	for (int j=metadata.size()-1;j<=0;j++)
+	for (int j=metadata.size()-1;j>=0;j--)
 	{
 		if (metadata[j].first == "add")
 		{
