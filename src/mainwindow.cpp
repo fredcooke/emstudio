@@ -751,7 +751,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 				{
 					if (m_readOnlyMetaDataMap.contains(locid))
 					{
-						unsigned int length=0;
+						int length=0;
 						for (int j=0;j<m_readOnlyMetaDataMap[locid].m_ramData.size();j++)
 						{
 							length += m_readOnlyMetaDataMap[locid].m_ramData[j].size;

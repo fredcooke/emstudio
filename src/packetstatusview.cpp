@@ -54,6 +54,8 @@ void PacketStatusView::clear()
 
 void PacketStatusView::passPacketSent(unsigned short locationid,QByteArray header,QByteArray payload)
 {
+	Q_UNUSED(header)
+	Q_UNUSED(payload)
 	for (int i=0;i<ui.packetCountTableWidget->rowCount();i++)
 	{
 		if (ui.packetCountTableWidget->item(i,0)->text() == QString("0x") + QString::number(locationid,16).toUpper())
@@ -69,6 +71,8 @@ void PacketStatusView::passPacketSent(unsigned short locationid,QByteArray heade
 
 void PacketStatusView::passPacketAck(unsigned short locationid,QByteArray header,QByteArray payload)
 {
+	Q_UNUSED(header)
+	Q_UNUSED(payload)
 	for (int i=0;i<ui.packetCountTableWidget->rowCount();i++)
 	{
 		if (ui.packetCountTableWidget->item(i,0)->text() == QString("0x") + QString::number(locationid,16).toUpper())

@@ -52,6 +52,8 @@ TableView2D::TableView2D(QWidget *parent) : QWidget(parent)
 }
 void TableView2D::tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn)
 {
+	Q_UNUSED(prevrow)
+	Q_UNUSED(prevcolumn)
 	if (currentrow == -1 || currentcolumn == -1)
 	{
 		return;
@@ -183,6 +185,7 @@ void TableView2D::tableCellChanged(int row,int column)
 }
 void TableView2D::resizeEvent(QResizeEvent *evt)
 {
+	Q_UNUSED(evt)
 	/*for (int i=0;i<ui.tableWidget->columnCount();i++)
 	{
 		ui.tableWidget->setColumnWidth(i,(ui.tableWidget->width() / ui.tableWidget->columnCount())-1);
@@ -204,6 +207,7 @@ void TableView2D::passData(unsigned short locationid,QByteArray data,int physica
 
 void TableView2D::passData(unsigned short locationid,QByteArray rawdata,int physicallocation,Table2DMetaData metadata)
 {
+	Q_UNUSED(physicallocation)
 	m_metaData = metadata;
 	if (tableData)
 	{

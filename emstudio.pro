@@ -12,7 +12,7 @@ INCLUDEPATH += src
 OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
-
+QMAKE_CXXFLAGS += -Werror
 win32 {
 	INCLUDEPATH += C:/libs/qwt/include C:/libs/qjson/include
 	LIBS += -LC:/libs/qwt/lib -lqwt -LC:/libs/qjson/lib -lqjson0
