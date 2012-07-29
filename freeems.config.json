@@ -10,7 +10,8 @@
   "ydp" : "0",
   "ztitle" : "VE",
   "zcalc" : [{"type" : "div","value" : "512.0"}],
-  "zdp" : "1"
+  "zdp" : "1",
+  "size" : "1024"
  },
  "Lambda Table" : {
   "locationid" : "0x0006",
@@ -23,7 +24,8 @@
   "ydp" : "0",
   "ztitle" : "Lambda",
   "zcalc" : [{"type":"div","value" : "32768.0"}],
-  "zdp" : "2"
+  "zdp" : "2",
+  "size" : "1024"
  },
  "Timing Table" : {
   "locationid" : "0x0008",
@@ -36,7 +38,8 @@
   "ydp" : "0",
   "ztitle" : "Timing",
   "zcalc" : [{ "type":"div","value" : "1024.0"}],
-  "zdp" : "1"
+  "zdp" : "1",
+  "size" : "1024"
  },
  "Dwell VS Voltage Table" : {
   "locationid" : "0x0100",
@@ -46,7 +49,8 @@
   "xdp" : "2",
   "ytitle" : "pw",
   "ycalc" : [{"type":"div","value" : "1250.0"}],
-  "ydp" : "2"
+  "ydp" : "2",
+  "size" : "64"
  },
  "Injector Dead Time Table" : {
   "locationid" : "0x0102",
@@ -56,7 +60,8 @@
   "xdp" : "2",
   "ytitle" : "pw",
   "ycalc" : [{"type":"div","value" : "1250.0"}],
-  "ydp" : "2"
+  "ydp" : "2",
+  "size" : "64"
  },
  "Priming Volume Table" : {
   "locationid" : "0x0108",
@@ -66,7 +71,8 @@
   "xdp" : "1",
   "ytitle" : "pw",
   "ycalc" : [{ "type": "div","value" : "1250.0"}],
-  "ydp" : "2"
+  "ydp" : "2",
+  "size" : "64"
  },
  "Engine Temp Enrichment Table" : {
   "locationid" : "0x010A",
@@ -76,7 +82,8 @@
   "xdp" : "1",
   "ytitle" : "enrich",
   "ycalc" : [{ "type":"div","value" : "163.84"}],
-  "ydp" : "1"
+  "ydp" : "1",
+  "size" : "64"
  },
  "RPM Based Dwell Table" : {
   "locationid" : "0x010C",
@@ -86,7 +93,8 @@
   "xdp" : "0",
   "ytitle" : "Dwell (ms)",
   "ycalc" : [{ "type":"div","value" : "1250.0"}],
-  "ydp" : "2"
+  "ydp" : "2",
+  "size" : "64"
  }
 },
 "ramvars" : {

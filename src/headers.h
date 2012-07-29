@@ -41,6 +41,7 @@ class Table3DMetaData
 public:
 	Table3DMetaData() { xDp=2; yDp=2; zDp=2;}
 	QString tableTitle;
+	unsigned int size;
 	unsigned short locationId;
 	QString xAxisTitle;
 	QString yAxisTitle;
@@ -57,6 +58,7 @@ class Table2DMetaData
 public:
 	Table2DMetaData() { xDp=2; yDp=2; }
 	QString tableTitle;
+	unsigned int size;
 	unsigned short locationId;
 	QString xAxisTitle;
 	QString yAxisTitle;
