@@ -1302,6 +1302,12 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 		if (locationid == m_table3DMetaData[i].locationId)
 		{
 			title = m_table3DMetaData[i].tableTitle;
+			if (m_table3DMetaData[i].size != size)
+			{
+				//Error here, since size is not equal to table meta data.
+				interrogateProgressViewCancelClicked();
+				QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(size) + " expected: " + QString::number(m_table3DMetaData[i].size));
+			}
 		}
 	}
 	for (int i=0;i<m_table2DMetaData.size();i++)
@@ -1309,6 +1315,12 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 		if (locationid == m_table2DMetaData[i].locationId)
 		{
 			title = m_table2DMetaData[i].tableTitle;
+			if (m_table2DMetaData[i].size != size)
+			{
+				//Error here, since size is not equal to table meta data.
+				interrogateProgressViewCancelClicked();
+				QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(size) + " expected: " + QString::number(m_table2DMetaData[i].size));
+			}
 		}
 	}
 	if (m_readOnlyMetaDataMap.contains(locationid))
