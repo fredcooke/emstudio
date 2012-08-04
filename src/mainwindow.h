@@ -150,6 +150,8 @@ private:
 	bool m_deviceFlashDirty;
 	bool hasDeviceRamBlock(unsigned short id);
 	bool hasLocalRamBlock(unsigned short id);
+	void updateView(unsigned short locid,QWidget *view,QByteArray data,int type);
+	void createView(unsigned short locid,QByteArray data,int type);
 	bool hasLocalFlashBlock(unsigned short id);
 	bool hasDeviceFlashBlock(unsigned short id);
 	void setDeviceFlashBlock(unsigned short id,QByteArray data);

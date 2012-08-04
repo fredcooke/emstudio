@@ -630,268 +630,189 @@ void MainWindow::menu_windows_PacketStatusClicked()
 		packetStatusMdiWindow->show();
 	}
 }
+void MainWindow::updateView(unsigned short locid,QWidget *view,QByteArray data,int type)
+{
+	if (type == 1)
+	{
+		bool found = false;
+		for (int j=0;j<m_table2DMetaData.size();j++)
+		{
+			if (m_table2DMetaData[j].locationId == locid)
+			{
+				found = true;
+				qobject_cast<TableView2D*>(view)->passData(locid,data,0,m_table2DMetaData[j]);
+			}
+		}
+		if (!found)
+		{
+			qobject_cast<TableView2D*>(view)->passData(locid,data,0);
+		}
+	}
+	else if (type == 3)
+	{
+		bool found = false;
+		for (int j=0;j<m_table3DMetaData.size();j++)
+		{
+			if (m_table3DMetaData[j].locationId == locid)
+			{
+				found = true;
+				qobject_cast<TableView3D*>(view)->passData(locid,data,0,m_table3DMetaData[j]);
+			}
+		}
+		if (!found)
+		{
+			qobject_cast<TableView3D*>(view)->passData(locid,data,0);
+		}
+
+	}
+	else
+	{
+		qobject_cast<RawDataView*>(view)->setData(locid,data,true);
+	}
+	m_rawDataView[locid]->show();
+	//m_rawDataView[locid]->activateWindow();
+	//m_rawDataView[locid]->mdiArea()->setActiveSubWindow(m_rawDataView[locid]);
+	m_rawDataView[locid]->raise();
+	QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::Show));
+	QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::WindowActivate));
+
+}
+void MainWindow::createView(unsigned short locid,QByteArray data,int type)
+{
+	if (type == 1)
+	{
+		qDebug() << "Creating new table view for location: 0x" << QString::number(locid,16).toUpper();
+		TableView2D *view = new TableView2D();
+		QString title;
+		bool found = false;
+		for (int j=0;j<m_table2DMetaData.size();j++)
+		{
+			if (m_table2DMetaData[j].locationId == locid)
+			{
+				found = true;
+				view->passData(locid,data,0,m_table2DMetaData[j]);
+				title = m_table2DMetaData[j].tableTitle;
+			}
+		}
+		if (!found)
+		{
+			view->passData(locid,data,0);
+		}
+		connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+		//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+		connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
+		connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
+		connect(view,SIGNAL(reloadTableData(unsigned short)),this,SLOT(tableview2d_reloadTableData(unsigned short)));
+		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+		win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
+		win->setGeometry(view->geometry());
+		m_rawDataView[locid] = view;
+		win->show();
+		QApplication::postEvent(win, new QEvent(QEvent::Show));
+		QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+	}
+	else if (type == 3)
+	{
+		TableView3D *view = new TableView3D();
+		QString title;
+		bool found = false;
+		for (int j=0;j<m_table3DMetaData.size();j++)
+		{
+			if (m_table3DMetaData[j].locationId == locid)
+			{
+				found = true;
+				view->passData(locid,data,0,m_table3DMetaData[j]);
+				title = m_table3DMetaData[j].tableTitle;
+			}
+		}
+		if (!found)
+		{
+			view->passData(locid,data,0);
+		}
+		connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+		//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+		connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
+		connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
+		connect(view,SIGNAL(reloadTableData(unsigned short)),this,SLOT(tableview3d_reloadTableData(unsigned short)));
+		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+		win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
+		win->setGeometry(view->geometry());
+		m_rawDataView[locid] = view;
+		win->show();
+		QApplication::postEvent(win, new QEvent(QEvent::Show));
+		QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+	}
+	else
+	{
+		if (m_readOnlyMetaDataMap.contains(locid))
+		{
+			int length=0;
+			for (int j=0;j<m_readOnlyMetaDataMap[locid].m_ramData.size();j++)
+			{
+				length += m_readOnlyMetaDataMap[locid].m_ramData[j].size;
+			}
+			if (data.size() != length)
+			{
+				//Wrong size!
+				qDebug() << "Invalid meta data size for location id:" << "0x" + QString::number(locid,16).toUpper();
+				qDebug() << "Expected:" << length << "Got:" << data.size();
+				QMessageBox::information(this,"Error",QString("Meta data indicates this location ID should be ") + QString::number(length) + " however it is " + QString::number(data.size()) + ". Unable to load memory location. Please fix your config.json file");
+				return;
+			}
+			//m_readOnlyMetaDataMap[locid]
+			ReadOnlyRamView *view = new ReadOnlyRamView();
+			view->passData(locid,data,m_readOnlyMetaDataMap[locid].m_ramData);
+			connect(view,SIGNAL(readRamLocation(unsigned short)),this,SLOT(reloadLocationId(unsigned short)));
+			connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+			QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+			win->setWindowTitle("Ram Location: 0x" + QString::number(locid,16).toUpper());
+			win->setGeometry(view->geometry());
+			m_rawDataView[locid] = view;
+			win->show();
+			QApplication::postEvent(win, new QEvent(QEvent::Show));
+			QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+		}
+		else
+		{
+			RawDataView *view = new RawDataView();
+			view->setData(locid,data,true);
+			connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
+			connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+			QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+			win->setWindowTitle("Ram Location: 0x" + QString::number(locid,16).toUpper());
+			win->setGeometry(view->geometry());
+			m_rawDataView[locid] = view;
+			win->show();
+			QApplication::postEvent(win, new QEvent(QEvent::Show));
+			QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+		}
+	}
+}
 
 void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 {
 	Q_UNUSED(type)
 	Q_UNUSED(isram)
-	for (int i=0;i<m_ramMemoryList.size();i++)
+	if (hasLocalRamBlock(locid))
 	{
-		if (m_ramMemoryList[i]->locationid == locid)
+		if (m_rawDataView.contains(locid))
 		{
-			if (m_rawDataView.contains(locid))
-			{
-				if (type == 1)
-				{
-					bool found = false;
-					for (int j=0;j<m_table2DMetaData.size();j++)
-					{
-						if (m_table2DMetaData[j].locationId == locid)
-						{
-							found = true;
-							qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0,m_table2DMetaData[j]);
-						}
-					}
-					if (!found)
-					{
-						qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
-					}
-				}
-				else if (type == 3)
-				{
-					bool found = false;
-					for (int j=0;j<m_table3DMetaData.size();j++)
-					{
-						if (m_table3DMetaData[j].locationId == locid)
-						{
-							found = true;
-							qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0,m_table3DMetaData[j]);
-						}
-					}
-					if (!found)
-					{
-						qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
-					}
-
-				}
-				else
-				{
-					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_ramMemoryList[i]->data(),true);
-				}
-				m_rawDataView[locid]->show();
-				//m_rawDataView[locid]->activateWindow();
-				//m_rawDataView[locid]->mdiArea()->setActiveSubWindow(m_rawDataView[locid]);
-				m_rawDataView[locid]->raise();
-				QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::Show));
-				QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::WindowActivate));
-			}
-			else
-			{
-				if (type == 1)
-				{
-					qDebug() << "Creating new table view for location: 0x" << QString::number(locid,16).toUpper();
-					TableView2D *view = new TableView2D();
-					QString title;
-					bool found = false;
-					for (int j=0;j<m_table2DMetaData.size();j++)
-					{
-						if (m_table2DMetaData[j].locationId == locid)
-						{
-							found = true;
-							view->passData(locid,m_ramMemoryList[i]->data(),0,m_table2DMetaData[j]);
-							title = m_table2DMetaData[j].tableTitle;
-						}
-					}
-					if (!found)
-					{
-						view->passData(locid,m_ramMemoryList[i]->data(),0);
-					}
-					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-					//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
-					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
-					connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
-					connect(view,SIGNAL(reloadTableData(unsigned short)),this,SLOT(tableview2d_reloadTableData(unsigned short)));
-					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
-					win->setGeometry(view->geometry());
-					m_rawDataView[locid] = view;
-					win->show();
-					QApplication::postEvent(win, new QEvent(QEvent::Show));
-					QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
-				}
-				else if (type == 3)
-				{
-					TableView3D *view = new TableView3D();
-					QString title;
-					bool found = false;
-					for (int j=0;j<m_table3DMetaData.size();j++)
-					{
-						if (m_table3DMetaData[j].locationId == locid)
-						{
-							found = true;
-							view->passData(locid,m_ramMemoryList[i]->data(),0,m_table3DMetaData[j]);
-							title = m_table3DMetaData[j].tableTitle;
-						}
-					}
-					if (!found)
-					{
-						view->passData(locid,m_ramMemoryList[i]->data(),0);
-					}
-					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-					//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
-					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
-					connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
-					connect(view,SIGNAL(reloadTableData(unsigned short)),this,SLOT(tableview3d_reloadTableData(unsigned short)));
-					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-					win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
-					win->setGeometry(view->geometry());
-					m_rawDataView[locid] = view;
-					win->show();
-					QApplication::postEvent(win, new QEvent(QEvent::Show));
-					QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
-				}
-				else
-				{
-					if (m_readOnlyMetaDataMap.contains(locid))
-					{
-						int length=0;
-						for (int j=0;j<m_readOnlyMetaDataMap[locid].m_ramData.size();j++)
-						{
-							length += m_readOnlyMetaDataMap[locid].m_ramData[j].size;
-						}
-						if (m_ramMemoryList[i]->data().size() != length)
-						{
-							//Wrong size!
-							qDebug() << "Invalid meta data size for location id:" << "0x" + QString::number(locid,16).toUpper();
-							qDebug() << "Expected:" << length << "Got:" << m_ramMemoryList[i]->data().size();
-							QMessageBox::information(this,"Error",QString("Meta data indicates this location ID should be ") + QString::number(length) + " however it is " + QString::number(m_ramMemoryList[i]->data().size()) + ". Unable to load memory location. Please fix your config.json file");
-							return;
-						}
-						//m_readOnlyMetaDataMap[locid]
-						ReadOnlyRamView *view = new ReadOnlyRamView();
-						view->passData(locid,m_ramMemoryList[i]->data(),m_readOnlyMetaDataMap[locid].m_ramData);
-						connect(view,SIGNAL(readRamLocation(unsigned short)),this,SLOT(reloadLocationId(unsigned short)));
-						connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-						QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-						win->setWindowTitle("Ram Location: 0x" + QString::number(locid,16).toUpper());
-						win->setGeometry(view->geometry());
-						m_rawDataView[locid] = view;
-						win->show();
-						QApplication::postEvent(win, new QEvent(QEvent::Show));
-						QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
-					}
-					else
-					{
-						RawDataView *view = new RawDataView();
-						view->setData(locid,m_ramMemoryList[i]->data(),true);
-						connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
-						connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-						QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-						win->setWindowTitle("Ram Location: 0x" + QString::number(locid,16).toUpper());
-						win->setGeometry(view->geometry());
-						m_rawDataView[locid] = view;
-						win->show();
-						QApplication::postEvent(win, new QEvent(QEvent::Show));
-						QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
-					}
-				}
-			}
-			return;
+			updateView(locid,m_rawDataView[locid],getLocalRamBlock(locid),type);
+		}
+		else
+		{
+			createView(locid,getLocalRamBlock(locid),type);
 		}
 	}
-
-	for (int i=0;i<m_flashMemoryList.size();i++)
+	else if (hasLocalFlashBlock(locid))
 	{
-		if (m_flashMemoryList[i]->locationid == locid)
+		if (m_rawDataView.contains(locid))
 		{
-			if (m_rawDataView.contains(locid))
-			{
-				if (type == 1)
-				{
-					bool found = false;
-					for (int j=0;j<m_table2DMetaData.size();j++)
-					{
-						if (m_table2DMetaData[j].locationId == locid)
-						{
-							found = true;
-							qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0,m_table2DMetaData[j]);
-						}
-					}
-					if (!found)
-					{
-						qobject_cast<TableView2D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
-					}
-				}
-				else if (type == 3)
-				{
-					bool found = false;
-					for (int j=0;j<m_table3DMetaData.size();j++)
-					{
-						if (m_table3DMetaData[j].locationId == locid)
-						{
-							found = true;
-							qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0,m_table3DMetaData[j]);
-						}
-					}
-					if (!found)
-					{
-						qobject_cast<TableView3D*>(m_rawDataView[locid])->passData(locid,m_ramMemoryList[i]->data(),0);
-					}
-				}
-				else
-				{
-					qobject_cast<RawDataView*>(m_rawDataView[locid])->setData(locid,m_flashMemoryList[i]->data(),false);
-					//m_rawDataView[locid]->setData(locid,m_ramRawBlockList[i]->data);
-				}
-				m_rawDataView[locid]->show();
-				QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::Show));
-				QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::WindowActivate));
-			}
-			else
-			{
-				if (type == 1)
-				{
-					TableView2D *view = new TableView2D();
-					bool found = false;
-					for (int j=0;j<m_table2DMetaData.size();j++)
-					{
-						if (m_table2DMetaData[j].locationId == locid)
-						{
-							found = true;
-							view->passData(locid,m_flashMemoryList[i]->data(),0,m_table2DMetaData[j]);
-						}
-					}
-					if (!found)
-					{
-						view->passData(locid,m_flashMemoryList[i]->data(),0);
-					}
-					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
-					connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
-					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-					win->setWindowTitle("Flash Location 0x" + QString::number(locid,16).toUpper());
-					win->setGeometry(view->geometry());
-					m_rawDataView[locid] = view;
-					win->show();
-					QApplication::postEvent(win, new QEvent(QEvent::Show));
-					QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
-				}
-				else
-				{
-					RawDataView *view = new RawDataView();
-					view->setData(locid,m_flashMemoryList[i]->data(),false);
-					connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-					connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
-					QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-					win->setWindowTitle("Flash Location: 0x" + QString::number(locid,16).toUpper());
-					win->setGeometry(view->geometry());
-					m_rawDataView[locid] = view;
-					win->show();
-					QApplication::postEvent(win, new QEvent(QEvent::Show));
-					QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
-				}
-			}
-			return;
+			updateView(locid,m_rawDataView[locid],getLocalFlashBlock(locid),type);
+		}
+		else
+		{
+			createView(locid,getLocalFlashBlock(locid),type);
 		}
 	}
 }
