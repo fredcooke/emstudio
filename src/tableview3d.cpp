@@ -132,13 +132,13 @@ void TableView3D::loadClicked()
 	}
 
 }
-void TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation)
+bool TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation)
 {
 	metaDataValid = false;
-	passData(locationid,data,physicallocation,Table3DMetaData());
+	return passData(locationid,data,physicallocation,Table3DMetaData());
 }
 
-void TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation,Table3DMetaData metadata)
+bool TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation,Table3DMetaData metadata)
 {
 	Q_UNUSED(physicallocation)
 	m_metaData = metadata;
@@ -166,15 +166,85 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	ui.tableWidget->verticalHeader()->hide();
 	ui.tableWidget->setRowCount(tableData->rows()+1);
 	ui.tableWidget->setColumnCount(tableData->columns()+1);
+	double first = tableData->yAxis()[0];
+	int order = 0;
 	for (int i=0;i<tableData->rows();i++)
 	{
-		//double val = tableData->yAxis()[i];
+		if (i == 1)
+		{
+			if (tableData->yAxis()[i] < first)
+			{
+				order = 1;
+			}
+			else
+			{
+				order = 2;
+			}
+		}
+		if (order == 1)
+		{
+			if (tableData->yAxis()[i] > first)
+			{
+				//Out of order table axis.
+				return false;
+			}
+		}
+		else if (order == 2)
+		{
+			if (tableData->yAxis()[i] < first)
+			{
+				//Out of order table axis.
+				return false;
+			}
+		}
+		first = tableData->yAxis()[i];
 
+		if (tableData->yAxis()[i] < first)
+		{
+			//Out of order axis;
+			return false;
+		}
+		first = tableData->yAxis()[i];
 		ui.tableWidget->setItem((tableData->rows()-1)-(i),0,new QTableWidgetItem(formatNumber(tableData->yAxis()[i],m_metaData.yDp)));
 		//ui.tableWidget->setItem((tableData->rows()-1)-(i),0,new QTableWidgetItem(QString::number(val)));
 	}
+	first = tableData->xAxis()[0];
 	for (int i=0;i<tableData->columns();i++)
 	{
+		if (i == 1)
+		{
+			if (tableData->xAxis()[i] < first)
+			{
+				order = 1;
+			}
+			else
+			{
+				order = 2;
+			}
+		}
+		if (order == 1)
+		{
+			if (tableData->xAxis()[i] > first)
+			{
+				//Out of order table axis.
+				return false;
+			}
+		}
+		else if (order == 2)
+		{
+			if (tableData->xAxis()[i] < first)
+			{
+				//Out of order table axis.
+				return false;
+			}
+		}
+		first = tableData->xAxis()[i];
+		if (tableData->xAxis()[i] < first)
+		{
+			//Out of order axis;
+			return false;
+		}
+		first = tableData->xAxis()[i];
 		//ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(QString::number(val)));
 		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,(i+1),new QTableWidgetItem(formatNumber(tableData->xAxis()[i],m_metaData.xDp)));
 	}
@@ -214,7 +284,7 @@ void TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	selectedlist.clear();
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
-
+	return true;
 }
 QString TableView3D::formatNumber(double num,int prec)
 {

@@ -34,8 +34,8 @@ class TableView2D : public QWidget
 public:
 	explicit TableView2D(QWidget *parent = 0);
 	~TableView2D();
-	void passData(unsigned short locationid,QByteArray data,int physicallocation,Table2DMetaData metadata);
-	void passData(unsigned short locationid,QByteArray data,int physicallocation);
+	bool passData(unsigned short locationid,QByteArray data,int physicallocation,Table2DMetaData metadata);
+	bool passData(unsigned short locationid,QByteArray data,int physicallocation);
 	//void passData(unsigned short locationid,Table2DData data);
 private:
 	Table2DData *tableData;

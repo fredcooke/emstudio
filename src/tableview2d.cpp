@@ -200,12 +200,12 @@ void TableView2D::setSilentValue(int row,int column,QString value)
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 }
-void TableView2D::passData(unsigned short locationid,QByteArray data,int physicallocation)
+bool TableView2D::passData(unsigned short locationid,QByteArray data,int physicallocation)
 {
-	passData(locationid,data,physicallocation,Table2DMetaData());
+	return passData(locationid,data,physicallocation,Table2DMetaData());
 }
 
-void TableView2D::passData(unsigned short locationid,QByteArray rawdata,int physicallocation,Table2DMetaData metadata)
+bool TableView2D::passData(unsigned short locationid,QByteArray rawdata,int physicallocation,Table2DMetaData metadata)
 {
 	Q_UNUSED(physicallocation)
 	m_metaData = metadata;
@@ -222,8 +222,39 @@ void TableView2D::passData(unsigned short locationid,QByteArray rawdata,int phys
 	ui.tableWidget->clear();
 	ui.tableWidget->setColumnCount(0);
 	ui.tableWidget->setRowCount(2);
+	double first = tableData->axis()[0];
+	int order = 0;
 	for (int i=0;i<tableData->columns();i++)
 	{
+		if (i == 1)
+		{
+			if (tableData->axis()[i] < first)
+			{
+				order = 1;
+			}
+			else
+			{
+				order = 2;
+			}
+		}
+		if (order == 1)
+		{
+			if (tableData->axis()[i] > first)
+			{
+				//Out of order table axis.
+				return false;
+			}
+		}
+		else if (order == 2)
+		{
+			if (tableData->axis()[i] < first)
+			{
+				//Out of order table axis.
+				return false;
+			}
+		}
+		first = tableData->axis()[i];
+
 		ui.tableWidget->setColumnCount(ui.tableWidget->columnCount()+1);
 		ui.tableWidget->setItem(0,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->axis()[i],'f',m_metaData.xDp)));
 		ui.tableWidget->setItem(1,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->values()[i],'f',m_metaData.yDp)));
@@ -252,6 +283,7 @@ void TableView2D::passData(unsigned short locationid,QByteArray rawdata,int phys
 	ui.tableWidget->setCurrentCell(m_currRow,m_currCol);
 	//ui.tableWidget->resizeColumnsToContents();
 	resizeColumnWidths();
+	return true;
 }
 
 TableView2D::~TableView2D()

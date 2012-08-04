@@ -690,13 +690,23 @@ void MainWindow::createView(unsigned short locid,QByteArray data,int type)
 			if (m_table2DMetaData[j].locationId == locid)
 			{
 				found = true;
-				view->passData(locid,data,0,m_table2DMetaData[j]);
+				if (!view->passData(locid,data,0,m_table2DMetaData[j]))
+				{
+					view->deleteLater();
+					QMessageBox::information(0,"Error","Table view contains invalid data! Please check your firmware");
+					return;
+				}
 				title = m_table2DMetaData[j].tableTitle;
 			}
 		}
 		if (!found)
 		{
-			view->passData(locid,data,0);
+			if (!view->passData(locid,data,0))
+			{
+				QMessageBox::information(0,"Error","Table view contains invalid data! Please check your firmware");
+				view->deleteLater();
+				return;
+			}
 		}
 		connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 		//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
@@ -721,13 +731,23 @@ void MainWindow::createView(unsigned short locid,QByteArray data,int type)
 			if (m_table3DMetaData[j].locationId == locid)
 			{
 				found = true;
-				view->passData(locid,data,0,m_table3DMetaData[j]);
+				if (!view->passData(locid,data,0,m_table3DMetaData[j]))
+				{
+					QMessageBox::information(0,"Error","Table view contains invalid data! Please check your firmware");
+					view->deleteLater();
+					return;
+				}
 				title = m_table3DMetaData[j].tableTitle;
 			}
 		}
 		if (!found)
 		{
-			view->passData(locid,data,0);
+			if (!view->passData(locid,data,0))
+			{
+				QMessageBox::information(0,"Error","Table view contains invalid data! Please check your firmware");
+				view->deleteLater();
+				return;
+			}
 		}
 		connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 		//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
