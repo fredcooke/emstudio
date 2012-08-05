@@ -53,7 +53,7 @@ void ReadOnlyRamView::passData(unsigned short locationid,QByteArray data,QList<R
 			{
 				unsigned short ushortval;
 				unsigned short ucharval;
-				double dval;
+				double dval=0;
 				if (metadata[i].size == 1)
 				{
 					ucharval = (unsigned char)data[metadata[i].offset];

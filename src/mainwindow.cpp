@@ -1579,7 +1579,7 @@ void MainWindow::checkSyncRequest()
 void MainWindow::updateRamLocation(unsigned short locationid)
 {
 	bool hasparent = false;
-	unsigned short tempRamParentId;
+	unsigned short tempRamParentId=0;
 	bool isparent = false;
 	QList<unsigned short> childlist;
 	for (int j=0;j<m_ramMemoryList.size();j++)

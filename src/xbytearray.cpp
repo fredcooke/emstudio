@@ -19,8 +19,10 @@
 
 #include "xbytearray.h"
 #ifdef Q_WS_WIN32
+#ifndef Q_CC_MINGW
 #define and &&
 #define or ||
+#endif
 #endif
 XByteArray::XByteArray()
 {
