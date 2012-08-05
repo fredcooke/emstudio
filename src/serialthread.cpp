@@ -319,7 +319,12 @@ int SerialThread::writePacket(QByteArray packet)
 	for (int i=0;i<packet.size();i++)
 	{
 		char c = packet.data()[i];
-		write(m_portHandle,&c,1);
+		if (write(m_portHandle,&c,1)<0)
+		{
+			//TODO: Error here
+			qDebug() << "Serial write error";
+			return -1;
+		}
 		msleep(m_interByteSendDelay);
 	}
 	return 0;
