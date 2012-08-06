@@ -50,9 +50,11 @@ private:
 	void resizeColumnWidths();
 	int m_currRow;
 	int m_currCol;
+	void exportJson(QString filename);
 protected:
 	void resizeEvent(QResizeEvent *evt);
 private slots:
+	void exportClicked();
 	void saveClicked();
 	void loadClicked();
 	void tableCellChanged(int row,int column);

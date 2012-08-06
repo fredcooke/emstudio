@@ -21,6 +21,8 @@
 #include <QDebug>
 #include <qwt_plot_grid.h>
 #include <qwt_plot_curve.h>
+#include <qjson/serializer.h>
+#include <QFileDialog>
 TableView2D::TableView2D(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
@@ -34,7 +36,7 @@ TableView2D::TableView2D(QWidget *parent) : QWidget(parent)
 	connect(ui.loadPushButton,SIGNAL(clicked()),this,SLOT(loadClicked()));
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
-
+	connect(ui.exportPushButton,SIGNAL(clicked()),this,SLOT(exportClicked()));
 	QPalette pal = ui.plot->palette();
 	pal.setColor(QPalette::Background,QColor::fromRgb(0,0,0));
 	ui.plot->setPalette(pal);
@@ -49,6 +51,61 @@ TableView2D::TableView2D(QWidget *parent) : QWidget(parent)
 	//QwtSeriesData<QwtIntervalSample> series;
 
 
+}
+void TableView2D::exportJson(QString filename)
+{
+	//Create a JSON file similar to MTX's yaml format.
+	QVariantMap topmap;
+	QVariantMap x;
+	QVariantMap y;
+	QVariantMap z;
+	QVariantList xlist;
+	QVariantList ylist;
+	QVariantList zlist;
+
+	topmap["2DTable"] = "";
+	topmap["title"] = m_metaData.tableTitle;
+	topmap["description"] = m_metaData.tableTitle;
+	x["unit"] = m_metaData.xAxisTitle;
+	x["label"] = m_metaData.xAxisTitle;
+	y["unit"] = m_metaData.yAxisTitle;
+	y["label"] = m_metaData.yAxisTitle;
+
+	for (int i=1;i<ui.tableWidget->columnCount();i++)
+	{
+		//Reformat the number to be XXXX.XX to make Fred happy.
+		double val = ui.tableWidget->item(0,i)->text().toDouble();
+		xlist.append(QString::number(val,'f',2));
+		double val2 = ui.tableWidget->item(1,i)->text().toDouble();
+		ylist.append(QString::number(val2,'f',2));
+	}
+	y["values"] = ylist;
+	x["values"] = xlist;
+	topmap["X"] = x;
+	topmap["Y"] = y;
+
+	QJson::Serializer serializer;
+	QByteArray serialized = serializer.serialize(topmap);
+
+	//TODO: Open a message box and allow the user to select where they want to save the file.
+	QFile file(filename);
+	if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
+	{
+		qDebug() << "Unable to open file to output JSON!";
+		return;
+	}
+	file.write(serialized);
+	file.close();
+}
+
+void TableView2D::exportClicked()
+{
+	QString filename = QFileDialog::getSaveFileName(this,"Save Json File",".","Json Files (*.json)");
+	if (filename == "")
+	{
+		return;
+	}
+	exportJson(filename);
 }
 void TableView2D::tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn)
 {
