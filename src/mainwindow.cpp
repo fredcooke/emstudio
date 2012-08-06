@@ -42,8 +42,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	QVariant top = parser.parse(filebytes);
 	if (!top.isValid())
 	{
+		QString errormsg = QString("Error parsing JSON from config file on line number: ") + QString::number(parser.errorLine()) + " error text: " + parser.errorString();
+		QMessageBox::information(0,"Error",errormsg);
 		qDebug() << "Error parsing JSON";
-		qDebug() << "Line number:" << parser.errorLine() << "error:" << parser.errorString();
+		qDebug() << "Line number:" << parser.errorLine() << "error text:" << parser.errorString();
 		return;
 	}
 	QVariantMap topmap = top.toMap();
