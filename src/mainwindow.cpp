@@ -28,6 +28,8 @@
 #include <qjson/parser.h>
 #define define2string_p(x) #x
 #define define2string(x) define2string_p(x)
+#define TABLE_3D_PAYLOAD_SIZE 1024
+#define TABLE_2D_PAYLOAD_SIZE 64
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	progressView=0;
@@ -1076,7 +1078,6 @@ void MainWindow::setDeviceFlashBlock(unsigned short id,QByteArray data)
 		}
 	}
 }
-
 void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
@@ -1092,6 +1093,35 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 	}
 	else
 	{
+		//Check to see if it's supposed to be a table, and if so, check size
+		for (int i=0;i<m_table3DMetaData.size();i++)
+		{
+			if (m_table3DMetaData[i].locationId == locationid)
+			{
+				//It's a 3D table. Should be 1024
+				if (payload.size() != TABLE_3D_PAYLOAD_SIZE)
+				{
+					//Stop interrogation and kill everything.
+					interrogateProgressViewCancelClicked();
+					QMessageBox::information(this,"Error","RAM Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen");
+					return;
+				}
+			}
+		}
+		for (int i=0;i<m_table2DMetaData.size();i++)
+		{
+			if (m_table2DMetaData[i].locationId == locationid)
+			{
+				//It's a 3D table. Should be 1024
+				if (payload.size() != TABLE_2D_PAYLOAD_SIZE)
+				{
+					//Stop interrogation and kill everything.
+					interrogateProgressViewCancelClicked();
+					QMessageBox::information(this,"Error","RAM Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen");
+					return;
+				}
+			}
+		}
 		for (int i=0;i<m_deviceRamMemoryList.size();i++)
 		{
 			if (m_deviceRamMemoryList[i]->locationid == locationid)
@@ -1129,6 +1159,34 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
+	for (int i=0;i<m_table3DMetaData.size();i++)
+	{
+		if (m_table3DMetaData[i].locationId == locationid)
+		{
+			//It's a 3D table. Should be 1024
+			if (payload.size() != TABLE_3D_PAYLOAD_SIZE)
+			{
+				//Stop interrogation and kill everything.
+				interrogateProgressViewCancelClicked();
+				QMessageBox::information(this,"Error","RAM Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen");
+				return;
+			}
+		}
+	}
+	for (int i=0;i<m_table2DMetaData.size();i++)
+	{
+		if (m_table2DMetaData[i].locationId == locationid)
+		{
+			//It's a 3D table. Should be 1024
+			if (payload.size() != TABLE_2D_PAYLOAD_SIZE)
+			{
+				//Stop interrogation and kill everything.
+				interrogateProgressViewCancelClicked();
+				QMessageBox::information(this,"Error","RAM Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen");
+				return;
+			}
+		}
+	}
 	for (int i=0;i<m_deviceFlashMemoryList.size();i++)
 	{
 		if (m_deviceFlashMemoryList[i]->locationid == locationid)
