@@ -43,9 +43,14 @@ Section "EMStudio (Required)" ;No components page, name is not important
   SetOutPath $INSTDIR
   
   ; Put file there
-  File "/home/michael/code/emstudio/release/emstudio.exe"
-  File "/home/michael/code/emstudio/src/gauges.qml"
-  File "/home/michael/code/emstudio/freeems.config.json"
+  ; These files should be local to this script
+  ;File "/home/michael/code/emstudio/release/emstudio.exe"
+  ;File "/home/michael/code/emstudio/src/gauges.qml"
+  ;File "/home/michael/code/emstudio/freeems.config.json"
+  File "release/emstudio.exe"
+  File "src/gauges.qml"
+  File "freeems.config.json"
+
 
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\EMStudio "Install_Dir" "$INSTDIR"
