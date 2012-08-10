@@ -12,22 +12,23 @@ INCLUDEPATH += src
 OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
-QMAKE_CXXFLAGS += -Werror
+QMAKE_CXXFLAGS += -Werror -static-libgcc
 win32 {
-	if ($$(QMAKESPEC) == "win32-x-g++")
-	{
+	#if ($$(QMAKESPEC) == "win32-x-g++")
+	#{
+		
 		INCLUDEPATH += /home/michael/QtWin/libs/qwt/include /home/michael/QtWin/libs/qjson/include
 		LIBS += -L/home/michael/QtWin/libs/qwt/lib -lqwt -L/home/michael/QtWin/libs/qjson/lib -lqjson0
 		DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
 		DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
-	}
-	if ($$(QMAKESPEC) =! "win32-x-g++")
-	{
-		INCLUDEPATH += C:/libs/qwt/include C:/libs/qjson/include
-		LIBS += -LC:/libs/qwt/lib -lqwt -LC:/libs/qjson/lib -lqjson0
-		DEFINES += GIT_COMMIT=$$system(\"c:/program files/git/bin/git.exe\" describe --dirty=-DEV --always)
-		DEFINES += GIT_HASH=$$system(\"c:/program files/git/bin/git.exe\" log -n 1 --pretty=format:%H)
-	}
+	#}
+	#if ($$(QMAKESPEC) =! "win32-x-g++")
+	#{
+	#	INCLUDEPATH += C:/libs/qwt/include C:/libs/qjson/include
+	#	LIBS += -LC:/libs/qwt/lib -lqwt -LC:/libs/qjson/lib -lqjson0
+	#	DEFINES += GIT_COMMIT=$$system(\"c:/program files/git/bin/git.exe\" describe --dirty=-DEV --always)
+	#	DEFINES += GIT_HASH=$$system(\"c:/program files/git/bin/git.exe\" log -n 1 --pretty=format:%H)
+	#}
 }
 unix {
 	target.path = /usr/bin

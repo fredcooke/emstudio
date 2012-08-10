@@ -62,19 +62,20 @@ Section "Qt Components"
 
   SetOutPath $INSTDIR
 
-  File /usr/lib32/qt4win32/QtCore4.dll
-  File /usr/lib32/qt4win32/QtGui4.dll
-  File /usr/lib32/qt4win32/QtOpenGL4.dll
-  File /usr/lib32/qt4win32/QtSvg4.dll
-  File /usr/lib32/qt4win32/QtDeclarative4.dll
-  File /usr/lib32/qt4win32/QtGui4.dll
-  File /usr/lib32/qt4win32/QtNetwork4.dll
-  File /usr/lib32/qt4win32/QtScript4.dll
-  File /usr/lib32/qt4win32/QtSql4.dll
-  File /usr/lib32/qt4win32/QtXml4.dll
-  File /usr/lib32/qt4win32/QtXmlPatterns4.dll
+  File /usr/lib/qt4win32/QtCore4.dll
+  File /usr/lib/qt4win32/QtGui4.dll
+  File /usr/lib/qt4win32/QtOpenGL4.dll
+  File /usr/lib/qt4win32/QtSvg4.dll
+  File /usr/lib/qt4win32/QtDeclarative4.dll
+  File /usr/lib/qt4win32/QtGui4.dll
+  File /usr/lib/qt4win32/QtNetwork4.dll
+  File /usr/lib/qt4win32/QtScript4.dll
+  File /usr/lib/qt4win32/QtSql4.dll
+  File /usr/lib/qt4win32/QtXml4.dll
+  File /usr/lib/qt4win32/QtXmlPatterns4.dll
   File /home/michael/QtWin/libs/qwt/bin/qwt.dll
   File /home/michael/QtWin/libs/qjson/bin/qjson0.dll
+  File /usr/share/doc/mingw32-runtime/mingwm10.dll
 
 
 SectionEnd
