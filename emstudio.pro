@@ -12,7 +12,8 @@ INCLUDEPATH += src
 OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
-QMAKE_CXXFLAGS += -Werror -static-libgcc
+QMAKE_CXXFLAGS += -Werror
+QMAKE_LFLAGS += -static-libg++
 win32-x-g++ {
         message("Building for win32-x-g++")
         INCLUDEPATH += /home/michael/QtWin/libs/qwt/include /home/michael/QtWin/libs/qjson/include
