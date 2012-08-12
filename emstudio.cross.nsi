@@ -81,7 +81,7 @@ Section "Qt Components"
   File /home/michael/QtWin/libs/qwt/bin/qwt.dll
   File /home/michael/QtWin/libs/qjson/bin/qjson0.dll
   File /usr/share/doc/mingw32-runtime/mingwm10.dll
-
+  File /home/michael/QtWin/lib/libgcc_s_dw2-1.dll
 
 SectionEnd
 
