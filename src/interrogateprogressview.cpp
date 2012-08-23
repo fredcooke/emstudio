@@ -47,7 +47,6 @@ void InterrogateProgressView::addTask(QString task, int sequencenumber)
 	ui.outputTableWidget->setItem(ui.outputTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(sequencenumber)));
 	ui.outputTableWidget->setItem(ui.outputTableWidget->rowCount()-1,1,new QTableWidgetItem(task));
 	ui.outputTableWidget->setItem(ui.outputTableWidget->rowCount()-1,2,new QTableWidgetItem("In progress"));
-	ui.outputTableWidget->scrollToBottom();
 }
 
 void InterrogateProgressView::taskFail(int sequencenumber)
@@ -58,6 +57,7 @@ void InterrogateProgressView::taskFail(int sequencenumber)
 		{
 			ui.outputTableWidget->item(i,2)->setText("Failed");
 			ui.outputTableWidget->item(i,2)->setBackgroundColor(QColor::fromRgb(255,0,0));
+			ui.outputTableWidget->scrollToItem(ui.outputTableWidget->item(i,0));
 		}
 	}
 }
@@ -70,6 +70,7 @@ void InterrogateProgressView::taskSucceed(int sequencenumber)
 		{
 			ui.outputTableWidget->item(i,2)->setText("Ok");
 			ui.outputTableWidget->item(i,2)->setBackgroundColor(QColor::fromRgb(0,255,0));
+			ui.outputTableWidget->scrollToItem(ui.outputTableWidget->item(i,0));
 		}
 	}
 }
