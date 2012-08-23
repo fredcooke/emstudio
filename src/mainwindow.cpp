@@ -1496,6 +1496,7 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 		m_tempMemoryList.append(loc);
 		int seq = emsComms->getLocationIdInfo(idlist[i]);
 		progressView->setMaximum(progressView->maximum()+1);
+		progressView->addTask("Getting Location ID Info for 0x" + QString::number(idlist[i],16).toUpper(),seq);
 		m_locIdMsgList.append(seq);
 		interrogationSequenceList.append(seq);
 	}
@@ -1584,9 +1585,9 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	emsComms->setLogDirectory(m_logDirectory);
 	emsComms->setLogsEnabled(m_saveLogs);
 	emsComms->start();
-	progressView->hide();
-	progressView->deleteLater();
-	progressView=0;
+	//progressView->hide();
+	//progressView->deleteLater();
+	//progressView=0;
 	emsInfo->clear();
 	this->setEnabled(true);
 	ui.actionConnect->setEnabled(true);
@@ -1619,15 +1620,40 @@ void MainWindow::emsCommsConnected()
 	connect(progressView,SIGNAL(cancelClicked()),this,SLOT(interrogateProgressViewCancelClicked()));
 	progressView->setMaximum(0);
 	progressView->show();
+	progressView->addOutput("Connected to EMS");
 	this->setEnabled(false);
-	interrogationSequenceList.append(emsComms->getFirmwareVersion());
-	interrogationSequenceList.append(emsComms->getInterfaceVersion());
-	interrogationSequenceList.append(emsComms->getLocationIdList(0x00,0x00));
-	interrogationSequenceList.append(emsComms->getCompilerVersion());
-	interrogationSequenceList.append(emsComms->getDecoderName());
-	interrogationSequenceList.append(emsComms->getFirmwareBuildDate());
-	interrogationSequenceList.append(emsComms->getMaxPacketSize());
-	interrogationSequenceList.append(emsComms->getOperatingSystem());
+	int seq = emsComms->getFirmwareVersion();
+	interrogationSequenceList.append(seq);
+	progressView->addTask("Get Firmware Version",seq);
+
+	seq = emsComms->getInterfaceVersion();
+	interrogationSequenceList.append(seq);
+	progressView->addTask("Get Interface Version",seq);
+
+	seq = emsComms->getLocationIdList(0x00,0x00);
+	interrogationSequenceList.append(seq);
+	progressView->addTask("Get Location ID List",seq);
+
+	seq = emsComms->getCompilerVersion();
+	interrogationSequenceList.append(seq);
+	progressView->addTask("Get Compiler Version",seq);
+
+	seq = emsComms->getDecoderName();
+	interrogationSequenceList.append(seq);
+	progressView->addTask("Get Decoder Name",seq);
+
+	seq = emsComms->getFirmwareBuildDate();
+	interrogationSequenceList.append(seq);
+	progressView->addTask("Get Firmware Build Date",seq);
+
+	seq = emsComms->getMaxPacketSize();
+	interrogationSequenceList.append(seq);
+	progressView->addTask("Get Max Packet Size",seq);
+
+	seq = emsComms->getOperatingSystem();
+	interrogationSequenceList.append(seq);
+	progressView->addTask("Get Operating System",seq);
+
 
 	progressView->setMaximum(8);
 	//progressView->setMax(progressView->max()+1);
@@ -1713,6 +1739,7 @@ void MainWindow::commandTimedOut(int sequencenumber)
 	}
 	if (m_interrogationInProgress)
 	{
+		progressView->taskFail(sequencenumber);
 		//If interrogation is in progress, we need to stop, since something has gone
 		//horribly wrong.
 		interrogateProgressViewCancelClicked();
@@ -1723,6 +1750,10 @@ void MainWindow::commandTimedOut(int sequencenumber)
 void MainWindow::commandSuccessful(int sequencenumber)
 {
 	qDebug() << "Command succesful:" << QString::number(sequencenumber);
+	if (m_interrogationInProgress)
+	{
+		progressView->taskSucceed(sequencenumber);
+	}
 	if (m_waitingForRamWriteConfirmation)
 	{
 		m_waitingForRamWriteConfirmation = false;
@@ -1764,6 +1795,7 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 				if (!m_deviceFlashMemoryList[i]->hasParent)
 				{
 					int seq = emsComms->retrieveBlockFromFlash(m_deviceFlashMemoryList[i]->locationid,0,0);
+					progressView->addTask("Getting Location ID 0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper(),seq);
 					m_locIdInfoMsgList.append(seq);
 					progressView->setMaximum(progressView->maximum()+1);
 					interrogationSequenceList.append(seq);
@@ -1774,6 +1806,7 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 				if (!m_deviceRamMemoryList[i]->hasParent)
 				{
 					int seq = emsComms->retrieveBlockFromRam(m_deviceRamMemoryList[i]->locationid,0,0);
+					progressView->addTask("Getting Location ID 0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper(),seq);
 					m_locIdInfoMsgList.append(seq);
 					progressView->setMaximum(progressView->maximum()+1);
 					interrogationSequenceList.append(seq);
@@ -1982,6 +2015,10 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	if (!m_interrogationInProgress)
 	{
 		QMessageBox::information(0,"Command Failed","Command failed with error: " + m_errorMap[errornum]);
+	}
+	else
+	{
+		progressView->taskFail(sequencenumber);
 	}
 	bool found = false;
 	if (m_waitingForRamWriteConfirmation)
