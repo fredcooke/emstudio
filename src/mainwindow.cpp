@@ -1238,6 +1238,7 @@ void MainWindow::menu_settingsClicked()
 void MainWindow::menu_connectClicked()
 {
 	ui.actionConnect->setEnabled(false);
+	ui.actionDisconnect->setEnabled(true);
 	m_interrogationInProgress = true;
 	emsComms->connectSerial(m_comPort,m_comBaud);
 }
