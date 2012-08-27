@@ -31,11 +31,6 @@ void OverviewProgressItemDelegate::paint(QPainter *painter, const QStyleOptionVi
 			if (imax == ivalue)
 			{
 
-				//painter->fillPath(rounded_rect,QColor::fromRgb(100,255,100));
-				QLinearGradient gradient(50,50,50,50);
-				gradient.setColorAt(0,QColor::fromRgb(100,255,100));
-				gradient.setColorAt(1,QColor::fromRgb(100,255,100));
-				gradient.setColorAt(2,QColor::fromRgb(100,255,100));
 				painter->fillPath(rounded_rect,QColor::fromRgb(100,255,100));
 				painter->setPen(QColor::fromRgb(0,0,0));
 				painter->drawText(option.rect.x() + (option.rect.width() / 2.0) - (painter->fontMetrics().width("Done")/2.0),option.rect.y()+ (option.rect.height()/2.0) - (painter->fontMetrics().height()/2.0),option.rect.width(),option.rect.height(),0,QString("Done"));
