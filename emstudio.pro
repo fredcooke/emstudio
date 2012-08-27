@@ -70,7 +70,8 @@ SOURCES += src/main.cpp\
     src/interrogateprogressview.cpp \
     src/table3ddata.cpp \
     src/tabledata.cpp \
-    src/readonlyramview.cpp
+    src/readonlyramview.cpp \
+    src/overviewprogressitemdelegate.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -103,7 +104,8 @@ HEADERS  += src/mainwindow.h \
     src/table3ddata.h \
     src/headers.h \
     src/tabledata.h \
-    src/readonlyramview.h
+    src/readonlyramview.h \
+    src/overviewprogressitemdelegate.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \

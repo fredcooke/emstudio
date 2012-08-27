@@ -112,6 +112,7 @@ private:
 	QList<int> interrogationSequenceList;
 	QMap<unsigned short,QWidget*> m_rawDataView;
 	QMdiSubWindow *tablesMdiWindow;
+	QMdiSubWindow *interrogateProgressMdiWindow;
 	QMdiSubWindow *emsMdiWindow;
 	QMdiSubWindow *flagsMdiWindow;
 	QMdiSubWindow *gaugesMdiWindow;

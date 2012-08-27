@@ -21,7 +21,7 @@
 
 #include <QWidget>
 #include "ui_interrogateprogressview.h"
-
+#include "overviewprogressitemdelegate.h"
 class InterrogateProgressView : public QWidget
 {
 	Q_OBJECT

@@ -1589,7 +1589,7 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	//progressView->deleteLater();
 	//progressView=0;
 	emsInfo->clear();
-	this->setEnabled(true);
+	//this->setEnabled(true);
 	ui.actionConnect->setEnabled(true);
 }
 void MainWindow::emsCompilerVersion(QString version)
@@ -1617,11 +1617,14 @@ void MainWindow::emsCommsConnected()
 	//New log and settings file here.
 
 	progressView = new InterrogateProgressView();
+	interrogateProgressMdiWindow = ui.mdiArea->addSubWindow(progressView);
+	interrogateProgressMdiWindow->setGeometry(progressView->geometry());
 	connect(progressView,SIGNAL(cancelClicked()),this,SLOT(interrogateProgressViewCancelClicked()));
 	progressView->setMaximum(0);
 	progressView->show();
+	interrogateProgressMdiWindow->show();
 	progressView->addOutput("Connected to EMS");
-	this->setEnabled(false);
+	//this->setEnabled(false);
 	int seq = emsComms->getFirmwareVersion();
 	interrogationSequenceList.append(seq);
 	progressView->addTask("Get Firmware Version",seq,0);
@@ -1824,7 +1827,7 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 			progressView->hide();
 			progressView->deleteLater();
 			progressView=0;
-			this->setEnabled(true);
+			//this->setEnabled(true);
 			qDebug() << "Interrogation complete";
 			emsInfo->show();
 			//Write everything to the settings.
