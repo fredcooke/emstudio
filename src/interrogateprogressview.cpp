@@ -27,6 +27,19 @@ InterrogateProgressView::InterrogateProgressView(QWidget *parent) : QWidget(pare
 	ui.outputTableWidget->setColumnWidth(0,50);
 	ui.outputTableWidget->setColumnWidth(1,300);
 	ui.outputTableWidget->setColumnWidth(2,100);
+
+	ui.overviewTableWidget->setColumnCount(2);
+	ui.overviewTableWidget->setColumnWidth(0,300);
+	ui.overviewTableWidget->setColumnWidth(1,100);
+	ui.overviewTableWidget->setRowCount(3);
+	ui.overviewTableWidget->setItem(0,0,new QTableWidgetItem("ECU Build Information"));
+	ui.overviewTableWidget->setItem(0,1,new QTableWidgetItem("0"));
+
+	ui.overviewTableWidget->setItem(1,0,new QTableWidgetItem("Location ID Info"));
+	ui.overviewTableWidget->setItem(1,1,new QTableWidgetItem("0"));
+
+	ui.overviewTableWidget->setItem(2,0,new QTableWidgetItem("Location ID Contents"));
+	ui.overviewTableWidget->setItem(2,1,new QTableWidgetItem("0"));
 }
 
 InterrogateProgressView::~InterrogateProgressView()
@@ -40,9 +53,28 @@ void InterrogateProgressView::addOutput(QString output)
 	ui.outputTableWidget->setItem(ui.outputTableWidget->rowCount()-1,2,new QTableWidgetItem());
 	ui.outputTableWidget->scrollToBottom();
 }
-void InterrogateProgressView::addTask(QString task, int sequencenumber)
+void InterrogateProgressView::addTask(QString task, int sequencenumber,int type)
 {
+	if (type == 0)
+	{
+		//ECU Build Info
+		ui.overviewTableWidget->item(0,1)->setText(QString::number(ui.overviewTableWidget->item(0,1)->text().toInt()+1));
+		m_typeToOverviewListMap[sequencenumber] = 0;
+	}
+	else if (type == 1)
+	{
+		//Location ID Info
+		ui.overviewTableWidget->item(1,1)->setText(QString::number(ui.overviewTableWidget->item(1,1)->text().toInt()+1));
+		m_typeToOverviewListMap[sequencenumber] = 1;
+	}
+	else if (type == 2)
+	{
+		//Location ID contents
+		ui.overviewTableWidget->item(2,1)->setText(QString::number(ui.overviewTableWidget->item(2,1)->text().toInt()+1));
+		m_typeToOverviewListMap[sequencenumber] = 2;
+	}
 	//ui.outputTextBrowser->append(QString::number(sequencenumber) + ": " + task + "...");
+
 	ui.outputTableWidget->setRowCount(ui.outputTableWidget->rowCount()+1);
 	ui.outputTableWidget->setItem(ui.outputTableWidget->rowCount()-1,0,new QTableWidgetItem(QString::number(sequencenumber)));
 	ui.outputTableWidget->setItem(ui.outputTableWidget->rowCount()-1,1,new QTableWidgetItem(task));
@@ -51,6 +83,10 @@ void InterrogateProgressView::addTask(QString task, int sequencenumber)
 
 void InterrogateProgressView::taskFail(int sequencenumber)
 {
+	if (m_typeToOverviewListMap.contains(sequencenumber))
+	{
+		ui.overviewTableWidget->item(m_typeToOverviewListMap[sequencenumber],1)->setText(QString::number(ui.overviewTableWidget->item(m_typeToOverviewListMap[sequencenumber],1)->text().toInt()-1));
+	}
 	for (int i=0;i<ui.outputTableWidget->rowCount();i++)
 	{
 		if (ui.outputTableWidget->item(i,0)->text() == QString::number(sequencenumber))
@@ -64,6 +100,10 @@ void InterrogateProgressView::taskFail(int sequencenumber)
 
 void InterrogateProgressView::taskSucceed(int sequencenumber)
 {
+	if (m_typeToOverviewListMap.contains(sequencenumber))
+	{
+		ui.overviewTableWidget->item(m_typeToOverviewListMap[sequencenumber],1)->setText(QString::number(ui.overviewTableWidget->item(m_typeToOverviewListMap[sequencenumber],1)->text().toInt()-1));
+	}
 	for (int i=0;i<ui.outputTableWidget->rowCount();i++)
 	{
 		if (ui.outputTableWidget->item(i,0)->text() == QString::number(sequencenumber))

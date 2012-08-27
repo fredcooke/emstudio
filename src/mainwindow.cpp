@@ -1496,7 +1496,7 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 		m_tempMemoryList.append(loc);
 		int seq = emsComms->getLocationIdInfo(idlist[i]);
 		progressView->setMaximum(progressView->maximum()+1);
-		progressView->addTask("Getting Location ID Info for 0x" + QString::number(idlist[i],16).toUpper(),seq);
+		progressView->addTask("Getting Location ID Info for 0x" + QString::number(idlist[i],16).toUpper(),seq,1);
 		m_locIdMsgList.append(seq);
 		interrogationSequenceList.append(seq);
 	}
@@ -1624,35 +1624,35 @@ void MainWindow::emsCommsConnected()
 	this->setEnabled(false);
 	int seq = emsComms->getFirmwareVersion();
 	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Firmware Version",seq);
+	progressView->addTask("Get Firmware Version",seq,0);
 
 	seq = emsComms->getInterfaceVersion();
 	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Interface Version",seq);
+	progressView->addTask("Get Interface Version",seq,0);
 
 	seq = emsComms->getLocationIdList(0x00,0x00);
 	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Location ID List",seq);
+	progressView->addTask("Get Location ID List",seq,0);
 
 	seq = emsComms->getCompilerVersion();
 	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Compiler Version",seq);
+	progressView->addTask("Get Compiler Version",seq,0);
 
 	seq = emsComms->getDecoderName();
 	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Decoder Name",seq);
+	progressView->addTask("Get Decoder Name",seq,0);
 
 	seq = emsComms->getFirmwareBuildDate();
 	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Firmware Build Date",seq);
+	progressView->addTask("Get Firmware Build Date",seq,0);
 
 	seq = emsComms->getMaxPacketSize();
 	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Max Packet Size",seq);
+	progressView->addTask("Get Max Packet Size",seq,0);
 
 	seq = emsComms->getOperatingSystem();
 	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Operating System",seq);
+	progressView->addTask("Get Operating System",seq,0);
 
 
 	progressView->setMaximum(8);
@@ -1795,7 +1795,7 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 				if (!m_deviceFlashMemoryList[i]->hasParent)
 				{
 					int seq = emsComms->retrieveBlockFromFlash(m_deviceFlashMemoryList[i]->locationid,0,0);
-					progressView->addTask("Getting Location ID 0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper(),seq);
+					progressView->addTask("Getting Location ID 0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper(),seq,2);
 					m_locIdInfoMsgList.append(seq);
 					progressView->setMaximum(progressView->maximum()+1);
 					interrogationSequenceList.append(seq);
@@ -1806,7 +1806,7 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 				if (!m_deviceRamMemoryList[i]->hasParent)
 				{
 					int seq = emsComms->retrieveBlockFromRam(m_deviceRamMemoryList[i]->locationid,0,0);
-					progressView->addTask("Getting Location ID 0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper(),seq);
+					progressView->addTask("Getting Location ID 0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper(),seq,2);
 					m_locIdInfoMsgList.append(seq);
 					progressView->setMaximum(progressView->maximum()+1);
 					interrogationSequenceList.append(seq);

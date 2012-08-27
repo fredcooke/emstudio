@@ -32,13 +32,14 @@ public:
 	void setProgress(int progress);
 	void setMaximum(int maximum);
 	void addOutput(QString output);
-	void addTask(QString task, int sequencenumber);
+	void addTask(QString task, int sequencenumber,int type);
 	void taskFail(int sequencenumber);
 	void taskSucceed(int sequencenumber);
 	int maximum() { return ui.progressBar->maximum(); }
 	int progress() { return ui.progressBar->value(); }
 private:
 	Ui::InterrogateProgressView ui;
+	QMap<int,int> m_typeToOverviewListMap;
 private slots:
 	void cancelClickedSlot();
 signals:
