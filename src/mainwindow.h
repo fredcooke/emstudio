@@ -168,6 +168,7 @@ private:
 	void checkRamFlashSync();
 	bool m_interrogationInProgress;
 private slots:
+	void interrogateProgressViewDestroyed(QObject *object);
 	void emsOperatingSystem(QString os);
 	void emsDecoderName(QString name);
 	void emsFirmwareBuildDate(QString date);

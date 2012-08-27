@@ -520,9 +520,9 @@ void MainWindow::emsCommsDisconnected()
 	ui.actionDisconnect->setEnabled(false);
 	if (progressView)
 	{
-		progressView->hide();
-		progressView->deleteLater();
-		progressView=0;
+		//progressView->hide();
+		//progressView->deleteLater();
+		//progressView=0;
 	}
 }
 
@@ -895,6 +895,18 @@ void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int p
 	}
 
 
+}
+void MainWindow::interrogateProgressViewDestroyed(QObject *object)
+{
+	Q_UNUSED(object);
+	QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>(object->parent());
+	if (!win)
+	{
+		//qDebug() << "Error "
+		return;
+	}
+	win->hide();
+	ui.mdiArea->removeSubWindow(win);
 }
 
 void MainWindow::rawDataViewDestroyed(QObject *object)
@@ -1541,9 +1553,12 @@ void MainWindow::error(QString msg)
 }
 void MainWindow::interrogateProgressViewCancelClicked()
 {
+	emsComms->disconnectSerial();
+	emsComms->wait(500);
 	emsComms->terminate();
-	emsComms->wait(5000);
-	emsComms->deleteLater();
+	emsComms->wait(500);
+	//emsComms->deleteLater();
+	delete emsComms;
 	emsComms = 0;
 
 	//Need to reset everything here.
@@ -1617,7 +1632,14 @@ void MainWindow::emsCommsConnected()
 {
 	//New log and settings file here.
 
+	if (progressView)
+	{
+		QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>(progressView->parent());
+		ui.mdiArea->removeSubWindow(win);
+		delete progressView;
+	}
 	progressView = new InterrogateProgressView();
+	connect(progressView,SIGNAL(destroyed(QObject*)),this,SLOT(interrogateProgressViewDestroyed(QObject*)));
 	interrogateProgressMdiWindow = ui.mdiArea->addSubWindow(progressView);
 	interrogateProgressMdiWindow->setGeometry(progressView->geometry());
 	connect(progressView,SIGNAL(cancelClicked()),this,SLOT(interrogateProgressViewCancelClicked()));
