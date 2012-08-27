@@ -239,6 +239,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_waitingForRamWriteConfirmation = false;
 	m_waitingForFlashWriteConfirmation = false;
 	ui.setupUi(this);
+	connect(ui.actionSave_Offline_Data,SIGNAL(triggered()),this,SLOT(menu_file_saveOfflineDataClicked()));
+	connect(ui.actionLoad_Offline_Data,SIGNAL(triggered()),this,SLOT(menu_file_loadOfflineDataClicked()));
 	this->setWindowTitle(QString("EMStudio ") + QString(define2string(GIT_COMMIT)));
 	emsinfo.emstudioCommit = define2string(GIT_COMMIT);
 	emsinfo.emstudioHash = define2string(GIT_HASH);
@@ -512,7 +514,177 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	win->show();
 	win->raise();*/
 }
+void MainWindow::menu_file_saveOfflineDataClicked()
+{
+	QVariantMap top;
+	QVariantMap flashMap;
+	QVariantMap metaMap;
+	QVariantMap ramMap;
+	QMap<unsigned short,MemoryLocationInfo>::const_iterator i = m_memoryInfoMap.constBegin();
+	while (i != m_memoryInfoMap.constEnd())
+	{
+		QVariantMap id;
+		id["id"] = QString::number((unsigned short)i.key(),16).toUpper();
+		id["flags"] = QString::number((unsigned short)i.value().rawflags,16).toUpper();
+		id["rampage"] = QString::number((unsigned char)i.value().rampage,16).toUpper();
+		id["flashpage"] = QString::number((unsigned char)i.value().flashpage,16).toUpper();
+		id["ramaddress"] = QString::number((unsigned short)i.value().ramaddress,16).toUpper();
+		id["flashaddress"] = QString::number((unsigned short)i.value().flashaddress,16).toUpper();
+		id["parent"] = QString::number((unsigned short)i.value().parent,16).toUpper();
+		id["size"] = QString::number((unsigned short)i.value().size,16).toUpper();
+		metaMap[QString::number((unsigned short)i.key(),16).toUpper()] = id;
+		if (!i.value().flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+		{
+			if (!i.value().flags.contains(FreeEmsComms::BLOCK_IS_READ_ONLY))
+			{
+				if (i.value().flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
+				{
+					QString val = "";
+					QByteArray block = getDeviceFlashBlock(i.key());
+					for (int j=0;j<block.size();j++)
+					{
+						val += QString::number((unsigned char)block[j],16).toUpper() + ",";
+					}
+					val = val.mid(0,val.length()-1);
+					flashMap[QString::number((unsigned short)i.key(),16).toUpper()] = val;
+				}
+				if (i.value().flags.contains(FreeEmsComms::BLOCK_IS_RAM))
+				{
+					QString val = "";
+					QByteArray block = getDeviceRamBlock(i.key());
+					for (int j=0;j<block.size();j++)
+					{
+						val += QString::number((unsigned char)block[j],16).toUpper() + ",";
+					}
+					val = val.mid(0,val.length()-1);
+					ramMap[QString::number((unsigned short)i.key(),16).toUpper()] = val;
+				}
+			}
+		}
+		i++;
+	}
+	top["ram"] = ramMap;
+	top["flash"] = flashMap;
+	top["meta"] = metaMap;
+	QJson::Serializer serializer;
+	QByteArray out = serializer.serialize(top);
+	QFile outfile("test.output.json");
+	outfile.open(QIODevice::ReadWrite | QIODevice::Truncate);
+	outfile.write(out);
+	outfile.flush();
+	outfile.close();
+}
 
+void MainWindow::menu_file_loadOfflineDataClicked()
+{
+	//QByteArray out = serializer.serialize(top);
+	QFile outfile("test.output.json");
+	outfile.open(QIODevice::ReadOnly);
+	QByteArray out = outfile.readAll();
+	outfile.close();
+
+	QJson::Parser parser;
+	bool ok = false;
+	QVariant outputvar = parser.parse(out,&ok);
+	if (!ok)
+	{
+		qDebug() << "Error parsing json:" << parser.errorString();
+		return;
+	}
+	QVariantMap top = outputvar.toMap();
+	QVariantMap ramMap = top["ram"].toMap();
+	QVariantMap flashMap = top["flash"].toMap();
+	QVariantMap metaMap = top["meta"].toMap();
+	QVariantMap::const_iterator i = metaMap.constBegin();
+	while (i != metaMap.constEnd())
+	{
+		bool ok;
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = i.key().toInt();
+		m_tempMemoryList.append(loc);
+		unsigned short flags =i.value().toMap()["flags"].toString().toInt(&ok,16);
+		unsigned char rampage = i.value().toMap()["rampage"].toString().toInt(&ok,16);
+		unsigned short ramaddress = i.value().toMap()["ramaddress"].toString().toInt(&ok,16);
+		unsigned char flashpage = i.value().toMap()["flashpage"].toString().toInt(&ok,16);
+		unsigned short flashaddress = i.value().toMap()["flags"].toString().toInt(&ok,16);
+		unsigned short parent = i.value().toMap()["parent"].toString().toInt(&ok,16);
+		unsigned short size = i.value().toMap()["size"].toString().toInt(&ok,16);
+		unsigned short id = i.key().toInt(&ok,16);
+		QList<FreeEmsComms::LocationIdFlags> m_blockFlagList;
+		m_blockFlagList.append(FreeEmsComms::BLOCK_HAS_PARENT);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_RAM);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_FLASH);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_INDEXABLE);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_READ_ONLY);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_GETS_VERIFIED);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_FOR_BACKUP_RESTORE);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_SPARE_7);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_SPARE_8);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_SPARE_9);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_SPARE_10);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_SPARE_11);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_2D_TABLE);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_MAIN_TABLE);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_LOOKUP_DATA);
+		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_CONFIGURATION);
+		QList<FreeEmsComms::LocationIdFlags> nflags;
+		for (int j=0;j<m_blockFlagList.size();j++)
+		{
+			if (flags & m_blockFlagList[j])
+			{
+				nflags.append(m_blockFlagList[j]);
+			}
+		}
+		locationIdInfo(id,flags,nflags,parent,rampage,flashpage,ramaddress,flashaddress,size);
+		i++;
+	}
+	checkRamFlashSync();
+	i = ramMap.constBegin();
+	while (i != ramMap.constEnd())
+	{
+		//ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
+		QString val = i.value().toString();
+		QStringList valsplit = val.split(",");
+		QByteArray bytes;
+		bool ok = false;
+		for (int j=0;j<valsplit.size();j++)
+		{
+			bytes.append(valsplit[j].toInt(&ok,16));
+		}
+		ramBlockRetrieved(i.key().toInt(),QByteArray(),bytes);
+		i++;
+	}
+
+	i = flashMap.constBegin();
+	while (i != flashMap.constEnd())
+	{
+		QString val = i.value().toString();
+		QStringList valsplit = val.split(",");
+		QByteArray bytes;
+		bool ok = false;
+		for (int j=0;j<valsplit.size();j++)
+		{
+			bytes.append(valsplit[j].toInt(&ok,16));
+		}
+		flashBlockRetrieved(i.key().toInt(),QByteArray(),bytes);
+		i++;
+	}
+	/*for (int i=0;i<idlist.size();i++)
+	{
+		//ui/listWidget->addItem(QString::number(idlist[i]));
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = idlist[i];
+		m_tempMemoryList.append(loc);
+		int seq = emsComms->getLocationIdInfo(idlist[i]);
+		progressView->setMaximum(progressView->maximum()+1);
+		progressView->addTask("Getting Location ID Info for 0x" + QString::number(idlist[i],16).toUpper(),seq,1);
+		m_locIdMsgList.append(seq);
+		interrogationSequenceList.append(seq);
+	}*/
+	//locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
+	//void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
+	//void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
+}
 
 void MainWindow::emsCommsDisconnected()
 {
@@ -1311,6 +1483,19 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 	Q_UNUSED(ramaddress)
 	Q_UNUSED(flashaddress)
 	QString title;
+	if (m_memoryInfoMap.contains(locationid))
+	{
+		m_memoryInfoMap[locationid] = MemoryLocationInfo();
+	}
+	m_memoryInfoMap[locationid].locationid = locationid;
+	m_memoryInfoMap[locationid].rawflags = rawFlags;
+	m_memoryInfoMap[locationid].flags = flags;
+	m_memoryInfoMap[locationid].parent = parent;
+	m_memoryInfoMap[locationid].flashpage = flashpage;
+	m_memoryInfoMap[locationid].rampage = rampage;
+	m_memoryInfoMap[locationid].flashaddress = flashaddress;
+	m_memoryInfoMap[locationid].ramaddress = ramaddress;
+	m_memoryInfoMap[locationid].size = size;
 	for (int i=0;i<m_table3DMetaData.size();i++)
 	{
 		if (locationid == m_table3DMetaData[i].locationId)

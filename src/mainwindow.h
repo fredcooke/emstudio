@@ -68,6 +68,19 @@ public:
 	QString emstudioHash;
 };
 
+class MemoryLocationInfo
+{
+public:
+	unsigned short locationid;
+	unsigned short rawflags;
+	QList<FreeEmsComms::LocationIdFlags> flags;
+	unsigned short parent;
+	unsigned char rampage;
+	unsigned char flashpage;
+	unsigned short ramaddress;
+	unsigned short flashaddress;
+	unsigned short size;
+};
 
 class MainWindow : public QMainWindow
 {
@@ -79,6 +92,7 @@ public:
 	void setDevice(QString dev);
 	void connectToEms();
 private:
+	QMap<unsigned short,MemoryLocationInfo> m_memoryInfoMap;
 	Interrogation emsinfo;
 	unsigned short m_currentRamLocationId;
 	bool m_waitingForRamWriteConfirmation;
@@ -180,6 +194,8 @@ private slots:
 	void emsInfoDisplayLocationId(int locid,bool isram,int type);
 	void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void dataViewSaveLocation(unsigned short locationid,QByteArray data,int phyiscallocation);
+	void menu_file_saveOfflineDataClicked();
+	void menu_file_loadOfflineDataClicked();
 	void menu_windows_GaugesClicked();
 	void menu_windows_EmsInfoClicked();
 	void menu_windows_TablesClicked();

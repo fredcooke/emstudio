@@ -54,6 +54,9 @@
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
     <addaction name="separator"/>
+    <addaction name="actionSave_Offline_Data"/>
+    <addaction name="actionLoad_Offline_Data"/>
+    <addaction name="separator"/>
     <addaction name="actionExit_3"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -155,6 +158,16 @@
   <action name="actionAbout">
    <property name="text">
     <string>&amp;About</string>
+   </property>
+  </action>
+  <action name="actionSave_Offline_Data">
+   <property name="text">
+    <string>Save Offline Data</string>
+   </property>
+  </action>
+  <action name="actionLoad_Offline_Data">
+   <property name="text">
+    <string>Load Offline Data</string>
    </property>
   </action>
  </widget>
