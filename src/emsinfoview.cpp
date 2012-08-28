@@ -173,8 +173,24 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,QString title,unsigne
 	}
 	if (!found)
 	{*/
-	ui.locationIdInfoTableWidget->setRowCount(ui.locationIdInfoTableWidget->rowCount()+1);
-	foundi = ui.locationIdInfoTableWidget->rowCount()-1;
+	bool ok = false;
+	bool found = false;
+	for (int i=0;i<ui.locationIdInfoTableWidget->rowCount();i++)
+	{
+		unsigned short test = ui.locationIdInfoTableWidget->item(i,0)->text().split("x")[1].toInt(&ok,16);
+		if (test > locationid)
+		{
+			foundi = i;
+			found = true;
+			ui.locationIdInfoTableWidget->insertRow(i);
+			break;
+		}
+	}
+	if (!found)
+	{
+		ui.locationIdInfoTableWidget->setRowCount(ui.locationIdInfoTableWidget->rowCount()+1);
+		foundi = ui.locationIdInfoTableWidget->rowCount()-1;
+	}
 	ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem("0x" + QString::number(locationid,16).toUpper()));
 	for (int i=1;i<17;i++)
 	{
