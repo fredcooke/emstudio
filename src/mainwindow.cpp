@@ -529,6 +529,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 }
 void MainWindow::menu_file_saveOfflineDataClicked()
 {
+	QString filename = QFileDialog::getSaveFileName(this,"Save Offline File",".","Offline JSON Files (*.json)");
+	if (filename == "")
+	{
+		return;
+	}
 	QVariantMap top;
 	QVariantMap flashMap;
 	QVariantMap metaMap;
@@ -581,7 +586,7 @@ void MainWindow::menu_file_saveOfflineDataClicked()
 	top["meta"] = metaMap;
 	QJson::Serializer serializer;
 	QByteArray out = serializer.serialize(top);
-	QFile outfile("test.output.json");
+	QFile outfile(filename);
 	outfile.open(QIODevice::ReadWrite | QIODevice::Truncate);
 	outfile.write(out);
 	outfile.flush();
@@ -590,8 +595,13 @@ void MainWindow::menu_file_saveOfflineDataClicked()
 
 void MainWindow::menu_file_loadOfflineDataClicked()
 {
+	QString filename = QFileDialog::getOpenFileName(this,"Load Offline File",".","Offline JSON Files (*.json)");
+	if (filename == "")
+	{
+		return;
+	}
 	//QByteArray out = serializer.serialize(top);
-	QFile outfile("test.output.json");
+	QFile outfile(filename);
 	outfile.open(QIODevice::ReadOnly);
 	QByteArray out = outfile.readAll();
 	outfile.close();
@@ -651,37 +661,41 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 		locationIdInfo(id,flags,nflags,parent,rampage,flashpage,ramaddress,flashaddress,size);
 		i++;
 	}
-	checkRamFlashSync();
+	populateParentLists();
+
 	i = ramMap.constBegin();
 	while (i != ramMap.constEnd())
 	{
+		bool ok = false;
 		//ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 		QString val = i.value().toString();
 		QStringList valsplit = val.split(",");
 		QByteArray bytes;
-		bool ok = false;
 		for (int j=0;j<valsplit.size();j++)
 		{
 			bytes.append(valsplit[j].toInt(&ok,16));
 		}
-		ramBlockRetrieved(i.key().toInt(),QByteArray(),bytes);
+		ramBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
 		i++;
 	}
 
 	i = flashMap.constBegin();
 	while (i != flashMap.constEnd())
 	{
+		bool ok = false;
+		//qDebug() << "Flash location" << i.key().toInt(&ok,16);
 		QString val = i.value().toString();
 		QStringList valsplit = val.split(",");
 		QByteArray bytes;
-		bool ok = false;
 		for (int j=0;j<valsplit.size();j++)
 		{
 			bytes.append(valsplit[j].toInt(&ok,16));
 		}
-		flashBlockRetrieved(i.key().toInt(),QByteArray(),bytes);
+		flashBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
 		i++;
 	}
+	checkRamFlashSync();
+	emsMdiWindow->show();
 	/*for (int i=0;i<idlist.size();i++)
 	{
 		//ui/listWidget->addItem(QString::number(idlist[i]));
@@ -1391,6 +1405,7 @@ void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header
 			if (m_deviceFlashMemoryList[i]->isEmpty)
 			{
 				m_deviceFlashMemoryList[i]->setData(payload);
+				return;
 			}
 			else
 			{
@@ -1398,6 +1413,7 @@ void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header
 				{
 					qDebug() << "Flash block in memory does not match flash block on tuner! This should not happen!";
 					qDebug() << "Flash size:" << m_deviceFlashMemoryList[i]->data().size();
+					qDebug() << "Flash ID:" << "0x" + QString::number(locationid,16).toUpper();
 					m_deviceFlashMemoryList[i]->setData(payload);
 				}
 			}
@@ -1540,7 +1556,6 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 		title = m_readOnlyMetaDataMap[locationid].title;
 		//m_readOnlyMetaDataMap[locationid]
 	}
-	qDebug() << "Found location ID info";
 	emsInfo->locationIdInfo(locationid,title,rawFlags,flags,parent,rampage,flashpage,ramaddress,flashaddress,size);
 	if (flags.contains(FreeEmsComms::BLOCK_IS_RAM) && flags.contains((FreeEmsComms::BLOCK_IS_FLASH)))
 	{
