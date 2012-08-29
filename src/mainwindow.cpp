@@ -35,7 +35,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	progressView=0;
 	m_interrogationInProgress = false;
 	qDebug() << "Loading config file freeems.config.json";
-	QFile file("freeems.config.json");
+	QString filestr = "";
+	if (QFile::exists("freeems.config.json"))
+	{
+		filestr = "freeems.config.json";
+	}
+	else if (QFile::exists("/etc/emstudio/freeems.config.json"))
+	{
+		filestr = "/etc/emstudio/freeems.config.json";
+	}
+	else
+	{
+		QMessageBox::information(0,"Error","Error: No freeems.config.json file found!");
+	}
+	QFile file(filestr);
 	file.open(QIODevice::ReadOnly);
 	QByteArray filebytes = file.readAll();
 	file.close();

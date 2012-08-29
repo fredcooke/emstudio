@@ -30,7 +30,9 @@ win32-g++ {
 }
 unix {
 	target.path = /usr/bin
-	INSTALLS += target
+	config.path = /etc/emstudio
+	config.files += freeems.config.json
+	INSTALLS += target config
 	LIBS += -lqwt -lqjson
 	INCLUDEPATH += /usr/include/qwt
 	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
