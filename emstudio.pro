@@ -31,7 +31,7 @@ win32-g++ {
 unix {
 	target.path = /usr/bin
 	config.path = /etc/emstudio
-	config.files += freeems.config.json
+	config.files += freeems.config.json src/gauges.qml
 	INSTALLS += target config
 	LIBS += -lqwt -lqjson
 	INCLUDEPATH += /usr/include/qwt

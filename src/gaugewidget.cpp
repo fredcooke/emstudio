@@ -32,6 +32,10 @@ GaugeWidget::GaugeWidget(QWidget *parent) : QDeclarativeView(parent)
 	{
 		setSource(QUrl("src/gauges.qml"));
 	}
+	else if (QFile::exists("/etc/emstudio/gauges.qml"))
+	{
+		setSource(QUrl("/etc/emstudio/gauges.qml"));
+	}
 	else
 	{
 		qDebug() << "Unable to locate gauges.qml";
