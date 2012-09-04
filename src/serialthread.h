@@ -27,6 +27,7 @@
 #include <windows.h>
 #else
 #define HANDLE int
+#include <sys/file.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>

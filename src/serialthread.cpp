@@ -515,6 +515,12 @@ int SerialThread::openPort(QString portName,int baudrate)
 		qDebug() << "Port:" << portName;
 		return -1;
 	}
+	if (flock(m_portHandle,LOCK_EX | LOCK_NB))
+	{
+		qDebug() << "Unable to maintain lock on serial port" << portName;
+		qDebug() << "This port is likely open in another process";
+		return -2;
+	}
 	//printf("Com Port Opened %i\n",portHandle);
 	//debug(obdLib::DEBUG_VERBOSE,"Com Port Opened %i",portHandle);
 	//fcntl(m_portHandle, F_SETFL, FASYNC); //Set it to blocking. This is required? Wtf?

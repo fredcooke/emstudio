@@ -470,11 +470,19 @@ void FreeEmsComms::run()
 			{
 				//qDebug() << "SERIAL_CONNECT";
 				emit debugVerbose("SERIAL_CONNECT");
-
-				if (serialThread->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt()))
+				int errornum = 0;
+				if ((errornum = serialThread->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt())))
 				{
-					qDebug() << "Unable to connect to COM port";
-					emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()));
+					if (errornum == -1)
+					{
+						qDebug() << "Unable to connect to COM port";
+						emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()));
+					}
+					else if (errornum == -2)
+					{
+						qDebug() << "Unable to connect to COM port due to process lock";
+						emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()) + " due to another process holding lock on the port");
+					}
 					//return;
 					m_threadReqList.removeAt(i);
 					i--;
