@@ -19,31 +19,61 @@
 #include "rawdataview.h"
 
 
-RawDataView::RawDataView(QWidget *parent) : QWidget(parent)
+RawDataView::RawDataView(bool isram, bool isflash,QWidget *parent)
 {
+	Q_UNUSED(parent)
 	ui.setupUi(this);
-	connect(ui.saveChangesButton,SIGNAL(clicked()),this,SLOT(saveButtonClicked()));
+	connect(ui.saveFlashPushButton,SIGNAL(clicked()),this,SLOT(saveFlashButtonClicked()));
+	connect(ui.saveRamPushButton,SIGNAL(clicked()),this,SLOT(saveRamButtonClicked()));
+	connect(ui.loadFlashPushButton,SIGNAL(clicked()),this,SLOT(loadFlashButtonClicked()));
+	connect(ui.loadRamPushButton,SIGNAL(clicked()),this,SLOT(loadRamButtonClicked()));
+	if (!isram)
+	{
+		//Is only flash
+		ui.saveRamPushButton->setEnabled(false);
+		ui.saveRamPushButton->setVisible(false);
+		ui.loadRamPushButton->setEnabled(false);
+		ui.loadRamPushButton->setVisible(false);
+	}
+	else if (!isflash)
+	{
+		//Is only ram
+		ui.saveFlashPushButton->setEnabled(false);
+		ui.saveFlashPushButton->setVisible(false);
+		ui.loadFlashPushButton->setEnabled(false);
+		ui.loadFlashPushButton->setVisible(false);
+	}
+	else
+	{
+		//Is both ram and flash, leave both sets of buttons enabled.
+	}
 }
-void RawDataView::setData(unsigned short locationid,QByteArray data,bool isram)
+bool RawDataView::setData(unsigned short locationid,QByteArray data)
 {
-	m_isRam = isram;
 	m_locationId = locationid;
 	ui.hexEditor->setData(data);
 	ui.locationIdLabel->setText("0x" + QString::number(locationid,16).toUpper());
+	return true;
+}
+void RawDataView::loadRamButtonClicked()
+{
+	emit reloadData(m_locationId,true);
+}
+
+void RawDataView::loadFlashButtonClicked()
+{
+	emit reloadData(m_locationId,false);
 }
 
 RawDataView::~RawDataView()
 {
 }
-
-void RawDataView::saveButtonClicked()
+void RawDataView::saveFlashButtonClicked()
 {
-	if (m_isRam)
-	{
-		emit saveData(m_locationId,ui.hexEditor->data(),0); //0 for RAM, 1 for flash.
-	}
-	else
-	{
-		emit saveData(m_locationId,ui.hexEditor->data(),1); //0 for RAM, 1 for flash.
-	}
+	emit saveData(m_locationId,ui.hexEditor->data(),1); //0 for RAM, 1 for flash.
+}
+
+void RawDataView::saveRamButtonClicked()
+{
+	emit saveData(m_locationId,ui.hexEditor->data(),0); //0 for RAM, 1 for flash.
 }

@@ -165,8 +165,8 @@ private:
 	bool m_deviceFlashDirty;
 	bool hasDeviceRamBlock(unsigned short id);
 	bool hasLocalRamBlock(unsigned short id);
-	void updateView(unsigned short locid,QWidget *view,QByteArray data,int type);
-	void createView(unsigned short locid,QByteArray data,int type);
+	void updateView(unsigned short locid,QObject *view,QByteArray data,int type);
+	void createView(unsigned short locid,QByteArray data,int type,bool isram, bool isflash);
 	bool hasLocalFlashBlock(unsigned short id);
 	bool hasDeviceFlashBlock(unsigned short id);
 	void setDeviceFlashBlock(unsigned short id,QByteArray data);
@@ -183,6 +183,9 @@ private:
 	bool m_interrogationInProgress;
 private slots:
 	void interrogateProgressViewDestroyed(QObject *object);
+	void interrogateRamBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
+	void interrogateFlashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
+	bool verifyMemoryBlock(unsigned short locationid,QByteArray header,QByteArray payload);
 	void emsOperatingSystem(QString os);
 	void emsDecoderName(QString name);
 	void emsFirmwareBuildDate(QString date);
@@ -216,8 +219,9 @@ private slots:
 	void logPayloadReceived(QByteArray header,QByteArray payload);
 	void logProgress(qlonglong current,qlonglong total);
 	void logFinished();
-	void tableview3d_reloadTableData(unsigned short locationid);
-	void tableview2d_reloadTableData(unsigned short locationid);
+	void tableview3d_reloadTableData(unsigned short locationid,bool ram);
+	void tableview2d_reloadTableData(unsigned short locationid,bool isram);
+	void reloadDataFromDevice(unsigned short locationid,bool isram);
 	void loadLogButtonClicked();
 	void playLogButtonClicked();
 	void pauseLogButtonClicked();

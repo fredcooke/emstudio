@@ -26,18 +26,19 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include "headers.h"
-
-class TableView2D : public QWidget
+#include "dataview.h"
+class TableView2D : public DataView
 {
 	Q_OBJECT
 	
 public:
-	explicit TableView2D(QWidget *parent = 0);
+	explicit TableView2D(bool isram, bool isflash,QWidget *parent = 0);
 	~TableView2D();
-	bool passData(unsigned short locationid,QByteArray data,int physicallocation,Table2DMetaData metadata);
-	bool passData(unsigned short locationid,QByteArray data,int physicallocation);
+	bool setData(unsigned short locationid,QByteArray data);
+	bool setData(unsigned short locationid,QByteArray data,Table2DMetaData metadata);
 	//void passData(unsigned short locationid,Table2DData data);
 private:
+	bool metaDataValid;
 	Table2DData *tableData;
 	void setSilentValue(int row,int column,QString value);
 	Table2DMetaData m_metaData;
@@ -56,14 +57,15 @@ protected:
 private slots:
 	void exportClicked();
 	void saveClicked();
-	void loadClicked();
+	void loadFlashClicked();
+	void loadRamClicked();
 	void tableCellChanged(int row,int column);
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
 signals:
 	void saveToFlash(unsigned short locationid);
 	void saveData(unsigned short locationid,QByteArray data,int phyiscallocation);
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
-	void reloadTableData(unsigned short locationid);
+	void reloadTableData(unsigned short locationid,bool ram);
 };
 
 #endif // TABLEVIEW2D_H

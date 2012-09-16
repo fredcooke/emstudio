@@ -28,6 +28,7 @@ class Table3DData : public TableData
 public:
 	Table3DData(unsigned short locationid, QByteArray data,Table3DMetaData metadata);
 	void setData(unsigned short locationid,QByteArray payload,Table3DMetaData metadata);
+	void setData(unsigned short locationid,QByteArray payload);
 	QByteArray data();
 	QList<double> xAxis();
 	QList<double> yAxis();

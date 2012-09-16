@@ -29,10 +29,10 @@ class TableView3D : public QWidget
 	Q_OBJECT
 	
 public:
-	explicit TableView3D(QWidget *parent = 0);
+	explicit TableView3D(bool isram,bool isflash,QWidget *parent = 0);
 	~TableView3D();
-	bool passData(unsigned short locationid,QByteArray data,int physicallocation,Table3DMetaData metadata);
-	bool passData(unsigned short locationid,QByteArray data,int physicallocation);
+	bool setData(unsigned short locationid,QByteArray data);
+	bool setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata);
 private:
 	bool metaDataValid;
 	Table3DData *tableData;
@@ -47,16 +47,19 @@ private:
 	void resizeColumnWidths();
 	int m_currRow;
 	int m_currCol;
+protected:
+	void contextMenuEvent(QContextMenuEvent *evt);
 private slots:
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
 	void tableCellChanged(int row,int column);
 	void saveClicked();
 	void loadClicked();
+	void loadRamClicked();
 	void exportClicked();
 	void exportJson(QString filename);
 signals:
 	void saveToFlash(unsigned short locationid);
-	void reloadTableData(unsigned short locationid);
+	void reloadTableData(unsigned short locationid,bool ram);
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
 
 };

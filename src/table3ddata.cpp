@@ -22,10 +22,9 @@ Table3DData::Table3DData(unsigned short locationid, QByteArray data,Table3DMetaD
 {
 	setData(locationid,data,metadata);
 }
-void Table3DData::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata)
+void Table3DData::setData(unsigned short locationid,QByteArray data)
 {
-	m_locationId = locationid;
-	m_metaData = metadata;
+	Q_UNUSED(locationid)
 	unsigned short xaxissize = (((unsigned char)data[0]) << 8) + (unsigned char)data[1];
 	unsigned short yaxissize = (((unsigned char)data[2]) << 8) + (unsigned char)data[3];
 	qDebug() << "XAxis:" << xaxissize;
@@ -60,6 +59,13 @@ void Table3DData::setData(unsigned short locationid,QByteArray data,Table3DMetaD
 		}
 		m_values.append(currrow);
 	}
+}
+
+void Table3DData::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata)
+{
+	m_locationId = locationid;
+	m_metaData = metadata;
+	setData(locationid,data);
 }
 double Table3DData::maxXAxis()
 {

@@ -27,9 +27,16 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="loadPushButton">
+      <widget class="QPushButton" name="loadFlashPushButton">
        <property name="text">
         <string>Load From Flash</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="loadRamPushButton">
+       <property name="text">
+        <string>Load From Ram</string>
        </property>
       </widget>
      </item>

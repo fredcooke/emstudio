@@ -23,9 +23,11 @@
 #include <qwt_plot_curve.h>
 #include <qjson/serializer.h>
 #include <QFileDialog>
-TableView2D::TableView2D(QWidget *parent) : QWidget(parent)
+TableView2D::TableView2D(bool isram, bool isflash,QWidget *parent)
 {
+	Q_UNUSED(parent)
 	ui.setupUi(this);
+	metaDataValid = false;
 	tableData=0;
 	//ui.tableWidget->setColumnCount(1);
 	ui.tableWidget->setRowCount(2);
@@ -33,7 +35,8 @@ TableView2D::TableView2D(QWidget *parent) : QWidget(parent)
 	ui.tableWidget->verticalHeader()->hide();
 	//ui.tableWidget->setColumnWidth(0,100);
 	connect(ui.savePushButton,SIGNAL(clicked()),this,SLOT(saveClicked()));
-	connect(ui.loadPushButton,SIGNAL(clicked()),this,SLOT(loadClicked()));
+	connect(ui.loadFlashPushButton,SIGNAL(clicked()),this,SLOT(loadFlashClicked()));
+	connect(ui.loadRamPushButton,SIGNAL(clicked()),this,SLOT(loadRamClicked()));
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	connect(ui.exportPushButton,SIGNAL(clicked()),this,SLOT(exportClicked()));
@@ -49,7 +52,21 @@ TableView2D::TableView2D(QWidget *parent) : QWidget(parent)
 
 	//curve->setData()
 	//QwtSeriesData<QwtIntervalSample> series;
-
+	if (!isram)
+	{
+		//Is only flash
+		ui.loadRamPushButton->setVisible(false);
+	}
+	else if (!isflash)
+	{
+		//Is only ram
+		ui.loadFlashPushButton->setVisible(false);
+		ui.savePushButton->setVisible(false);
+	}
+	else
+	{
+		//Is both ram and flash
+	}
 
 }
 void TableView2D::exportJson(QString filename)
@@ -142,12 +159,25 @@ void TableView2D::resizeColumnWidths()
 		ui.tableWidget->setColumnWidth(i,max);
 	}
 }
-void TableView2D::loadClicked()
+void TableView2D::loadRamClicked()
 {
 	if (QMessageBox::information(0,"Warning","Doing this will reload the table from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
 		qDebug() << "Ok";
-		emit reloadTableData(m_locationid);
+		emit reloadTableData(m_locationid,true);
+	}
+	else
+	{
+		qDebug() << "Not ok";
+	}
+}
+
+void TableView2D::loadFlashClicked()
+{
+	if (QMessageBox::information(0,"Warning","Doing this will reload the table from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+	{
+		qDebug() << "Ok";
+		emit reloadTableData(m_locationid,false);
 	}
 	else
 	{
@@ -257,20 +287,17 @@ void TableView2D::setSilentValue(int row,int column,QString value)
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 }
-bool TableView2D::passData(unsigned short locationid,QByteArray data,int physicallocation)
+bool TableView2D::setData(unsigned short locationid,QByteArray data)
 {
-	return passData(locationid,data,physicallocation,Table2DMetaData());
-}
-
-bool TableView2D::passData(unsigned short locationid,QByteArray rawdata,int physicallocation,Table2DMetaData metadata)
-{
-	Q_UNUSED(physicallocation)
-	m_metaData = metadata;
+	if (!metaDataValid)
+	{
+		m_metaData = Table2DMetaData();
+	}
 	if (tableData)
 	{
 		tableData->deleteLater();
 	}
-	tableData = new Table2DData(locationid,rawdata,m_metaData);
+	tableData = new Table2DData(locationid,data,m_metaData);
 	connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	qDebug() << "TableView2D::passData" << "0x" + QString::number(locationid,16).toUpper();
 	samples.clear();
@@ -341,6 +368,13 @@ bool TableView2D::passData(unsigned short locationid,QByteArray rawdata,int phys
 	//ui.tableWidget->resizeColumnsToContents();
 	resizeColumnWidths();
 	return true;
+}
+
+bool TableView2D::setData(unsigned short locationid,QByteArray rawdata,Table2DMetaData metadata)
+{
+	m_metaData = metadata;
+	metaDataValid = true;
+	return setData(locationid,rawdata);
 }
 
 TableView2D::~TableView2D()

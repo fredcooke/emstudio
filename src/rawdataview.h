@@ -20,25 +20,31 @@
 #define RAWDATAVIEW_H
 
 #include <QWidget>
+#include "dataview.h"
 #include "ui_rawdataview.h"
 
-class RawDataView : public QWidget
+class RawDataView : public DataView
 {
 	Q_OBJECT
 	
 public:
-	explicit RawDataView(QWidget *parent = 0);
+	explicit RawDataView(bool isram, bool isflash,QWidget *parent = 0);
 	~RawDataView();
-	void setData(unsigned short locationid,QByteArray data,bool isram);
+	bool setData(unsigned short locationid,QByteArray data);
+	//void verifyData(unsigned short locationid,QByteArray data);
 private:
 	bool m_isRam;
 	Ui::RawDataView ui;
 	unsigned short m_locationId;
 
 private slots:
-	void saveButtonClicked();
+	void saveFlashButtonClicked();
+	void saveRamButtonClicked();
+	void loadRamButtonClicked();
+	void loadFlashButtonClicked();
 signals:
 	void saveData(unsigned short locationid,QByteArray data,int physicallocation);
+	void reloadData(unsigned short locationid,bool isram);
 };
 
 #endif // RAWDATAVIEW_H

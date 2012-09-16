@@ -29,16 +29,30 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QPushButton" name="saveChangesButton">
+        <widget class="QPushButton" name="saveRamPushButton">
          <property name="text">
-          <string>Save Changes</string>
+          <string>Save To Ram</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="resetChangesButton">
+        <widget class="QPushButton" name="saveFlashPushButton">
          <property name="text">
-          <string>Reset Changes</string>
+          <string>Save To Flash</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="loadRamPushButton">
+         <property name="text">
+          <string>Load From Ram</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="loadFlashPushButton">
+         <property name="text">
+          <string>Load From Flash</string>
          </property>
         </widget>
        </item>

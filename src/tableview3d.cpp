@@ -22,17 +22,51 @@
 #include <QFile>
 #include <QFileDialog>
 #include <qjson/serializer.h>
-TableView3D::TableView3D(QWidget *parent) : QWidget(parent)
+#include <QContextMenuEvent>
+#include <QMenu>
+#include <QAction>
+TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
 	tableData=0;
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	connect(ui.savePushButton,SIGNAL(clicked()),this,SLOT(saveClicked()));
-	connect(ui.loadPushButton,SIGNAL(clicked()),this,SLOT(loadClicked()));
+	connect(ui.loadFlashPushButton,SIGNAL(clicked()),this,SLOT(loadClicked()));
 	connect(ui.exportPushButton,SIGNAL(clicked()),this,SLOT(exportClicked()));
+	setContextMenuPolicy(Qt::DefaultContextMenu);
+	//QAction* fooAction = new QAction("foo",this);
+	//QAction* barAction = new QAction("bar",this);
+	//connect(fooAction, SIGNAL(triggered()), this, SLOT(doSomethingFoo()));
+	//connect(barAction, SIGNAL(triggered()), this, SLOT(doSomethingBar()));
+	//addAction(fooAction);
+	//addAction(barAction);
 	metaDataValid = true;
+	if (!isram)
+	{
+		//Is only flash
+		ui.loadRamPushButton->setVisible(false);
+	}
+	else if (!isflash)
+	{
+		//Is only ram
+		ui.savePushButton->setVisible(false);
+		ui.loadFlashPushButton->setVisible(false);
+	}
+	else
+	{
+		//Is both ram and flash
+	}
 }
+void TableView3D::contextMenuEvent(QContextMenuEvent *evt)
+{
+	QMenu menu(this);
+	menu.addAction("Test");
+	menu.addAction("Second");
+	menu.setGeometry(evt->x(),evt->y(),menu.width(),menu.height());
+	menu.show();
+}
+
 void TableView3D::tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn)
 {
 	Q_UNUSED(prevrow)
@@ -118,13 +152,25 @@ void TableView3D::exportClicked()
 	}
 	exportJson(filename);
 }
+void TableView3D::loadRamClicked()
+{
+	if (QMessageBox::information(0,"Warning","Doing this will reload the table from ram, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+	{
+		qDebug() << "Ok";
+		emit reloadTableData(m_locationId,true);
+	}
+	else
+	{
+		qDebug() << "Not ok";
+	}
+}
 
 void TableView3D::loadClicked()
 {
 	if (QMessageBox::information(0,"Warning","Doing this will reload the table from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
 		qDebug() << "Ok";
-		emit reloadTableData(m_locationId);
+		emit reloadTableData(m_locationId,false);
 	}
 	else
 	{
@@ -132,21 +178,14 @@ void TableView3D::loadClicked()
 	}
 
 }
-bool TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation)
+bool TableView3D::setData(unsigned short locationid,QByteArray data)
 {
-	metaDataValid = false;
-	return passData(locationid,data,physicallocation,Table3DMetaData());
-}
 
-bool TableView3D::passData(unsigned short locationid,QByteArray data,int physicallocation,Table3DMetaData metadata)
-{
-	Q_UNUSED(physicallocation)
-	m_metaData = metadata;
 	if (tableData)
 	{
 		tableData->deleteLater();
 	}
-	tableData = new Table3DData(locationid,data,metadata);
+	tableData = new Table3DData(locationid,data,m_metaData);
 	connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	m_locationId = locationid;
 
@@ -285,6 +324,15 @@ bool TableView3D::passData(unsigned short locationid,QByteArray data,int physica
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	return true;
+	//return passData(locationid,data,physicallocation,Table3DMetaData());
+}
+
+bool TableView3D::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata)
+{
+	m_metaData = metadata;
+	metaDataValid = true;
+	return setData(locationid,data);
+
 }
 QString TableView3D::formatNumber(double num,int prec)
 {
