@@ -7,10 +7,17 @@ emstudio
 
 # Other project stuff
 Makefile
+Makefile.Debug
+Makefile.Release
 
 # Temp files
 *~
-
+*.ini
+*.out
+debian/stamp-makefile*
+debian/files
+debian/emstudio.substvars
+object_script.emstudio.*
 
 # Project user files
 *.user
@@ -26,3 +33,4 @@ Makefile
 *.tar.gz
 *.png
 *.zip
+
