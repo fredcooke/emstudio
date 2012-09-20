@@ -33,6 +33,7 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent) : QWidget(pare
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	connect(ui.savePushButton,SIGNAL(clicked()),this,SLOT(saveClicked()));
 	connect(ui.loadFlashPushButton,SIGNAL(clicked()),this,SLOT(loadClicked()));
+	connect(ui.loadRamPushButton,SIGNAL(clicked()),this,SLOT(loadRamClicked()));
 	connect(ui.exportPushButton,SIGNAL(clicked()),this,SLOT(exportClicked()));
 	setContextMenuPolicy(Qt::DefaultContextMenu);
 	//QAction* fooAction = new QAction("foo",this);
