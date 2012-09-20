@@ -29,7 +29,6 @@ public:
 	bool isRam;
 	bool hasParent;
 	int type;
-	bool isEmpty;
 	unsigned short parent;
 	unsigned short ramPage;
 	unsigned short ramAddress;
@@ -41,6 +40,7 @@ public:
 	void setParent(MemoryLocation *parent);
 	MemoryLocation *getParent() { return m_parent; }
 	void setData(QByteArray data);
+	bool isEmpty();
 	void childChanged(MemoryLocation *child,QByteArray data);
 	QByteArray data(MemoryLocation *child);
 	QByteArray data();

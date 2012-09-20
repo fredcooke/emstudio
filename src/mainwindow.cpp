@@ -1313,14 +1313,18 @@ void MainWindow::setDeviceFlashBlock(unsigned short id,QByteArray data)
 void MainWindow::interrogateRamBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
+	qDebug() << "Interrogation Ram block" << "0x" + QString::number(locationid,16).toUpper();
 	for (int i=0;i<m_deviceRamMemoryList.size();i++)
 	{
 		if (m_deviceRamMemoryList[i]->locationid == locationid)
 		{
-			if (m_deviceRamMemoryList[i]->isEmpty)
+			if (m_deviceRamMemoryList[i]->isEmpty())
 			{
 				//Initial retrieval.
+				qDebug() << "Location is" << m_deviceRamMemoryList[i]->isEmpty();
 				m_deviceRamMemoryList[i]->setData(payload);
+				qDebug() << "Location is" << m_deviceRamMemoryList[i]->isEmpty();
+				return;
 			}
 			else
 			{
@@ -1336,11 +1340,12 @@ void MainWindow::interrogateRamBlockRetrieved(unsigned short locationid,QByteArr
 void MainWindow::interrogateFlashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
+	qDebug() << "Interrogation Flash block" << "0x" + QString::number(locationid,16).toUpper();
 	for (int i=0;i<m_deviceFlashMemoryList.size();i++)
 	{
 		if (m_deviceFlashMemoryList[i]->locationid == locationid)
 		{
-			if (m_deviceFlashMemoryList[i]->isEmpty)
+			if (m_deviceFlashMemoryList[i]->isEmpty())
 			{
 				m_deviceFlashMemoryList[i]->setData(payload);
 				return;
@@ -1420,10 +1425,12 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 		{
 			if (m_deviceRamMemoryList[i]->locationid == locationid)
 			{
-				if (m_deviceRamMemoryList[i]->isEmpty)
+				if (m_deviceRamMemoryList[i]->isEmpty())
 				{
+
 					//This should not happen
 					qDebug() << "Ram block on device while ram block on tuner is empty! This should not happen" << "0x" + QString::number(locationid,16).toUpper();
+					qDebug() << "Current block size:" << m_deviceRamMemoryList[i]->data().size();
 					m_deviceRamMemoryList[i]->setData(payload);
 				}
 				else
@@ -1464,7 +1471,7 @@ void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header
 	{
 		if (m_deviceFlashMemoryList[i]->locationid == locationid)
 		{
-			if (m_deviceFlashMemoryList[i]->isEmpty)
+			if (m_deviceFlashMemoryList[i]->isEmpty())
 			{
 				m_deviceFlashMemoryList[i]->setData(payload);
 				return;
@@ -2050,7 +2057,7 @@ void MainWindow::commandTimedOut(int sequencenumber)
 }
 void MainWindow::commandSuccessful(int sequencenumber)
 {
-	qDebug() << "Command succesful:" << QString::number(sequencenumber);
+	//qDebug() << "Command succesful:" << QString::number(sequencenumber);
 	if (m_interrogationInProgress)
 	{
 		progressView->taskSucceed(sequencenumber);
@@ -2129,8 +2136,10 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 			qDebug() << "Interrogation complete";
 
 			//Disconnect from the interrogation slots, and connect to the primary slots.
-			disconnect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-			disconnect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+			//disconnect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+			emsComms->disconnect(SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+			emsComms->disconnect(SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+			//disconnect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 			connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 			connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 

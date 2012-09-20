@@ -23,7 +23,6 @@ MemoryLocation::MemoryLocation()
 	m_parent = 0;
 	parent=0;
 	hasParent = false;
-	isEmpty = true;
 }
 void MemoryLocation::addChild(MemoryLocation *child)
 {
@@ -63,6 +62,14 @@ QByteArray MemoryLocation::data(MemoryLocation *child)
 	}
 	return m_data.mid(childinparent,child->size);
 }
+bool MemoryLocation::isEmpty()
+{
+	if (this->data().size() == 0)
+	{
+		return true;
+	}
+	return false;
+}
 
 QByteArray MemoryLocation::data()
 {
@@ -86,5 +93,4 @@ void MemoryLocation::setData(QByteArray data)
 	{
 		m_data = data;
 	}
-	isEmpty=false;
 }
