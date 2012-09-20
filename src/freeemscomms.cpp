@@ -877,7 +877,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 
 			if (payloadid == m_payloadWaitingForResponse+1)
 			{
-				qDebug() << "Recieved Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
+				//qDebug() << "Recieved Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
 				if (parsedPacket.isNAK)
 				{
 					//NAK to our packet
