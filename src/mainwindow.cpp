@@ -771,8 +771,13 @@ void MainWindow::reloadDataFromDevice(unsigned short locationid,bool isram)
 			{
 				view->setData(locationid,getLocalFlashBlock(locationid));
 				emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
+				emsComms->retrieveBlockFromFlash(locationid,0,0);
 				setLocalRamBlock(locationid,getLocalFlashBlock(locationid));
 			}
+		}
+		else
+		{
+			qDebug() << "Local flash block does not exist";
 		}
 	}
 }
@@ -1403,6 +1408,7 @@ bool MainWindow::verifyMemoryBlock(unsigned short locationid,QByteArray header,Q
 void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
+	qDebug() << "Ram Block retrieved:" << "0x" + QString::number(locationid,16).toUpper();
 	if (!hasDeviceRamBlock(locationid))
 	{
 		//This should not happen
@@ -1460,6 +1466,7 @@ void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,Q
 
 void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 {
+	qDebug() << "Flash Block retrieved:" << "0x" + QString::number(locationid,16).toUpper();
 	Q_UNUSED(header)
 	if (!verifyMemoryBlock(locationid,header,payload))
 	{

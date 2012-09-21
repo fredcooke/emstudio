@@ -57,12 +57,29 @@ bool RawDataView::setData(unsigned short locationid,QByteArray data)
 }
 void RawDataView::loadRamButtonClicked()
 {
-	emit reloadData(m_locationId,true);
+	if (QMessageBox::information(0,"Warning","Doing this will reload the block from ram, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+	{
+		qDebug() << "Ok";
+		emit reloadData(m_locationId,true);
+	}
+	else
+	{
+		qDebug() << "Not ok";
+	}
+
 }
 
 void RawDataView::loadFlashButtonClicked()
 {
-	emit reloadData(m_locationId,false);
+	if (QMessageBox::information(0,"Warning","Doing this will reload the block from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+	{
+		qDebug() << "Ok";
+		emit reloadData(m_locationId,false);
+	}
+	else
+	{
+		qDebug() << "Not ok";
+	}
 }
 
 RawDataView::~RawDataView()
