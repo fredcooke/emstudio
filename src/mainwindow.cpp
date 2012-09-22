@@ -298,6 +298,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsComms = new FreeEmsComms(this);
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
+	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
 	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
@@ -1838,7 +1839,8 @@ void MainWindow::firmwareVersion(QString version)
 }
 void MainWindow::error(QString msg)
 {
-	Q_UNUSED(msg)
+	//Q_UNUSED(msg)
+	QMessageBox::information(0,"Error",msg);
 }
 void MainWindow::interrogateProgressViewCancelClicked()
 {
@@ -1864,6 +1866,7 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	//m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
+	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
 	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
