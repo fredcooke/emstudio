@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 			qDebug() << "Unknown command" << args[i].first;
 			qDebug() << "Help";
 			qDebug() << "Available Commands:";
-			qDebug() << "-d <dev>\t--dev <dev>\tOpen EMStudio, connecting to device<dev>";
+			qDebug() << "-d <dev>\t--dev <dev>\tOpen EMStudio, connecting to device <dev>";
 			qDebug() << "-h\t\t--help\t\tShow this help";
 			return 0;
 		}
