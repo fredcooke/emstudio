@@ -56,6 +56,7 @@ private slots:
 	void loadClicked();
 	void loadRamClicked();
 	void exportClicked();
+	void importClicked();
 	void exportJson(QString filename);
 signals:
 	void saveToFlash(unsigned short locationid);

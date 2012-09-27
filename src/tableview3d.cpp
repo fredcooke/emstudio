@@ -22,6 +22,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <qjson/serializer.h>
+#include <qjson/parser.h>
 #include <QContextMenuEvent>
 #include <QMenu>
 #include <QAction>
@@ -92,6 +93,7 @@ void TableView3D::exportJson(QString filename)
 	QVariantList zlist;
 
 	topmap["3DTable"] = "";
+	topmap["type"] = "3D";
 	topmap["title"] = m_metaData.tableTitle;
 	topmap["description"] = m_metaData.tableTitle;
 	x["unit"] = m_metaData.xAxisTitle;
@@ -142,6 +144,80 @@ void TableView3D::exportJson(QString filename)
 	}
 	file.write(serialized);
 	file.close();
+}
+void TableView3D::importClicked()
+{
+	QString filename = QFileDialog::getOpenFileName(this,"Load Json File",".","Json Files (*.json)");
+	if (filename == "")
+	{
+		return;
+	}
+	//Create a JSON file similar to MTX's yaml format.
+
+	//QByteArray serialized = serializer.serialize(topmap);
+
+	//TODO: Open a message box and allow the user to select where they want to save the file.
+	QFile file(filename);
+	if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
+	{
+		qDebug() << "Unable to open file to output JSON!";
+		return;
+	}
+	QByteArray toparsebytes = file.readAll();
+	file.close();
+	QJson::Parser parser;
+	bool ok = false;
+	QVariant topvar = parser.parse(toparsebytes,&ok);
+	if (!ok)
+	{
+		qDebug() << "Unable to parse import json";
+		return;
+	}
+
+	QVariantMap topmap = topvar.toMap();
+	QVariantMap x = topmap["X"].toMap();
+	QVariantMap y = topmap["Y"].toMap();
+	QVariantMap z = topmap["Z"].toMap();
+	QVariantList xlist = x["values"].toList();
+	QVariantList ylist = y["values"].toList();
+	QVariantList zlist = z["values"].toList();
+	QString type = topmap["type"].toString();
+	QString title = topmap["title"].toString();
+	QString description = topmap["description"].toString();
+	/*m_metaData.tableTitle = title;
+	m_metaData.tableTitle = description;
+	m_metaData.xAxisTitle = x["unit"].toString();
+	m_metaData.xAxisTitle = x["label"].toString();
+	m_metaData.yAxisTitle = y["unit"].toString();
+	m_metaData.yAxisTitle = y["label"].toString();
+	m_metaData.zAxisTitle = z["unit"].toString();
+	m_metaData.zAxisTitle = z["label"].toString();*/
+
+	for (int i=1;i<ui.tableWidget->columnCount();i++)
+	{
+		//Reformat the number to be XXXX.XX to make Fred happy.
+		double val = ui.tableWidget->item(ui.tableWidget->rowCount()-1,i)->text().toDouble();
+		xlist.append(QString::number(val,'f',2));
+	}
+	for (int i=0;i<ui.tableWidget->rowCount()-1;i++)
+	{
+		//Reformat the number to be XXXX.XX to make Fred happy.
+		double val = ui.tableWidget->item(i,0)->text().toDouble();
+		ylist.append(QString::number(val,'f',2));
+	}
+	for (int j=0;j<ui.tableWidget->rowCount()-1;j++)
+	{
+		QVariantList zrow;
+		for (int i=1;i<ui.tableWidget->columnCount();i++)
+		{
+			zrow.append(ui.tableWidget->item(j,i)->text());
+		}
+		zlist.append((QVariant)zrow);
+	}
+
+
+
+
 }
 
 void TableView3D::exportClicked()
