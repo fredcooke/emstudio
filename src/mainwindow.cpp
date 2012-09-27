@@ -765,20 +765,28 @@ void MainWindow::reloadDataFromDevice(unsigned short locationid,bool isram)
 	}
 	else
 	{
-		if (hasLocalFlashBlock(locationid))
+		DataView *view = qobject_cast<DataView*>(sender());
+		if (!view)
 		{
-			RawDataView *view = qobject_cast<RawDataView*>(sender());
-			if (view)
-			{
-				view->setData(locationid,getLocalFlashBlock(locationid));
-				emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
-				emsComms->retrieveBlockFromFlash(locationid,0,0);
-				setLocalRamBlock(locationid,getLocalFlashBlock(locationid));
-			}
+			qDebug() << "Error, unable to cast sender of reloadDataFromDevice() to DataView*";
+			return;
+		}
+		if (hasLocalRamBlock(locationid))
+		{
+			view->setData(locationid,getLocalFlashBlock(locationid));
+			emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
+			emsComms->retrieveBlockFromFlash(locationid,0,0);
+			setLocalRamBlock(locationid,getLocalFlashBlock(locationid));
+		}
+		else if (hasLocalFlashBlock(locationid))
+		{
+			view->setData(locationid,getLocalFlashBlock(locationid));
+			emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
 		}
 		else
 		{
-			qDebug() << "Local flash block does not exist";
+			qDebug() << "Local flash block does not exist! This should never happen";
+			return;
 		}
 	}
 }
