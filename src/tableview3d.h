@@ -23,8 +23,8 @@
 #include "headers.h"
 #include "table3ddata.h"
 #include "ui_tableview3d.h"
-
-class TableView3D : public QWidget
+#include "dataview.h"
+class TableView3D : public DataView
 {
 	Q_OBJECT
 	

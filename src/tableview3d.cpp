@@ -26,8 +26,9 @@
 #include <QContextMenuEvent>
 #include <QMenu>
 #include <QAction>
-TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent) : QWidget(parent)
+TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 {
+	Q_UNUSED(parent)
 	ui.setupUi(this);
 	tableData=0;
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
@@ -59,6 +60,7 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent) : QWidget(pare
 	{
 		//Is both ram and flash
 	}
+	ui.importPushButton->setVisible(false);
 }
 void TableView3D::contextMenuEvent(QContextMenuEvent *evt)
 {
