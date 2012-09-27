@@ -1503,6 +1503,7 @@ void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header
 			}
 		}
 	}
+	updateDataWindows(locationid);
 	return;
 }
 
@@ -2246,7 +2247,18 @@ void MainWindow::updateDataWindows(unsigned short locationid)
 		DataView *dview = qobject_cast<DataView*>(m_rawDataView[locationid]);
 		if (dview)
 		{
-			dview->setData(locationid,getLocalRamBlock(locationid));
+			if (hasLocalRamBlock(locationid))
+			{
+				dview->setData(locationid,getLocalRamBlock(locationid));
+			}
+			else if (hasLocalFlashBlock(locationid))
+			{
+				dview->setData(locationid,getLocalFlashBlock(locationid));
+			}
+			else
+			{
+				qDebug() << "updateDataWindows called for location id" << "0x" + QString::number(locationid,16).toUpper() << "but no local ram or flash block exists!";
+			}
 			return;
 		}
 		/*
