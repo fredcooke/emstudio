@@ -780,8 +780,7 @@ void MainWindow::reloadDataFromDevice(unsigned short locationid,bool isram)
 		}
 		else if (hasLocalFlashBlock(locationid))
 		{
-			view->setData(locationid,getLocalFlashBlock(locationid));
-			emsComms->updateBlockInRam(locationid,0,getLocalFlashBlock(locationid).size(),getLocalFlashBlock(locationid));
+			emsComms->retrieveBlockFromFlash(locationid,0,0);
 		}
 		else
 		{
