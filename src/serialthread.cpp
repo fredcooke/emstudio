@@ -131,6 +131,7 @@ int SerialThread::readSerial(int timeout)
 		if (readlen < 0)
 		{
 			//Nothing on the port
+			//qDebug() << "Timeout";
 			msleep(10);
 		}
 		else
@@ -143,6 +144,11 @@ int SerialThread::readSerial(int timeout)
 		}
 		if (readlen == 0)
 		{
+			//This should be an error
+			qDebug() << "Nothing to read";
+			perror("Error:");
+			printf("\n");
+			return -1;
 			msleep(10);
 		}
 		for (int i=0;i<readlen;i++)

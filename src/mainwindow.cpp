@@ -724,6 +724,53 @@ void MainWindow::emsCommsDisconnected()
 		//progressView->deleteLater();
 		//progressView=0;
 	}
+
+	/*emsComms->disconnectSerial();
+	emsComms->wait(500);
+	emsComms->terminate();
+	emsComms->wait(500);
+	emsComms->deleteLater();*/
+	emsComms = 0;
+
+	//Need to reset everything here.
+	emsComms = new FreeEmsComms(this);
+	//m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm.ss");
+	emsComms->setLogFileName(m_logFileName);
+	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
+	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
+	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
+	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
+	connect(emsComms,SIGNAL(decoderName(QString)),this,SLOT(emsDecoderName(QString)));
+	connect(emsComms,SIGNAL(compilerVersion(QString)),this,SLOT(emsCompilerVersion(QString)));
+	connect(emsComms,SIGNAL(interfaceVersion(QString)),this,SLOT(interfaceVersion(QString)));
+	connect(emsComms,SIGNAL(operatingSystem(QString)),this,SLOT(emsOperatingSystem(QString)));
+	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)));
+	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));
+	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
+	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
+	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
+	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
+	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
+	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,QString,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,QString,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+	emsComms->setBaud(m_comBaud);
+	emsComms->setPort(m_comPort);
+	emsComms->setLogDirectory(m_logDirectory);
+	emsComms->setLogsEnabled(m_saveLogs);
+	//emsComms->start();
+	//progressView->hide();
+	//progressView->deleteLater();
+	//progressView=0;
+
+	//this->setEnabled(true);
+	ui.actionConnect->setEnabled(true);
+
 }
 
 void MainWindow::setDevice(QString dev)
@@ -734,7 +781,7 @@ void MainWindow::setDevice(QString dev)
 
 void MainWindow::connectToEms()
 {
-	emsComms->start();
+
 	menu_connectClicked();
 }
 void MainWindow::tableview3d_reloadTableData(unsigned short locationid,bool ram)
@@ -1538,6 +1585,25 @@ void MainWindow::menu_connectClicked()
 	ui.actionConnect->setEnabled(false);
 	ui.actionDisconnect->setEnabled(true);
 	m_interrogationInProgress = true;
+	m_ramMemoryList.clear();
+	m_flashMemoryList.clear();
+	m_deviceFlashMemoryList.clear();
+	m_deviceRamMemoryList.clear();
+	m_tempMemoryList.clear();
+	interrogationSequenceList.clear();
+	m_locIdMsgList.clear();
+	m_locIdInfoMsgList.clear();
+	emsMdiWindow->hide();
+	for (QMap<unsigned short,QWidget*>::const_iterator i= m_rawDataView.constBegin();i != m_rawDataView.constEnd();i++)
+	{
+		QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>((*i)->parent());
+		ui.mdiArea->removeSubWindow(win);
+		delete win;
+		//delete (*i);
+	}
+	m_rawDataView.clear();
+	emsInfo->clear();
+	emsComms->start();
 	emsComms->connectSerial(m_comPort,m_comBaud);
 }
 
@@ -1853,14 +1919,16 @@ void MainWindow::error(QString msg)
 void MainWindow::interrogateProgressViewCancelClicked()
 {
 	emsComms->disconnectSerial();
-	emsComms->wait(500);
+	emsComms->wait(1000);
 	emsComms->terminate();
-	emsComms->wait(500);
+	emsComms->wait(1000);
 	//emsComms->deleteLater();
-	delete emsComms;
-	emsComms = 0;
+	//delete emsComms;
+	//emsComms = 0;
 
 	//Need to reset everything here.
+	//Not anymore, it's all taken care of in the disconnect.
+	/*
 	m_ramMemoryList.clear();
 	m_flashMemoryList.clear();
 	m_deviceFlashMemoryList.clear();
@@ -1906,7 +1974,7 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	//progressView=0;
 	emsInfo->clear();
 	//this->setEnabled(true);
-	ui.actionConnect->setEnabled(true);
+	ui.actionConnect->setEnabled(true);*/
 }
 void MainWindow::emsCompilerVersion(QString version)
 {
@@ -2162,7 +2230,8 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 			connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 
 
-			emsInfo->show();
+			//emsInfo->show();
+			emsMdiWindow->show();
 			//Write everything to the settings.
 			QString json = "";
 			json += "{";
