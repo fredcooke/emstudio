@@ -29,6 +29,7 @@
 TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 {
 	Q_UNUSED(parent)
+	m_isFlashOnly = false;
 	ui.setupUi(this);
 	tableData=0;
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
@@ -264,7 +265,7 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data)
 	{
 		tableData->deleteLater();
 	}
-	tableData = new Table3DData(locationid,data,m_metaData);
+	tableData = new Table3DData(locationid,m_isFlashOnly,data,m_metaData);
 	connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	m_locationId = locationid;
 

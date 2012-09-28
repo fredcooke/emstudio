@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>554</width>
-    <height>413</height>
+    <width>717</width>
+    <height>424</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,6 +52,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="showMapPushButton">
+       <property name="text">
+        <string>Show 3D Map</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="importPushButton">

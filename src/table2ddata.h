@@ -29,7 +29,7 @@ class Table2DData : public TableData
 	Q_OBJECT
 public:
 	Table2DData();
-	Table2DData(unsigned short locationid,QByteArray payload,Table2DMetaData metadata);
+	Table2DData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata);
 	void setData(unsigned short locationid,QByteArray payload,Table2DMetaData metadata);
 	//QByteArray data();
 	double maxXAxis();
@@ -42,6 +42,7 @@ public:
 	int rows();
 	void setCell(int row, int column,double newval);
 private:
+	bool m_isFlashOnly;
 	double m_maxXAxis;
 	double m_maxYAxis;
 	double m_minXAxis;

@@ -18,8 +18,9 @@
 
 #include "table3ddata.h"
 #include <QDebug>
-Table3DData::Table3DData(unsigned short locationid, QByteArray data,Table3DMetaData metadata) : TableData()
+Table3DData::Table3DData(unsigned short locationid, bool isflashonly,QByteArray data,Table3DMetaData metadata) : TableData()
 {
+	m_isFlashOnly = isflashonly;
 	setData(locationid,data,metadata);
 }
 void Table3DData::setData(unsigned short locationid,QByteArray data)
@@ -101,7 +102,10 @@ void Table3DData::setXAxis(int index,double val)
 	unsigned short newval = backConvertAxis(val,m_metaData.xAxisCalc);
 	data.append((char)((newval >> 8) & 0xFF));
 	data.append((char)(newval & 0xFF));
-	emit saveSingleData(m_locationId,data,4+(index*2),2);
+	if (!m_isFlashOnly)
+	{
+		emit saveSingleData(m_locationId,data,4+(index*2),2);
+	}
 }
 
 void Table3DData::setYAxis(int index,double val)
@@ -110,7 +114,10 @@ void Table3DData::setYAxis(int index,double val)
 	unsigned short newval = backConvertAxis(val,m_metaData.yAxisCalc);
 	data.append((char)((newval >> 8) & 0xFF));
 	data.append((char)(newval & 0xFF));
-	emit saveSingleData(m_locationId,data,58+(index*2),2);
+	if (!m_isFlashOnly)
+	{
+		emit saveSingleData(m_locationId,data,58+(index*2),2);
+	}
 }
 
 void Table3DData::setCell(int yIndex, int xIndex,double val)
@@ -120,7 +127,10 @@ void Table3DData::setCell(int yIndex, int xIndex,double val)
 	data.append((char)((newval >> 8) & 0xFF));
 	data.append((char)(newval & 0xFF));
 	qDebug() << "Attempting to save data at:" << yIndex << xIndex;
-	emit saveSingleData(m_locationId,data,100+(xIndex*2)+(yIndex * (m_xAxis.size()*2)),2);
+	if (!m_isFlashOnly)
+	{
+		emit saveSingleData(m_locationId,data,100+(xIndex*2)+(yIndex * (m_xAxis.size()*2)),2);
+	}
 }
 QByteArray Table3DData::data()
 {

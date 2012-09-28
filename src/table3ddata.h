@@ -26,7 +26,7 @@ class Table3DData : public TableData
 {
 	Q_OBJECT
 public:
-	Table3DData(unsigned short locationid, QByteArray data,Table3DMetaData metadata);
+	Table3DData(unsigned short locationid,bool isflashonly, QByteArray data,Table3DMetaData metadata);
 	void setData(unsigned short locationid,QByteArray payload,Table3DMetaData metadata);
 	void setData(unsigned short locationid,QByteArray payload);
 	QByteArray data();
@@ -45,6 +45,7 @@ public:
 	double minYAxis();
 	double minZAxis();
 private:
+	bool m_isFlashOnly;
 	unsigned short m_locationId;
 	QList<double> m_xAxis;
 	QList<double> m_yAxis;

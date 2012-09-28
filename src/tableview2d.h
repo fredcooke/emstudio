@@ -38,6 +38,7 @@ public:
 	bool setData(unsigned short locationid,QByteArray data,Table2DMetaData metadata);
 	//void passData(unsigned short locationid,Table2DData data);
 private:
+	bool m_isFlashOnly;
 	bool metaDataValid;
 	Table2DData *tableData;
 	void setSilentValue(int row,int column,QString value);

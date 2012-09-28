@@ -23,8 +23,9 @@ Table2DData::Table2DData() : TableData()
 
 }
 
-Table2DData::Table2DData(unsigned short locationid,QByteArray payload,Table2DMetaData metadata) : TableData()
+Table2DData::Table2DData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata) : TableData()
 {
+	m_isFlashOnly = isflashonly;
 	setData(locationid,payload,metadata);
 }
 
@@ -110,7 +111,10 @@ void Table2DData::setCell(int row, int column,double newval)
 	//QByteArray data;
 	//data.append((char)((newval >> 8) & 0xFF));
 	//data.append((char)(newval & 0xFF));
-	emit saveSingleData(m_locationId,data,(column*2)+(row * 32),2);
+	if (!m_isFlashOnly)
+	{
+		emit saveSingleData(m_locationId,data,(column*2)+(row * 32),2);
+	}
 }
 
 /*QByteArray Table2DData::data()
