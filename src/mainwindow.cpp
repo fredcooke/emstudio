@@ -1179,6 +1179,9 @@ void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int p
 void MainWindow::interrogateProgressViewDestroyed(QObject *object)
 {
 	Q_UNUSED(object);
+	m_interrogationInProgress = false;
+	progressView = 0;
+	interrogateProgressViewCancelClicked();
 	QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>(object->parent());
 	if (!win)
 	{
@@ -1187,6 +1190,9 @@ void MainWindow::interrogateProgressViewDestroyed(QObject *object)
 	}
 	win->hide();
 	ui.mdiArea->removeSubWindow(win);
+	win->deleteLater();
+
+
 }
 
 void MainWindow::rawDataViewDestroyed(QObject *object)
@@ -1872,8 +1878,8 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 		loc->locationid = idlist[i];
 		m_tempMemoryList.append(loc);
 		int seq = emsComms->getLocationIdInfo(idlist[i]);
-		progressView->setMaximum(progressView->maximum()+1);
-		progressView->addTask("Getting Location ID Info for 0x" + QString::number(idlist[i],16).toUpper(),seq,1);
+		if (progressView) progressView->setMaximum(progressView->maximum()+1);
+		if (progressView) progressView->addTask("Getting Location ID Info for 0x" + QString::number(idlist[i],16).toUpper(),seq,1);
 		m_locIdMsgList.append(seq);
 		interrogationSequenceList.append(seq);
 	}
@@ -2146,7 +2152,7 @@ void MainWindow::commandSuccessful(int sequencenumber)
 	//qDebug() << "Command succesful:" << QString::number(sequencenumber);
 	if (m_interrogationInProgress)
 	{
-		progressView->taskSucceed(sequencenumber);
+		if (progressView) progressView->taskSucceed(sequencenumber);
 	}
 	if (m_waitingForRamWriteConfirmation)
 	{
@@ -2189,9 +2195,9 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 				if (!m_deviceFlashMemoryList[i]->hasParent)
 				{
 					int seq = emsComms->retrieveBlockFromFlash(m_deviceFlashMemoryList[i]->locationid,0,0);
-					progressView->addTask("Getting Location ID 0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper(),seq,2);
+					if (progressView) progressView->addTask("Getting Location ID 0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper(),seq,2);
 					m_locIdInfoMsgList.append(seq);
-					progressView->setMaximum(progressView->maximum()+1);
+					if (progressView) progressView->setMaximum(progressView->maximum()+1);
 					interrogationSequenceList.append(seq);
 				}
 			}
@@ -2200,9 +2206,9 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 				if (!m_deviceRamMemoryList[i]->hasParent)
 				{
 					int seq = emsComms->retrieveBlockFromRam(m_deviceRamMemoryList[i]->locationid,0,0);
-					progressView->addTask("Getting Location ID 0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper(),seq,2);
+					if (progressView) progressView->addTask("Getting Location ID 0x" + QString::number(m_deviceFlashMemoryList[i]->locationid,16).toUpper(),seq,2);
 					m_locIdInfoMsgList.append(seq);
-					progressView->setMaximum(progressView->maximum()+1);
+					if (progressView) progressView->setMaximum(progressView->maximum()+1);
 					interrogationSequenceList.append(seq);
 				}
 			}
@@ -2210,14 +2216,17 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 	}
 	if (interrogationSequenceList.contains(sequencenumber))
 	{
-		progressView->setProgress(progressView->progress()+1);
+		if (progressView)
+		{
+			progressView->setProgress(progressView->progress()+1);
+		}
 		interrogationSequenceList.removeOne(sequencenumber);
 		if (interrogationSequenceList.size() == 0)
 		{
 			m_interrogationInProgress = false;
-			progressView->hide();
-			progressView->deleteLater();
-			progressView=0;
+			if (progressView) progressView->hide();
+			if (progressView) progressView->deleteLater();
+			if (progressView) progressView=0;
 			//this->setEnabled(true);
 			qDebug() << "Interrogation complete";
 
@@ -2441,7 +2450,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	}
 	else
 	{
-		progressView->taskFail(sequencenumber);
+		if (progressView) progressView->taskFail(sequencenumber);
 	}
 	bool found = false;
 	if (m_waitingForRamWriteConfirmation)
