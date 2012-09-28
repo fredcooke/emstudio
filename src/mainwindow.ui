@@ -132,12 +132,12 @@
   </action>
   <action name="actionTables">
    <property name="text">
-    <string>&amp;Tables</string>
+    <string>&amp;Numeric Data</string>
    </property>
   </action>
   <action name="actionEMS_Info">
    <property name="text">
-    <string>&amp;EMS Info</string>
+    <string>&amp;Tunable Memory</string>
    </property>
   </action>
   <action name="actionFlags">
