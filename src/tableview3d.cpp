@@ -62,7 +62,7 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 		//Is both ram and flash
 	}
 	ui.importPushButton->setVisible(false);
-	ui.showMapPushButton->setVisible(false);
+	connect(ui.showMapPushButton,SIGNAL(clicked()),this,SLOT(showMapClicked()));
 }
 void TableView3D::keyPressEvent(QKeyEvent *event)
 {
@@ -168,6 +168,14 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 		}
 	}
 } // cDisplayDlg::keyPressEv
+void TableView3D::showMapClicked()
+{
+	TableMap3D *map = new TableMap3D();
+	map->setGeometry(100,100,800,600);
+	map->show();
+	map->passData(tableData);
+}
+
 void TableView3D::contextMenuEvent(QContextMenuEvent *evt)
 {
 	QMenu menu(this);
