@@ -24,6 +24,7 @@
 #include "table3ddata.h"
 #include "ui_tableview3d.h"
 #include "dataview.h"
+#include "tablemap3d.h"
 class TableView3D : public DataView
 {
 	Q_OBJECT
@@ -59,6 +60,7 @@ private slots:
 	void exportClicked();
 	void importClicked();
 	void exportJson(QString filename);
+	void showMapClicked();
 signals:
 	void saveToFlash(unsigned short locationid);
 	void reloadTableData(unsigned short locationid,bool ram);

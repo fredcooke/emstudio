@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui declarative
+QT       += core gui declarative opengl
 #CONFIG += debug
 TARGET = emstudio
 TEMPLATE = app
@@ -33,7 +33,7 @@ unix {
 	config.path = /etc/emstudio
 	config.files += freeems.config.json src/gauges.qml
 	INSTALLS += target config
-	LIBS += -lqwt -lqjson
+	LIBS += -lqwt -lqjson -lGL -lGLU
 	INCLUDEPATH += /usr/include/qwt
 	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
@@ -75,7 +75,8 @@ SOURCES += src/main.cpp\
     src/readonlyramview.cpp \
     src/overviewprogressitemdelegate.cpp \
     src/dataview.cpp \
-    src/emsstatus.cpp
+    src/emsstatus.cpp \
+    src/tablemap3d.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -111,7 +112,8 @@ HEADERS  += src/mainwindow.h \
     src/readonlyramview.h \
     src/overviewprogressitemdelegate.h \
     src/dataview.h \
-    src/emsstatus.h
+    src/emsstatus.h \
+    src/tablemap3d.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
