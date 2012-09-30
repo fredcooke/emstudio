@@ -33,7 +33,7 @@ unix {
 	config.path = /etc/emstudio
 	config.files += freeems.config.json src/gauges.qml
 	INSTALLS += target config
-	LIBS += -lqwt -lqjson -lGL -lGLU
+	LIBS += -lqwt -lqjson -lGL -lGLU -lglut
 	INCLUDEPATH += /usr/include/qwt
 	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
