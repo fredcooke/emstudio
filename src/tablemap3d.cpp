@@ -185,29 +185,38 @@ void TableMap3D::paintGL()
 			g = g/255.0;
 			b = b/255.0;
 
-			float x0 = (float)y/((float)m_tableData->yAxis().size()-2.0);
-			float y0 = (float)x/((float)m_tableData->xAxis().size()-2.0);
+			float x0 = (float)x/((float)m_tableData->xAxis().size()-2.0);
+			float y0 = (float)y/((float)m_tableData->yAxis().size()-2.0);
 			float z0 = (float)m_tableData->values()[y][x] / 75.0;
 			glColor4f(r,g,b,1);
 			glVertex3f(x0,y0,z0);
 
-			float x1 = ((float)y)/((float)m_tableData->yAxis().size()-2.0);
-			float y1 = (float)x+1/((float)m_tableData->xAxis().size()-2.0);
+			float x1 = ((float)x)/((float)m_tableData->xAxis().size()-2.0);
+			float y1 = ((float)y+1)/((float)m_tableData->yAxis().size()-2.0);
 			float z1 = (float)m_tableData->values()[y+1][x] / 75.0;
 			glColor4f(r,g,b,1);
 			glVertex3f(x1,y1,z1);
 
-			float x2 = ((float)y+1.0)/((float)m_tableData->yAxis().size()-2.0);
-			float y2 = ((float)x+1.0)/((float)m_tableData->xAxis().size()-2.0);
+			float x2 = ((float)x+1.0)/((float)m_tableData->xAxis().size()-2.0);
+			float y2 = ((float)y+1.0)/((float)m_tableData->yAxis().size()-2.0);
 			float z2 = (float)m_tableData->values()[y+1][x+1] / 75.0;
 			glColor4f(r,g,b,1);
 			glVertex3f(x2,y2,z2);
 
-			float x3 = (float)y+1/((float)m_tableData->yAxis().size()-2.0);
-			float y3 = ((float)x)/((float)m_tableData->xAxis().size()-2.0);
+			float x3 = ((float)x+1)/((float)m_tableData->xAxis().size()-2.0);
+			float y3 = ((float)y)/((float)m_tableData->yAxis().size()-2.0);
 			float z3 = (float)m_tableData->values()[y][x+1]/75.0;
 			glColor4f(r,g,b,1);
 			glVertex3f(x3,y3,z3);
+			/*qDebug() << "------------------------------";
+			qDebug() << x0 << x1 << x2 << x3;
+			qDebug() << y0 << y1 << y2 << y3;
+			qDebug() << z0 << z1 << z2 << z3;
+			if (y1 > 5)
+			{
+				qDebug() << "Overlarge y";
+
+			}*/
 		}
 		glEnd();
 	}
