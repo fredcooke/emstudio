@@ -18,7 +18,7 @@
 
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-
+#include "tableview3d.h"
 #include <QMainWindow>
 #include "ui_mainwindow.h"
 #include <QFile>
