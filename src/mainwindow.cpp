@@ -24,7 +24,6 @@
 #include <QMdiSubWindow>
 #include <QSettings>
 #include <tableview2d.h>
-#include <tableview3d.h>
 #include <qjson/parser.h>
 #define define2string_p(x) #x
 #define define2string(x) define2string_p(x)
@@ -32,6 +31,8 @@
 #define TABLE_2D_PAYLOAD_SIZE 64
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+	qDebug() << "EMStudio commit:" << define2string(GIT_COMMIT);
+	qDebug() << "Full hash:" << define2string(GIT_HASH);
 	progressView=0;
 	m_interrogationInProgress = false;
 	qDebug() << "Loading config file freeems.config.json";
@@ -1179,9 +1180,12 @@ void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int p
 void MainWindow::interrogateProgressViewDestroyed(QObject *object)
 {
 	Q_UNUSED(object);
-	m_interrogationInProgress = false;
 	progressView = 0;
-	interrogateProgressViewCancelClicked();
+	if (m_interrogationInProgress)
+	{
+		m_interrogationInProgress = false;
+		interrogateProgressViewCancelClicked();
+	}
 	QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>(object->parent());
 	if (!win)
 	{
