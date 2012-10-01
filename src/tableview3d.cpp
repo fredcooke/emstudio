@@ -30,6 +30,7 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 {
 	Q_UNUSED(parent)
 	m_isFlashOnly = false;
+	m_tableMap=0;
 	ui.setupUi(this);
 	tableData=0;
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
@@ -66,10 +67,17 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 }
 void TableView3D::showMapClicked()
 {
-	TableMap3D *map = new TableMap3D();
-	map->setGeometry(100,100,800,600);
-	map->show();
-	map->passData(tableData);
+	if (m_tableMap)
+	{
+		m_tableMap->show();
+	}
+	else
+	{
+		m_tableMap = new TableMap3D();
+		m_tableMap->setGeometry(100,100,800,600);
+		m_tableMap->show();
+		m_tableMap->passData(tableData);
+	}
 }
 
 void TableView3D::contextMenuEvent(QContextMenuEvent *evt)
@@ -275,6 +283,10 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data)
 		tableData->deleteLater();
 	}
 	tableData = new Table3DData(locationid,m_isFlashOnly,data,m_metaData);
+	if (m_tableMap)
+	{
+		m_tableMap->passData(tableData);
+	}
 	connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	m_locationId = locationid;
 
@@ -485,6 +497,10 @@ void TableView3D::tableCellChanged(int row,int column)
 		setSilentValue(row,column,formatNumber(currentvalue));
 		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 		return;
+	}
+	if (m_tableMap)
+	{
+		m_tableMap->update();
 	}
 	setSilentValue(row,column,formatNumber(tempValue));
 	//ui.tableWidget->item(row,column)->setText(QString::number(tempValue,'f',2));

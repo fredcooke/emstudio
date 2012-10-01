@@ -35,6 +35,7 @@ public:
 	bool setData(unsigned short locationid,QByteArray data);
 	bool setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata);
 private:
+	TableMap3D *m_tableMap;
 	bool m_isFlashOnly;
 	bool metaDataValid;
 	Table3DData *tableData;
