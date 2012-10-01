@@ -100,54 +100,59 @@ void TableMap3D::paintGL()
 	for (int i=0;i<=10;i++)
 	{
 		glBegin(GL_LINE_STRIP);
-		glVertex3f(maxx-((float)4)/((float)m_tableData->xAxis().size()),0,(float)i/10.0);
-		glVertex3f(maxx-((float)4)/((float)m_tableData->xAxis().size()),maxy+((float)2)/((float)m_tableData->xAxis().size()),(float)i/10.0);
-		glVertex3f(0,maxy+((float)2)/((float)m_tableData->xAxis().size()),(float)i/10.0);
+		glVertex3f(maxx/*-(((float)1)/((float)m_tableData->xAxis().size()))*/,0,(float)i/10.0);
+		glVertex3f(maxx/*-(((float)1)/((float)m_tableData->xAxis().size()))*/,maxy/*+((float)2)/((float)m_tableData->xAxis().size())*/,(float)i/10.0);
+		glVertex3f(0,maxy/*+((float)2)/((float)m_tableData->xAxis().size())*/,(float)i/10.0);
 		glEnd();
-		this->renderText(maxy,-0.05,(float)i/100.0,QString::number((m_tableData->maxZAxis() / 75.0) / (i/10.0)));
+		this->renderText(-0.1,maxy + 0.1,(float)i/10.0,QString::number((m_tableData->maxZAxis()) * (i/10.0),'f',2));
 	}
+
 
 	//Longer X axis (RPM)
 	for (int i=0;i<m_tableData->xAxis().size();i+=1)
 	{
 		glBegin(GL_LINES);
 		float tmpf2=0;
-		tmpf2 = (float)i/((float)m_tableData->xAxis().size());
-		glVertex3f(maxx-((float)4)/((float)m_tableData->xAxis().size()),tmpf2 * (maxy / 1.0),0);
-		glVertex3f(maxx-((float)4)/((float)m_tableData->xAxis().size()),tmpf2 * (maxy / 1.0),1);
+		tmpf2 = (float)(i * maxy)/((float)m_tableData->xAxis().size());
+		glVertex3f(maxx,tmpf2 * (maxx / 1.0),0);
+		glVertex3f(maxx,tmpf2 * (maxx / 1.0),1);
 		glEnd();
-		this->renderText(0,tmpf2,-0.05,QString::number(m_tableData->xAxis()[i]));
+		//this->renderText(0,tmpf2,-0.05,QString::number(m_tableData->xAxis()[i]));
 	}
 
 	//Shorter Y Axis (KPA)
 	for (int i=0;i<m_tableData->yAxis().size();i+=1)
 	{
 		glBegin(GL_LINES);
-		float tmpf1 = (float)i/((float)m_tableData->yAxis().size());
-		glVertex3f(tmpf1 * (maxy / 1.0),maxy+((float)2)/((float)m_tableData->yAxis().size()-2.0),0);
-		glVertex3f(tmpf1 * (maxy / 1.0),maxy+((float)2)/((float)m_tableData->yAxis().size()-2.0),1);
+		float tmpf1 = (float)(i * maxx)/((float)m_tableData->yAxis().size());
+		glVertex3f(tmpf1 * (maxx / 1.0),maxy,0);
+		glVertex3f(tmpf1 * (maxx / 1.0),maxy,1);
 		glEnd();
-		//this->renderText(tmpf1,0,-0.05,QString::number(m_tableData->yAxis()[i]));
+		//this->renderText(0,tmpf1,-0.05,QString::number(m_tableData->yAxis()[i]));
 	}
 
+	//Middle vertical
+	glBegin(GL_LINES);
+	glVertex3f(maxx,maxy,0);
+	glVertex3f(maxx,maxy,1);
+	glEnd();
 
 	//Line around the top of the graph
 	glBegin(GL_LINE_STRIP);
-	glVertex3f(0,1,1);
-	glVertex3f(1,1,1);
-	glVertex3f(1,0,1);
+	glVertex3f(0,maxy,1);
+	glVertex3f(maxx,maxy,1);
+	glVertex3f(maxx,0,1);
 	glEnd();
 
 
 	//Square outline around the bottom of the graph
 	glBegin(GL_LINE_STRIP);
-	glVertex3f(0,1,0);
+	glVertex3f(0,maxy,0);
 	glVertex3f(0,0,0);
-	glVertex3f(1,0,0);
-	glVertex3f(1,1,0);
-	glVertex3f(0,1,0);
+	glVertex3f(maxx,0,0);
+	glVertex3f(maxx,maxy,0);
+	glVertex3f(0,maxy,0);
 	glEnd();
-
 	for(int x=0;x<m_tableData->xAxis().size()-1;x++)
 	{
 		glBegin(GL_QUADS);
@@ -185,38 +190,30 @@ void TableMap3D::paintGL()
 			g = g/255.0;
 			b = b/255.0;
 
-			float x0 = (float)x/((float)m_tableData->xAxis().size()-2.0);
-			float y0 = (float)y/((float)m_tableData->yAxis().size()-2.0);
-			float z0 = (float)m_tableData->values()[y][x] / 75.0;
+			//X and Y are reversed here, to allow for the graph to look the proper way.
+			float y0 = ((float)x * maxy)/((float)m_tableData->xAxis().size()-1.0);
+			float x0 = ((float)y)/((float)m_tableData->yAxis().size()-1.0);
+			float z0 = (float)m_tableData->values()[y][x] / m_tableData->maxZAxis();
 			glColor4f(r,g,b,1);
 			glVertex3f(x0,y0,z0);
 
-			float x1 = ((float)x)/((float)m_tableData->xAxis().size()-2.0);
-			float y1 = ((float)y+1)/((float)m_tableData->yAxis().size()-2.0);
-			float z1 = (float)m_tableData->values()[y+1][x] / 75.0;
+			float y1 = ((float)x * maxy)/((float)m_tableData->xAxis().size()-1.0);
+			float x1 = ((float)y+1)/((float)m_tableData->yAxis().size()-1.0);
+			float z1 = (float)m_tableData->values()[y+1][x] / m_tableData->maxZAxis();
 			glColor4f(r,g,b,1);
 			glVertex3f(x1,y1,z1);
 
-			float x2 = ((float)x+1.0)/((float)m_tableData->xAxis().size()-2.0);
-			float y2 = ((float)y+1.0)/((float)m_tableData->yAxis().size()-2.0);
-			float z2 = (float)m_tableData->values()[y+1][x+1] / 75.0;
+			float y2 = ((float)((x+1.0) * maxy))/((float)m_tableData->xAxis().size()-1.0);
+			float x2 = ((float)y+1.0)/((float)m_tableData->yAxis().size()-1.0);
+			float z2 = (float)m_tableData->values()[y+1][x+1] / m_tableData->maxZAxis();
 			glColor4f(r,g,b,1);
 			glVertex3f(x2,y2,z2);
 
-			float x3 = ((float)x+1)/((float)m_tableData->xAxis().size()-2.0);
-			float y3 = ((float)y)/((float)m_tableData->yAxis().size()-2.0);
-			float z3 = (float)m_tableData->values()[y][x+1]/75.0;
+			float y3 = ((float)(x+1) * maxy)/((float)m_tableData->xAxis().size()-1.0);
+			float x3 = ((float)y)/((float)m_tableData->yAxis().size()-1.0);
+			float z3 = (float)m_tableData->values()[y][x+1]/m_tableData->maxZAxis();
 			glColor4f(r,g,b,1);
 			glVertex3f(x3,y3,z3);
-			/*qDebug() << "------------------------------";
-			qDebug() << x0 << x1 << x2 << x3;
-			qDebug() << y0 << y1 << y2 << y3;
-			qDebug() << z0 << z1 << z2 << z3;
-			if (y1 > 5)
-			{
-				qDebug() << "Overlarge y";
-
-			}*/
 		}
 		glEnd();
 	}
