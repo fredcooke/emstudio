@@ -331,7 +331,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsMdiWindow = ui.mdiArea->addSubWindow(emsInfo);
 	emsMdiWindow->setGeometry(emsInfo->geometry());
 	emsMdiWindow->hide();
-	emsMdiWindow->setWindowTitle("EMS Info");
+	emsMdiWindow->setWindowTitle(emsInfo->windowTitle());
 
 
 	aboutView = new AboutView();
@@ -355,7 +355,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	tablesMdiWindow = ui.mdiArea->addSubWindow(dataTables);
 	tablesMdiWindow->setGeometry(dataTables->geometry());
 	tablesMdiWindow->hide();
-	tablesMdiWindow->setWindowTitle("Data Tables");
+	tablesMdiWindow->setWindowTitle(dataTables->windowTitle());
 
 	dataFlags = new FlagView();
 	//connect(dataFlags,SIGNAL(destroyed()),this,SLOT(dataFlagsDestroyed()));
