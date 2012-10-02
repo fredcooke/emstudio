@@ -508,7 +508,7 @@ int SerialThread::openPort(QString portName,int baudrate)
 	Win_CommTimeouts.WriteTotalTimeoutMultiplier = 0;
 	Win_CommTimeouts.WriteTotalTimeoutConstant = 110;
 	SetCommConfig(m_portHandle, &Win_CommConfig, sizeof(COMMCONFIG));
-	SetCommTimeouts(m_portHandle,&Win_CommTimeouts);
+	//SetCommTimeouts(m_portHandle,&Win_CommTimeouts);
 	return 0;
 #else
 
