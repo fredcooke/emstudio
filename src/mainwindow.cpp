@@ -1675,8 +1675,10 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 	QString title;
 	if (m_memoryInfoMap.contains(locationid))
 	{
-		m_memoryInfoMap[locationid] = MemoryLocationInfo();
+		//Duplication location id info
+		qDebug() << "Duplicate location ID recieved from ECU:" << "0x" + QString::number(locationid,16).toUpper();
 	}
+	m_memoryInfoMap[locationid] = MemoryLocationInfo();
 	m_memoryInfoMap[locationid].locationid = locationid;
 	m_memoryInfoMap[locationid].rawflags = rawFlags;
 	m_memoryInfoMap[locationid].flags = flags;
