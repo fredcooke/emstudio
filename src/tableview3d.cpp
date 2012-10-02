@@ -62,6 +62,7 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 		//Is both ram and flash
 	}
 	ui.importPushButton->setVisible(false);
+	ui.showMapPushButton->setVisible(false);
 }
 void TableView3D::contextMenuEvent(QContextMenuEvent *evt)
 {
