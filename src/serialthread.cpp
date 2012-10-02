@@ -477,7 +477,7 @@ int SerialThread::openPort(QString portName,int baudrate)
 		return -1;
 	}
 	COMMCONFIG Win_CommConfig;
-	COMMTIMEOUTS Win_CommTimeouts;
+	//COMMTIMEOUTS Win_CommTimeouts;
 	unsigned long confSize = sizeof(COMMCONFIG);
 	Win_CommConfig.dwSize = confSize;
 	GetCommConfig(m_portHandle, &Win_CommConfig, &confSize);
@@ -502,11 +502,11 @@ int SerialThread::openPort(QString portName,int baudrate)
 		Win_CommConfig.dcb.BaudRate = 115200;
 	}
 	Win_CommConfig.dcb.ByteSize = 8;
-	Win_CommTimeouts.ReadIntervalTimeout = 50;
-	Win_CommTimeouts.ReadTotalTimeoutMultiplier = 0;
-	Win_CommTimeouts.ReadTotalTimeoutConstant = 110;
-	Win_CommTimeouts.WriteTotalTimeoutMultiplier = 0;
-	Win_CommTimeouts.WriteTotalTimeoutConstant = 110;
+	//Win_CommTimeouts.ReadIntervalTimeout = 50;
+	//Win_CommTimeouts.ReadTotalTimeoutMultiplier = 0;
+	//Win_CommTimeouts.ReadTotalTimeoutConstant = 110;
+	//Win_CommTimeouts.WriteTotalTimeoutMultiplier = 0;
+	//Win_CommTimeouts.WriteTotalTimeoutConstant = 110;
 	SetCommConfig(m_portHandle, &Win_CommConfig, sizeof(COMMCONFIG));
 	//SetCommTimeouts(m_portHandle,&Win_CommTimeouts);
 	return 0;
