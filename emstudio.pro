@@ -74,7 +74,8 @@ SOURCES += src/main.cpp\
     src/tabledata.cpp \
     src/readonlyramview.cpp \
     src/overviewprogressitemdelegate.cpp \
-    src/dataview.cpp
+    src/dataview.cpp \
+    src/emsstatus.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -109,7 +110,8 @@ HEADERS  += src/mainwindow.h \
     src/tabledata.h \
     src/readonlyramview.h \
     src/overviewprogressitemdelegate.h \
-    src/dataview.h
+    src/dataview.h \
+    src/emsstatus.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
@@ -124,7 +126,8 @@ FORMS    += src/mainwindow.ui \
     src/aboutview.ui \
     src/tableview3d.ui \
     src/interrogateprogressview.ui \
-    src/readonlyramview.ui
+    src/readonlyramview.ui \
+    src/emsstatus.ui
 
 OTHER_FILES += \
     README.md

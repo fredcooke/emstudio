@@ -42,6 +42,7 @@
 #include "interrogateprogressview.h"
 #include "table2ddata.h"
 #include "readonlyramview.h"
+#include "emsstatus.h"
 //#include "datarawview.h"
 
 
@@ -122,6 +123,7 @@ private:
 	QString m_logFileName;
 	PacketStatusView *packetStatus;
 	AboutView *aboutView;
+	EmsStatus *statusView;
 	InterrogateProgressView *progressView;
 	QList<int> interrogationSequenceList;
 	QMap<unsigned short,QWidget*> m_rawDataView;
@@ -132,6 +134,7 @@ private:
 	QMdiSubWindow *gaugesMdiWindow;
 	QMdiSubWindow *packetStatusMdiWindow;
 	QMdiSubWindow *aboutMdiWindow;
+	QMdiSubWindow *emsStatusMdiWindow;
 	//QFile *settingsFile;
 	void checkMessageCounters(int sequencenumber);
 	//QMdiSubWindow *rawMdiWindow;
@@ -182,6 +185,7 @@ private:
 	void checkRamFlashSync();
 	bool m_interrogationInProgress;
 private slots:
+	void emsStatusDockRequested();
 	void interrogateProgressViewDestroyed(QObject *object);
 	void interrogateRamBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
 	void interrogateFlashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);

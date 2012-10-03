@@ -357,6 +357,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	tablesMdiWindow->hide();
 	tablesMdiWindow->setWindowTitle(dataTables->windowTitle());
 
+	statusView = new EmsStatus(this);
+	connect(statusView,SIGNAL(dockRequested()),this,SLOT(emsStatusDockRequested()));
+	//emsStatusMdiWindow = ui.mdiArea->addSubWindow(statusView);
+	//emsStatusMdiWindow->setGeometry(statusView->geometry());
+	//emsStatusMdiWindow->setWindowTitle(statusView->windowTitle());
+
 	dataFlags = new FlagView();
 	//connect(dataFlags,SIGNAL(destroyed()),this,SLOT(dataFlagsDestroyed()));
 	dataFlags->passDecoder(dataPacketDecoder);
@@ -2068,6 +2074,12 @@ void MainWindow::checkSyncRequest()
 {
 	emsComms->getLocationIdList(0,0);
 }
+void MainWindow::emsStatusDockRequested()
+{
+	//ui.mdiArea->removeSubWindow(emsStatusMdiWindow);
+	//this->addDockWidget(Qt::RightDockWidgetArea,statusView);
+}
+
 void MainWindow::updateRamLocation(unsigned short locationid)
 {
 	bool hasparent = false;
