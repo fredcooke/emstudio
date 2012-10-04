@@ -205,6 +205,7 @@ private slots:
 	void menu_file_saveOfflineDataClicked();
 	void menu_file_loadOfflineDataClicked();
 	void menu_windows_GaugesClicked();
+	void menu_windows_EmsStatusClicked();
 	void menu_windows_EmsInfoClicked();
 	void menu_windows_TablesClicked();
 	void menu_windows_FlagsClicked();

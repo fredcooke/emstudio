@@ -74,6 +74,7 @@
     <addaction name="actionEMS_Info"/>
     <addaction name="actionFlags"/>
     <addaction name="actionPacket_Status"/>
+    <addaction name="actionEMS_Status"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -168,6 +169,11 @@
   <action name="actionLoad_Offline_Data">
    <property name="text">
     <string>Load Offline Data</string>
+   </property>
+  </action>
+  <action name="actionEMS_Status">
+   <property name="text">
+    <string>EMS Status</string>
    </property>
   </action>
  </widget>

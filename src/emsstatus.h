@@ -2,6 +2,7 @@
 #define EMSSTATUS_H
 
 #include <QDockWidget>
+#include <QCloseEvent>
 #include "ui_emsstatus.h"
 
 class EmsStatus : public QDockWidget
@@ -11,6 +12,8 @@ class EmsStatus : public QDockWidget
 public:
 	explicit EmsStatus(QWidget *parent = 0);
 	~EmsStatus();
+protected:
+	void closeEvent(QCloseEvent *event);
 signals:
 	void hardResetRequest();
 	void softResetRequest();

@@ -254,6 +254,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_waitingForFlashWriteConfirmation = false;
 	ui.setupUi(this);
 	connect(ui.actionSave_Offline_Data,SIGNAL(triggered()),this,SLOT(menu_file_saveOfflineDataClicked()));
+	connect(ui.actionEMS_Status,SIGNAL(triggered()),this,SLOT(menu_windows_EmsStatusClicked()));
 	connect(ui.actionLoad_Offline_Data,SIGNAL(triggered()),this,SLOT(menu_file_loadOfflineDataClicked()));
 	this->setWindowTitle(QString("EMStudio ") + QString(define2string(GIT_COMMIT)));
 	emsinfo.emstudioCommit = define2string(GIT_COMMIT);
@@ -1792,6 +1793,11 @@ void MainWindow::settingsCancelClicked()
 	ui.mdiArea->removeSubWindow(subwin);
 	comSettingsWidget->deleteLater();
 }
+void MainWindow::menu_windows_EmsStatusClicked()
+{
+	statusView->show();
+}
+
 void MainWindow::menu_windows_GaugesClicked()
 {
 	if (gaugesMdiWindow->isVisible())
