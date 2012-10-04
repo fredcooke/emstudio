@@ -312,6 +312,7 @@ bool FreeEmsComms::sendPacket(RequestClass request,bool haslength)
 {
 	if (!sendPacket(request.type,request.args,request.argsize,haslength))
 	{
+		qDebug() << "sendPacket failed";
 		return false;
 	}
 	qDebug() << "Sent packet" << "0x" + QString::number(request.type,16).toUpper() << "Sequence Number:" << request.sequencenumber;
@@ -789,10 +790,9 @@ void FreeEmsComms::run()
 			{
 				if (!m_waitingForResponse)
 				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+					//m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0x0010;
+					//m_payloadWaitingForResponse = 0x0010;
 					if (!sendPacket(HARD_RESET))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -800,6 +800,7 @@ void FreeEmsComms::run()
 					}
 					m_threadReqList.removeAt(i);
 					i--;
+					emit packetSent(HARD_RESET,QByteArray(),QByteArray());
 				}
 			}
 			else if (false)

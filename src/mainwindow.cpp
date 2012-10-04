@@ -358,7 +358,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	tablesMdiWindow->setWindowTitle(dataTables->windowTitle());
 
 	statusView = new EmsStatus(this);
-	connect(statusView,SIGNAL(dockRequested()),this,SLOT(emsStatusDockRequested()));
+	this->addDockWidget(Qt::RightDockWidgetArea,statusView);
+	connect(statusView,SIGNAL(hardResetRequest()),this,SLOT(emsStatusHardResetRequested()));
+	connect(statusView,SIGNAL(softResetRequest()),this,SLOT(emsStatusSoftResetRequested()));
 	//emsStatusMdiWindow = ui.mdiArea->addSubWindow(statusView);
 	//emsStatusMdiWindow->setGeometry(statusView->geometry());
 	//emsStatusMdiWindow->setWindowTitle(statusView->windowTitle());
@@ -2074,8 +2076,15 @@ void MainWindow::checkSyncRequest()
 {
 	emsComms->getLocationIdList(0,0);
 }
-void MainWindow::emsStatusDockRequested()
+void MainWindow::emsStatusHardResetRequested()
 {
+	qDebug() << "Attempting hard reset:" << emsComms->hardReset();
+
+}
+
+void MainWindow::emsStatusSoftResetRequested()
+{
+	qDebug() << "Attempting soft reset:" << emsComms->softReset();
 	//ui.mdiArea->removeSubWindow(emsStatusMdiWindow);
 	//this->addDockWidget(Qt::RightDockWidgetArea,statusView);
 }

@@ -12,9 +12,8 @@ public:
 	explicit EmsStatus(QWidget *parent = 0);
 	~EmsStatus();
 signals:
-	void dockRequested();
-private slots:
-	void dockButtonClicked();
+	void hardResetRequest();
+	void softResetRequest();
 private:
 	Ui::EmsStatus ui;
 };

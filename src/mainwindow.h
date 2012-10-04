@@ -185,7 +185,8 @@ private:
 	void checkRamFlashSync();
 	bool m_interrogationInProgress;
 private slots:
-	void emsStatusDockRequested();
+	void emsStatusHardResetRequested();
+	void emsStatusSoftResetRequested();
 	void interrogateProgressViewDestroyed(QObject *object);
 	void interrogateRamBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
 	void interrogateFlashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
