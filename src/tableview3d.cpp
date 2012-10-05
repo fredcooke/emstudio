@@ -124,6 +124,11 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 			//Can't paste when we don't know where to paste!
 			return;
 		}
+		if (ui.tableWidget->selectedItems().size() != 1)
+		{
+			QMessageBox::information(0,"Error","Pasting to a selection group is not supported yet. Please select the top left cell you wish to paste from");
+			return;
+		}
 		int rowindex = ui.tableWidget->selectedItems()[0]->row();
 		int columnindex = ui.tableWidget->selectedItems()[0]->column();
 		int newrow = 0;
@@ -131,6 +136,22 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 		QByteArray data = QApplication::clipboard()->mimeData()->data("text/plain");
 		QString datastring(data);
 		QStringList datastringsplit = datastring.split("\n");
+
+		//Check to make sure we're in-bounds first
+		if (datastringsplit.size() + columnindex > ui.tableWidget->columnCount()+1)
+		{
+			QMessageBox::information(0,"Error","Attempted to paste a block that does not fit!");
+			return;
+		}
+		foreach(QString line,datastringsplit)
+		{
+			if (line.split("\t").size() + rowindex > ui.tableWidget->rowCount()+1)
+			{
+				QMessageBox::information(0,"Error","Attempted to paste a block that does not fit!");
+				return;
+			}
+		}
+
 		foreach(QString line,datastringsplit)
 		{
 			QStringList linesplit = line.split("\t");
