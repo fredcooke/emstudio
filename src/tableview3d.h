@@ -20,6 +20,7 @@
 #define TABLEVIEW3D_H
 
 #include <QWidget>
+#include <QKeyEvent>
 #include "headers.h"
 #include "table3ddata.h"
 #include "ui_tableview3d.h"
@@ -50,6 +51,7 @@ private:
 	int m_currCol;
 protected:
 	void contextMenuEvent(QContextMenuEvent *evt);
+	void keyPressEvent(QKeyEvent *event);
 private slots:
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
 	void tableCellChanged(int row,int column);
