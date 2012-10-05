@@ -60,10 +60,21 @@ QList<QPair<QString,QString> > getArgs(int argc, char **argv)
 	}
 	return retval;
 }
+void printHelp()
+{
+	qDebug() << "Help";
+	qDebug() << "Available Commands:";
+	qDebug() << "-h\t\t--help\t\tShow this help";
+	qDebug() << "-d <dev>\t--dev <dev>\tOpen EMStudio, connecting to device <dev>";
+	qDebug() << "-a <true/false>\t--autoconnect <true/false>\tEnable/Disable autoconnect. Default enabled";
+
+}
+
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 	QString port = "";
+	bool autoconnect = true;
 	QList<QPair<QString,QString> > args = getArgs(argc,argv);
 	for (int i=0;i<args.size();i++)
 	{
@@ -73,19 +84,20 @@ int main(int argc, char *argv[])
 		}
 		else if (args[i].first == "--help" || args[i].first == "-h")
 		{
-			qDebug() << "Help";
-			qDebug() << "Available Commands:";
-			qDebug() << "-d <dev>\t--dev <dev>\tOpen EMStudio, connecting to device <dev>";
-			qDebug() << "-h\t\t--help\t\tShow this help";
+			printHelp();
 			return 0;
+		}
+		else if (args[i].first == "--autoconnect" || args[i].first == "-a")
+		{
+			if (args[i].second.toLower() == "false")
+			{
+				autoconnect = false;
+			}
 		}
 		else
 		{
 			qDebug() << "Unknown command" << args[i].first;
-			qDebug() << "Help";
-			qDebug() << "Available Commands:";
-			qDebug() << "-d <dev>\t--dev <dev>\tOpen EMStudio, connecting to device <dev>";
-			qDebug() << "-h\t\t--help\t\tShow this help";
+			printHelp();
 			return 0;
 		}
 	}
@@ -95,7 +107,10 @@ int main(int argc, char *argv[])
 	{
 		w.setDevice(port);
 	}
-	w.connectToEms();
+	if (autoconnect)
+	{
+		w.connectToEms();
+	}
 	w.show();
 	return a.exec();
 }
