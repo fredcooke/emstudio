@@ -21,6 +21,7 @@
 
 #include <QWidget>
 #include <QKeyEvent>
+#include <QClipboard>
 #include "headers.h"
 #include "table3ddata.h"
 #include "ui_tableview3d.h"
