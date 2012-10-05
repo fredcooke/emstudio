@@ -77,7 +77,7 @@ bool SerialThread::verifyFreeEMS()
 		{
 			if (count > 1)
 			{
-				if (buf[1] == 0x3E)
+				if (buf[2] == 0x3E)
 				{
 					//Serial monitor running
 					return false;
