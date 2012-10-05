@@ -496,6 +496,15 @@ void FreeEmsComms::run()
 				emit connected();
 				m_threadReqList.removeAt(i);
 				i--;
+				if (!serialThread->verifyFreeEMS())
+				{
+					qDebug() << "Either in SM mode, or otherwise connected to a bad port";
+					emit error("Either in SM mode, or otherwise connected to a bad port");
+					serialconnected = false;
+					serialThread->closePort();
+					emit disconnected();
+					continue;
+				}
 			}
 			else if (!serialconnected)
 			{

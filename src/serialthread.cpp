@@ -59,6 +59,41 @@ void SerialThread::setBaud(int baudrate)
 {
 	m_baud = baudrate;
 }
+bool SerialThread::verifyFreeEMS()
+{
+	unsigned char ret = 0x0D;
+	int writei = write(m_portHandle,&ret,1);
+	if (writei <= 0)
+	{
+		qDebug() << "Error writing to verify FreeEMS";
+		return false;
+	}
+	unsigned char buf[3];
+	msleep(100);
+	int count = read(m_portHandle,buf,3);
+	if (count > 0)
+	{
+		if (buf[0] == 0xE0 || buf[1] == 0xE1)
+		{
+			if (count > 1)
+			{
+				if (buf[1] == 0x3E)
+				{
+					//Serial monitor running
+					return false;
+				}
+				else
+				{
+					//Probably not;
+					return true;
+				}
+			}
+		}
+	}
+	//nothing on the port here either.
+	return true;
+}
+
 void SerialThread::setLogFileName(QString filename)
 {
 	m_logFileName = filename;

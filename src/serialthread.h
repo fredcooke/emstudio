@@ -40,6 +40,7 @@ class SerialThread : public QThread
 	Q_OBJECT
 public:
     SerialThread(QObject *parent=0);
+    bool verifyFreeEMS();
     void setLogFileName(QString filename);
     void setPort(QString portname);
     void setLogDirectory(QString dir);
