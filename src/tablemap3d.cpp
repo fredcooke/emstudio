@@ -155,6 +155,18 @@ void TableMap3D::paintGL()
 	glEnd();
 	for(int x=0;x<m_tableData->xAxis().size()-1;x++)
 	{
+		for (int i=0;i<2;i++)
+		{
+		if (i == 0)
+		{
+			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+			glLineWidth(2);
+		}
+		else if (i == 1)
+		{
+			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+			glLineWidth(1);
+		}
 		glBegin(GL_QUADS);
 		for(int y=0;y<m_tableData->yAxis().size()-1;y++)
 		{
@@ -186,36 +198,48 @@ void TableMap3D::paintGL()
 				g=255-(255*((val-((m_tableData->maxZAxis()/4.0)*3))/(m_tableData->maxZAxis()/4.0)));
 				b=0;
 			}
-			r = r/255.0;
-			g = g/255.0;
-			b = b/255.0;
+			if (i == 0)
+			{
+				r = 0;
+				g = 0;
+				b = 0;
+			}
+			else if (i == 1)
+			{
+				r = r/255.0;
+				g = g/255.0;
+				b = b/255.0;
+			}
 
 			//X and Y are reversed here, to allow for the graph to look the proper way.
+
 			float y0 = ((float)x * maxy)/((float)m_tableData->xAxis().size()-1.0);
 			float x0 = ((float)y)/((float)m_tableData->yAxis().size()-1.0);
 			float z0 = (float)m_tableData->values()[y][x] / m_tableData->maxZAxis();
 			glColor4f(r,g,b,1);
-			glVertex3f(x0,y0,z0);
+			glVertex3f(x0,maxy-y0,z0);
 
 			float y1 = ((float)x * maxy)/((float)m_tableData->xAxis().size()-1.0);
 			float x1 = ((float)y+1)/((float)m_tableData->yAxis().size()-1.0);
 			float z1 = (float)m_tableData->values()[y+1][x] / m_tableData->maxZAxis();
 			glColor4f(r,g,b,1);
-			glVertex3f(x1,y1,z1);
+			glVertex3f(x1,maxy-y1,z1);
 
 			float y2 = ((float)((x+1.0) * maxy))/((float)m_tableData->xAxis().size()-1.0);
 			float x2 = ((float)y+1.0)/((float)m_tableData->yAxis().size()-1.0);
 			float z2 = (float)m_tableData->values()[y+1][x+1] / m_tableData->maxZAxis();
 			glColor4f(r,g,b,1);
-			glVertex3f(x2,y2,z2);
+			glVertex3f(x2,maxy-y2,z2);
 
 			float y3 = ((float)(x+1) * maxy)/((float)m_tableData->xAxis().size()-1.0);
 			float x3 = ((float)y)/((float)m_tableData->yAxis().size()-1.0);
 			float z3 = (float)m_tableData->values()[y][x+1]/m_tableData->maxZAxis();
 			glColor4f(r,g,b,1);
-			glVertex3f(x3,y3,z3);
+			glVertex3f(x3,maxy-y3,z3);
+
 		}
 		glEnd();
+		}
 	}
 }
 void TableMap3D::passData(Table3DData *tableData)

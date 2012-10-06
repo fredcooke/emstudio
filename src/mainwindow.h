@@ -43,6 +43,7 @@
 #include "table2ddata.h"
 #include "readonlyramview.h"
 #include "emsstatus.h"
+#include "tablemap3d.h"
 //#include "datarawview.h"
 
 
@@ -185,6 +186,7 @@ private:
 	void checkRamFlashSync();
 	bool m_interrogationInProgress;
 private slots:
+	void tableview3d_show3DTable(unsigned short locationid,Table3DData *data);
 	void emsStatusHardResetRequested();
 	void emsStatusSoftResetRequested();
 	void interrogateProgressViewDestroyed(QObject *object);

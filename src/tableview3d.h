@@ -66,6 +66,7 @@ private slots:
 	void exportJson(QString filename);
 	void showMapClicked();
 signals:
+	void show3DTable(unsigned short locationid,Table3DData *data);
 	void saveToFlash(unsigned short locationid);
 	void reloadTableData(unsigned short locationid,bool ram);
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);

@@ -1017,6 +1017,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,int type,bool i
 	else if (type == 3)
 	{
 		TableView3D *view = new TableView3D(isram,isflash);
+		connect(view,SIGNAL(show3DTable(unsigned short,Table3DData*)),this,SLOT(tableview3d_show3DTable(unsigned short,Table3DData*)));
 		QString title;
 		bool found = false;
 		for (int j=0;j<m_table3DMetaData.size();j++)
@@ -2082,6 +2083,17 @@ void MainWindow::checkSyncRequest()
 {
 	emsComms->getLocationIdList(0,0);
 }
+void MainWindow::tableview3d_show3DTable(unsigned short locationid,Table3DData *data)
+{
+	TableMap3D *m_tableMap = new TableMap3D();
+	m_tableMap->passData(data);
+	QMdiSubWindow *win = ui.mdiArea->addSubWindow(m_tableMap);
+	win->setGeometry(m_tableMap->geometry());
+	win->setWindowTitle("0x" + QString::number(locationid,16).toUpper());
+	win->show();
+
+}
+
 void MainWindow::emsStatusHardResetRequested()
 {
 	qDebug() << "Attempting hard reset:" << emsComms->hardReset();

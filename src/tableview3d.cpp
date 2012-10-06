@@ -171,16 +171,18 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 } // cDisplayDlg::keyPressEv
 void TableView3D::showMapClicked()
 {
+	emit show3DTable(m_locationId,tableData);
 	if (m_tableMap)
 	{
-		m_tableMap->show();
+//		m_tableMap->show();
 	}
 	else
 	{
-		m_tableMap = new TableMap3D();
+		/*m_tableMap = new TableMap3D();
 		m_tableMap->setGeometry(100,100,800,600);
 		m_tableMap->show();
 		m_tableMap->passData(tableData);
+		emit show3DTable(m_locationId,m_tableData);*/
 	}
 }
 
