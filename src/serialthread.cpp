@@ -61,6 +61,7 @@ void SerialThread::setBaud(int baudrate)
 }
 bool SerialThread::verifyFreeEMS()
 {
+#ifndef Q_OS_WIN32
 	unsigned char ret = 0x0D;
 	int writei = write(m_portHandle,&ret,1);
 	if (writei <= 0)
@@ -91,6 +92,7 @@ bool SerialThread::verifyFreeEMS()
 		}
 	}
 	//nothing on the port here either.
+#endif
 	return true;
 }
 

@@ -2,7 +2,10 @@
 #include <QPainter>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/glut.h>
+//This is required for some windows builds
+#ifndef GL_MULTISAMPLE
+#define GL_MULTISAMPLE  0x809D
+#endif
 TableMap3D::TableMap3D(QWidget *parent) : QGLWidget(parent)
 {
 	m_tableData=0;
