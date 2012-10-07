@@ -1,5 +1,5 @@
 /***************************************************************************
-*                                                                          *
+*   QHexEdit is copyright Simon Winfried (winfried.simon@gmail.com)        *
 *   This file is a part of QHexEdit                                        *
 *                                                                          *
 *   QHexEdit is free software: you can redistribute it and/or modify       *
