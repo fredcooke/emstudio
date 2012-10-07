@@ -608,18 +608,11 @@ int SerialThread::openPort(QString portName,int baudrate)
 	newtio.c_cflag &= ~CRTSCTS;
 	newtio.c_cflag &= ~CSTOPB;
 	newtio.c_iflag=IGNBRK;
-	//newtio.c_cflag |= (CLOCAL | CREAD | PARODD);
-	/*newtio.c_lflag &= !(ICANON | ECHO | ECHOE | ISIG);
-	newtio.c_oflag &= !(OPOST);
-	newtio.c_cc[VMIN] = 0; // Min number of bytes to read
-	newtio.c_cc[VTIME] = 100; //10 second read timeout*/
 	newtio.c_iflag &= ~(IXON|IXOFF|IXANY);
 	newtio.c_lflag=0;
 	newtio.c_oflag=0;
-	//newtio.c_cc[VTIME]=1;
-	//newtio.c_cc[VMIN]=60;
-	newtio.c_cc[VTIME]=2;
-	newtio.c_cc[VMIN]=1;
+	newtio.c_cc[VTIME]=1; //1/10th second timeout, to allow for quitting the read thread
+	newtio.c_cc[VMIN]=1; //We want a pure timer timeout
 	if (baudrate != -1)
 	{
 		if(cfsetispeed(&newtio, BAUD))
@@ -633,6 +626,7 @@ int SerialThread::openPort(QString portName,int baudrate)
 		}
 		//debug(obdLib::DEBUG_VERBOSE,"Setting baud rate to %i on port %s\n",baudrate,portName);
 	}
+	fcntl(m_portHandle, F_SETFL, 0); //Set to blocking
 	tcsetattr(m_portHandle,TCSANOW,&newtio);
 	return 0;
 #endif //Q_OS_WIN32

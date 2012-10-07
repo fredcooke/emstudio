@@ -47,6 +47,7 @@ public:
     void setLogsEnabled(bool enabled);
     void setBaud(int baudrate);
     int openPort(QString portName,int baudrate);
+    int portHandle() { return m_portHandle; }
     void closePort();
     QByteArray readPacket();
     int readSerial(int timeout);

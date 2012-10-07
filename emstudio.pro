@@ -76,7 +76,8 @@ SOURCES += src/main.cpp\
     src/overviewprogressitemdelegate.cpp \
     src/dataview.cpp \
     src/emsstatus.cpp \
-    src/tablemap3d.cpp
+    src/tablemap3d.cpp \
+    src/serialrxthread.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -113,7 +114,8 @@ HEADERS  += src/mainwindow.h \
     src/overviewprogressitemdelegate.h \
     src/dataview.h \
     src/emsstatus.h \
-    src/tablemap3d.h
+    src/tablemap3d.h \
+    src/serialrxthread.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \

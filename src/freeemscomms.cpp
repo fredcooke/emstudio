@@ -315,7 +315,6 @@ bool FreeEmsComms::sendPacket(RequestClass request,bool haslength)
 		qDebug() << "sendPacket failed";
 		return false;
 	}
-	qDebug() << "Sent packet" << "0x" + QString::number(request.type,16).toUpper() << "Sequence Number:" << request.sequencenumber;
 	return true;
 }
 
@@ -381,6 +380,7 @@ bool FreeEmsComms::sendPacket(unsigned short payloadid,QList<QVariant> arglist,Q
 	{
 		return false;
 	}
+	qDebug() << "Sent packet" << "0x" + QString::number(payloadid,16).toUpper();
 	emit packetSent(payloadid,header,payload);
 	return true;
 }
@@ -455,6 +455,9 @@ void FreeEmsComms::setInterByteSendDelay(int milliseconds)
 
 void FreeEmsComms::run()
 {
+	rxThread = new SerialRXThread(this);
+	connect(rxThread,SIGNAL(incomingPacket(QByteArray)),this,SLOT(parseEverything(QByteArray)));
+
 	bool serialconnected = false;
 	//bool waitingforresponse=false;
 	//int waitingpayloadid=0;
@@ -505,6 +508,9 @@ void FreeEmsComms::run()
 					emit disconnected();
 					continue;
 				}
+
+				rxThread->start(serialThread->portHandle());
+
 			}
 			else if (!serialconnected)
 			{
@@ -519,11 +525,11 @@ void FreeEmsComms::run()
 			}
 			else if (m_threadReqList[i].type == GET_LOCATION_ID_LIST)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					qDebug() << "GET_LOCATION_ID_LIST";
 					emit debugVerbose("GET_LOCATION_ID_LIST");
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0xDA5E;
@@ -535,9 +541,11 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == GET_DECODER_NAME)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -552,9 +560,11 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == GET_FIRMWARE_BUILD_DATE)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -569,9 +579,11 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == GET_COMPILER_VERSION)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -586,9 +598,11 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == GET_OPERATING_SYSTEM)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -603,9 +617,11 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == BURN_BLOCK_FROM_RAM_TO_FLASH)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -621,9 +637,11 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == GET_LOCATION_ID_INFO)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -640,9 +658,11 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == UPDATE_BLOCK_IN_RAM)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -657,10 +677,12 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 
 			}
 			else if (m_threadReqList[i].type == RETRIEVE_BLOCK_IN_RAM)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -675,9 +697,11 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == UPDATE_BLOCK_IN_FLASH)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -692,9 +716,11 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == RETRIEVE_BLOCK_IN_FLASH)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -709,14 +735,15 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == GET_INTERFACE_VERSION)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					qDebug() << "GET_INTERFACE_VERSION";
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0000;
 					if (!sendPacket(GET_INTERFACE_VERSION))
@@ -727,14 +754,15 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == GET_FIRMWARE_VERSION)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					qDebug() << "GET_FIRMWARE_VERSION";
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0002;
 					if (!sendPacket(GET_FIRMWARE_VERSION))
@@ -745,9 +773,11 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == GET_MAX_PACKET_SIZE)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -762,9 +792,11 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == ECHO_PACKET)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_waitingForResponse = true;
@@ -779,9 +811,11 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == SOFT_RESET)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					m_currentWaitingRequest = m_threadReqList[i];
@@ -794,9 +828,11 @@ void FreeEmsComms::run()
 					i--;
 					emit packetSent(SOFT_RESET,QByteArray(),QByteArray());
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (m_threadReqList[i].type == HARD_RESET)
 			{
+				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
 					//m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
@@ -811,6 +847,7 @@ void FreeEmsComms::run()
 					i--;
 					emit packetSent(HARD_RESET,QByteArray(),QByteArray());
 				}
+				m_waitingInfoMutex.unlock();
 			}
 			else if (false)
 			{
@@ -822,8 +859,9 @@ void FreeEmsComms::run()
 		}
 
 		//General packet reading
-		if (serialconnected)
-		{
+		//if (serialconnected)
+		//{
+			/*
 			//qDebug() << "Attempting to read:";
 			int result = serialThread->readSerial(20);
 			if (result > 20)
@@ -845,12 +883,13 @@ void FreeEmsComms::run()
 				emit disconnected();
 				return;
 			}
-			//qDebug() << "finished attempting to read";
-		}
-		else
-		{
+			//qDebug() << "finished attempting to read";*/
+		//}
+		//else
+		//{
 			msleep(20);
-		}
+		//}
+		m_waitingInfoMutex.lock();
 		if (QDateTime::currentDateTime().currentMSecsSinceEpoch() - m_timeoutMsecs > 500 && m_waitingForResponse)
 		{
 			//5 seconds
@@ -871,52 +910,60 @@ void FreeEmsComms::run()
 			}
 			//TODO: Requeue the command for retry.
 		}
-		while (serialThread->bufferSize() != 0)
+		m_waitingInfoMutex.unlock();
+		/*while (serialThread->bufferSize() != 0)
 		{
 			QByteArray packet = serialThread->readPacket();
 			Packet parsedPacket = parseBuffer(packet);
 			parsePacket(parsedPacket);
-		}
+		}*/
 	}
 }
 void FreeEmsComms::parsePacket(Packet parsedPacket)
 {
 	if (parsedPacket.isValid)
 	{
+		QMutexLocker locker(&m_waitingInfoMutex);
 		/*unsigned short payloadid = (unsigned short)packetpair.first[1] << 8;
 		payloadid += (unsigned char)packetpair.first[2];*/
 		unsigned short payloadid = parsedPacket.payloadid;
 		//qDebug() << "Incoming packet. Payload:" << payloadid;
 
-		if (payloadid != 0x0191)
+		if (payloadid == 0x0191)
 		{
 			//qDebug() << "Incoming packet:" << "0x" + QString::number(payloadid,16).toUpper();
 
 		}
-		if (m_waitingForResponse)
+		else
 		{
-
-			if (payloadid == m_payloadWaitingForResponse+1)
+			if (m_waitingForResponse)
 			{
-				//qDebug() << "Recieved Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
-				if (parsedPacket.isNAK)
+				if (payloadid == m_payloadWaitingForResponse+1)
 				{
-					//NAK to our packet
-					unsigned short errornum = parsedPacket.payload[0] << 8;
-					errornum += parsedPacket.payload[1];
-					emit commandFailed(m_currentWaitingRequest.sequencenumber,errornum);
-					emit packetNaked(m_currentWaitingRequest.type,parsedPacket.header,parsedPacket.payload,errornum);
+					qDebug() << "Recieved Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
+					qDebug() << "Currently waiting for:" << QString::number(m_currentWaitingRequest.type,16).toUpper();
+					if (parsedPacket.isNAK)
+					{
+						//NAK to our packet
+						unsigned short errornum = parsedPacket.payload[0] << 8;
+						errornum += parsedPacket.payload[1];
+						emit commandFailed(m_currentWaitingRequest.sequencenumber,errornum);
+						emit packetNaked(m_currentWaitingRequest.type,parsedPacket.header,parsedPacket.payload,errornum);
+					}
+					else
+					{
+						//Packet is good.
+						emit commandSuccessful(m_currentWaitingRequest.sequencenumber);
+						emit packetAcked(m_currentWaitingRequest.type,parsedPacket.header,parsedPacket.payload);
+					}
+					m_waitingForResponse = false;
 				}
 				else
 				{
-					//Packet is good.
-					emit commandSuccessful(m_currentWaitingRequest.sequencenumber);
-					emit packetAcked(m_currentWaitingRequest.type,parsedPacket.header,parsedPacket.payload);
+					qDebug() << "ERROR! Invalid packet:" << "0x" + QString::number(payloadid,16).toUpper();
 				}
-				m_waitingForResponse = false;
 			}
 		}
-
 		if (payloadid == 0x0191)
 		{	//Datalog packet
 
@@ -1013,6 +1060,13 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 				}
 				details += "}";
 
+				if (m_currentWaitingRequest.args.size() == 0)
+				{
+					qDebug() << "ERROR! Current waiting packet's arg size is zero1!!";
+					qDebug() << "0x" + QString::number(m_currentWaitingRequest.type,16).toUpper();
+					qDebug() << "0x" + QString::number(payloadid,16).toUpper();
+					//return;
+				}
 				unsigned short locationid = m_currentWaitingRequest.args[0].toInt();
 				//qDebug() << "Payload:" << QString::number(locationid,16);
 				//qDebug() << details;
@@ -1146,6 +1200,11 @@ bool FreeEmsComms::sendSimplePacket(unsigned short payloadid)
 void FreeEmsComms::setLogFileName(QString filename)
 {
 	serialThread->setLogFileName(filename);
+}
+void FreeEmsComms::parseEverything(QByteArray buffer)
+{
+	Packet p = parseBuffer(buffer);
+	parsePacket(p);
 }
 
 FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)

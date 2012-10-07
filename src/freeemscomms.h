@@ -24,6 +24,7 @@
 #include <QVariant>
 #include <QDateTime>
 #include "serialthread.h"
+#include "serialrxthread.h"
 #include "logloader.h"
 class FreeEmsComms : public QThread
 {
@@ -136,6 +137,8 @@ public:
 protected:
 	void run();
 private:
+	QMutex m_waitingInfoMutex;
+	SerialRXThread *rxThread;
 	bool sendPacket(RequestClass request,bool haslength);
 	qint64 m_timeoutMsecs;
 	QList<LocationIdFlags> m_blockFlagList;
@@ -178,6 +181,7 @@ signals:
 	//void updateBlockInRamSucceeded();
 public slots:
 private slots:
+	void parseEverything(QByteArray buffer);
 	Packet parseBuffer(QByteArray buffer);
 	void parsePacket(Packet parsedPacket);
 
