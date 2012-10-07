@@ -59,11 +59,16 @@ void SerialThread::setBaud(int baudrate)
 {
 	m_baud = baudrate;
 }
-bool SerialThread::verifyFreeEMS()
+bool SerialThread::verifyFreeEMS(QString portname)
 {
-#ifndef Q_OS_WIN32
+	openPort(portname,115200,false);
 	unsigned char ret = 0x0D;
-	int writei = write(m_portHandle,&ret,1);
+	int writei =0;
+#ifdef Q_OS_WIN32
+	::WriteFile(m_portHandle, (void*)&ret, (DWORD)1, (LPDWORD)&writei, NULL);
+#else
+	writei = write(m_portHandle,&ret,1);
+#endif
 	if (writei <= 0)
 	{
 		qDebug() << "Error writing to verify FreeEMS";
@@ -71,28 +76,38 @@ bool SerialThread::verifyFreeEMS()
 	}
 	unsigned char buf[3];
 	msleep(100);
-	int count = read(m_portHandle,buf,3);
+	int count = 0;
+#ifdef Q_OS_WIN32
+	::ReadFile(m_portHandle,(LPVOID)buf,3,(LPDWORD)&count,NULL);
+#else
+	count = read(m_portHandle,buf,3);
+#endif
 	if (count > 0)
 	{
-		if (buf[0] == 0xE0 || buf[1] == 0xE1)
+		qDebug() << "Verify:" << QString::number(buf[0],16);
+		qDebug() << "Verify:" << QString::number(buf[1],16);
+		if (buf[0] == 0xE0 || buf[0] == 0xE1)
 		{
 			if (count > 1)
 			{
+				qDebug() << "Verify:" << QString::number(buf[2],16);
 				if (buf[2] == 0x3E)
 				{
 					//Serial monitor running
+					closePort();
 					return false;
 				}
 				else
 				{
 					//Probably not;
+					closePort();
 					return true;
 				}
 			}
 		}
 	}
 	//nothing on the port here either.
-#endif
+	closePort();
 	return true;
 }
 
@@ -501,11 +516,12 @@ void SerialThread::closePort()
 #ifdef Q_OS_WIN32
 	CloseHandle(m_portHandle);
 #else
+	flock(m_portHandle,LOCK_UN);
 	close(m_portHandle);
 #endif
 }
 
-int SerialThread::openPort(QString portName,int baudrate)
+int SerialThread::openPort(QString portName,int baudrate,bool oddparity)
 {
 #ifdef Q_OS_WIN32
 	m_portHandle=CreateFileA(portName.toAscii(), GENERIC_READ|GENERIC_WRITE,0, NULL, OPEN_EXISTING, 0, NULL);
@@ -518,7 +534,14 @@ int SerialThread::openPort(QString portName,int baudrate)
 	unsigned long confSize = sizeof(COMMCONFIG);
 	Win_CommConfig.dwSize = confSize;
 	GetCommConfig(m_portHandle, &Win_CommConfig, &confSize);
-	Win_CommConfig.dcb.Parity = 1; //Odd parity
+	if (oddparity)
+	{
+		Win_CommConfig.dcb.Parity = 1; //Odd parity
+	}
+	else
+	{
+		Win_CommConfig.dcb.Parity = 0; //No parity
+	}
 	Win_CommConfig.dcb.fRtsControl = RTS_CONTROL_DISABLE;
 	Win_CommConfig.dcb.fOutxCtsFlow = FALSE;
 	Win_CommConfig.dcb.fOutxDsrFlow = FALSE;
@@ -604,7 +627,14 @@ int SerialThread::openPort(QString portName,int baudrate)
 	}
 	newtio.c_cflag = (newtio.c_cflag & ~CSIZE) | CS8;
 	newtio.c_cflag |= CLOCAL | CREAD;
-	newtio.c_cflag |= (PARENB | PARODD);
+	if (oddparity)
+	{
+		newtio.c_cflag |= (PARENB | PARODD);
+	}
+	else
+	{
+		newtio.c_cflag &= ~(PARENB | PARODD);
+	}
 	newtio.c_cflag &= ~CRTSCTS;
 	newtio.c_cflag &= ~CSTOPB;
 	newtio.c_iflag=IGNBRK;

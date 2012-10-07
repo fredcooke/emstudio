@@ -2,17 +2,22 @@
 #define SERIALRXTHREAD_H
 
 #include <QThread>
-
+#ifndef Q_OS_WIN32
+#define HANDLE int
+#endif
+#ifdef Q_OS_WIN32
+#include <windows.h>
+#endif
 class SerialRXThread : public QThread
 {
 	Q_OBJECT
 public:
 	explicit SerialRXThread(QObject *parent = 0);	
 	~SerialRXThread();
-	void start(int handle);
+	void start(HANDLE handle);
 private:
 	bool m_terminate;
-	int m_portHandle;
+	HANDLE m_portHandle;
 protected:
 	void run();
 signals:

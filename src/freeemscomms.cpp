@@ -473,6 +473,17 @@ void FreeEmsComms::run()
 			if (m_threadReqList[i].type == SERIAL_CONNECT)
 			{
 				//qDebug() << "SERIAL_CONNECT";
+				if (!serialThread->verifyFreeEMS(m_threadReqList[i].args[0].toString()))
+				{
+					qDebug() << "FreeEMS is either in Serial Monitor mode, or EMStudio is connected to the wrong port";
+					emit error("FreeEMS is either in Serial Monitor mode, or EMStudio is connected to the wrong port");
+					serialconnected = false;
+					serialThread->closePort();
+					emit disconnected();
+					m_threadReqList.removeAt(i);
+					i--;
+					continue;
+				}
 				emit debugVerbose("SERIAL_CONNECT");
 				int errornum = 0;
 				if ((errornum = serialThread->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt())))
@@ -499,15 +510,7 @@ void FreeEmsComms::run()
 				emit connected();
 				m_threadReqList.removeAt(i);
 				i--;
-				if (!serialThread->verifyFreeEMS())
-				{
-					qDebug() << "Either in SM mode, or otherwise connected to a bad port";
-					emit error("Either in SM mode, or otherwise connected to a bad port");
-					serialconnected = false;
-					serialThread->closePort();
-					emit disconnected();
-					continue;
-				}
+
 
 				rxThread->start(serialThread->portHandle());
 

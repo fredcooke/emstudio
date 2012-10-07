@@ -5,7 +5,7 @@ SerialRXThread::SerialRXThread(QObject *parent) : QThread(parent)
 {
 	m_terminate = false;
 }
-void SerialRXThread::start(int handle)
+void SerialRXThread::start(HANDLE handle)
 {
 	m_portHandle = handle;
 	QThread::start();

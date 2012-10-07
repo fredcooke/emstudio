@@ -40,14 +40,14 @@ class SerialThread : public QThread
 	Q_OBJECT
 public:
     SerialThread(QObject *parent=0);
-    bool verifyFreeEMS();
+    bool verifyFreeEMS(QString portname);
     void setLogFileName(QString filename);
     void setPort(QString portname);
     void setLogDirectory(QString dir);
     void setLogsEnabled(bool enabled);
     void setBaud(int baudrate);
-    int openPort(QString portName,int baudrate);
-    int portHandle() { return m_portHandle; }
+    int openPort(QString portName,int baudrate,bool oddparity = true);
+    HANDLE portHandle() { return m_portHandle; }
     void closePort();
     QByteArray readPacket();
     int readSerial(int timeout);
