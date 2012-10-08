@@ -530,16 +530,18 @@ int SerialThread::openPort(QString portName,int baudrate,bool oddparity)
 		return -1;
 	}
 	COMMCONFIG Win_CommConfig;
-	//COMMTIMEOUTS Win_CommTimeouts;
+
 	unsigned long confSize = sizeof(COMMCONFIG);
 	Win_CommConfig.dwSize = confSize;
 	GetCommConfig(m_portHandle, &Win_CommConfig, &confSize);
 	if (oddparity)
 	{
+		qDebug() << "SerialPort Odd parity selected";
 		Win_CommConfig.dcb.Parity = 1; //Odd parity
 	}
 	else
 	{
+		qDebug() << "SerialPort No parity selected";
 		Win_CommConfig.dcb.Parity = 0; //No parity
 	}
 	Win_CommConfig.dcb.fRtsControl = RTS_CONTROL_DISABLE;
@@ -562,13 +564,14 @@ int SerialThread::openPort(QString portName,int baudrate,bool oddparity)
 		Win_CommConfig.dcb.BaudRate = 115200;
 	}
 	Win_CommConfig.dcb.ByteSize = 8;
-	//Win_CommTimeouts.ReadIntervalTimeout = 50;
-	//Win_CommTimeouts.ReadTotalTimeoutMultiplier = 0;
-	//Win_CommTimeouts.ReadTotalTimeoutConstant = 110;
-	//Win_CommTimeouts.WriteTotalTimeoutMultiplier = 0;
-	//Win_CommTimeouts.WriteTotalTimeoutConstant = 110;
+	COMMTIMEOUTS Win_CommTimeouts;
+	Win_CommTimeouts.ReadIntervalTimeout = 0; //inter-byte timeout value (Disabled)
+	Win_CommTimeouts.ReadTotalTimeoutMultiplier = 0; //Multiplier
+	Win_CommTimeouts.ReadTotalTimeoutConstant = 10; //Total timeout, 1/10th of a second to match *nix
+	Win_CommTimeouts.WriteTotalTimeoutMultiplier = 0;
+	Win_CommTimeouts.WriteTotalTimeoutConstant = 110;
 	SetCommConfig(m_portHandle, &Win_CommConfig, sizeof(COMMCONFIG));
-	//SetCommTimeouts(m_portHandle,&Win_CommTimeouts);
+	SetCommTimeouts(m_portHandle,&Win_CommTimeouts);
 	return 0;
 #else
 
