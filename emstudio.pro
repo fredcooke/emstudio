@@ -12,7 +12,6 @@ INCLUDEPATH += src
 OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
-QMAKE_CXXFLAGS += -Werror
 QMAKE_LFLAGS += -static-libgcc
 win32-x-g++ {
         message("Building for win32-x-g++")
@@ -29,6 +28,7 @@ win32-g++ {
         DEFINES += GIT_HASH=$$system(\"c:/program files/git/bin/git.exe\" log -n 1 --pretty=format:%H)
 }
 unix {
+	QMAKE_CXXFLAGS += -Werror
 	target.path = /usr/bin
 	config.path = /etc/emstudio
 	config.files += freeems.config.json src/gauges.qml
@@ -39,6 +39,7 @@ unix {
 	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
 }
 mac {
+	QMAKE_CXXFLAGS += -Werror
 	INCLUDEPATH += /opt/local/include
 	INCLUDEPATH += /opt/local/include/qwt
 }
