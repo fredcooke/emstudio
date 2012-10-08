@@ -365,11 +365,13 @@ int SerialThread::writePacket(QByteArray packet)
 	for (int i=0;i<packet.size();i++)
 	{
 		char c = packet.data()[i];
+		qDebug() << "About to write";
 		if (!::WriteFile(m_portHandle, (void*)&c, (DWORD)1, (LPDWORD)&len, NULL))
 		{
 			qDebug() << "Serial Write Error";
 			return -1;
 		}
+		qDebug() << "Written";
 		msleep(m_interByteSendDelay);
 	}
 	return 0;
@@ -565,11 +567,11 @@ int SerialThread::openPort(QString portName,int baudrate,bool oddparity)
 	}
 	Win_CommConfig.dcb.ByteSize = 8;
 	COMMTIMEOUTS Win_CommTimeouts;
-	Win_CommTimeouts.ReadIntervalTimeout = 0; //inter-byte timeout value (Disabled)
-	Win_CommTimeouts.ReadTotalTimeoutMultiplier = 0; //Multiplier
-	Win_CommTimeouts.ReadTotalTimeoutConstant = 10; //Total timeout, 1/10th of a second to match *nix
+	Win_CommTimeouts.ReadIntervalTimeout = MAXDWORD; //inter-byte timeout value (Disabled)
+	Win_CommTimeouts.ReadTotalTimeoutMultiplier = MAXDWORD; //Multiplier
+	Win_CommTimeouts.ReadTotalTimeoutConstant = 1; //Total timeout, 1/10th of a second to match *nix
 	Win_CommTimeouts.WriteTotalTimeoutMultiplier = 0;
-	Win_CommTimeouts.WriteTotalTimeoutConstant = 110;
+	Win_CommTimeouts.WriteTotalTimeoutConstant = 0;
 	SetCommConfig(m_portHandle, &Win_CommConfig, sizeof(COMMCONFIG));
 	SetCommTimeouts(m_portHandle,&Win_CommTimeouts);
 	return 0;

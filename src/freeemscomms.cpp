@@ -376,6 +376,7 @@ bool FreeEmsComms::sendPacket(unsigned short payloadid,QList<QVariant> arglist,Q
 		header.append((char)((payloadid >> 8) & 0xFF));
 		header.append((char)((payloadid) & 0xFF));
 	}
+	qDebug() << "About to send packet";
 	if (serialThread->writePacket(generatePacket(header,payload)) < 0)
 	{
 		return false;
@@ -504,7 +505,7 @@ void FreeEmsComms::run()
 					emit disconnected();
 					continue;
 				}
-				//qDebug() << "Serial connected!";
+				qDebug() << "Serial connected!";
 				serialconnected = true;
 				emit debug("Connected to serial port");
 				emit connected();

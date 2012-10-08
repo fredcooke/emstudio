@@ -51,11 +51,12 @@ void SerialRXThread::run()
 		if (readlen == 0)
 		{
 			//This should be an error
-			qDebug() << "Nothing to read";
-			perror("Error:");
-			printf("\n");
-			return;
-			msleep(10);
+			//qDebug() << "Nothing to read";
+			//perror("Error:");
+			//printf("\n");
+			//return; //Disable this, now that we are using timeouts.
+			//msleep(10);
+			continue;
 		}
 		for (int i=0;i<readlen;i++)
 		{
