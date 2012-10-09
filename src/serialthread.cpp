@@ -368,27 +368,23 @@ int SerialThread::writePacket(QByteArray packet)
 		for (int i=0;i<packet.size();i++)
 		{
 			char c = packet.data()[i];
-			qDebug() << "About to write";
 			if (!::WriteFile(m_portHandle, (void*)&c, (DWORD)1, (LPDWORD)&len, NULL))
 			{
 				qDebug() << "Serial Write Error";
 				m_serialLockMutex->unlock();
 				return -1;
 			}
-			qDebug() << "Written";
 			msleep(m_interByteSendDelay);
 		}
 	}
 	else
 	{
-		qDebug() << "About to write nodelay";
 		if (!::WriteFile(m_portHandle, (void*)packet.data(), (DWORD)packet.length(), (LPDWORD)&len, NULL))
 		{
 			qDebug() << "Serial Write Error";
 			m_serialLockMutex->unlock();
 			return -1;
 		}
-		qDebug() << "Written nodelay";
 	}
 #else
 	for (int i=0;i<packet.size();i++)
