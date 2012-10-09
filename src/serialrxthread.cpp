@@ -5,9 +5,10 @@ SerialRXThread::SerialRXThread(QObject *parent) : QThread(parent)
 {
 	m_terminate = false;
 }
-void SerialRXThread::start(HANDLE handle)
+void SerialRXThread::start(HANDLE handle,QMutex *seriallock)
 {
 	m_portHandle = handle;
+	m_serialLockMutex = seriallock;
 	QThread::start();
 }
 SerialRXThread::~SerialRXThread()
@@ -29,6 +30,7 @@ void SerialRXThread::run()
 	int readlen=0;
 	while (!m_terminate)
 	{
+		m_serialLockMutex->lock();
 #ifdef Q_OS_WIN32
 		if (!ReadFile(m_portHandle,(LPVOID)buffer,1024,(LPDWORD)&readlen,NULL))
 		{
@@ -38,6 +40,7 @@ void SerialRXThread::run()
 #else
 		readlen = read(m_portHandle,buffer,1024);
 #endif //Q_OS_WIN32
+		m_serialLockMutex->unlock();
 		if (readlen < 0)
 		{
 			//Nothing on the port

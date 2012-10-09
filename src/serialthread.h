@@ -46,7 +46,7 @@ public:
     void setLogDirectory(QString dir);
     void setLogsEnabled(bool enabled);
     void setBaud(int baudrate);
-    int openPort(QString portName,int baudrate,bool oddparity = true);
+    int openPort(QString portName,int baudrate,QMutex *seriallock,bool oddparity = true);
     HANDLE portHandle() { return m_portHandle; }
     void closePort();
     QByteArray readPacket();
@@ -57,6 +57,7 @@ public:
     void setInterByteSendDelay(int milliseconds);
     QMutex m_logWriteMutex;
 private:
+    QMutex *m_serialLockMutex;
     void openLogs();
     unsigned int m_packetErrorCount;
     bool m_logsEnabled;

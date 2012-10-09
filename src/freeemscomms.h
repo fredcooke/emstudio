@@ -137,6 +137,7 @@ public:
 protected:
 	void run();
 private:
+	QMutex m_serialLockMutex;
 	QMutex m_waitingInfoMutex;
 	SerialRXThread *rxThread;
 	bool sendPacket(RequestClass request,bool haslength);

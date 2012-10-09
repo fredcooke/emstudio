@@ -487,7 +487,7 @@ void FreeEmsComms::run()
 				}
 				emit debugVerbose("SERIAL_CONNECT");
 				int errornum = 0;
-				if ((errornum = serialThread->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt())))
+				if ((errornum = serialThread->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt(),&m_serialLockMutex)))
 				{
 					if (errornum == -1)
 					{
@@ -513,7 +513,7 @@ void FreeEmsComms::run()
 				i--;
 
 
-				rxThread->start(serialThread->portHandle());
+				rxThread->start(serialThread->portHandle(),&m_serialLockMutex);
 
 			}
 			else if (!serialconnected)

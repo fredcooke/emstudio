@@ -61,7 +61,7 @@ void SerialThread::setBaud(int baudrate)
 }
 bool SerialThread::verifyFreeEMS(QString portname)
 {
-	openPort(portname,115200,false);
+	openPort(portname,115200,m_serialLockMutex,false);
 	unsigned char ret = 0x0D;
 	int writei =0;
 #ifdef Q_OS_WIN32
@@ -360,6 +360,7 @@ int SerialThread::writePacket(QByteArray packet)
 		m_logOutFile->flush();
 		m_logWriteMutex.unlock();
 	}
+	m_serialLockMutex->lock();
 #ifdef Q_OS_WIN32
 	int len=0;
 	if (m_interByteSendDelay > 0)
@@ -371,6 +372,7 @@ int SerialThread::writePacket(QByteArray packet)
 			if (!::WriteFile(m_portHandle, (void*)&c, (DWORD)1, (LPDWORD)&len, NULL))
 			{
 				qDebug() << "Serial Write Error";
+				m_serialLockMutex->unlock();
 				return -1;
 			}
 			qDebug() << "Written";
@@ -383,11 +385,11 @@ int SerialThread::writePacket(QByteArray packet)
 		if (!::WriteFile(m_portHandle, (void*)packet.data(), (DWORD)packet.length(), (LPDWORD)&len, NULL))
 		{
 			qDebug() << "Serial Write Error";
+			m_serialLockMutex->unlock();
 			return -1;
 		}
 		qDebug() << "Written nodelay";
 	}
-	return 0;
 #else
 	for (int i=0;i<packet.size();i++)
 	{
@@ -396,12 +398,15 @@ int SerialThread::writePacket(QByteArray packet)
 		{
 			//TODO: Error here
 			qDebug() << "Serial write error";
+			m_serialLockMutex->unlock();
 			return -1;
 		}
 		msleep(m_interByteSendDelay);
 	}
-	return 0;
+
 #endif //Q_OS_WIN32
+	m_serialLockMutex->unlock();
+	return 0;
 }
 
 QByteArray SerialThread::readPacket()
@@ -420,7 +425,7 @@ QByteArray SerialThread::readPacket()
 
 void SerialThread::run()
 {
-	if (openPort(m_portName,m_baud))
+	if (openPort(m_portName,m_baud,m_serialLockMutex))
 	{
 		qDebug() << "Error opening com port";
 		return;
@@ -536,8 +541,9 @@ void SerialThread::closePort()
 #endif
 }
 
-int SerialThread::openPort(QString portName,int baudrate,bool oddparity)
+int SerialThread::openPort(QString portName,int baudrate,QMutex *seriallock,bool oddparity)
 {
+	m_serialLockMutex = seriallock;
 #ifdef Q_OS_WIN32
 	m_portHandle=CreateFileA(portName.toAscii(), GENERIC_READ|GENERIC_WRITE,0, NULL, OPEN_EXISTING, 0, NULL);
 	if (m_portHandle == INVALID_HANDLE_VALUE)

@@ -2,6 +2,7 @@
 #define SERIALRXTHREAD_H
 
 #include <QThread>
+#include <QMutex>
 #ifndef Q_OS_WIN32
 #define HANDLE int
 #endif
@@ -14,8 +15,9 @@ class SerialRXThread : public QThread
 public:
 	explicit SerialRXThread(QObject *parent = 0);	
 	~SerialRXThread();
-	void start(HANDLE handle);
+	void start(HANDLE handle,QMutex *seriallock);
 private:
+	QMutex *m_serialLockMutex;
 	bool m_terminate;
 	HANDLE m_portHandle;
 protected:
