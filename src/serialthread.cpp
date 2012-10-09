@@ -362,17 +362,30 @@ int SerialThread::writePacket(QByteArray packet)
 	}
 #ifdef Q_OS_WIN32
 	int len=0;
-	for (int i=0;i<packet.size();i++)
+	if (m_interByteSendDelay > 0)
 	{
-		char c = packet.data()[i];
-		qDebug() << "About to write";
-		if (!::WriteFile(m_portHandle, (void*)&c, (DWORD)1, (LPDWORD)&len, NULL))
+		for (int i=0;i<packet.size();i++)
+		{
+			char c = packet.data()[i];
+			qDebug() << "About to write";
+			if (!::WriteFile(m_portHandle, (void*)&c, (DWORD)1, (LPDWORD)&len, NULL))
+			{
+				qDebug() << "Serial Write Error";
+				return -1;
+			}
+			qDebug() << "Written";
+			msleep(m_interByteSendDelay);
+		}
+	}
+	else
+	{
+		qDebug() << "About to write nodelay";
+		if (!::WriteFile(m_portHandle, (void*)packet.data(), (DWORD)packet.length(), (LPDWORD)&len, NULL))
 		{
 			qDebug() << "Serial Write Error";
 			return -1;
 		}
-		qDebug() << "Written";
-		msleep(m_interByteSendDelay);
+		qDebug() << "Written nodelay";
 	}
 	return 0;
 #else
