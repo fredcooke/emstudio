@@ -26,6 +26,9 @@ Table3DData::Table3DData(unsigned short locationid, bool isflashonly,QByteArray 
 void Table3DData::setData(unsigned short locationid,QByteArray data)
 {
 	Q_UNUSED(locationid)
+	m_xAxis.clear();
+	m_yAxis.clear();
+	m_values.clear();
 	unsigned short xaxissize = (((unsigned char)data[0]) << 8) + (unsigned char)data[1];
 	unsigned short yaxissize = (((unsigned char)data[2]) << 8) + (unsigned char)data[3];
 	qDebug() << "XAxis:" << xaxissize;

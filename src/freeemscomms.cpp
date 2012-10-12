@@ -25,7 +25,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 	qRegisterMetaType<QList<unsigned short> >("QList<unsigned short>");
 	qRegisterMetaType<QList<FreeEmsComms::LocationIdFlags> >("QList<FreeEmsComms::LocationIdFlags>");
 	serialThread = new SerialThread(this);
-	connect(serialThread,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
+	connect(serialThread,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)),Qt::DirectConnection);
 	logLoader = new LogLoader(this);
 	connect(logLoader,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
 	m_waitingForResponse = false;
@@ -457,7 +457,7 @@ void FreeEmsComms::setInterByteSendDelay(int milliseconds)
 void FreeEmsComms::run()
 {
 	rxThread = new SerialRXThread(this);
-	connect(rxThread,SIGNAL(incomingPacket(QByteArray)),this,SLOT(parseEverything(QByteArray)));
+	connect(rxThread,SIGNAL(incomingPacket(QByteArray)),this,SLOT(parseEverything(QByteArray)),Qt::DirectConnection);
 
 	bool serialconnected = false;
 	//bool waitingforresponse=false;

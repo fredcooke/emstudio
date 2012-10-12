@@ -386,14 +386,19 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data)
 
 	if (tableData)
 	{
-		tableData->deleteLater();
+		//tableData->deleteLater();
+		tableData->setData(locationid,data);
 	}
-	tableData = new Table3DData(locationid,m_isFlashOnly,data,m_metaData);
-	if (m_tableMap)
+	else
 	{
-		m_tableMap->passData(tableData);
+		tableData = new Table3DData(locationid,m_isFlashOnly,data,m_metaData);
+		connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
+		if (m_tableMap)
+		{
+			m_tableMap->passData(tableData);
+		}
 	}
-	connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
+
 	m_locationId = locationid;
 
 	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
