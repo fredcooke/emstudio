@@ -168,7 +168,7 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 			newrow++;
 		}
 	}
-} // cDisplayDlg::keyPressEv
+}
 void TableView3D::showMapClicked()
 {
 	emit show3DTable(m_locationId,tableData);

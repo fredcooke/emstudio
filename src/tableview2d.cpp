@@ -70,6 +70,110 @@ TableView2D::TableView2D(bool isram, bool isflash,QWidget *parent)
 	}
 
 }
+void TableView2D::keyPressEvent(QKeyEvent *event)
+{
+	if(event->key() == Qt::Key_C && event->modifiers() & Qt::ControlModifier)
+	{
+		//Copy
+		if (ui.tableWidget->selectedItems().size() == 0)
+		{
+			return;
+		}
+		QByteArray itembytes;
+		//int row = ui.tableWidget->selectedItems()[0]->row();
+		QMap<int,QMap<int,QString> > tablemap;
+		int maxrow = 0;
+		int maxcolumn = 0;
+		int minrow = 255;
+		int mincolumn = 255;
+		foreach(QTableWidgetItem* item,ui.tableWidget->selectedItems())
+		{
+			tablemap[item->row()][item->column()] = item->text();
+			if (item->row() > maxrow) maxrow = item->row();
+			if (item->column() > maxcolumn) maxcolumn = item->column();
+			if (item->row() < minrow) minrow = item->row();
+			if (item->column() < mincolumn) mincolumn = item->column();
+		}
+		for (int i=minrow;i<=maxrow;i++)
+		{
+			for (int j=mincolumn;j<=maxcolumn;j++)
+			{
+				if (tablemap.contains(i))
+				{
+					if (tablemap[i].contains(j))
+					{
+						itembytes.append(tablemap[i][j]);
+						itembytes.append("\t");
+					}
+					else
+					{
+						itembytes.append("\t");
+					}
+				}
+				else
+				{
+					//itembytes.append("\n");
+				}
+			}
+			itembytes.append("\n");
+		}
+
+		QMimeData * mime = new QMimeData();
+		mime->setData("text/plain",itembytes);
+		QApplication::clipboard()->setMimeData(mime);
+	}
+	else if(event->key() == Qt::Key_V && event->modifiers() & Qt::ControlModifier)
+	{
+		//Paste
+		if (ui.tableWidget->selectedItems().size() == 0)
+		{
+			//Can't paste when we don't know where to paste!
+			return;
+		}
+		if (ui.tableWidget->selectedItems().size() != 1)
+		{
+			QMessageBox::information(0,"Error","Pasting to a selection group is not supported yet. Please select the top left cell you wish to paste from");
+			return;
+		}
+		int rowindex = ui.tableWidget->selectedItems()[0]->row();
+		int columnindex = ui.tableWidget->selectedItems()[0]->column();
+		int newrow = 0;
+		int newcolumn = 0;
+		QByteArray data = QApplication::clipboard()->mimeData()->data("text/plain");
+		QString datastring(data);
+		QStringList datastringsplit = datastring.split("\n");
+
+		//Check to make sure we're in-bounds first
+		if (datastringsplit.size() + columnindex > ui.tableWidget->columnCount()+1)
+		{
+			QMessageBox::information(0,"Error","Attempted to paste a block that does not fit!");
+			return;
+		}
+		foreach(QString line,datastringsplit)
+		{
+			if (line.split("\t").size() + rowindex > ui.tableWidget->rowCount()+1)
+			{
+				QMessageBox::information(0,"Error","Attempted to paste a block that does not fit!");
+				return;
+			}
+		}
+
+		foreach(QString line,datastringsplit)
+		{
+			QStringList linesplit = line.split("\t");
+			foreach (QString item,linesplit)
+			{
+				if (item != "")
+				{
+					ui.tableWidget->item(rowindex+newrow,columnindex+newcolumn)->setText(item);
+				}
+				newcolumn++;
+			}
+			newcolumn=0;
+			newrow++;
+		}
+	}
+} // cDisplayDlg::keyPressEv
 void TableView2D::exportJson(QString filename)
 {
 	//Create a JSON file similar to MTX's yaml format.

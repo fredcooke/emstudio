@@ -21,6 +21,8 @@
 
 #include <QWidget>
 #include <QResizeEvent>
+#include <QKeyEvent>
+#include <QClipboard>
 #include <table2ddata.h>
 #include "ui_tableview2d.h"
 #include <qwt_plot.h>
@@ -55,6 +57,7 @@ private:
 	void exportJson(QString filename);
 protected:
 	void resizeEvent(QResizeEvent *evt);
+	void keyPressEvent(QKeyEvent *event);
 private slots:
 	void exportClicked();
 	void saveClicked();
