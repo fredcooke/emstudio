@@ -30,12 +30,13 @@ void TableWidget::keyPressEvent(QKeyEvent *event)
 		{
 			if (m_hotkeyList[i].first == event->key())
 			{
-				qDebug() << "found event";
+				qDebug() << "found event2";
 				emit hotKeyPressed(event->key(),event->modifiers());
 				return;
 			}
 		}
 	}
 	qDebug() << "Unhandled event:" << event->key() << event->modifiers();
+	event->ignore();
 	QTableWidget::keyPressEvent(event);
 }

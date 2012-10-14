@@ -206,7 +206,8 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
 		//else if (column == 0) Y
 		//else Z
 
-		ui.tableWidget->selectedItems()[0]->setText(formatNumber(textd,m_metaData.zDp));
+		//ui.tableWidget->selectedItems()[0]->setText(formatNumber(textd,m_metaData.zDp));
+		setValue(ui.tableWidget->selectedItems()[0]->row(),ui.tableWidget->selectedItems()[0]->column(),textd);
 	}
 	else if (key == Qt::Key_Minus || key == Qt::Key_Underscore)
 	{
@@ -245,7 +246,8 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
 		{
 			textd = minval;
 		}
-		ui.tableWidget->selectedItems()[0]->setText(formatNumber(textd,m_metaData.zDp));
+		//ui.tableWidget->selectedItems()[0]->setText(formatNumber(textd,m_metaData.zDp));
+		setValue(ui.tableWidget->selectedItems()[0]->row(),ui.tableWidget->selectedItems()[0]->column(),textd);
 	}
 }
 
@@ -779,6 +781,7 @@ void TableView3D::tableCellChanged(int row,int column)
 		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 		return;
 	}
+	setValue(row,column,tempValue);
 }
 void TableView3D::setSilentValue(int row,int column,QString value)
 {

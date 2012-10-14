@@ -163,6 +163,7 @@ void TableView2D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
 }
 void TableView2D::setValue(int row, int column,double value)
 {
+	qDebug() << "Set value:" << row << column << value;
 	if (row == -1 || column == -1)
 	{
 		qDebug() << "Negative array index! Should be unreachable code! FIXME!";
@@ -252,7 +253,7 @@ void TableView2D::setValue(int row, int column,double value)
 }
 
 void TableView2D::keyPressEvent(QKeyEvent *event)
-{
+{	
 	if(event->key() == Qt::Key_C && event->modifiers() & Qt::ControlModifier)
 	{
 		//Copy
@@ -302,6 +303,7 @@ void TableView2D::keyPressEvent(QKeyEvent *event)
 		QMimeData * mime = new QMimeData();
 		mime->setData("text/plain",itembytes);
 		QApplication::clipboard()->setMimeData(mime);
+		return;
 	}
 	else if(event->key() == Qt::Key_V && event->modifiers() & Qt::ControlModifier)
 	{
@@ -353,7 +355,9 @@ void TableView2D::keyPressEvent(QKeyEvent *event)
 			newcolumn=0;
 			newrow++;
 		}
+		return;
 	}
+	QWidget::keyPressEvent(event);
 }
 void TableView2D::exportJson(QString filename)
 {
@@ -473,6 +477,7 @@ void TableView2D::loadFlashClicked()
 
 void TableView2D::tableCellChanged(int row,int column)
 {
+	qDebug() << "Cell changed";
 	bool conversionOk = false;
 	double tempValue=ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
 	if (!conversionOk)
