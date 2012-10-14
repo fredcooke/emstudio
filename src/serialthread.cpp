@@ -387,17 +387,29 @@ int SerialThread::writePacket(QByteArray packet)
 		}
 	}
 #else
-	for (int i=0;i<packet.size();i++)
+	if (m_interByteSendDelay > 0)
 	{
-		char c = packet.data()[i];
-		if (write(m_portHandle,&c,1)<0)
+		for (int i=0;i<packet.size();i++)
 		{
-			//TODO: Error here
+			char c = packet.data()[i];
+			if (write(m_portHandle,&c,1)<0)
+			{
+				//TODO: Error here
+				qDebug() << "Serial write error";
+				m_serialLockMutex->unlock();
+				return -1;
+			}
+			msleep(m_interByteSendDelay);
+		}
+	}
+	else
+	{
+		if (write(m_portHandle,packet.data(),packet.size())<0)
+		{
 			qDebug() << "Serial write error";
 			m_serialLockMutex->unlock();
 			return -1;
 		}
-		msleep(m_interByteSendDelay);
 	}
 
 #endif //Q_OS_WIN32

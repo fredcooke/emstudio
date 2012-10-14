@@ -402,7 +402,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsComms->setPort(m_comPort);
 	emsComms->setLogDirectory(m_logDirectory);
 	emsComms->setLogsEnabled(m_saveLogs);
-
+	emsComms->setInterByteSendDelay(m_comInterByte);
 
 	pidcount = 0;
 
@@ -773,6 +773,7 @@ void MainWindow::emsCommsDisconnected()
 	emsComms->setPort(m_comPort);
 	emsComms->setLogDirectory(m_logDirectory);
 	emsComms->setLogsEnabled(m_saveLogs);
+	emsComms->setInterByteSendDelay(m_comInterByte);
 	//emsComms->start();
 	//progressView->hide();
 	//progressView->deleteLater();
@@ -1578,6 +1579,7 @@ void MainWindow::menu_settingsClicked()
 	settings->setClearDataLogs(m_clearLogs);
 	settings->setNumLogsToSave(m_logsToKeep);
 	settings->setDataLogDir(m_logDirectory);
+	settings->setInterByteDelay(m_comInterByte);
 	//m_saveLogs = settings.value("savelogs",true).toBool();
 	//m_clearLogs = settings.value("clearlogs",false).toBool();
 	//m_logsToKeep = settings.value("logstokeep",0).toInt();
