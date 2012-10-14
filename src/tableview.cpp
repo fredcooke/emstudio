@@ -22,9 +22,10 @@
 TableView::TableView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
-	ui.tableWidget->setColumnCount(2);
-	ui.tableWidget->setColumnWidth(0,300);
+	ui.tableWidget->setColumnCount(3);
+	ui.tableWidget->setColumnWidth(0,200);
 	ui.tableWidget->setColumnWidth(1,100);
+	ui.tableWidget->setColumnWidth(2,300);
 	guiUpdateTimer = new QTimer(this);
 	connect(guiUpdateTimer,SIGNAL(timeout()),this,SLOT(guiUpdateTimerTick()));
 	guiUpdateTimer->start(250);
@@ -42,8 +43,9 @@ void TableView::passDecoder(DataPacketDecoder *decoder)
 	for (int i=0;i<dataPacketDecoder->m_dataFieldList.size();i++)
 	{
 		m_nameToIndexMap[dataPacketDecoder->m_dataFieldList[i].name()] = i;
-		ui.tableWidget->setItem(i,0,new QTableWidgetItem(dataPacketDecoder->m_dataFieldList[i].description()));
+		ui.tableWidget->setItem(i,0,new QTableWidgetItem(dataPacketDecoder->m_dataFieldList[i].name()));
 		ui.tableWidget->setItem(i,1,new QTableWidgetItem("0"));
+		ui.tableWidget->setItem(i,2,new QTableWidgetItem(dataPacketDecoder->m_dataFieldList[i].description()));
 	}
 }
 
