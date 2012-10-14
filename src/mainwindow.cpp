@@ -2096,8 +2096,10 @@ void MainWindow::tableview3d_show3DTable(unsigned short locationid,Table3DData *
 
 void MainWindow::emsStatusHardResetRequested()
 {
-	qDebug() << "Attempting hard reset:" << emsComms->hardReset();
-
+	if (QMessageBox::information(0,"Warning","Resetting the ECU will erase all changes currently in RAM, but not saved to FLASH, and restart the ECU. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+	{
+		qDebug() << "Attempting hard reset:" << emsComms->hardReset();
+	}
 }
 
 void MainWindow::emsStatusSoftResetRequested()
