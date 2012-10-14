@@ -897,25 +897,15 @@ void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,
 }
 void MainWindow::menu_aboutClicked()
 {
-	if (aboutMdiWindow->isVisible())
-	{
-		aboutMdiWindow->hide();
-	}
-	else
-	{
-		aboutMdiWindow->show();
-	}
+	aboutMdiWindow->show();
+	QApplication::postEvent(aboutMdiWindow, new QEvent(QEvent::Show));
+	QApplication::postEvent(aboutMdiWindow, new QEvent(QEvent::WindowActivate));
 }
 void MainWindow::menu_windows_PacketStatusClicked()
 {
-	if (packetStatusMdiWindow->isVisible())
-	{
-		packetStatusMdiWindow->hide();
-	}
-	else
-	{
-		packetStatusMdiWindow->show();
-	}
+	packetStatusMdiWindow->show();
+	QApplication::postEvent(packetStatusMdiWindow, new QEvent(QEvent::Show));
+	QApplication::postEvent(packetStatusMdiWindow, new QEvent(QEvent::WindowActivate));
 }
 void MainWindow::updateView(unsigned short locid,QObject *view,QByteArray data,int type)
 {
@@ -1801,49 +1791,29 @@ void MainWindow::menu_windows_EmsStatusClicked()
 
 void MainWindow::menu_windows_GaugesClicked()
 {
-	if (gaugesMdiWindow->isVisible())
-	{
-		gaugesMdiWindow->hide();
-	}
-	else
-	{
-		gaugesMdiWindow->show();
-	}
+	gaugesMdiWindow->show();
+	QApplication::postEvent(gaugesMdiWindow, new QEvent(QEvent::Show));
+	QApplication::postEvent(gaugesMdiWindow, new QEvent(QEvent::WindowActivate));
 }
 
 void MainWindow::menu_windows_EmsInfoClicked()
 {
-	if (emsMdiWindow->isVisible())
-	{
-		emsMdiWindow->hide();
-	}
-	else
-	{
-		emsMdiWindow->show();
-	}
+	emsMdiWindow->show();
+	QApplication::postEvent(emsMdiWindow, new QEvent(QEvent::Show));
+	QApplication::postEvent(emsMdiWindow, new QEvent(QEvent::WindowActivate));
 }
 
 void MainWindow::menu_windows_TablesClicked()
 {
-	if (tablesMdiWindow->isVisible())
-	{
-		tablesMdiWindow->hide();
-	}
-	else
-	{
-		tablesMdiWindow->show();
-	}
+	tablesMdiWindow->show();
+	QApplication::postEvent(tablesMdiWindow, new QEvent(QEvent::Show));
+	QApplication::postEvent(tablesMdiWindow, new QEvent(QEvent::WindowActivate));
 }
 void MainWindow::menu_windows_FlagsClicked()
 {
-	if (flagsMdiWindow->isVisible())
-	{
-		flagsMdiWindow->hide();
-	}
-	else
-	{
-		flagsMdiWindow->show();
-	}
+	flagsMdiWindow->show();
+	QApplication::postEvent(flagsMdiWindow, new QEvent(QEvent::Show));
+	QApplication::postEvent(flagsMdiWindow, new QEvent(QEvent::WindowActivate));
 }
 
 void MainWindow::unknownPacket(QByteArray header,QByteArray payload)
