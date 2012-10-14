@@ -341,14 +341,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	aboutMdiWindow = ui.mdiArea->addSubWindow(aboutView);
 	aboutMdiWindow->setGeometry(aboutView->geometry());
 	aboutMdiWindow->hide();
-	aboutMdiWindow->setWindowTitle("About");
+	aboutMdiWindow->setWindowTitle(aboutView->windowTitle());
 
 	dataGauges = new GaugeView();
 	//connect(dataGauges,SIGNAL(destroyed()),this,SLOT(dataGaugesDestroyed()));
 	gaugesMdiWindow = ui.mdiArea->addSubWindow(dataGauges);
 	gaugesMdiWindow->setGeometry(dataGauges->geometry());
 	gaugesMdiWindow->hide();
-	gaugesMdiWindow->setWindowTitle("Gauges");
+	gaugesMdiWindow->setWindowTitle(dataGauges->windowTitle());
 
 	dataTables = new TableView();
 	//connect(dataTables,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
@@ -372,7 +372,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	flagsMdiWindow = ui.mdiArea->addSubWindow(dataFlags);
 	flagsMdiWindow->setGeometry(dataFlags->geometry());
 	flagsMdiWindow->hide();
-	flagsMdiWindow->setWindowTitle("Flags");
+	flagsMdiWindow->setWindowTitle(dataFlags->windowTitle());
 
 	packetStatus = new PacketStatusView();
 	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
@@ -382,7 +382,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	packetStatusMdiWindow = ui.mdiArea->addSubWindow(packetStatus);
 	packetStatusMdiWindow->setGeometry(packetStatus->geometry());
 	packetStatusMdiWindow->hide();
-	packetStatusMdiWindow->setWindowTitle("Packet Status");
+	packetStatusMdiWindow->setWindowTitle(packetStatus->windowTitle());
 
 
 
@@ -1585,6 +1585,7 @@ void MainWindow::menu_settingsClicked()
 	connect(settings,SIGNAL(saveClicked()),this,SLOT(settingsSaveClicked()));
 	connect(settings,SIGNAL(cancelClicked()),this,SLOT(settingsCancelClicked()));
 	QMdiSubWindow *win = ui.mdiArea->addSubWindow(settings);
+	win->setWindowTitle(settings->windowTitle());
 	win->setGeometry(settings->geometry());
 	win->show();
 	settings->show();
