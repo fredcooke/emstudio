@@ -55,6 +55,7 @@ private:
 	int m_currRow;
 	int m_currCol;
 	void exportJson(QString filename);
+	void setValue(int row, int column,double value);
 protected:
 	void resizeEvent(QResizeEvent *evt);
 	void keyPressEvent(QKeyEvent *event);
@@ -65,6 +66,7 @@ private slots:
 	void loadRamClicked();
 	void tableCellChanged(int row,int column);
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
+	void hotKeyPressed(int key,Qt::KeyboardModifiers modifier);
 signals:
 	void saveToFlash(unsigned short locationid);
 	void saveData(unsigned short locationid,QByteArray data,int phyiscallocation);

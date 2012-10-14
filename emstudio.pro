@@ -78,7 +78,8 @@ SOURCES += src/main.cpp\
     src/dataview.cpp \
     src/emsstatus.cpp \
     src/tablemap3d.cpp \
-    src/serialrxthread.cpp
+    src/serialrxthread.cpp \
+    src/tablewidget.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -116,7 +117,8 @@ HEADERS  += src/mainwindow.h \
     src/dataview.h \
     src/emsstatus.h \
     src/tablemap3d.h \
-    src/serialrxthread.h
+    src/serialrxthread.h \
+    src/tablewidget.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \

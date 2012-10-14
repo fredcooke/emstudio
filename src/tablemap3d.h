@@ -28,7 +28,7 @@ protected:
 private:
 	Table3DData *m_tableData;
 signals:
-	
+
 public slots:
 	
 };

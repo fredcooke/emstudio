@@ -52,6 +52,7 @@ private:
 	void resizeColumnWidths();
 	int m_currRow;
 	int m_currCol;
+	void setValue(int row, int column,double value);
 protected:
 	void contextMenuEvent(QContextMenuEvent *evt);
 	void keyPressEvent(QKeyEvent *event);
@@ -65,6 +66,7 @@ private slots:
 	void importClicked();
 	void exportJson(QString filename);
 	void showMapClicked();
+	void hotKeyPressed(int key,Qt::KeyboardModifiers modifier);
 signals:
 	void show3DTable(unsigned short locationid,Table3DData *data);
 	void saveToFlash(unsigned short locationid);

@@ -62,7 +62,7 @@ double Table2DData::minXAxis()
 
 double Table2DData::minYAxis()
 {
-	return m_maxYAxis;
+	return m_minYAxis;
 }
 
 QList<double> Table2DData::axis()

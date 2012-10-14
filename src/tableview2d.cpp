@@ -41,6 +41,12 @@ TableView2D::TableView2D(bool isram, bool isflash,QWidget *parent)
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	connect(ui.exportPushButton,SIGNAL(clicked()),this,SLOT(exportClicked()));
+	connect(ui.tableWidget,SIGNAL(hotKeyPressed(int,Qt::KeyboardModifiers)),this,SLOT(hotKeyPressed(int,Qt::KeyboardModifiers)));
+	ui.tableWidget->addHotkey(Qt::Key_Plus,Qt::ShiftModifier);
+	ui.tableWidget->addHotkey(Qt::Key_Minus,Qt::NoModifier);
+	ui.tableWidget->addHotkey(Qt::Key_Underscore,Qt::ShiftModifier);
+	ui.tableWidget->addHotkey(Qt::Key_Equal,Qt::NoModifier);
+
 	QPalette pal = ui.plot->palette();
 	pal.setColor(QPalette::Background,QColor::fromRgb(0,0,0));
 	ui.plot->setPalette(pal);
@@ -70,6 +76,181 @@ TableView2D::TableView2D(bool isram, bool isflash,QWidget *parent)
 	}
 
 }
+void TableView2D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
+{
+	if (key == Qt::Key_Plus || key == Qt::Key_Equal)
+	{
+		if (ui.tableWidget->selectedItems().size() == 0)
+		{
+			return;
+		}
+		QString text = ui.tableWidget->selectedItems()[0]->text();
+		double textd = text.toDouble();
+		double maxval = 0;
+		//int dp = 0;
+		if (ui.tableWidget->selectedItems()[0]->row() == 0)
+		{
+			maxval = tableData->maxXAxis();
+		//	dp = m_metaData.xDp;
+		}
+		else /*if (ui.tableWidget->selectedItems()[0]->row() == 1)*/
+		{
+			maxval = tableData->maxYAxis();
+		//	dp = m_metaData.yDp;
+		}
+		if (modifier & Qt::ShiftModifier)
+		{
+			textd += maxval / 10.0;
+		}
+		else
+		{
+			textd += maxval / 100.0;
+		}
+		if (textd > maxval)
+		{
+			///TODO: Talk to fredcooke about DP, and why it makes it impossible
+			//to set any short value to exactly 65535. This is probably unintentional,
+			//but certainly not good.
+			textd = maxval;
+		}
+		else
+		{
+			int stopper = 1;
+			stopper++;
+		}
+		//ui.tableWidget->selectedItems()[0]->setText(QString::number(textd,'f',dp));
+		setValue(ui.tableWidget->selectedItems()[0]->row(),ui.tableWidget->selectedItems()[0]->column(),textd);
+	}
+	else if (key == Qt::Key_Minus || key == Qt::Key_Underscore)
+	{
+		if (ui.tableWidget->selectedItems().size() == 0)
+		{
+			return;
+		}
+		QString text = ui.tableWidget->selectedItems()[0]->text();
+		double textd = text.toDouble();
+		double minval = 0;
+		double maxval = 0;
+		//int dp = 0;
+		if (ui.tableWidget->selectedItems()[0]->row() == 0)
+		{
+			minval = tableData->minXAxis();
+			maxval = tableData->maxXAxis();
+		//	dp = m_metaData.xDp;
+		}
+		else if (ui.tableWidget->selectedItems()[0]->row() == 1)
+		{
+			minval = tableData->minYAxis();
+			maxval = tableData->maxYAxis();
+		//	dp = m_metaData.yDp;
+		}
+		if (modifier & Qt::ShiftModifier)
+		{
+			textd -= maxval / 10;
+		}
+		else
+		{
+			textd -= maxval / 100;
+		}
+		if (textd < minval)
+		{
+			textd = minval;
+		}
+
+		//ui.tableWidget->selectedItems()[0]->setText(QString::number(textd,'f',dp));
+		setValue(ui.tableWidget->selectedItems()[0]->row(),ui.tableWidget->selectedItems()[0]->column(),textd);
+	}
+}
+void TableView2D::setValue(int row, int column,double value)
+{
+	if (row == -1 || column == -1)
+	{
+		qDebug() << "Negative array index! Should be unreachable code! FIXME!";
+		return;
+	}
+	if (row >= ui.tableWidget->rowCount() || column >= ui.tableWidget->columnCount())
+	{
+		qDebug() << "Larger than life, should be unreachable code! FIXME!";
+		return;
+	}
+	bool conversionOk = false;
+	//double tempValue=ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
+	double tempValue=value;
+	double oldValue = tempValue;
+	/*if (!conversionOk)
+	{
+		QMessageBox::information(0,"Error","Value entered is not a number!");
+		setSilentValue(row,column,QString::number(currentvalue,'f',2));
+		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+		return;
+	}*/
+	//qDebug() << "New Value:" << tempValue;
+
+	//This is to make sure we round the value properly. So value displayed == value sent.
+	setSilentValue(row,column,QString::number(tempValue,'f',2));
+	tempValue = ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
+	//New value has been accepted. Let's write it.
+	if (samples.size() <= column)
+	{
+		return;
+	}
+	//unsigned short newval = ui.tableWidget->item(row,column)->text().toInt();
+	//currentvalue = newval;
+	if (row == 0)
+	{
+		if (tempValue > tableData->maxXAxis())
+		{
+			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			return;
+		}
+		else if (tempValue < tableData->minXAxis())
+		{
+			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			return;
+		}
+
+		currentvalue = oldValue;
+		//tableData->setCell(0,column,currentvalue);
+
+
+		samples.replace(column,QPointF(ui.tableWidget->item(row,column)->text().toInt(),samples.at(column).y()));
+		curve->setSamples(samples);
+		//ui.plot->replot();
+		ui.plot->autoRefresh();
+	}
+	else if (row == 1)
+	{
+		if (tempValue > tableData->maxYAxis())
+		{
+			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minYAxis()) + "-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			return;
+		}
+		else if (tempValue < tableData->minYAxis())
+		{
+			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minYAxis()) + "-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+			setSilentValue(row,column,QString::number(currentvalue,'f',2));
+			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+			return;
+		}
+		//tableData->setXAxis(column,currentvalue);
+		currentvalue = oldValue;
+		samples.replace(column,QPointF(samples.at(column).x(),ui.tableWidget->item(row,column)->text().toInt()));
+		curve->setSamples(samples);
+		//ui.plot->replot();
+		ui.plot->autoRefresh();
+	}
+	//New value has been accepted. Let's write it.
+	tableData->setCell(row,column,oldValue); //This will emit saveSingleData
+	//ui.tableWidget->resizeColumnsToContents();
+	resizeColumnWidths();
+}
+
 void TableView2D::keyPressEvent(QKeyEvent *event)
 {
 	if(event->key() == Qt::Key_C && event->modifiers() & Qt::ControlModifier)
@@ -173,7 +354,7 @@ void TableView2D::keyPressEvent(QKeyEvent *event)
 			newrow++;
 		}
 	}
-} // cDisplayDlg::keyPressEv
+}
 void TableView2D::exportJson(QString filename)
 {
 	//Create a JSON file similar to MTX's yaml format.
@@ -292,19 +473,8 @@ void TableView2D::loadFlashClicked()
 
 void TableView2D::tableCellChanged(int row,int column)
 {
-	if (row == -1 || column == -1)
-	{
-		qDebug() << "Negative array index! Should be unreachable code! FIXME!";
-		return;
-	}
-	if (row >= ui.tableWidget->rowCount() || column >= ui.tableWidget->columnCount())
-	{
-		qDebug() << "Larger than life, should be unreachable code! FIXME!";
-		return;
-	}
 	bool conversionOk = false;
 	double tempValue=ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
-	double oldValue = tempValue;
 	if (!conversionOk)
 	{
 		QMessageBox::information(0,"Error","Value entered is not a number!");
@@ -312,68 +482,7 @@ void TableView2D::tableCellChanged(int row,int column)
 		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 		return;
 	}
-	//qDebug() << "New Value:" << tempValue;
-	setSilentValue(row,column,QString::number(tempValue,'f',2));
-	tempValue = ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
-	//qDebug() << "Brand New Value:" << tempValue;
-	//New value has been accepted. Let's write it.
-	if (samples.size() <= column)
-	{
-		return;
-	}
-	//unsigned short newval = ui.tableWidget->item(row,column)->text().toInt();
-	//currentvalue = newval;
-	if (row == 0)
-	{
-		if (tempValue > tableData->maxXAxis())
-		{
-			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			setSilentValue(row,column,QString::number(currentvalue,'f',2));
-			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			return;
-		}
-		else if (tempValue < tableData->minXAxis())
-		{
-			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			setSilentValue(row,column,QString::number(currentvalue,'f',2));
-			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			return;
-		}
-
-		currentvalue = oldValue;
-		//tableData->setCell(0,column,currentvalue);
-
-
-		samples.replace(column,QPointF(ui.tableWidget->item(row,column)->text().toInt(),samples.at(column).y()));
-		curve->setSamples(samples);
-		ui.plot->replot();
-	}
-	else if (row == 1)
-	{
-		if (tempValue > tableData->maxXAxis())
-		{
-			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			setSilentValue(row,column,QString::number(currentvalue,'f',2));
-			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			return;
-		}
-		else if (tempValue < tableData->minXAxis())
-		{
-			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			setSilentValue(row,column,QString::number(currentvalue,'f',2));
-			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			return;
-		}
-		//tableData->setXAxis(column,currentvalue);
-		currentvalue = oldValue;
-		samples.replace(column,QPointF(samples.at(column).x(),ui.tableWidget->item(row,column)->text().toInt()));
-		curve->setSamples(samples);
-		ui.plot->replot();
-	}
-	//New value has been accepted. Let's write it.
-	tableData->setCell(row,column,oldValue); //This will emit saveSingleData
-	//ui.tableWidget->resizeColumnsToContents();
-	resizeColumnWidths();
+	setValue(row,column,tempValue);
 }
 void TableView2D::resizeEvent(QResizeEvent *evt)
 {
