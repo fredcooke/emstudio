@@ -100,24 +100,25 @@ void TableView3D::setValue(int row, int column,double value)
 		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 		return;
 	}*/
-	setSilentValue(row,column,formatNumber(tempValue));
+
 	//ui.tableWidget->item(row,column)->setText(QString::number(tempValue,'f',2));
 	//tempValue = ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
 
 	//New value has been accepted. Let's write it.
 	if (row == ui.tableWidget->rowCount()-1)
 	{
+		setSilentValue(row,column,formatNumber(tempValue,m_metaData.xDp));
 		if (tempValue > tableData->maxXAxis())
 		{
 			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			setSilentValue(row,column,formatNumber(currentvalue));
+			setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
 			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 			return;
 		}
 		else if (tempValue < tableData->minXAxis())
 		{
 			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			setSilentValue(row,column,formatNumber(currentvalue));
+			setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
 			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 			return;
 		}
@@ -127,18 +128,19 @@ void TableView3D::setValue(int row, int column,double value)
 	}
 	else if (column == 0)
 	{
+		setSilentValue(row,column,formatNumber(tempValue,m_metaData.yDp));
 		if (tempValue > tableData->maxYAxis())
 		{
 			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minYAxis()) + "-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
 			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			setSilentValue(row,column,formatNumber(currentvalue));
+			setSilentValue(row,column,formatNumber(currentvalue,m_metaData.yDp));
 			return;
 		}
 		else if (tempValue < tableData->minYAxis())
 		{
 			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minYAxis()) + "-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
 			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			setSilentValue(row,column,formatNumber(currentvalue));
+			setSilentValue(row,column,formatNumber(currentvalue,m_metaData.yDp));
 			return;
 		}
 		currentvalue = oldValue;
@@ -146,18 +148,19 @@ void TableView3D::setValue(int row, int column,double value)
 	}
 	else
 	{
+		setSilentValue(row,column,formatNumber(tempValue,m_metaData.zDp));
 		if (tempValue > tableData->maxZAxis())
 		{
 			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
 			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			setSilentValue(row,column,formatNumber(currentvalue));
+			setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
 			return;
 		}
 		if (tempValue < tableData->minZAxis())
 		{
 			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
 			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			setSilentValue(row,column,formatNumber(currentvalue));
+			setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
 			return;
 		}
 		currentvalue = oldValue;
