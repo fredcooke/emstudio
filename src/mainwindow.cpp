@@ -2725,7 +2725,7 @@ void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 
 MainWindow::~MainWindow()
 {
-	emsComms->terminate();
+	emsComms->stop();
 	emsComms->wait(1000);
 	delete emsComms;
 }

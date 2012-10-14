@@ -16,7 +16,9 @@ public:
 	explicit SerialRXThread(QObject *parent = 0);	
 	~SerialRXThread();
 	void start(HANDLE handle,QMutex *seriallock);
+	void stop() { m_terminate = true; }
 private:
+
 	QMutex *m_serialLockMutex;
 	bool m_terminate;
 	HANDLE m_portHandle;

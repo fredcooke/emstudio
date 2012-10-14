@@ -50,9 +50,10 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 }
 FreeEmsComms::~FreeEmsComms()
 {
-	rxThread->terminate();
-	rxThread->wait(1000);
-	delete rxThread;
+	//rxThread->stop();
+	//rxThread->wait(500);
+	//rxThread->terminate();
+	//delete rxThread;
 }
 
 void FreeEmsComms::disconnectSerial()
@@ -465,12 +466,12 @@ void FreeEmsComms::run()
 {
 	rxThread = new SerialRXThread(this);
 	connect(rxThread,SIGNAL(incomingPacket(QByteArray)),this,SLOT(parseEverything(QByteArray)),Qt::DirectConnection);
-
+	m_terminateLoop = false;
 	bool serialconnected = false;
 	//bool waitingforresponse=false;
 	//int waitingpayloadid=0;
 
-	while (true)
+	while (!m_terminateLoop)
 	{
 		m_reqListMutex.lock();
 		m_threadReqList.append(m_reqList);
@@ -929,6 +930,8 @@ void FreeEmsComms::run()
 			parsePacket(parsedPacket);
 		}*/
 	}
+	rxThread->stop();
+	rxThread->wait(500);
 }
 void FreeEmsComms::parsePacket(Packet parsedPacket)
 {

@@ -104,6 +104,7 @@ public:
 
 	FreeEmsComms(QObject *parent = 0);
 	~FreeEmsComms();
+	void stop() { m_terminateLoop = true; }
 	void setLogsEnabled(bool enabled);
 	void setLogDirectory(QString dir);
 	void setPort(QString portname);
@@ -138,6 +139,7 @@ public:
 protected:
 	void run();
 private:
+	bool m_terminateLoop;
 	QMutex m_serialLockMutex;
 	QMutex m_waitingInfoMutex;
 	SerialRXThread *rxThread;
