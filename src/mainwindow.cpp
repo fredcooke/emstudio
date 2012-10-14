@@ -2058,13 +2058,38 @@ void MainWindow::checkSyncRequest()
 }
 void MainWindow::tableview3d_show3DTable(unsigned short locationid,Table3DData *data)
 {
+	if (m_table3DMapViewMap.contains(locationid))
+	{
+		m_table3DMapViewMap[locationid]->show();
+		QApplication::postEvent(m_table3DMapViewMap[locationid], new QEvent(QEvent::Show));
+		QApplication::postEvent(m_table3DMapViewMap[locationid], new QEvent(QEvent::WindowActivate));
+		return;
+	}
+
 	TableMap3D *m_tableMap = new TableMap3D();
+
 	m_tableMap->passData(data);
 	QMdiSubWindow *win = ui.mdiArea->addSubWindow(m_tableMap);
+	connect(win,SIGNAL(destroyed(QObject*)),this,SLOT(tableMap3DDestroyed(QObject*)));
 	win->setGeometry(m_tableMap->geometry());
 	win->setWindowTitle("0x" + QString::number(locationid,16).toUpper());
 	win->show();
+	QApplication::postEvent(win, new QEvent(QEvent::Show));
+	QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+	m_table3DMapViewMap[locationid] = win;
 
+}
+void MainWindow::tableMap3DDestroyed(QObject *object)
+{
+	Q_UNUSED(object)
+	for (QMap<unsigned short,QMdiSubWindow*>::const_iterator i = m_table3DMapViewMap.constBegin(); i != m_table3DMapViewMap.constEnd();i++)
+	{
+		if (i.value() == sender())
+		{
+			m_table3DMapViewMap.remove(i.key());
+			return;
+		}
+	}
 }
 
 void MainWindow::emsStatusHardResetRequested()

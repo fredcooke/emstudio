@@ -111,6 +111,7 @@ private:
 	QList<MemoryLocation*> m_tempMemoryList;
 	QList<Table3DMetaData> m_table3DMetaData;
 	QList<Table2DMetaData> m_table2DMetaData;
+	QMap<unsigned short,QMdiSubWindow*> m_table3DMapViewMap;
 	QMap<unsigned short,ReadOnlyRamBlock> m_readOnlyMetaDataMap;
 	QList<ConfigData> m_configMetaData;
 	QList<ReadOnlyRamData> m_readOnlyMetaData;
@@ -189,6 +190,7 @@ private slots:
 	void tableview3d_show3DTable(unsigned short locationid,Table3DData *data);
 	void emsStatusHardResetRequested();
 	void emsStatusSoftResetRequested();
+	void tableMap3DDestroyed(QObject *object);
 	void interrogateProgressViewDestroyed(QObject *object);
 	void interrogateRamBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
 	void interrogateFlashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
