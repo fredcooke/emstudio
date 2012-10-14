@@ -103,6 +103,7 @@ public:
 	};
 
 	FreeEmsComms(QObject *parent = 0);
+	~FreeEmsComms();
 	void setLogsEnabled(bool enabled);
 	void setLogDirectory(QString dir);
 	void setPort(QString portname);

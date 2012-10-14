@@ -48,6 +48,13 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 	m_blockFlagList.append(BLOCK_IS_CONFIGURATION);
 
 }
+FreeEmsComms::~FreeEmsComms()
+{
+	rxThread->terminate();
+	rxThread->wait(1000);
+	delete rxThread;
+}
+
 void FreeEmsComms::disconnectSerial()
 {
 	RequestClass req;
