@@ -70,7 +70,7 @@ void DataPacketDecoder::populateDataFields()
 	m_dataFieldList.append(DataField("AirFlow","Raw Intermediate",38,2,1.0));
 	m_dataFieldList.append(DataField("densityAndFuel","raw Intermediate",40,2,1.0));
 	m_dataFieldList.append(DataField("BasePW","Raw PW Before corrections",42,2,1250));
-	m_dataFieldList.append(DataField("ETE","Engine Temp Enrichment Percentage",44,2,100.0/16384.0));
+	m_dataFieldList.append(DataField("ETE","Engine Temp Enrichment Percentage",44,2,16384.0/100.0));
 	m_dataFieldList.append(DataField("TFCTotal","Total Transient Fuel Corrections",46,2,1250)); // Needs to be signed short / int16
 	m_dataFieldList.append(DataField("EffectivePW","Actual PW of fuel delivery",48,2,1250.0));
 	m_dataFieldList.append(DataField("IDT","PW duration before fuel flow begins",50,2,1250.0));
