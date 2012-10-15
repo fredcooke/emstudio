@@ -328,14 +328,14 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 		QStringList datastringsplit = datastring.split("\n");
 
 		//Check to make sure we're in-bounds first
-		if (datastringsplit.size() + columnindex > ui.tableWidget->columnCount()+1)
+		if (datastringsplit.size() + rowindex > ui.tableWidget->rowCount()+1)
 		{
 			QMessageBox::information(0,"Error","Attempted to paste a block that does not fit!");
 			return;
 		}
 		foreach(QString line,datastringsplit)
 		{
-			if (line.split("\t").size() + rowindex > ui.tableWidget->rowCount()+1)
+			if (line.split("\t").size() + columnindex > ui.tableWidget->columnCount()+1)
 			{
 				QMessageBox::information(0,"Error","Attempted to paste a block that does not fit!");
 				return;
