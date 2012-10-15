@@ -122,16 +122,6 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>Website: &lt;a href=&quot;http://emstune.com/&quot;&gt;http://emstune.com/&lt;/a&gt;</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QLabel" name="label_5">
       <property name="text">
        <string>Issues: &lt;a href=&quot;http://issues.freeems.org/&quot;&gt;http://issues.freeems.org/&lt;/a&gt;</string>
