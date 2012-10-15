@@ -2096,7 +2096,7 @@ void MainWindow::tableview3d_show3DTable(unsigned short locationid,Table3DData *
 
 void MainWindow::emsStatusHardResetRequested()
 {
-	if (QMessageBox::information(0,"Warning","Resetting the ECU will erase all changes currently in RAM, but not saved to FLASH, and restart the ECU. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+	if (QMessageBox::information(0,"Warning","Hard resetting the ECU will erase all changes currently in RAM, but not saved to FLASH, and restart the ECU. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
 		qDebug() << "Attempting hard reset:" << emsComms->hardReset();
 	}
@@ -2104,7 +2104,10 @@ void MainWindow::emsStatusHardResetRequested()
 
 void MainWindow::emsStatusSoftResetRequested()
 {
-	qDebug() << "Attempting soft reset:" << emsComms->softReset();
+	if (QMessageBox::information(0,"Warning","Soft resetting the ECU will erase all changes currently in RAM, but not saved to FLASH, and restart the ECU. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+	{
+		qDebug() << "Attempting soft reset:" << emsComms->softReset();
+	}
 	//ui.mdiArea->removeSubWindow(emsStatusMdiWindow);
 	//this->addDockWidget(Qt::RightDockWidgetArea,statusView);
 }
