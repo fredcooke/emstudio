@@ -23,7 +23,7 @@
 #include <QMutex>
 #include <QVariant>
 #include <QDateTime>
-#include "serialthread.h"
+#include "serialport.h"
 #include "serialrxthread.h"
 #include "logloader.h"
 class FreeEmsComms : public QThread
@@ -140,7 +140,6 @@ protected:
 	void run();
 private:
 	bool m_terminateLoop;
-	QMutex m_serialLockMutex;
 	QMutex m_waitingInfoMutex;
 	SerialRXThread *rxThread;
 	bool sendPacket(RequestClass request,bool haslength);
@@ -150,11 +149,18 @@ private:
 	QMutex m_reqListMutex;
 	QList<RequestClass> m_reqList;
 	QList<RequestClass> m_threadReqList;
-	SerialThread *serialThread;
+	SerialPort *serialPort;
 	LogLoader *logLoader;
 	bool m_waitingForResponse;
+	bool m_logsEnabled;
+	QString m_logsDirectory;
+	QString m_logsFilename;
 	unsigned int m_payloadWaitingForResponse;
 	RequestClass m_currentWaitingRequest;
+	QFile *m_logInFile;
+	QFile *m_logOutFile;
+	QFile *m_logInOutFile;
+	void openLogs();
 	//void parseBuffer(QByteArray buffer);
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);
@@ -185,6 +191,8 @@ signals:
 	//void updateBlockInRamSucceeded();
 public slots:
 private slots:
+	void dataLogWrite(QByteArray buffer);
+	void dataLogRead(QByteArray buffer);
 	void parseEverything(QByteArray buffer);
 	Packet parseBuffer(QByteArray buffer);
 	void parsePacket(Packet parsedPacket);

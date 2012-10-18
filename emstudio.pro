@@ -51,7 +51,6 @@ SOURCES += src/main.cpp\
     src/freeemscomms.cpp \
     src/gaugewidget.cpp \
     src/gaugeitem.cpp \
-    src/serialthread.cpp \
     src/datapacketdecoder.cpp \
     src/comsettings.cpp \
     src/rawdatadisplay.cpp \
@@ -79,7 +78,8 @@ SOURCES += src/main.cpp\
     src/emsstatus.cpp \
     src/tablemap3d.cpp \
     src/serialrxthread.cpp \
-    src/tablewidget.cpp
+    src/tablewidget.cpp \
+    src/serialport.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -89,7 +89,6 @@ HEADERS  += src/mainwindow.h \
     src/freeemscomms.h \
     src/gaugewidget.h \
     src/gaugeitem.h \
-    src/serialthread.h \
     src/datapacketdecoder.h \
     src/comsettings.h \
     src/rawdatadisplay.h \
@@ -118,7 +117,8 @@ HEADERS  += src/mainwindow.h \
     src/emsstatus.h \
     src/tablemap3d.h \
     src/serialrxthread.h \
-    src/tablewidget.h
+    src/tablewidget.h \
+    src/serialport.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \

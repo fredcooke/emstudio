@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QMutex>
+#include "serialport.h"
 #ifndef Q_OS_WIN32
 #define HANDLE int
 #endif
@@ -15,18 +16,15 @@ class SerialRXThread : public QThread
 public:
 	explicit SerialRXThread(QObject *parent = 0);	
 	~SerialRXThread();
-	void start(HANDLE handle,QMutex *seriallock);
+	void start(SerialPort *serialport);
 	void stop() { m_terminate = true; }
 private:
-
-	QMutex *m_serialLockMutex;
 	bool m_terminate;
-	HANDLE m_portHandle;
+	SerialPort *m_serialPort;
 protected:
 	void run();
 signals:
 	void incomingPacket(QByteArray packet);
-	void dataWritten(QByteArray data);
 	void dataRead(QByteArray data);
 public slots:
 	

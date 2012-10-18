@@ -24,11 +24,16 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 {
 	qRegisterMetaType<QList<unsigned short> >("QList<unsigned short>");
 	qRegisterMetaType<QList<FreeEmsComms::LocationIdFlags> >("QList<FreeEmsComms::LocationIdFlags>");
-	serialThread = new SerialThread(this);
-	connect(serialThread,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)),Qt::DirectConnection);
+	serialPort = new SerialPort(this);
+	connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
+	connect(serialPort,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)),Qt::DirectConnection);
 	logLoader = new LogLoader(this);
 	connect(logLoader,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
 	m_waitingForResponse = false;
+	m_logsEnabled = false;
+	m_logInFile=0;
+	m_logOutFile=0;
+	m_logInOutFile=0;
 	m_sequenceNumber = 1;
 	m_blockFlagList.append(BLOCK_HAS_PARENT);
 	m_blockFlagList.append(BLOCK_IS_RAM);
@@ -64,6 +69,15 @@ void FreeEmsComms::disconnectSerial()
 	m_reqList.append(req);
 	m_reqListMutex.unlock();
 }
+void FreeEmsComms::openLogs()
+{
+	m_logInFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".bin");
+	m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+	m_logInOutFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".both.bin");
+	m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+	m_logOutFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".toecu.bin");
+	m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+}
 
 void FreeEmsComms::connectSerial(QString port,int baud)
 {
@@ -87,22 +101,42 @@ void FreeEmsComms::playLog()
 }
 void FreeEmsComms::setLogsEnabled(bool enabled)
 {
-	serialThread->setLogsEnabled(enabled);
+	if (m_logsEnabled && !enabled)
+	{
+		m_logInFile->close();
+		delete m_logInFile;
+		m_logInFile=0;
+
+		m_logInOutFile->close();
+		delete m_logInOutFile;
+		m_logInOutFile=0;
+
+		m_logOutFile->close();
+		delete m_logOutFile;
+		m_logOutFile=0;
+	}
+	else if (!m_logsEnabled && enabled)
+	{
+		openLogs();
+	}
+	m_logsEnabled = enabled;
+	//serialThread->setLogsEnabled(enabled);
 }
 
 void FreeEmsComms::setLogDirectory(QString dir)
 {
-	serialThread->setLogDirectory(dir);
+	m_logsDirectory = dir;
+	//serialThread->setLogDirectory(dir);
 }
 
 void FreeEmsComms::setPort(QString portname)
 {
-	serialThread->setPort(portname);
+	serialPort->setPort(portname);
 }
 
 void FreeEmsComms::setBaud(int baudrate)
 {
-	serialThread->setBaud(baudrate);
+	serialPort->setBaud(baudrate);
 }
 int FreeEmsComms::burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size)
 {
@@ -385,7 +419,7 @@ bool FreeEmsComms::sendPacket(unsigned short payloadid,QList<QVariant> arglist,Q
 		header.append((char)((payloadid) & 0xFF));
 	}
 	qDebug() << "About to send packet";
-	if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+	if (serialPort->writePacket(generatePacket(header,payload)) < 0)
 	{
 		return false;
 	}
@@ -459,13 +493,14 @@ QByteArray FreeEmsComms::generatePacket(QByteArray header,QByteArray payload)
 }
 void FreeEmsComms::setInterByteSendDelay(int milliseconds)
 {
-	serialThread->setInterByteSendDelay(milliseconds);
+	serialPort->setInterByteSendDelay(milliseconds);
 }
 
 void FreeEmsComms::run()
 {
 	rxThread = new SerialRXThread(this);
 	connect(rxThread,SIGNAL(incomingPacket(QByteArray)),this,SLOT(parseEverything(QByteArray)),Qt::DirectConnection);
+	connect(rxThread,SIGNAL(dataRead(QByteArray)),this,SLOT(dataLogRead(QByteArray)));
 	m_terminateLoop = false;
 	bool serialconnected = false;
 	//bool waitingforresponse=false;
@@ -482,12 +517,12 @@ void FreeEmsComms::run()
 			if (m_threadReqList[i].type == SERIAL_CONNECT)
 			{
 				//qDebug() << "SERIAL_CONNECT";
-				if (!serialThread->verifyFreeEMS(m_threadReqList[i].args[0].toString()))
+				if (!serialPort->verifyFreeEMS(m_threadReqList[i].args[0].toString()))
 				{
 					qDebug() << "FreeEMS is either in Serial Monitor mode, or EMStudio is connected to the wrong port";
 					emit error("FreeEMS is either in Serial Monitor mode, or EMStudio is connected to the wrong port");
 					serialconnected = false;
-					serialThread->closePort();
+					serialPort->closePort();
 					emit disconnected();
 					m_threadReqList.removeAt(i);
 					i--;
@@ -495,7 +530,7 @@ void FreeEmsComms::run()
 				}
 				emit debugVerbose("SERIAL_CONNECT");
 				int errornum = 0;
-				if ((errornum = serialThread->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt(),&m_serialLockMutex)))
+				if ((errornum = serialPort->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt())))
 				{
 					if (errornum == -1)
 					{
@@ -521,7 +556,7 @@ void FreeEmsComms::run()
 				i--;
 
 
-				rxThread->start(serialThread->portHandle(),&m_serialLockMutex);
+				rxThread->start(serialPort);
 
 			}
 			else if (!serialconnected)
@@ -531,7 +566,7 @@ void FreeEmsComms::run()
 			else if (m_threadReqList[i].type == SERIAL_DISCONNECT)
 			{
 				emit debugVerbose("SERIAL_DISCONNECT");
-				serialThread->closePort();
+				serialPort->closePort();
 				serialconnected = false;
 				emit disconnected();
 			}
@@ -863,7 +898,7 @@ void FreeEmsComms::run()
 			}
 			else if (false)
 			{
-				serialThread->writePacket(QByteArray());
+				serialPort->writePacket(QByteArray());
 				//waitingforresponse = true;
 				//waitingpayloadid = 0x0101;
 				break;
@@ -1203,7 +1238,7 @@ bool FreeEmsComms::sendSimplePacket(unsigned short payloadid)
 	header.append((char)((payloadid << 8) & 0xFF));
 	header.append((char)(payloadid & 0xFF));
 	m_payloadWaitingForResponse = payloadid;
-	if (serialThread->writePacket(generatePacket(header,payload)) < 0)
+	if (serialPort->writePacket(generatePacket(header,payload)) < 0)
 	{
 		qDebug() << "Error writing packet. Quitting thread";
 		return false;
@@ -1213,8 +1248,27 @@ bool FreeEmsComms::sendSimplePacket(unsigned short payloadid)
 
 void FreeEmsComms::setLogFileName(QString filename)
 {
-	serialThread->setLogFileName(filename);
+	m_logsFilename = filename;
+	//serialThread->setLogFileName(filename);
 }
+void FreeEmsComms::dataLogWrite(QByteArray buffer)
+{
+	if (m_logsEnabled)
+	{
+		m_logOutFile->write(buffer);
+		m_logInOutFile->write(buffer);
+	}
+}
+
+void FreeEmsComms::dataLogRead(QByteArray buffer)
+{
+	if (m_logsEnabled)
+	{
+		m_logInFile->write(buffer);
+		m_logInOutFile->write(buffer);
+	}
+}
+
 void FreeEmsComms::parseEverything(QByteArray buffer)
 {
 	Packet p = parseBuffer(buffer);

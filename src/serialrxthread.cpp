@@ -5,10 +5,9 @@ SerialRXThread::SerialRXThread(QObject *parent) : QThread(parent)
 {
 	m_terminate = false;
 }
-void SerialRXThread::start(HANDLE handle,QMutex *seriallock)
+void SerialRXThread::start(SerialPort *serialport)
 {
-	m_portHandle = handle;
-	m_serialLockMutex = seriallock;
+	m_serialPort = serialport;
 	QThread::start();
 }
 SerialRXThread::~SerialRXThread()
@@ -17,7 +16,6 @@ SerialRXThread::~SerialRXThread()
 	this->terminate();
 	this->wait(1000);
 }
-
 void SerialRXThread::run()
 {
 	//qint64 currms = QDateTime::currentMSecsSinceEpoch();
@@ -30,17 +28,7 @@ void SerialRXThread::run()
 	int readlen=0;
 	while (!m_terminate)
 	{
-		m_serialLockMutex->lock();
-#ifdef Q_OS_WIN32
-		if (!ReadFile(m_portHandle,(LPVOID)buffer,1024,(LPDWORD)&readlen,NULL))
-		{
-			//Serial error here
-			qDebug() << "Serial Read error";
-		}
-#else
-		readlen = read(m_portHandle,buffer,1024);
-#endif //Q_OS_WIN32
-		m_serialLockMutex->unlock();
+		readlen = m_serialPort->readBytes(buffer,1024);
 		if (readlen < 0)
 		{
 			//Nothing on the port
@@ -49,6 +37,12 @@ void SerialRXThread::run()
 		}
 		else
 		{
+			//emit dataRead(QByteArray((const char*)buffer,readlen));
+			/*if (m_logsEnabled)
+			{
+				m_logInFile->write((const char*)buffer,readlen);
+				m_logInFile->flush();
+			}*/
 			emit dataRead(QByteArray((const char*)buffer,readlen));
 		}
 		if (readlen == 0)
@@ -70,19 +64,15 @@ void SerialRXThread::run()
 					//Start byte in the middle of a packet
 					//Clear out the buffer and start fresh
 					m_inescape = false;
-					/*if (m_logsEnabled)
-					{
-						m_logWriteMutex.lock();
-						m_logInOutFile->write(QByteArray().append(0xAA));
-						QByteArray nbuffer(qbuffer);
-						nbuffer.replace(0xBB,QByteArray().append(0xBB).append(0x44));
-						nbuffer.replace(0xAA,QByteArray().append(0xBB).append(0x55));
-						nbuffer.replace(0xCC,QByteArray().append(0xBB).append(0x33));
-						m_logInOutFile->write((const char*)nbuffer.data(),nbuffer.size());
-						m_logInOutFile->write(QByteArray().append(0xCC));
-						m_logInOutFile->flush();
-						m_logWriteMutex.unlock();
-					}*/
+					QByteArray bufToEmit;
+					bufToEmit.append(0xAA);
+					QByteArray nbuffer(qbuffer);
+					nbuffer.replace(0xBB,QByteArray().append(0xBB).append(0x44));
+					nbuffer.replace(0xAA,QByteArray().append(0xBB).append(0x55));
+					nbuffer.replace(0xCC,QByteArray().append(0xBB).append(0x33));
+					bufToEmit.append(nbuffer);
+					bufToEmit.append(0xCC);
+					emit dataRead(bufToEmit);
 					qbuffer.clear();
 					qDebug() << "Buffer error";
 					m_packetErrorCount++;
@@ -109,9 +99,18 @@ void SerialRXThread::run()
 				{
 					sum += qbuffer[i];
 				}
+				QByteArray bufToEmit;
+				bufToEmit.append(0xAA);
+				QByteArray nbuffer(qbuffer);
+				nbuffer.replace(0xBB,QByteArray().append(0xBB).append(0x44));
+				nbuffer.replace(0xAA,QByteArray().append(0xBB).append(0x55));
+				nbuffer.replace(0xCC,QByteArray().append(0xBB).append(0x33));
+				bufToEmit.append(nbuffer);
+				bufToEmit.append(0xCC);
+				emit dataRead(bufToEmit);
 				/*if (m_logsEnabled)
 				{
-					m_logWriteMutex.lock();
+					m_logWriteMutex->lock();
 					m_logInOutFile->write(QByteArray().append(0xAA));
 					QByteArray nbuffer(qbuffer);
 					nbuffer.replace(0xBB,QByteArray().append(0xBB).append(0x44));
@@ -120,7 +119,7 @@ void SerialRXThread::run()
 					m_logInOutFile->write((const char*)nbuffer.data(),nbuffer.size());
 					m_logInOutFile->write(QByteArray().append(0xCC));
 					m_logInOutFile->flush();
-					m_logWriteMutex.unlock();
+					m_logWriteMutex->unlock();
 				}*/
 				//qDebug() << "Payload sum:" << QString::number(sum);
 				//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
