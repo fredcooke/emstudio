@@ -299,6 +299,7 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 					//itembytes.append("\n");
 				}
 			}
+			itembytes = itembytes.mid(0,itembytes.length()-1);
 			itembytes.append("\n");
 		}
 
