@@ -50,7 +50,11 @@ bool SerialPort::verifyFreeEMS(QString portname)
 		return false;
 	}
 	unsigned char buf[3];
+#ifdef Q_OS_WIN32
+	Sleep(100);
+#else
 	usleep(100000);
+#endif
 	//msleep(100);
 	int count = 0;
 #ifdef Q_OS_WIN32
@@ -129,7 +133,7 @@ int SerialPort::writePacket(QByteArray packet)
 				qDebug() << "Serial Write Error";
 				return -1;
 			}
-			msleep(m_interByteSendDelay);
+			Sleep(m_interByteSendDelay);
 		}
 	}
 	else
