@@ -387,7 +387,53 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 
 	//Load settings
-	QSettings settings("settings.ini",QSettings::IniFormat);
+	m_settingsFile = "settings.ini";
+	//TODO: Figure out proper directory names
+#ifdef Q_OS_WIN32
+	QString appDataDir = getenv("AppData");
+	if (!QDir(appDataDir).exists("EMStudio"))
+	{
+		QDir(appDataDir).mkpath("EMStudio");
+	}
+	//The following is the intended profile directory structure
+	/*if (!QDir(appDataDir).exists("EMStudio/Profiles/Default"))
+	{
+		QDir(appDataDir).mkpath("EMStudio/Profiles/Default");
+	}
+	if (!QDir(appDataDir).exists("EMStudio/Profiles/Default/Logs"))
+	{
+		QDir(appDataDir).mkpath("EMStudio/Profiles/Default/Logs");
+	}
+	if (!QDir(appDataDir).exists("EMStudio/Profiles/Default/Offline"))
+	{
+		QDir(appDataDir).mkpath("EMStudio/Profiles/Default/Offline");
+	}*/
+	m_settingsFile = appDataDir + "/" + "EMStudio/Profiles/Default/EMStudio-config.ini";
+//#elif Q_OS_MAC <- Does not exist. Need OSX checking capabilities somewhere...
+//#elif Q_OS_LINUX
+#else
+	QString appDataDir = getenv("HOME");
+	if (!QDir(appDataDir).exists(".EMStudio"))
+	{
+		QDir(appDataDir).mkpath(".EMStudio");
+	}
+	//The following is the intended profile directory structure
+	/*if (!QDir(appDataDir).exists(".EMStudio/Profiles/Default"))
+	{
+		QDir(appDataDir).mkpath(".EMStudio/Profiles/Default");
+	}
+	if (!QDir(appDataDir).exists(".EMStudio/Profiles/Default/Logs"))
+	{
+		QDir(appDataDir).mkpath(".EMStudio/Profiles/Default/Logs");
+	}
+	if (!QDir(appDataDir).exists(".EMStudio/Profiles/Default/Offline"))
+	{
+		QDir(appDataDir).mkpath(".EMStudio/Profiles/Default/Offline");
+	}*/
+	m_settingsFile = appDataDir + "/" + ".EMStudio/EMStudio-config.ini";
+#endif
+	qDebug() << "Local settings file is:" << m_settingsFile;
+	QSettings settings(m_settingsFile,QSettings::IniFormat);
 	settings.beginGroup("comms");
 	m_comPort = settings.value("port","/dev/ttyUSB0").toString();
 	m_comBaud = settings.value("baud",115200).toInt();
@@ -1647,7 +1693,7 @@ void MainWindow::settingsSaveClicked()
 		subwin->deleteLater();
 	}*/
 	comSettingsWidget->hide();
-	QSettings settings("settings.ini",QSettings::IniFormat);
+	QSettings settings(m_settingsFile,QSettings::IniFormat);
 	settings.beginGroup("comms");
 	settings.setValue("port",m_comPort);
 	settings.setValue("baud",m_comBaud);

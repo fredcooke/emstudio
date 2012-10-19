@@ -158,6 +158,7 @@ private:
 	bool m_saveLogs;
 	bool m_clearLogs;
 	int m_logsToKeep;
+	QString m_settingsFile;
 	QString m_logDirectory;
 	QString m_firmwareVersion;
 	QString m_interfaceVersion;
