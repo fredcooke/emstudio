@@ -35,9 +35,64 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	qDebug() << "Full hash:" << define2string(GIT_HASH);
 	progressView=0;
 	m_interrogationInProgress = false;
+
+
+	m_settingsFile = "settings.ini";
+	//TODO: Figure out proper directory names
+#ifdef Q_OS_WIN32
+	QString appDataDir = getenv("%AppData%");
+	appDataDir = appDataDir.replace("\\","/");
+	if (!QDir(appDataDir).exists("EMStudio"))
+	{
+		QDir(appDataDir).mkpath("EMStudio");
+	}
+	m_defaultsDir = QString(getenv("%ProgramFiles%")).replace("\\","/") + "/EMStudio";
+	//The following is the intended profile directory structure
+	/*if (!QDir(appDataDir).exists("EMStudio/Profiles/Default"))
+	{
+		QDir(appDataDir).mkpath("EMStudio/Profiles/Default");
+	}
+	if (!QDir(appDataDir).exists("EMStudio/Profiles/Default/Logs"))
+	{
+		QDir(appDataDir).mkpath("EMStudio/Profiles/Default/Logs");
+	}
+	if (!QDir(appDataDir).exists("EMStudio/Profiles/Default/Offline"))
+	{
+		QDir(appDataDir).mkpath("EMStudio/Profiles/Default/Offline");
+	}*/
+	m_settingsFile = appDataDir + "/" + "EMStudio/Profiles/Default/EMStudio-config.ini";
+//#elif Q_OS_MAC <- Does not exist. Need OSX checking capabilities somewhere...
+//#elif Q_OS_LINUX
+#else
+	QString appDataDir = getenv("HOME");
+	if (!QDir(appDataDir).exists(".EMStudio"))
+	{
+		QDir(appDataDir).mkpath(".EMStudio");
+	}
+	m_defaultsDir = "/usr/share/EMStudio";
+	//The following is the intended profile directory structure
+	/*if (!QDir(appDataDir).exists(".EMStudio/Profiles/Default"))
+	{
+		QDir(appDataDir).mkpath(".EMStudio/Profiles/Default");
+	}
+	if (!QDir(appDataDir).exists(".EMStudio/Profiles/Default/Logs"))
+	{
+		QDir(appDataDir).mkpath(".EMStudio/Profiles/Default/Logs");
+	}
+	if (!QDir(appDataDir).exists(".EMStudio/Profiles/Default/Offline"))
+	{
+		QDir(appDataDir).mkpath(".EMStudio/Profiles/Default/Offline");
+	}*/
+	m_settingsFile = appDataDir + "/" + ".EMStudio/EMStudio-config.ini";
+#endif
+
 	qDebug() << "Loading config file freeems.config.json";
 	QString filestr = "";
-	if (QFile::exists("freeems.config.json"))
+	if (QFile::exists(m_defaultsDir + "/definitions/freeems.config.json"))
+	{
+		filestr = m_defaultsDir + "/definitions/freeems.config.json";
+	}
+	else if (QFile::exists("freeems.config.json"))
 	{
 		filestr = "freeems.config.json";
 	}
@@ -350,6 +405,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	gaugesMdiWindow->hide();
 	gaugesMdiWindow->setWindowTitle(dataGauges->windowTitle());
 
+	dataGauges->setFile(m_defaultsDir + "/" + "dashboards/gauges.qml");
+
 	dataTables = new TableView();
 	//connect(dataTables,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
 	dataTables->passDecoder(dataPacketDecoder);
@@ -387,51 +444,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 
 	//Load settings
-	m_settingsFile = "settings.ini";
-	//TODO: Figure out proper directory names
-#ifdef Q_OS_WIN32
-	QString appDataDir = getenv("AppData");
-	if (!QDir(appDataDir).exists("EMStudio"))
-	{
-		QDir(appDataDir).mkpath("EMStudio");
-	}
-	//The following is the intended profile directory structure
-	/*if (!QDir(appDataDir).exists("EMStudio/Profiles/Default"))
-	{
-		QDir(appDataDir).mkpath("EMStudio/Profiles/Default");
-	}
-	if (!QDir(appDataDir).exists("EMStudio/Profiles/Default/Logs"))
-	{
-		QDir(appDataDir).mkpath("EMStudio/Profiles/Default/Logs");
-	}
-	if (!QDir(appDataDir).exists("EMStudio/Profiles/Default/Offline"))
-	{
-		QDir(appDataDir).mkpath("EMStudio/Profiles/Default/Offline");
-	}*/
-	m_settingsFile = appDataDir + "/" + "EMStudio/Profiles/Default/EMStudio-config.ini";
-//#elif Q_OS_MAC <- Does not exist. Need OSX checking capabilities somewhere...
-//#elif Q_OS_LINUX
-#else
-	QString appDataDir = getenv("HOME");
-	if (!QDir(appDataDir).exists(".EMStudio"))
-	{
-		QDir(appDataDir).mkpath(".EMStudio");
-	}
-	//The following is the intended profile directory structure
-	/*if (!QDir(appDataDir).exists(".EMStudio/Profiles/Default"))
-	{
-		QDir(appDataDir).mkpath(".EMStudio/Profiles/Default");
-	}
-	if (!QDir(appDataDir).exists(".EMStudio/Profiles/Default/Logs"))
-	{
-		QDir(appDataDir).mkpath(".EMStudio/Profiles/Default/Logs");
-	}
-	if (!QDir(appDataDir).exists(".EMStudio/Profiles/Default/Offline"))
-	{
-		QDir(appDataDir).mkpath(".EMStudio/Profiles/Default/Offline");
-	}*/
-	m_settingsFile = appDataDir + "/" + ".EMStudio/EMStudio-config.ini";
-#endif
+
 	qDebug() << "Local settings file is:" << m_settingsFile;
 	QSettings settings(m_settingsFile,QSettings::IniFormat);
 	settings.beginGroup("comms");

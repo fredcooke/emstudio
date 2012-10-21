@@ -30,9 +30,11 @@ win32-g++ {
 unix {
 	QMAKE_CXXFLAGS += -Werror
 	target.path = /usr/bin
-	config.path = /etc/emstudio
-	config.files += freeems.config.json src/gauges.qml
-	INSTALLS += target config
+	dashboard.path = /usr/share/emstudio/dashboards
+	dashboard.files += src/gauges.qml
+	config.path = /usr/share/emstudio/definitions
+	config.files += freeems.config.json
+	INSTALLS += target config dashboard
 	LIBS += -lqwt -lqjson -lGL -lGLU -lglut
 	INCLUDEPATH += /usr/include/qwt
 	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)

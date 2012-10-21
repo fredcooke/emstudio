@@ -26,6 +26,7 @@ class GaugeWidget : public QDeclarativeView
 public:
     GaugeWidget(QWidget *parent=0);
     QDeclarativePropertyMap propertyMap;
+    void setFile(QString file);
 };
 
 #endif // GAUGEWIDGET_H

@@ -24,7 +24,7 @@ GaugeWidget::GaugeWidget(QWidget *parent) : QDeclarativeView(parent)
 {
 	qmlRegisterType<GaugeItem>("GaugeImage",0,1,"GaugeImage");
 	this->rootContext()->setContextProperty("propertyMap",&propertyMap);
-	if (QFile::exists("gauges.qml"))
+	/*if (QFile::exists("gauges.qml"))
 	{
 		setSource(QUrl("gauges.qml"));
 	}
@@ -39,5 +39,10 @@ GaugeWidget::GaugeWidget(QWidget *parent) : QDeclarativeView(parent)
 	else
 	{
 		qDebug() << "Unable to locate gauges.qml";
-	}
+	}*/
+}
+
+void GaugeWidget::setFile(QString file)
+{
+	setSource(QUrl(file));
 }

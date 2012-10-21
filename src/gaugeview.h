@@ -32,7 +32,9 @@ public:
 	~GaugeView();
 	void passData(QVariantMap data);
 	void passDecoder(DataPacketDecoder *decoder);
+	void setFile(QString file);
 private:
+	QString file;
 	QTimer *guiUpdateTimer;
 	DataPacketDecoder *dataPacketDecoder;
 	QVariantMap m_valueMap;
