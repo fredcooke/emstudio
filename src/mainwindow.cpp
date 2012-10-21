@@ -47,21 +47,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 		QDir(appDataDir).mkpath("EMStudio");
 	}
 	m_defaultsDir = QString(getenv("%ProgramFiles%")).replace("\\","/") + "/EMStudio";
-	//The following is the intended profile directory structure
-	/*if (!QDir(appDataDir).exists("EMStudio/Profiles/Default"))
-	{
-		QDir(appDataDir).mkpath("EMStudio/Profiles/Default");
-	}
-	if (!QDir(appDataDir).exists("EMStudio/Profiles/Default/Logs"))
-	{
-		QDir(appDataDir).mkpath("EMStudio/Profiles/Default/Logs");
-	}
-	if (!QDir(appDataDir).exists("EMStudio/Profiles/Default/Offline"))
-	{
-		QDir(appDataDir).mkpath("EMStudio/Profiles/Default/Offline");
-	}*/
-	m_settingsFile = appDataDir + "/" + "EMStudio/Profiles/Default/EMStudio-config.ini";
+	m_settingsDir = appDataDir + "/" + "EMStudio";
+	m_settingsFile = appDataDir + "/" + "EMStudio/EMStudio-config.ini";
 //#elif Q_OS_MAC <- Does not exist. Need OSX checking capabilities somewhere...
+	//Oh wait, it does not exist since I'm developing on a *nix box.
 //#elif Q_OS_LINUX
 #else
 	QString appDataDir = getenv("HOME");
@@ -70,40 +59,28 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 		QDir(appDataDir).mkpath(".EMStudio");
 	}
 	m_defaultsDir = "/usr/share/EMStudio";
-	//The following is the intended profile directory structure
-	/*if (!QDir(appDataDir).exists(".EMStudio/Profiles/Default"))
-	{
-		QDir(appDataDir).mkpath(".EMStudio/Profiles/Default");
-	}
-	if (!QDir(appDataDir).exists(".EMStudio/Profiles/Default/Logs"))
-	{
-		QDir(appDataDir).mkpath(".EMStudio/Profiles/Default/Logs");
-	}
-	if (!QDir(appDataDir).exists(".EMStudio/Profiles/Default/Offline"))
-	{
-		QDir(appDataDir).mkpath(".EMStudio/Profiles/Default/Offline");
-	}*/
+	m_settingsDir = appDataDir + "/" + ".EMStudio";
 	m_settingsFile = appDataDir + "/" + ".EMStudio/EMStudio-config.ini";
 #endif
 
-	qDebug() << "Loading config file freeems.config.json";
 	QString filestr = "";
 	if (QFile::exists(m_defaultsDir + "/definitions/freeems.config.json"))
 	{
 		filestr = m_defaultsDir + "/definitions/freeems.config.json";
 	}
+	else if (QFile::exists(m_settingsDir + "/" + "definitions/freeems.config.json"))
+	{
+		filestr = m_settingsDir + "/" + "definitions/freeems.config.json";
+	}
 	else if (QFile::exists("freeems.config.json"))
 	{
 		filestr = "freeems.config.json";
-	}
-	else if (QFile::exists("/etc/emstudio/freeems.config.json"))
-	{
-		filestr = "/etc/emstudio/freeems.config.json";
 	}
 	else
 	{
 		QMessageBox::information(0,"Error","Error: No freeems.config.json file found!");
 	}
+	qDebug() << "Loading config file from:" << filestr;
 	QFile file(filestr);
 	file.open(QIODevice::ReadOnly);
 	QByteArray filebytes = file.readAll();
@@ -405,7 +382,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	gaugesMdiWindow->hide();
 	gaugesMdiWindow->setWindowTitle(dataGauges->windowTitle());
 
-	dataGauges->setFile(m_defaultsDir + "/" + "dashboards/gauges.qml");
+	if (QFile::exists(m_defaultsDir + "/" + "dashboards/gauges.qml"))
+	{
+		dataGauges->setFile(m_defaultsDir + "/" + "dashboards/gauges.qml");
+	}
+	else
+	{
+		dataGauges->setFile("gauges.qml");
+	}
 
 	dataTables = new TableView();
 	//connect(dataTables,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
