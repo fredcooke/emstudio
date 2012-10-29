@@ -32,6 +32,7 @@ public:
 	void setInterfaceVersion(QString version);
 	void setFirmwareVersion(QString firmware);
 	void setLocalRam(bool dirty);
+
 	void setDeviceFlash(bool dirty);
 	void clear();
 protected:
@@ -39,6 +40,8 @@ protected:
 public slots:
 	void locationInfoWidgetDoubleClicked(int row, int column);
 	void locationIdInfo(unsigned short locationid,QString title,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
+	void normalViewClicked();
+	void hexViewClicked();
 private:
 	Ui::EmsInfo ui;
 signals:

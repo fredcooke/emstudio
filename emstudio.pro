@@ -81,7 +81,10 @@ SOURCES += src/main.cpp\
     src/tablemap3d.cpp \
     src/serialrxthread.cpp \
     src/tablewidget.cpp \
-    src/serialport.cpp
+    src/serialport.cpp \
+    src/configview.cpp \
+    src/configblock.cpp \
+    src/emsdata.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -120,7 +123,10 @@ HEADERS  += src/mainwindow.h \
     src/tablemap3d.h \
     src/serialrxthread.h \
     src/tablewidget.h \
-    src/serialport.h
+    src/serialport.h \
+    src/configview.h \
+    src/configblock.h \
+    src/emsdata.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
@@ -136,7 +142,8 @@ FORMS    += src/mainwindow.ui \
     src/tableview3d.ui \
     src/interrogateprogressview.ui \
     src/readonlyramview.ui \
-    src/emsstatus.ui
+    src/emsstatus.ui \
+    src/configview.ui
 
 OTHER_FILES += \
     README.md

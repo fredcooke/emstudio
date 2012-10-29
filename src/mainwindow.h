@@ -23,9 +23,11 @@
 #include "ui_mainwindow.h"
 #include <QFile>
 #include "datafield.h"
+#include "configview.h"
+#include "emsdata.h"
 //#include "logloader.h"
 #include "freeemscomms.h"
-
+#include "configblock.h"
 #include <QTimer>
 #include <qjson/serializer.h>
 #include "headers.h"
@@ -111,6 +113,7 @@ private:
 	QList<MemoryLocation*> m_tempMemoryList;
 	QList<Table3DMetaData> m_table3DMetaData;
 	QList<Table2DMetaData> m_table2DMetaData;
+	QMap<unsigned short,QList<ConfigBlock> > m_configBlockMap;
 	QMap<unsigned short,QMdiSubWindow*> m_table3DMapViewMap;
 	QMap<unsigned short,ReadOnlyRamBlock> m_readOnlyMetaDataMap;
 	QList<ConfigData> m_configMetaData;
@@ -171,24 +174,13 @@ private:
 	void markDeviceFlashClean();
 	bool m_localRamDirty;
 	bool m_deviceFlashDirty;
-	bool hasDeviceRamBlock(unsigned short id);
-	bool hasLocalRamBlock(unsigned short id);
 	void updateView(unsigned short locid,QObject *view,QByteArray data,int type);
 	void createView(unsigned short locid,QByteArray data,int type,bool isram, bool isflash);
-	bool hasLocalFlashBlock(unsigned short id);
-	bool hasDeviceFlashBlock(unsigned short id);
-	void setDeviceFlashBlock(unsigned short id,QByteArray data);
-	void setLocalRamBlock(unsigned short id,QByteArray data);
-	void setDeviceRamBlock(unsigned short id,QByteArray data);
-	void setLocalFlashBlock(unsigned short id,QByteArray data);
-	QByteArray getLocalRamBlock(unsigned short id);
-	QByteArray getLocalFlashBlock(unsigned short id);
-	QByteArray getDeviceRamBlock(unsigned short id);
-	QByteArray getDeviceFlashBlock(unsigned short id);
 	QList<int> m_locIdMsgList;
 	QList<int> m_locIdInfoMsgList;
 	void checkRamFlashSync();
 	bool m_interrogationInProgress;
+	EmsData *emsData;
 private slots:
 	void tableview3d_show3DTable(unsigned short locationid,Table3DData *data);
 	void emsStatusHardResetRequested();

@@ -12,6 +12,8 @@ class EmsStatus : public QDockWidget
 public:
 	explicit EmsStatus(QWidget *parent = 0);
 	~EmsStatus();
+	void passData(QVariantMap data);
+	void setFlag(QLineEdit *edit,bool green);
 protected:
 	void closeEvent(QCloseEvent *event);
 signals:

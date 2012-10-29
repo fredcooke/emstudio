@@ -44,7 +44,55 @@ EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 	connect(ui.locationIdInfoTableWidget,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(locationInfoWidgetDoubleClicked(int,int)));
 	connect(ui.checkSyncButton,SIGNAL(clicked()),this,SIGNAL(checkSync()));
 
+	ui.locationIdInfoTableWidget->setContextMenuPolicy(Qt::ActionsContextMenu);
+
+	QAction *hexAction = new QAction(this);
+	hexAction->setText("Hex View");
+	connect(hexAction,SIGNAL(triggered()),this,SLOT(hexViewClicked()));
+	QAction *normalAction= new QAction(this);
+	normalAction->setText("Normal View");
+	connect(normalAction,SIGNAL(triggered()),this,SLOT(normalViewClicked()));
+
+	ui.locationIdInfoTableWidget->addAction(normalAction);
+	ui.locationIdInfoTableWidget->addAction(hexAction);
+
 }
+void EmsInfoView::normalViewClicked()
+{
+	if (ui.locationIdInfoTableWidget->selectedItems().size() == 0)
+	{
+		return;
+	}
+	int row = ui.locationIdInfoTableWidget->selectedItems()[0]->row();
+	QString num = ui.locationIdInfoTableWidget->item(row,0)->text().split("x")[1];
+	bool ok = false;
+	int locid = num.toInt(&ok,16);
+	if (!ok)
+	{
+		qDebug() << "Numeric conversion failed for:" << num;
+		return;
+	}
+	displayLocationId(locid,true,0); //0 for normal view, 1 for hex view
+}
+
+void EmsInfoView::hexViewClicked()
+{
+	if (ui.locationIdInfoTableWidget->selectedItems().size() == 0)
+	{
+		return;
+	}
+	int row = ui.locationIdInfoTableWidget->selectedItems()[0]->row();
+	QString num = ui.locationIdInfoTableWidget->item(row,0)->text().split("x")[1];
+	bool ok = false;
+	int locid = num.toInt(&ok,16);
+	if (!ok)
+	{
+		qDebug() << "Numeric conversion failed for:" << num;
+		return;
+	}
+	displayLocationId(locid,true,1); //0 for normal view, 1 for hex view
+}
+
 void EmsInfoView::setLocalRam(bool dirty)
 {
 	if (dirty)

@@ -26,31 +26,70 @@
    <string>DockWidget</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
-   <widget class="QPushButton" name="softResetPushButton">
+   <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>10</y>
-      <width>91</width>
-      <height>24</height>
+      <x>0</x>
+      <y>0</y>
+      <width>178</width>
+      <height>163</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Soft Reset</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="hardResetPushButton">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>40</y>
-      <width>91</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Hard Reset</string>
-    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="softResetPushButton">
+         <property name="text">
+          <string>Soft Reset</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="hardResetPushButton">
+         <property name="text">
+          <string>Hard Reset</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="combustionSyncLineEdit">
+       <property name="text">
+        <string>Combustion Sync</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="crankSyncLineEdit">
+       <property name="text">
+        <string>Crank Sync</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="camSyncLineEdit">
+       <property name="text">
+        <string>Cam Sync</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lastTimeValidLineEdit">
+       <property name="text">
+        <string>Last Timestamp Valid</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lastPeriodValidLineEdit">
+       <property name="text">
+        <string>Last Period Valid</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
  </widget>
