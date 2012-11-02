@@ -106,10 +106,10 @@ private:
 	//QList<RawDataBlock*> m_flashRawBlockList;
 	//QList<RawDataBlock*> m_deviceRamRawBlockList;
 	//QList<RawDataBlock*> m_deviceFlashRawBlockList;
-	QList<MemoryLocation*> m_ramMemoryList;
+	/*QList<MemoryLocation*> m_ramMemoryList;
 	QList<MemoryLocation*> m_flashMemoryList;
 	QList<MemoryLocation*> m_deviceFlashMemoryList;
-	QList<MemoryLocation*> m_deviceRamMemoryList;
+	QList<MemoryLocation*> m_deviceRamMemoryList;*/
 	QList<MemoryLocation*> m_tempMemoryList;
 	QList<Table3DMetaData> m_table3DMetaData;
 	QList<Table2DMetaData> m_table2DMetaData;

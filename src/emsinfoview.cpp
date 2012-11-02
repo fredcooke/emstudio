@@ -44,17 +44,19 @@ EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 	connect(ui.locationIdInfoTableWidget,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(locationInfoWidgetDoubleClicked(int,int)));
 	connect(ui.checkSyncButton,SIGNAL(clicked()),this,SIGNAL(checkSync()));
 
-	ui.locationIdInfoTableWidget->setContextMenuPolicy(Qt::ActionsContextMenu);
+	//ui.locationIdInfoTableWidget->set
 
-	QAction *hexAction = new QAction(this);
-	hexAction->setText("Hex View");
-	connect(hexAction,SIGNAL(triggered()),this,SLOT(hexViewClicked()));
-	QAction *normalAction= new QAction(this);
-	normalAction->setText("Normal View");
-	connect(normalAction,SIGNAL(triggered()),this,SLOT(normalViewClicked()));
+	//ui.locationIdInfoTableWidget->setContextMenuPolicy(Qt::ActionsContextMenu);
 
-	ui.locationIdInfoTableWidget->addAction(normalAction);
-	ui.locationIdInfoTableWidget->addAction(hexAction);
+	//QAction *hexAction = new QAction(this);
+	//hexAction->setText("Hex View");
+	//connect(hexAction,SIGNAL(triggered()),this,SLOT(hexViewClicked()));
+	//QAction *normalAction= new QAction(this);
+	//normalAction->setText("Normal View");
+	//connect(normalAction,SIGNAL(triggered()),this,SLOT(normalViewClicked()));
+
+	//ui.locationIdInfoTableWidget->addAction(normalAction);
+	//ui.locationIdInfoTableWidget->addAction(hexAction);
 
 }
 void EmsInfoView::normalViewClicked()
@@ -126,6 +128,7 @@ void EmsInfoView::setDeviceFlash(bool dirty)
 
 void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 {
+	qDebug() << "Double click";
 	Q_UNUSED(column)
 	if (ui.locationIdInfoTableWidget->rowCount() <= row)
 	{
