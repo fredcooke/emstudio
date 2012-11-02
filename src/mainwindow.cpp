@@ -1215,7 +1215,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 			createView(locid,emsData->getLocalRamBlock(locid),type,true,emsData->hasLocalFlashBlock(locid));
 		}
 	}
-	else if (m_configBlockMap.contains(locid))
+	/*else if (m_configBlockMap.contains(locid))
 	{
 		ConfigView *view = new ConfigView();
 		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
@@ -1226,7 +1226,7 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
 		win->show();
 		QApplication::postEvent(win, new QEvent(QEvent::Show));
 		QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
-	}
+	}*/
 	else if (emsData->hasLocalFlashBlock(locid))
 	{
 		if (m_rawDataView.contains(locid))
