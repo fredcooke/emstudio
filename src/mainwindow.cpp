@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	}
 	m_defaultsDir = QString(getenv("%ProgramFiles%")).replace("\\","/") + "/EMStudio";
 	m_settingsDir = appDataDir + "/" + "EMStudio";
-	m_settingsFile = appDataDir + "/" + "EMStudio/EMStudio-config.ini";
+	//m_settingsFile = appDataDir + "/" + "EMStudio/EMStudio-config.ini";
 //#elif Q_OS_MAC <- Does not exist. Need OSX checking capabilities somewhere...
 	//Oh wait, it does not exist since I'm developing on a *nix box.
 //#elif Q_OS_LINUX
@@ -60,17 +60,32 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	}
 	m_defaultsDir = "/usr/share/EMStudio";
 	m_settingsDir = appDataDir + "/" + ".EMStudio";
-	m_settingsFile = appDataDir + "/" + ".EMStudio/EMStudio-config.ini";
+	//m_settingsFile = appDataDir + "/" + ".EMStudio/EMStudio-config.ini";
 #endif
 
-	QString filestr = "";
-	if (QFile::exists(m_defaultsDir + "/definitions/freeems.config.json"))
+	//Settings, then defaults, then fallback to local
+	if (QFile::exists(m_settingsDir + "/EMStudio-config.ini"))
 	{
-		filestr = m_defaultsDir + "/definitions/freeems.config.json";
+		m_settingsFile = m_settingsDir + "/EMStudio-config.ini";
 	}
-	else if (QFile::exists(m_settingsDir + "/" + "definitions/freeems.config.json"))
+	else if (QFile::exists(m_defaultsDir + "/EMStudio-config.ini"))
+	{
+		m_settingsFile = m_defaultsDir + "/EMStudio-config.ini";
+	}
+	else if (QFile::exists("EMStudio-config.ini"))
+	{
+		m_settingsFile = "EMStudio-config.ini";
+	}
+
+	//Settings, then defaults, then fallback to local
+	QString filestr = "";
+	if (QFile::exists(m_settingsDir + "/" + "definitions/freeems.config.json"))
 	{
 		filestr = m_settingsDir + "/" + "definitions/freeems.config.json";
+	}
+	else if (QFile::exists(m_defaultsDir + "/definitions/freeems.config.json"))
+	{
+		filestr = m_defaultsDir + "/definitions/freeems.config.json";
 	}
 	else if (QFile::exists("freeems.config.json"))
 	{
@@ -80,6 +95,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	{
 		QMessageBox::information(0,"Error","Error: No freeems.config.json file found!");
 	}
+
 	qDebug() << "Loading config file from:" << filestr;
 	QFile file(filestr);
 	file.open(QIODevice::ReadOnly);
