@@ -95,201 +95,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	{
 		QMessageBox::information(0,"Error","Error: No freeems.config.json file found!");
 	}
-
-	qDebug() << "Loading config file from:" << filestr;
-	QFile file(filestr);
-	file.open(QIODevice::ReadOnly);
-	QByteArray filebytes = file.readAll();
-	file.close();
-
-	QJson::Parser parser;
-	QVariant top = parser.parse(filebytes);
-	if (!top.isValid())
-	{
-		QString errormsg = QString("Error parsing JSON from config file on line number: ") + QString::number(parser.errorLine()) + " error text: " + parser.errorString();
-		QMessageBox::information(0,"Error",errormsg);
-		qDebug() << "Error parsing JSON";
-		qDebug() << "Line number:" << parser.errorLine() << "error text:" << parser.errorString();
-		return;
-	}
-	QVariantMap topmap = top.toMap();
-	QVariantMap errormap = topmap["errormap"].toMap();
-	QVariantMap::iterator i = errormap.begin();
-	while (i != errormap.end())
-	{
-		bool ok = false;
-		m_errorMap[i.value().toString().mid(2).toInt(&ok,16)] = i.key();
-		i++;
-	}
-
-	QVariantMap ramvars = topmap["ramvars"].toMap();
-	i = ramvars.begin();
-	while (i != ramvars.end())
-	{
-		bool ok = false;
-		unsigned short locid = i.key().mid(2).toInt(&ok,16);
-		m_readOnlyMetaDataMap[locid] = ReadOnlyRamBlock();
-		QVariantMap locidlist = i.value().toMap();
-		QString title = locidlist["title"].toString();
-		m_readOnlyMetaDataMap[locid].title = title;
-		QVariantList locidmap = locidlist["vars"].toList();
-		int offset = 0;
-		for (int j=0;j<locidmap.size();j++)
-		{
-			QVariantMap newlocidmap = locidmap[j].toMap();
-			ReadOnlyRamData rdata;
-			rdata.dataTitle = newlocidmap["name"].toString();
-			rdata.dataDescription = newlocidmap["title"].toString();
-			rdata.locationId = locid;
-			rdata.offset = offset;
-			rdata.size = newlocidmap["size"].toInt();
-			offset += rdata.size;
-			m_readOnlyMetaDataMap[locid].m_ramData.append(rdata);
-			m_readOnlyMetaData.append(rdata);
-			//m_readOnlyMetaDataMap[locid].append(rdata);
-
-		}
-		/*QVariantMap::iterator j = locidmap.begin();
-		while (j != locidmap.end())
-		{
-			if (j.key() == "title")
-			{
-				QString title = j.value().toString();
-				qDebug() << "Location title:" << title;
-			}
-			else
-			{
-				qDebug() << j.key();
-				QVariantMap valuemap = j.value().toMap();
-				if (valuemap.contains("type"))
-				{
-					ConfigData cdata;
-					cdata.configDescription = valuemap["title"].toString();
-					cdata.configTitle = j.key();
-					cdata.elementSize = valuemap["size"].toInt();
-					cdata.locationId = locid;
-					cdata.offset = valuemap["offset"].toInt();
-					cdata.type = valuemap["type"].toString();
-					QVariantMap calcmap = valuemap["calc"].toMap();
-					QList<QPair<QString,double> > calclist;
-					QVariantMap::iterator k = calcmap.begin();
-					while (k != calcmap.end())
-					{
-						calclist.append(QPair<QString,double>(k.key(),k.value().toDouble()));
-						k++;
-					}
-					cdata.elementCalc = calclist;
-					if (valuemap["type"] == "value")
-					{
-
-					}
-					else if (valuemap["type"] == "array")
-					{
-						cdata.arraySize = valuemap["arraysize"].toInt();
-					}
-					m_configMetaData.append(cdata);
-				}
-
-			}
-			j++;
-		}*/
-		i++;
-	}
-	qDebug() << m_readOnlyMetaData.size() << "Ram entries found";
-	QVariantMap tables = topmap["tables"].toMap();
-	i = tables.begin();
-	while (i != tables.end())
-	{
-		//qDebug() << "Table:" << i.key();
-		QVariantMap tabledata = i.value().toMap();
-		if (tabledata["type"] == "3D")
-		{
-			Table3DMetaData meta;
-			QString id = tabledata["locationid"].toString();
-			QString xtitle = tabledata["xtitle"].toString();
-			QVariantList xcalc = tabledata["xcalc"].toList();
-			QString xdp = tabledata["xdp"].toString();
-			unsigned int size = tabledata["size"].toInt();
-
-			QString ytitle = tabledata["ytitle"].toString();
-			QVariantList ycalc = tabledata["ycalc"].toList();
-			QString ydp = tabledata["ydp"].toString();
-
-			QString ztitle = tabledata["ztitle"].toString();
-			QVariantList zcalc = tabledata["zcalc"].toList();
-			QString zdp = tabledata["zdp"].toString();
-
-			//QVariantMap::iterator calci = xcalc.begin();
-			QList<QPair<QString,double> > xcalclist;
-			QList<QPair<QString,double> > ycalclist;
-			QList<QPair<QString,double> > zcalclist;
-			for (int j=0;j<xcalc.size();j++)
-			{
-				qDebug() << "XCalc:" << xcalc[j].toMap()["type"].toString() << xcalc[j].toMap()["value"].toDouble();
-				xcalclist.append(QPair<QString,double>(xcalc[j].toMap()["type"].toString(),xcalc[j].toMap()["value"].toDouble()));
-			}
-			for (int j=0;j<ycalc.size();j++)
-			{
-				ycalclist.append(QPair<QString,double>(ycalc[j].toMap()["type"].toString(),ycalc[j].toMap()["value"].toDouble()));
-			}
-			for (int j=0;j<zcalc.size();j++)
-			{
-				zcalclist.append(QPair<QString,double>(zcalc[j].toMap()["type"].toString(),zcalc[j].toMap()["value"].toDouble()));
-			}
-
-			bool ok = false;
-			meta.locationId = id.mid(2).toInt(&ok,16);
-			meta.tableTitle = i.key();
-			meta.xAxisCalc = xcalclist;
-			meta.xAxisTitle = xtitle;
-			meta.xDp = xdp.toInt();
-			meta.yAxisCalc = ycalclist;
-			meta.yAxisTitle = ytitle;
-			meta.yDp = ydp.toInt();
-			meta.zAxisCalc = zcalclist;
-			meta.zAxisTitle = ztitle;
-			meta.zDp = zdp.toInt();
-			meta.size = size;
-			m_table3DMetaData.append(meta);
-		}
-		else if (tabledata["type"] == "2D")
-		{
-			Table2DMetaData meta;
-			QString id = tabledata["locationid"].toString();
-			QString xtitle = tabledata["xtitle"].toString();
-			QVariantList xcalc = tabledata["xcalc"].toList();
-			QString xdp = tabledata["xdp"].toString();
-			QString ytitle = tabledata["ytitle"].toString();
-			QVariantList ycalc = tabledata["ycalc"].toList();
-			QString ydp = tabledata["ydp"].toString();
-			unsigned int size = tabledata["size"].toInt();
-
-			QList<QPair<QString,double> > xcalclist;
-			QList<QPair<QString,double> > ycalclist;
-
-			for (int j=0;j<xcalc.size();j++)
-			{
-				qDebug() << "XCalc:" << xcalc[j].toMap()["type"].toString() << xcalc[j].toMap()["value"].toDouble();
-				xcalclist.append(QPair<QString,double>(xcalc[j].toMap()["type"].toString(),xcalc[j].toMap()["value"].toDouble()));
-			}
-			for (int j=0;j<ycalc.size();j++)
-			{
-				ycalclist.append(QPair<QString,double>(ycalc[j].toMap()["type"].toString(),ycalc[j].toMap()["value"].toDouble()));
-			}
-			bool ok = false;
-			meta.locationId = id.mid(2).toInt(&ok,16);
-			meta.tableTitle = i.key();
-			meta.xAxisCalc = xcalclist;
-			meta.xAxisTitle = xtitle;
-			meta.xDp = xdp.toInt();
-			meta.yAxisCalc = ycalclist;
-			meta.yAxisTitle = ytitle;
-			meta.yDp = ydp.toInt();
-			meta.size = size;
-			m_table2DMetaData.append(meta);
-		}
-		i++;
-	}
+	m_memoryMetaData.loadMetaDataFromFile(filestr);
 
 	QFile decoderfile("decodersettings.json");
 	decoderfile.open(QIODevice::ReadOnly);
@@ -343,9 +149,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 		numberOfInjectionsPerEngineCycle:            4  // Full sync semi-sequential
 */
 
-	qDebug() << m_errorMap.keys().size() << "Error Keys Loaded";
-	qDebug() << m_table3DMetaData.size() << "3D Tables Loaded";
-	qDebug() << m_table2DMetaData.size() << "2D Tables Loaded";
+	qDebug() << m_memoryMetaData.errorMap().keys().size() << "Error Keys Loaded";
+	qDebug() << m_memoryMetaData.table3DMetaData().size() << "3D Tables Loaded";
+	qDebug() << m_memoryMetaData.table2DMetaData().size() << "2D Tables Loaded";
 	//return;
 	m_currentRamLocationId=0;
 	//populateDataFields();
@@ -1091,22 +897,18 @@ void MainWindow::createView(unsigned short locid,QByteArray data,int type,bool i
 		qDebug() << "Creating new table view for location: 0x" << QString::number(locid,16).toUpper();
 		TableView2D *view = new TableView2D(isram,isflash);
 		QString title;
-		bool found = false;
-		for (int j=0;j<m_table2DMetaData.size();j++)
+		Table2DMetaData metadata = m_memoryMetaData.get2DMetaData(locid);
+		if (metadata.valid)
 		{
-			if (m_table2DMetaData[j].locationId == locid)
+			if (!view->setData(locid,data,metadata))
 			{
-				found = true;
-				if (!view->setData(locid,data,m_table2DMetaData[j]))
-				{
-					view->deleteLater();
-					QMessageBox::information(0,"Error","Table view contains invalid data! Please check your firmware");
-					return;
-				}
-				title = m_table2DMetaData[j].tableTitle;
+				view->deleteLater();
+				QMessageBox::information(0,"Error","Table view contains invalid data! Please check your firmware");
+				return;
 			}
+			title = metadata.tableTitle;
 		}
-		if (!found)
+		else
 		{
 			if (!view->setData(locid,data))
 			{
@@ -1133,22 +935,19 @@ void MainWindow::createView(unsigned short locid,QByteArray data,int type,bool i
 		TableView3D *view = new TableView3D(isram,isflash);
 		connect(view,SIGNAL(show3DTable(unsigned short,Table3DData*)),this,SLOT(tableview3d_show3DTable(unsigned short,Table3DData*)));
 		QString title;
-		bool found = false;
-		for (int j=0;j<m_table3DMetaData.size();j++)
+		Table3DMetaData metadata = m_memoryMetaData.get3DMetaData(locid);
+		if (metadata.valid)
 		{
-			if (m_table3DMetaData[j].locationId == locid)
+			if (!view->setData(locid,data,metadata))
 			{
-				found = true;
-				if (!view->setData(locid,data,m_table3DMetaData[j]))
-				{
-					QMessageBox::information(0,"Error","Table view contains invalid data! Please check your firmware");
-					view->deleteLater();
-					return;
-				}
-				title = m_table3DMetaData[j].tableTitle;
+				QMessageBox::information(0,"Error","Table view contains invalid data! Please check your firmware");
+				view->deleteLater();
+				return;
 			}
+			title = metadata.tableTitle;
+
 		}
-		if (!found)
+		else
 		{
 			if (!view->setData(locid,data))
 			{
@@ -1172,7 +971,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,int type,bool i
 	}
 	else
 	{
-		if (m_readOnlyMetaDataMap.contains(locid))
+		/*if (m_readOnlyMetaDataMap.contains(locid))
 		{
 			int length=0;
 			for (int j=0;j<m_readOnlyMetaDataMap[locid].m_ramData.size();j++)
@@ -1201,7 +1000,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,int type,bool i
 			QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
 		}
 		else
-		{
+		{*/
 			RawDataView *view = new RawDataView(isram,isflash);
 			view->setData(locid,data);
 			connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
@@ -1214,7 +1013,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,int type,bool i
 			win->show();
 			QApplication::postEvent(win, new QEvent(QEvent::Show));
 			QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
-		}
+		//}
 	}
 }
 
@@ -1417,34 +1216,26 @@ void MainWindow::interrogateFlashBlockRetrieved(unsigned short locationid,QByteA
 bool MainWindow::verifyMemoryBlock(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
-	for (int i=0;i<m_table3DMetaData.size();i++)
+	if (m_memoryMetaData.has2DMetaData(locationid))
 	{
-		if (m_table3DMetaData[i].locationId == locationid)
+		if (payload.size() != TABLE_2D_PAYLOAD_SIZE)
 		{
-			//It's a 3D table. Should be 1024
-			if (payload.size() != TABLE_3D_PAYLOAD_SIZE)
-			{
-				return false;
-			}
-			else
-			{
-				return true;
-			}
+			return false;
+		}
+		else
+		{
+			return true;
 		}
 	}
-	for (int i=0;i<m_table2DMetaData.size();i++)
+	if (m_memoryMetaData.has3DMetaData(locationid))
 	{
-		if (m_table2DMetaData[i].locationId == locationid)
+		if (payload.size() != TABLE_3D_PAYLOAD_SIZE)
 		{
-			//It's a 2D table. Should be 64
-			if (payload.size() != TABLE_2D_PAYLOAD_SIZE)
-			{
-				return false;
-			}
-			else
-			{
-				return true;
-			}
+			return false;
+		}
+		else
+		{
+			return true;
 		}
 	}
 	//If we get here, the table does not exist in meta data
@@ -1653,35 +1444,27 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 	m_memoryInfoMap[locationid].flashaddress = flashaddress;
 	m_memoryInfoMap[locationid].ramaddress = ramaddress;
 	m_memoryInfoMap[locationid].size = size;
-	for (int i=0;i<m_table3DMetaData.size();i++)
+	if (m_memoryMetaData.has2DMetaData(locationid))
 	{
-		if (locationid == m_table3DMetaData[i].locationId)
+		title = m_memoryMetaData.get2DMetaData(locationid).tableTitle;
+		if (m_memoryMetaData.get2DMetaData(locationid).size != size)
 		{
-			title = m_table3DMetaData[i].tableTitle;
-			if (m_table3DMetaData[i].size != size)
-			{
-				//Error here, since size is not equal to table meta data.
-				interrogateProgressViewCancelClicked();
-				QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(size) + " expected: " + QString::number(m_table3DMetaData[i].size));
-			}
+			interrogateProgressViewCancelClicked();
+			QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(size) + " expected: " + QString::number(m_memoryMetaData.get2DMetaData(locationid).size));
 		}
 	}
-	for (int i=0;i<m_table2DMetaData.size();i++)
+	if (m_memoryMetaData.has3DMetaData(locationid))
 	{
-		if (locationid == m_table2DMetaData[i].locationId)
+		title = m_memoryMetaData.get3DMetaData(locationid).tableTitle;
+		if (m_memoryMetaData.get3DMetaData(locationid).size != size)
 		{
-			title = m_table2DMetaData[i].tableTitle;
-			if (m_table2DMetaData[i].size != size)
-			{
-				//Error here, since size is not equal to table meta data.
-				interrogateProgressViewCancelClicked();
-				QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(size) + " expected: " + QString::number(m_table2DMetaData[i].size));
-			}
+			interrogateProgressViewCancelClicked();
+			QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(size) + " expected: " + QString::number(m_memoryMetaData.get3DMetaData(locationid).size));
 		}
 	}
-	if (m_readOnlyMetaDataMap.contains(locationid))
+	if (m_memoryMetaData.hasRORMetaData(locationid))
 	{
-		title = m_readOnlyMetaDataMap[locationid].title;
+		title = m_memoryMetaData.getRORMetaData(locationid).dataTitle;
 		//m_readOnlyMetaDataMap[locationid]
 	}
 	emsInfo->locationIdInfo(locationid,title,rawFlags,flags,parent,rampage,flashpage,ramaddress,flashaddress,size);
@@ -2403,7 +2186,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	qDebug() << "Command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
 	if (!m_interrogationInProgress)
 	{
-		QMessageBox::information(0,"Command Failed","Command failed with error: " + m_errorMap[errornum]);
+		QMessageBox::information(0,"Command Failed","Command failed with error: " + m_memoryMetaData.getErrorString(errornum));
 	}
 	else
 	{

@@ -25,6 +25,7 @@
 #include "datafield.h"
 #include "configview.h"
 #include "emsdata.h"
+#include "memorymetadata.h"
 //#include "logloader.h"
 #include "freeemscomms.h"
 #include "configblock.h"
@@ -111,16 +112,12 @@ private:
 	QList<MemoryLocation*> m_deviceFlashMemoryList;
 	QList<MemoryLocation*> m_deviceRamMemoryList;*/
 	QList<MemoryLocation*> m_tempMemoryList;
-	QList<Table3DMetaData> m_table3DMetaData;
-	QList<Table2DMetaData> m_table2DMetaData;
 	QMap<unsigned short,QList<ConfigBlock> > m_configBlockMap;
 	QMap<unsigned short,QMdiSubWindow*> m_table3DMapViewMap;
-	QMap<unsigned short,ReadOnlyRamBlock> m_readOnlyMetaDataMap;
 	QList<ConfigData> m_configMetaData;
-	QList<ReadOnlyRamData> m_readOnlyMetaData;
 	//QMap<unsigned short,QList<ReadOnlyRamData> > m_readOnlyMetaDataMap;
-	QMap<unsigned short,QString> m_errorMap;
 	//RawDataView *rawData;
+	MemoryMetaData m_memoryMetaData;
 	TableView *dataTables;
 	GaugeView *dataGauges;
 	EmsInfoView *emsInfo;
