@@ -178,33 +178,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionPacket_Status,SIGNAL(triggered()),this,SLOT(menu_windows_PacketStatusClicked()));
 	connect(ui.actionAbout,SIGNAL(triggered()),this,SLOT(menu_aboutClicked()));
 
-	//connect(ui.action_Raw_Data,SIGNAL(triggered()),this,SLOT(menu_window_rawDataClicked()));
-
-	//connect(ui.saveDataPushButton,SIGNAL(clicked()),this,SLOT(ui_saveDataButtonClicked()));
-
 	emsInfo=0;
 	dataTables=0;
 	dataFlags=0;
 	dataGauges=0;
 
-
-	//connect(ui.connectPushButton,SIGNAL(clicked()),this,SLOT(connectButtonClicked()));
-	//connect(ui.loadLogPushButton,SIGNAL(clicked()),this,SLOT(loadLogButtonClicked()));
-	//connect(ui.playLogPushButton,SIGNAL(clicked()),this,SLOT(playLogButtonClicked()));
-	//connect(ui.pauseLogPushButton,SIGNAL(clicked()),this,SLOT(pauseLogButtonClicked()));
-	//connect(ui.stopLogPushButton,SIGNAL(clicked()),this,SLOT(stopLogButtonClicked()));
-
-
-	//connect(ui.interByteDelaySpinBox,SIGNAL(valueChanged(int)),this,SLOT(interByteDelayChanged(int)));
 	dataPacketDecoder = new DataPacketDecoder(this);
 	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
-	//
 
-	/*logLoader = new LogLoader(this);
-	connect(logLoader,SIGNAL(endOfLog()),this,SLOT(logFinished()));
-	connect(logLoader,SIGNAL(payloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
-	connect(logLoader,SIGNAL(logProgress(qlonglong,qlonglong)),this,SLOT(logProgress(qlonglong,qlonglong)));
-	*/
 	emsComms = new FreeEmsComms(this);
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
@@ -227,21 +208,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(operatingSystem(QString)),this,SLOT(emsOperatingSystem(QString)));
 	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));
 
-	//connect(emsComms,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
-
 	emsInfo = new EmsInfoView();
-	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,QString,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,QString,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
-
 	emsInfo->setFirmwareVersion(m_firmwareVersion);
 	emsInfo->setInterfaceVersion(m_interfaceVersion);
 	connect(emsInfo,SIGNAL(displayLocationId(int,bool,int)),this,SLOT(emsInfoDisplayLocationId(int,bool,int)));
-
 
 	emsMdiWindow = ui.mdiArea->addSubWindow(emsInfo);
 	emsMdiWindow->setGeometry(emsInfo->geometry());
 	emsMdiWindow->hide();
 	emsMdiWindow->setWindowTitle(emsInfo->windowTitle());
-
 
 	aboutView = new AboutView();
 	aboutView->setHash(define2string(GIT_HASH));
@@ -286,12 +261,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	this->addDockWidget(Qt::RightDockWidgetArea,statusView);
 	connect(statusView,SIGNAL(hardResetRequest()),this,SLOT(emsStatusHardResetRequested()));
 	connect(statusView,SIGNAL(softResetRequest()),this,SLOT(emsStatusSoftResetRequested()));
-	//emsStatusMdiWindow = ui.mdiArea->addSubWindow(statusView);
-	//emsStatusMdiWindow->setGeometry(statusView->geometry());
-	//emsStatusMdiWindow->setWindowTitle(statusView->windowTitle());
 
 	dataFlags = new FlagView();
-	//connect(dataFlags,SIGNAL(destroyed()),this,SLOT(dataFlagsDestroyed()));
 	dataFlags->passDecoder(dataPacketDecoder);
 	flagsMdiWindow = ui.mdiArea->addSubWindow(dataFlags);
 	flagsMdiWindow->setGeometry(dataFlags->geometry());
@@ -308,10 +279,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	packetStatusMdiWindow->hide();
 	packetStatusMdiWindow->setWindowTitle(packetStatus->windowTitle());
 
-
-
 	//Load settings
-
 	qDebug() << "Local settings file is:" << m_settingsFile;
 	QSettings settings(m_settingsFile,QSettings::IniFormat);
 	settings.beginGroup("comms");
@@ -346,123 +314,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	logfile = new QFile("myoutput.log");
 	logfile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-
-
-
-	/*QFile file("log.inandout.log");
-	file.open(QIODevice::ReadOnly);
-	QByteArray filebytes = file.readAll();
-	file.close();
-	unsigned char data2[] = {
-	0xAA,0x00,0x01,0x04,
-	0x00,0x01,0x00,0x00,0x00,0x00,0x06,0xCC
-	};
-
-	for (int i=0;i<filebytes.size();i++)
-	{
-		for (int j=0;j<12;j++)
-		{
-			if ((unsigned char)filebytes[i+j] == data2[j])
-			{
-				if (j == 11)
-				{
-					//Good data.
-					//1032 bytes
-					filebytes.mid(i+j+1,1032);
-					qDebug() << "Found:";
-				}
-			}
-			else
-			{
-				break;
-			}
-		}
-	}
-	//38686
-	//39709
-	filebytes = filebytes.mid(38686,(39709-38686)+1);
-	qDebug() <<"Start:" << QString::number((unsigned char)filebytes[0],16) << QString::number((unsigned char)filebytes[filebytes.length()-1],16);
-	//filebytes = filebytes.mid(6,filebytes.length()-7);
-	qDebug() <<"Start:" << QString::number((unsigned char)filebytes[0],16) << QString::number((unsigned char)filebytes[filebytes.length()-1],16);
-
-	//TEST 3D TABLE
-	QByteArray data;
-	unsigned short xlength = 24;
-	unsigned short ylength = 19;
-	QByteArray xdata;
-	QByteArray ydata;
-	data.append((char)(((xlength) >> 8) & 0xFF));
-	data.append((xlength) & 0xFF);
-	data.append((char)(((ylength) >> 8) & 0xFF));
-	data.append((ylength) & 0xFF);
-	for (int i=0;i<xlength;i++)
-	{
-		unsigned short r = i * (65535/xlength);
-		data.append((char)(((r) >> 8) & 0xFF));
-		data.append((r) & 0xFF);
-	}
-	for (int i=data.size();i<58;i++)
-	{
-		data.append((char)0x00);
-	}
-	for (int i=0;i<ylength;i++)
-	{
-		unsigned short r = i * (65535/ylength);
-		data.append((char)(((r) >> 8) & 0xFF));
-		data.append((r) & 0xFF);
-	}
-	for (int i=data.size();i<100;i++)
-	{
-		data.append((char)0x00);
-	}
-	for (int i=0;i<xlength;i++)
-	{
-		for (int j=0;j<ylength;j++)
-		{
-			unsigned short r = j*(65535/ylength);
-			data.append((char)(((r) >> 8) & 0xFF));
-			data.append((r) & 0xFF);
-		}
-	}
-	TableView3D *view  = new TableView3D();
-	view->passData(0xABCD,data,0);
-	connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-	//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
-	connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
-	QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-	win->setWindowTitle("Ram Location 0x" + QString::number(0xABCD,16).toUpper());
-	win->setGeometry(view->geometry());
-	m_rawDataView[0xABCD] = view;
-	win->show();
-	win->raise();*/
-	//
-	/*//TEST 2d TABLE!!!
-	QByteArray data;
-	for (int i=0;i<16;i++)
-	{
-
-		data.append((char)(((i * 1000) >> 8) & 0xFF));
-		data.append((i * 1000) & 0xFF);
-	}
-
-	for (int i=0;i<16;i++)
-	{
-		unsigned short random = rand();
-		//unsigned short random = ((i) * (65535/15.0));
-		data.append((char)((random >> 8) & 0xFF));
-		data.append((char)(random & 0xFF));
-	}
-
-	TableView2D *view = new TableView2D();
-	view->passData(0xABCD,data,0);
-	connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-	connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
-	QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-	win->setWindowTitle("Ram Location 0x" + QString::number(0xABCD,16).toUpper());
-	win->setGeometry(view->geometry());
-	m_rawDataView[0xABCD] = view;
-	win->show();
-	win->raise();*/
 }
 void MainWindow::menu_file_saveOfflineDataClicked()
 {
@@ -634,44 +485,16 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 	}
 	checkRamFlashSync();
 	emsMdiWindow->show();
-	/*for (int i=0;i<idlist.size();i++)
-	{
-		//ui/listWidget->addItem(QString::number(idlist[i]));
-		MemoryLocation *loc = new MemoryLocation();
-		loc->locationid = idlist[i];
-		m_tempMemoryList.append(loc);
-		int seq = emsComms->getLocationIdInfo(idlist[i]);
-		progressView->setMaximum(progressView->maximum()+1);
-		progressView->addTask("Getting Location ID Info for 0x" + QString::number(idlist[i],16).toUpper(),seq,1);
-		m_locIdMsgList.append(seq);
-		interrogationSequenceList.append(seq);
-	}*/
-	//locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
-	//void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
-	//void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
 }
 
 void MainWindow::emsCommsDisconnected()
 {
 	ui.actionConnect->setEnabled(true);
 	ui.actionDisconnect->setEnabled(false);
-	if (progressView)
-	{
-		//progressView->hide();
-		//progressView->deleteLater();
-		//progressView=0;
-	}
-
-	/*emsComms->disconnectSerial();
-	emsComms->wait(500);
-	emsComms->terminate();
-	emsComms->wait(500);
-	emsComms->deleteLater();*/
 	emsComms = 0;
 
 	//Need to reset everything here.
 	emsComms = new FreeEmsComms(this);
-	//m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
@@ -695,18 +518,12 @@ void MainWindow::emsCommsDisconnected()
 	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
 	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
-	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,QString,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,QString,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	emsComms->setBaud(m_comBaud);
 	emsComms->setPort(m_comPort);
 	emsComms->setLogDirectory(m_logDirectory);
 	emsComms->setLogsEnabled(m_saveLogs);
 	emsComms->setInterByteSendDelay(m_comInterByte);
-	//emsComms->start();
-	//progressView->hide();
-	//progressView->deleteLater();
-	//progressView=0;
 
-	//this->setEnabled(true);
 	ui.actionConnect->setEnabled(true);
 
 }
@@ -719,7 +536,6 @@ void MainWindow::setDevice(QString dev)
 
 void MainWindow::connectToEms()
 {
-
 	menu_connectClicked();
 }
 void MainWindow::tableview3d_reloadTableData(unsigned short locationid,bool ram)
@@ -816,13 +632,6 @@ void MainWindow::dataViewSaveLocation(unsigned short locationid,QByteArray data,
 		//FLASH
 		emsComms->updateBlockInFlash(locationid,0,data.size(),data);
 		emsData->setLocalFlashBlock(locationid,data);
-		/*for (int i=0;i<m_flashMemoryList.size();i++)
-		{
-			if (m_flashMemoryList[i]->locationid == locationid)
-			{
-				m_flashMemoryList[i]->setData(data);
-			}
-		}*/
 	}
 }
 void MainWindow::menu_aboutClicked()
@@ -841,50 +650,8 @@ void MainWindow::updateView(unsigned short locid,QObject *view,QByteArray data,i
 {
 	Q_UNUSED(type)
 	DataView *dview = qobject_cast<DataView*>(view);
-	//Q_UNUSED(dview)
-	//Q_UNUSED(data)
 	dview->setData(locid,data);
-	/*
-	if (type == 1)
-	{
-		bool found = false;
-		for (int j=0;j<m_table2DMetaData.size();j++)
-		{
-			if (m_table2DMetaData[j].locationId == locid)
-			{
-				found = true;
-				qobject_cast<TableView2D*>(view)->passData(locid,data,0,m_table2DMetaData[j]);
-			}
-		}
-		if (!found)
-		{
-			qobject_cast<TableView2D*>(view)->passData(locid,data,0);
-		}
-	}
-	else if (type == 3)
-	{
-		bool found = false;
-		for (int j=0;j<m_table3DMetaData.size();j++)
-		{
-			if (m_table3DMetaData[j].locationId == locid)
-			{
-				found = true;
-				qobject_cast<TableView3D*>(view)->passData(locid,data,0,m_table3DMetaData[j]);
-			}
-		}
-		if (!found)
-		{
-			qobject_cast<TableView3D*>(view)->passData(locid,data,0);
-		}
-
-	}
-	else
-	{
-		qobject_cast<RawDataView*>(view)->setData(locid,data);
-	}*/
 	m_rawDataView[locid]->show();
-	//m_rawDataView[locid]->activateWindow();
-	//m_rawDataView[locid]->mdiArea()->setActiveSubWindow(m_rawDataView[locid]);
 	m_rawDataView[locid]->raise();
 	QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::Show));
 	QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::WindowActivate));
@@ -1409,10 +1176,6 @@ void MainWindow::settingsSaveClicked()
 	settings.setValue("clearlogs",m_clearLogs);
 	settings.setValue("logstokeep",m_logsToKeep);
 	settings.setValue("logdir",m_logDirectory);
-	/*m_saveLogs = settings.value("savelogs",true).toBool();
-	m_clearLogs = settings.value("clearlogs",false).toBool();
-	m_logsToKeep = settings.value("logstokeep",0).toInt();
-	m_logDirectory = settings.value("logdir",".").toString();*/
 	settings.endGroup();
 	QMdiSubWindow *subwin = qobject_cast<QMdiSubWindow*>(comSettingsWidget->parent());
 	ui.mdiArea->removeSubWindow(subwin);
@@ -1671,59 +1434,6 @@ void MainWindow::interrogateProgressViewCancelClicked()
 	emsComms->wait(1000);
 	emsComms->terminate();
 	emsComms->wait(1000);
-	//emsComms->deleteLater();
-	//delete emsComms;
-	//emsComms = 0;
-
-	//Need to reset everything here.
-	//Not anymore, it's all taken care of in the disconnect.
-	/*
-	m_ramMemoryList.clear();
-	m_flashMemoryList.clear();
-	m_deviceFlashMemoryList.clear();
-	m_deviceRamMemoryList.clear();
-	m_tempMemoryList.clear();
-	interrogationSequenceList.clear();
-	m_locIdMsgList.clear();
-	m_locIdInfoMsgList.clear();
-
-	emsComms = new FreeEmsComms(this);
-	//m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm.ss");
-	emsComms->setLogFileName(m_logFileName);
-	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
-	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
-	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
-	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
-	connect(emsComms,SIGNAL(decoderName(QString)),this,SLOT(emsDecoderName(QString)));
-	connect(emsComms,SIGNAL(compilerVersion(QString)),this,SLOT(emsCompilerVersion(QString)));
-	connect(emsComms,SIGNAL(interfaceVersion(QString)),this,SLOT(interfaceVersion(QString)));
-	connect(emsComms,SIGNAL(operatingSystem(QString)),this,SLOT(emsOperatingSystem(QString)));
-	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)));
-	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));
-	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
-	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
-	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
-	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
-	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
-	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
-	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,QString,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),emsInfo,SLOT(locationIdInfo(unsigned short,QString,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
-	emsComms->setBaud(m_comBaud);
-	emsComms->setPort(m_comPort);
-	emsComms->setLogDirectory(m_logDirectory);
-	emsComms->setLogsEnabled(m_saveLogs);
-	emsComms->start();
-	//progressView->hide();
-	//progressView->deleteLater();
-	//progressView=0;
-	emsInfo->clear();
-	//this->setEnabled(true);
-	ui.actionConnect->setEnabled(true);*/
 }
 void MainWindow::emsCompilerVersion(QString version)
 {
@@ -2120,57 +1830,10 @@ void MainWindow::updateDataWindows(unsigned short locationid)
 			}
 			return;
 		}
-		/*
-		RawDataView *rawview = qobject_cast<RawDataView*>(m_rawDataView[locationid]);
-		if (rawview)
-		{
-			rawview->setData(locationid,getLocalRamBlock(locationid));
-		}
-		else
-		{
-			TableView2D *tableview = qobject_cast<TableView2D*>(m_rawDataView[locationid]);
-			if (tableview)
-			{
-				for (int j=0;j<m_table2DMetaData.size();j++)
-				{
-					if (m_table2DMetaData[j].locationId == locationid)
-					{
-						tableview->passData(locationid,getLocalRamBlock(locationid),0,m_table2DMetaData[j]);
-					}
-				}
-			}
-			else
-			{
-				TableView3D *tableview3d = qobject_cast<TableView3D*>(m_rawDataView[locationid]);
-				if (tableview3d)
-				{
-					for (int j=0;j<m_table3DMetaData.size();j++)
-					{
-						if (m_table3DMetaData[j].locationId == locationid)
-						{
-							tableview3d->passData(locationid,getLocalRamBlock(locationid),0,m_table3DMetaData[j]);
-						}
-					}
-
-				}
-				else
-				{
-					ReadOnlyRamView *readonlyview = qobject_cast<ReadOnlyRamView*>(m_rawDataView[locationid]);
-					if (readonlyview)
-					{
-						readonlyview->passData(locationid,getLocalRamBlock(locationid),m_readOnlyMetaDataMap[locationid].m_ramData);
-					}
-					else
-					{
-						qDebug() << "GUI Window open with memory location, but no valid window type found!";
-					}
-				}
-			}
-		}*/
 	}
 	else
 	{
-		//qDebug() << "Attempted to update a window that does not exist!" << "0x" + QString::number(locationid,16).toUpper();
+		qDebug() << "Attempted to update a window that does not exist!" << "0x" + QString::number(locationid,16).toUpper();
 	}
 }
 
