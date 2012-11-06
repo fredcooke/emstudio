@@ -20,7 +20,7 @@ Rectangle {
 		endAngle:315
 		text: "RPM"
 		property string propertyMapProperty: "RPM"
-		Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["RPM_DURATION"] ? propertyMap["RPM_DURATION"] : 50) } }
+		//Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["RPM_DURATION"] ? propertyMap["RPM_DURATION"] : 50) } }
 		m_value: (propertyMap["RPM"] ? propertyMap["RPM"] : 0)
 	}
 	GaugeImage {
@@ -35,7 +35,7 @@ Rectangle {
 		endAngle:315
 		text: "Ign Timing"
 		property string propertyMapProperty:"Advance"
-		Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["Advance_DURATION"] ? propertyMap["Advance_DURATION"] : 50) } }
+		//Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["Advance_DURATION"] ? propertyMap["Advance_DURATION"] : 50) } }
 		m_value: (propertyMap["Advance"] ? propertyMap["Advance"] : 0)
 	}
 	GaugeImage {
@@ -50,7 +50,7 @@ Rectangle {
 		endAngle:315
 		text: "Pulse Width"
 		property string propertyMapProperty:"EffectivePW"
-		Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["EffectivePW_DURATION"] ? propertyMap["EffectivePW_DURATION"] : 50) } }
+		//Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["EffectivePW_DURATION"] ? propertyMap["EffectivePW_DURATION"] : 50) } }
 		m_value: (propertyMap["EffectivePW"] ? propertyMap["EffectivePW"] : 0)
 	}
 	GaugeImage {
@@ -65,7 +65,7 @@ Rectangle {
 		endAngle:315
 		text: "Coolant"
 		property string propertyMapProperty:"CHT"
-		Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["CHT_DURATION"] ? propertyMap["CHT_DURATION"] : 50) } }
+		//Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["CHT_DURATION"] ? propertyMap["CHT_DURATION"] : 50) } }
 		m_value: (propertyMap["CHT"] ? propertyMap["CHT"] : 0)
 	}
 	GaugeImage {
@@ -80,7 +80,7 @@ Rectangle {
 		endAngle:315
 		text: "O2"
 		property string propertyMapProperty:"EGO"
-		Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["EGO_DURATION"] ? propertyMap["EGO_DURATION"] : 50) } }
+		//Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["EGO_DURATION"] ? propertyMap["EGO_DURATION"] : 50) } }
 		m_value: (propertyMap["EGO"] ? propertyMap["EGO"] : 0)
 	}
 	GaugeImage {
@@ -95,7 +95,7 @@ Rectangle {
 		endAngle:315
 		text: "MAP"
 		property string propertyMapProperty:"MAP"
-		Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["MAP_DURATION"] ? propertyMap["MAP_DURATION"] : 50) } }
+		//Behavior on m_value {  PropertyAnimation { properties: "m_value"; duration: (propertyMap["MAP_DURATION"] ? propertyMap["MAP_DURATION"] : 50) } }
 		m_value: (propertyMap["MAP"] ? propertyMap["MAP"] : 0)
 	}
 	Rectangle {
