@@ -32,6 +32,7 @@ public:
 	~RawDataView();
 	bool setData(unsigned short locationid,QByteArray data);
 	//void verifyData(unsigned short locationid,QByteArray data);
+	void passDatalog(QVariantMap data);
 private:
 	bool m_isRam;
 	Ui::RawDataView ui;

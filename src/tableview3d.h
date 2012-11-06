@@ -36,7 +36,10 @@ public:
 	~TableView3D();
 	bool setData(unsigned short locationid,QByteArray data);
 	bool setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata);
+	void passDatalog(QVariantMap data);
 private:
+	int m_oldXLoc;
+	int m_oldYLoc;
 	TableMap3D *m_tableMap;
 	bool m_isFlashOnly;
 	bool metaDataValid;

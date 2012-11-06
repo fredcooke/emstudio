@@ -590,6 +590,10 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data)
 	resizeColumnWidths();
 	return true;
 }
+void TableView2D::passDatalog(QVariantMap data)
+{
+	Q_UNUSED(data)
+}
 
 bool TableView2D::setData(unsigned short locationid,QByteArray rawdata,Table2DMetaData metadata)
 {

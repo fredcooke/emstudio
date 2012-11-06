@@ -132,6 +132,9 @@ void MemoryMetaData::loadMetaDataFromFile(QString filestr)
 			QVariantList zcalc = tabledata["zcalc"].toList();
 			QString zdp = tabledata["zdp"].toString();
 
+			QString xhighlight = tabledata["xhighlight"].toString();
+			QString yhighlight = tabledata["yhighlight"].toString();
+
 			//QVariantMap::iterator calci = xcalc.begin();
 			QList<QPair<QString,double> > xcalclist;
 			QList<QPair<QString,double> > ycalclist;
@@ -164,6 +167,8 @@ void MemoryMetaData::loadMetaDataFromFile(QString filestr)
 			meta.zDp = zdp.toInt();
 			meta.size = size;
 			meta.valid = true;
+			meta.xHighlight = xhighlight;
+			meta.yHighlight = yhighlight;
 			m_table3DMetaData.append(meta);
 		}
 		else if (tabledata["type"] == "2D")
@@ -177,6 +182,7 @@ void MemoryMetaData::loadMetaDataFromFile(QString filestr)
 			QVariantList ycalc = tabledata["ycalc"].toList();
 			QString ydp = tabledata["ydp"].toString();
 			unsigned int size = tabledata["size"].toInt();
+			QString xhighlight = tabledata["xhighlight"].toString();
 
 			QList<QPair<QString,double> > xcalclist;
 			QList<QPair<QString,double> > ycalclist;
@@ -201,6 +207,7 @@ void MemoryMetaData::loadMetaDataFromFile(QString filestr)
 			meta.yDp = ydp.toInt();
 			meta.size = size;
 			meta.valid = true;
+			meta.xHighlight = xhighlight;
 			m_table2DMetaData.append(meta);
 		}
 		i++;

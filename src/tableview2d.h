@@ -39,6 +39,7 @@ public:
 	bool setData(unsigned short locationid,QByteArray data);
 	bool setData(unsigned short locationid,QByteArray data,Table2DMetaData metadata);
 	//void passData(unsigned short locationid,Table2DData data);
+	void passDatalog(QVariantMap data);
 private:
 	bool m_isFlashOnly;
 	bool metaDataValid;

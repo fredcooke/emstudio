@@ -2032,6 +2032,14 @@ void MainWindow::dataLogDecoded(QVariantMap data)
 	{
 		statusView->passData(data);
 	}
+	for (QMap<unsigned short,QWidget*>::const_iterator i=m_rawDataView.constBegin();i!=m_rawDataView.constEnd();i++)
+	{
+		DataView *dview = qobject_cast<DataView*>(i.value());
+		if (dview)
+		{
+			dview->passDatalog(data);
+		}
+	}
 }
 
 void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)

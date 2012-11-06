@@ -47,6 +47,8 @@ public:
 	QString xAxisTitle;
 	QString yAxisTitle;
 	QString zAxisTitle;
+	QString xHighlight;
+	QString yHighlight;
 	int xDp;
 	int yDp;
 	int zDp;
@@ -64,6 +66,7 @@ public:
 	unsigned short locationId;
 	QString xAxisTitle;
 	QString yAxisTitle;
+	QString xHighlight;
 	int xDp;
 	int yDp;
 	QList<QPair<QString,double> > xAxisCalc;

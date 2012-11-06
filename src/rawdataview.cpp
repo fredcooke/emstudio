@@ -48,6 +48,10 @@ RawDataView::RawDataView(bool isram, bool isflash,QWidget *parent)
 		//Is both ram and flash, leave both sets of buttons enabled.
 	}
 }
+void RawDataView::passDatalog(QVariantMap data)
+{
+	Q_UNUSED(data)
+}
 bool RawDataView::setData(unsigned short locationid,QByteArray data)
 {
 	m_locationId = locationid;

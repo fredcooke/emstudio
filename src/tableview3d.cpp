@@ -728,7 +728,99 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data)
 	return true;
 	//return passData(locationid,data,physicallocation,Table3DMetaData());
 }
-
+void TableView3D::passDatalog(QVariantMap data)
+{
+	if (data.contains(m_metaData.xHighlight) && data.contains(m_metaData.yHighlight))
+	{
+		double xval = data[m_metaData.xHighlight].toDouble();
+		double yval = data[m_metaData.yHighlight].toDouble();
+		int xloc = 1;
+		int yloc = ui.tableWidget->rowCount()-2;
+		for (int x=1;x<ui.tableWidget->columnCount();x++)
+		{
+			double testval = ui.tableWidget->item(ui.tableWidget->rowCount()-1,x)->text().toDouble();
+			double prevtestval;
+			double nexttestval;
+			if (x == 1)
+			{
+				prevtestval = 0;
+			}
+			else
+			{
+				prevtestval = ui.tableWidget->item(ui.tableWidget->rowCount()-1,x-1)->text().toDouble();
+			}
+			if (x == ui.tableWidget->columnCount()-1)
+			{
+				nexttestval = testval + 1;
+			}
+			else
+			{
+				nexttestval = ui.tableWidget->item(ui.tableWidget->rowCount()-1,x+1)->text().toDouble();
+			}
+			double lowerlimit = testval - ((testval - prevtestval) / 2.0);
+			double upperlimit = testval + ((nexttestval - testval) / 2.0);
+			if (xval > lowerlimit && xval < upperlimit)
+			{
+				xloc = x;
+				break;
+			}
+		}
+		for (int y=ui.tableWidget->rowCount()-2;y>=0;y--)
+		{
+			if (ui.tableWidget->item(y,0))
+			{
+				double testval = ui.tableWidget->item(y,0)->text().toDouble();
+				double prevtestval;
+				double nexttestval;
+				if (y == ui.tableWidget->rowCount()-2)
+				{
+					prevtestval = 0;
+				}
+				else
+				{
+					prevtestval = ui.tableWidget->item(y+1,0)->text().toDouble();
+				}
+				if (y == 0)
+				{
+					nexttestval = testval + 1;
+				}
+				else
+				{
+					nexttestval = ui.tableWidget->item(y-1,0)->text().toDouble();
+				}
+				double lowerlimit = testval - ((testval - prevtestval) / 2.0);
+				double upperlimit = testval + ((nexttestval - testval) / 2.0);
+				if (yval > lowerlimit && yval < upperlimit)
+				{
+					yloc = y;
+					break;
+				}
+			}
+		}
+		if (xloc != -1 && yloc != -1)
+		{
+			if (xloc == m_oldXLoc && yloc == m_oldYLoc)
+			{
+				//No change, no reason to continue;
+				return;
+			}
+			if (ui.tableWidget->item(m_oldYLoc,m_oldXLoc))
+			{
+				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setTextColor(QColor::fromRgb(0,0,0));
+			}
+			m_oldXLoc = xloc;
+			m_oldYLoc = yloc;
+			if (ui.tableWidget->item(m_oldYLoc,m_oldXLoc))
+			{
+				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setTextColor(QColor::fromRgb(255,255,255));
+			}
+		}
+		else
+		{
+			qDebug() << "Error parsing datalog, xloc and yloc aren't != -1";
+		}
+	}
+}
 bool TableView3D::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata)
 {
 	m_metaData = metadata;
