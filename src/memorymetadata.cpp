@@ -114,7 +114,6 @@ void MemoryMetaData::loadMetaDataFromFile(QString filestr)
 	i = tables.begin();
 	while (i != tables.end())
 	{
-		//qDebug() << "Table:" << i.key();
 		QVariantMap tabledata = i.value().toMap();
 		if (tabledata["type"] == "3D")
 		{
@@ -164,6 +163,7 @@ void MemoryMetaData::loadMetaDataFromFile(QString filestr)
 			meta.zAxisTitle = ztitle;
 			meta.zDp = zdp.toInt();
 			meta.size = size;
+			meta.valid = true;
 			m_table3DMetaData.append(meta);
 		}
 		else if (tabledata["type"] == "2D")
@@ -200,6 +200,7 @@ void MemoryMetaData::loadMetaDataFromFile(QString filestr)
 			meta.yAxisTitle = ytitle;
 			meta.yDp = ydp.toInt();
 			meta.size = size;
+			meta.valid = true;
 			m_table2DMetaData.append(meta);
 		}
 		i++;
