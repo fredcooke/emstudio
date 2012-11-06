@@ -45,6 +45,7 @@ void GaugeView::passData(QVariantMap data)
 void GaugeView::setFile(QString file)
 {
 	widget->setFile(file);
+	propertiesInUse = widget->getPropertiesInUse();
 }
 
 void GaugeView::passDecoder(DataPacketDecoder *decoder)
@@ -58,7 +59,10 @@ void GaugeView::guiUpdateTimerTick()
 	QVariantMap::const_iterator i = m_valueMap.constBegin();
 	while (i != m_valueMap.constEnd())
 	{
-		widget->propertyMap.setProperty(i.key().toAscii(),i.value());
+		if (propertiesInUse.contains(i.key()))
+		{
+			widget->propertyMap.setProperty(i.key().toAscii(),i.value());
+		}
 		//ui.tableWidget->item(m_nameToIndexMap[i.key()],1)->setText(QString::number(i.value()));
 		//qDebug() << i.key() << m_nameToIndexMap[i.key()] << i.value();
 		i++;

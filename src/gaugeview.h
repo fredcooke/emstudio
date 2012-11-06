@@ -34,6 +34,7 @@ public:
 	void passDecoder(DataPacketDecoder *decoder);
 	void setFile(QString file);
 private:
+	QList<QString> propertiesInUse;
 	QString file;
 	QTimer *guiUpdateTimer;
 	DataPacketDecoder *dataPacketDecoder;
