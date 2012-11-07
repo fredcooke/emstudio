@@ -41,6 +41,8 @@ public:
 	QList<unsigned short> getTopLevelDeviceFlashLocations();
 	QList<unsigned short> getTopLevelDeviceRamLocations();
 
+	void passLocationInfo(unsigned short locationid,MemoryLocationInfo info);
+
 	void clearAllMemory();
 
 private:

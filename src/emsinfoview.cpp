@@ -21,7 +21,7 @@
 EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
-	ui.locationIdInfoTableWidget->setColumnCount(17);
+	/*ui.locationIdInfoTableWidget->setColumnCount(17);
 
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Table Name"));
@@ -39,7 +39,7 @@ EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(13,new QTableWidgetItem("Is Read Only"));
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(14,new QTableWidgetItem("Is Verified"));
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(15,new QTableWidgetItem("For Backup"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(16,new QTableWidgetItem("Table Type"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(16,new QTableWidgetItem("Table Type"));*/
 
 	connect(ui.locationIdInfoTableWidget,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(locationInfoWidgetDoubleClicked(int,int)));
 	connect(ui.checkSyncButton,SIGNAL(clicked()),this,SIGNAL(checkSync()));
@@ -192,24 +192,74 @@ void EmsInfoView::closeEvent(QCloseEvent *event)
 	event->ignore();
 	((QMdiSubWindow*)this->parent())->hide();
 }
+void EmsInfoView::locationIdInfo(unsigned short locationid,QString title,MemoryLocationInfo info)
+{
+	/*ui.locationIdInfoTableWidget->setColumnCount(17);
+
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Table Name"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("Flags"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(3,new QTableWidgetItem("Parent"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(4,new QTableWidgetItem("RamPage"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(5,new QTableWidgetItem("FlashPage"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(6,new QTableWidgetItem("RamAddress"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(7,new QTableWidgetItem("FlashAddress"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(8,new QTableWidgetItem("Size"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(9,new QTableWidgetItem("Has Parent"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(10,new QTableWidgetItem("Is Ram"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(11,new QTableWidgetItem("Is Flash"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(12,new QTableWidgetItem("Is Index"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(13,new QTableWidgetItem("Is Read Only"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(14,new QTableWidgetItem("Is Verified"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(15,new QTableWidgetItem("For Backup"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(16,new QTableWidgetItem("Table Type"));
+*/
+	ui.locationIdInfoTableWidget->setColumnCount(2+info.propertymap.size());
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Table Name"));
+	for (int i=0;i<info.propertymap.size();i++)
+	{
+		ui.locationIdInfoTableWidget->setHorizontalHeaderItem(2+i,new QTableWidgetItem(info.propertymap[i].first));
+	}
+	Q_UNUSED(info)
+	qDebug() << "Location ID Info for:" << "0x" + QString::number(locationid,16).toUpper();
+	int foundi = -1;
+	bool ok = false;
+	bool found = false;
+	for (int i=0;i<ui.locationIdInfoTableWidget->rowCount();i++)
+	{
+		unsigned short test = ui.locationIdInfoTableWidget->item(i,0)->text().split("x")[1].toInt(&ok,16);
+		if (test > locationid)
+		{
+			foundi = i;
+			found = true;
+			ui.locationIdInfoTableWidget->insertRow(i);
+			break;
+		}
+	}
+	if (!found)
+	{
+		ui.locationIdInfoTableWidget->setRowCount(ui.locationIdInfoTableWidget->rowCount()+1);
+		foundi = ui.locationIdInfoTableWidget->rowCount()-1;
+	}
+	ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem("0x" + QString::number(locationid,16).toUpper()));
+	/*for (int i=1;i<17;i++)
+	{
+		ui.locationIdInfoTableWidget->setItem(foundi,i,new QTableWidgetItem(""));
+	}*/
+	//}
+	ui.locationIdInfoTableWidget->setItem(foundi,1,new QTableWidgetItem(title));
+	//ui.locationIdInfoTableWidget->item(foundi,2)->setText("0x" + QString::number(rawFlags,16).toUpper());
+	for (int i=0;i<info.propertymap.size();i++)
+	{
+		ui.locationIdInfoTableWidget->setItem(foundi,2+i,new QTableWidgetItem(info.propertymap[i].second));
+	}
+
+	ui.locationIdInfoTableWidget->resizeColumnsToContents();
+}
 
 void EmsInfoView::locationIdInfo(unsigned short locationid,QString title,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
 {
-	/*ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Parent"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("RamPage"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(3,new QTableWidgetItem("FlashPage"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(4,new QTableWidgetItem("RamAddress"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(5,new QTableWidgetItem("FlashAddress"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(6,new QTableWidgetItem("Size"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(7,new QTableWidgetItem("Has Parent"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(8,new QTableWidgetItem("Is Ram"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(9,new QTableWidgetItem("Is Flash"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(10,new QTableWidgetItem("Is Index"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(11,new QTableWidgetItem("Is Read Only"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(12,new QTableWidgetItem("Is Verified"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(13,new QTableWidgetItem("For Backup"));
- ui.locationIdInfoTableWidget->setHorizontalHeaderItem(14,new QTableWidgetItem("Table Type"));*/
 	qDebug() << "Location ID Info for:" << "0x" + QString::number(locationid,16).toUpper();
 	//bool found = false;
 	int foundi = -1;

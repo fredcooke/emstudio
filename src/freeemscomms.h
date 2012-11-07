@@ -26,6 +26,7 @@
 #include "serialport.h"
 #include "serialrxthread.h"
 #include "logloader.h"
+#include "headers.h"
 class FreeEmsComms : public QThread
 {
 	Q_OBJECT
@@ -71,6 +72,7 @@ public:
 		BLOCK_IS_LOOKUP_DATA=0x4000,
 		BLOCK_IS_CONFIGURATION=0x8000
 	};
+
 	class Packet
 	{
 	public:
@@ -139,6 +141,7 @@ public:
 protected:
 	void run();
 private:
+	QMap<FreeEmsComms::LocationIdFlags,QString> m_blockFlagToNameMap;
 	bool m_terminateLoop;
 	QMutex m_waitingInfoMutex;
 	SerialRXThread *rxThread;
@@ -175,6 +178,7 @@ signals:
 	void disconnected();
 	void locationIdList(QList<unsigned short> idlist);
 	void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
+	void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);
 	void ramBlockRetrieved(unsigned short locationid, QByteArray header,QByteArray payload);
 	void flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);

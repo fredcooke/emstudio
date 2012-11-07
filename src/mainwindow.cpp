@@ -31,6 +31,7 @@
 #define TABLE_2D_PAYLOAD_SIZE 64
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+	qRegisterMetaType<MemoryLocationInfo>("MemoryLocationInfo");
 	qDebug() << "EMStudio commit:" << define2string(GIT_COMMIT);
 	qDebug() << "Full hash:" << define2string(GIT_HASH);
 	progressView=0;
@@ -202,6 +203,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
 	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(decoderName(QString)),this,SLOT(emsDecoderName(QString)));
@@ -512,6 +514,7 @@ void MainWindow::emsCommsDisconnected()
 	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
 	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
@@ -1182,6 +1185,98 @@ void MainWindow::settingsSaveClicked()
 	comSettingsWidget->deleteLater();
 
 }
+void MainWindow::locationIdInfo(unsigned short locationid,MemoryLocationInfo info)
+{
+	if (m_memoryInfoMap.contains(locationid))
+	{
+		qDebug() << "Duplicate location ID recieved from ECU:" << "0x" + QString::number(locationid,16).toUpper();
+	}
+	m_memoryInfoMap[locationid] = info;
+	QString title = "";
+	if (m_memoryMetaData.has2DMetaData(locationid))
+	{
+		title = m_memoryMetaData.get2DMetaData(locationid).tableTitle;
+		if (m_memoryMetaData.get2DMetaData(locationid).size != info.size)
+		{
+			interrogateProgressViewCancelClicked();
+			QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(info.size) + " expected: " + QString::number(m_memoryMetaData.get2DMetaData(locationid).size));
+		}
+	}
+	if (m_memoryMetaData.has3DMetaData(locationid))
+	{
+		title = m_memoryMetaData.get3DMetaData(locationid).tableTitle;
+		if (m_memoryMetaData.get3DMetaData(locationid).size != info.size)
+		{
+			interrogateProgressViewCancelClicked();
+			QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(info.size) + " expected: " + QString::number(m_memoryMetaData.get3DMetaData(locationid).size));
+		}
+	}
+	if (m_memoryMetaData.hasRORMetaData(locationid))
+	{
+		title = m_memoryMetaData.getRORMetaData(locationid).dataTitle;
+		//m_readOnlyMetaDataMap[locationid]
+	}
+	//emsInfo->locationIdInfo(locationid,title,rawFlags,flags,parent,rampage,flashpage,ramaddress,flashaddress,size);
+	emsInfo->locationIdInfo(locationid,title,info);
+	/*if (flags.contains(FreeEmsComms::BLOCK_IS_RAM) && flags.contains((FreeEmsComms::BLOCK_IS_FLASH)))
+	{
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = locationid;
+		loc->size = size;
+		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+		{
+			loc->parent = parent;
+			loc->hasParent = true;
+		}
+		loc->isRam = true;
+		loc->isFlash = true;
+		loc->ramAddress = ramaddress;
+		loc->ramPage = rampage;
+		loc->flashAddress = flashaddress;
+		loc->flashPage = flashpage;
+		//m_deviceRamMemoryList.append(loc);
+		emsData->addDeviceRamBlock(loc);
+		emsData->addDeviceFlashBlock(new MemoryLocation(*loc));
+		//m_flashMemoryList.append(new MemoryLocation(*loc));
+		//m_deviceFlashMemoryList.append(new MemoryLocation(*loc));
+
+	}
+	else if (flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
+	{
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = locationid;
+		loc->size = size;
+		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+		{
+			loc->parent = parent;
+			loc->hasParent = true;
+		}
+		loc->isFlash = true;
+		loc->isRam = false;
+		loc->flashAddress = flashaddress;
+		loc->flashPage = flashpage;
+		//m_deviceFlashMemoryList.append(loc);
+		emsData->addDeviceFlashBlock(loc);
+	}
+	else if (flags.contains(FreeEmsComms::BLOCK_IS_RAM))
+	{
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = locationid;
+		loc->size = size;
+		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+		{
+			loc->parent = parent;
+			loc->hasParent = true;
+		}
+		loc->isRam = true;
+		loc->isFlash = false;
+		loc->ramAddress = ramaddress;
+		loc->ramPage = rampage;
+		//m_deviceRamMemoryList.append(loc);
+		emsData->addDeviceRamBlock(loc);
+	}*/
+}
+
 void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
 {
 	Q_UNUSED(size)
@@ -1200,7 +1295,11 @@ void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlag
 	m_memoryInfoMap[locationid] = MemoryLocationInfo();
 	m_memoryInfoMap[locationid].locationid = locationid;
 	m_memoryInfoMap[locationid].rawflags = rawFlags;
-	m_memoryInfoMap[locationid].flags = flags;
+	m_memoryInfoMap[locationid].flags = QList<unsigned short>();
+	for (int i=0;i<flags.size();i++)
+	{
+		m_memoryInfoMap[locationid].flags.append(flags[i]);
+	}
 	m_memoryInfoMap[locationid].parent = parent;
 	m_memoryInfoMap[locationid].flashpage = flashpage;
 	m_memoryInfoMap[locationid].rampage = rampage;

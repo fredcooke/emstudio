@@ -323,3 +323,130 @@ QString EmsData::serialize(bool withdata)
 	Q_UNUSED(withdata)
 	return "";
 }
+
+void EmsData::passLocationInfo(unsigned short locationid,MemoryLocationInfo info)
+{
+	if (info.isRam && info.isFlash)
+	{
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = locationid;
+		loc->size = info.size;
+		loc->ramAddress = info.ramaddress;
+		loc->ramPage = info.rampage;
+		loc->flashAddress = info.flashaddress;
+		loc->flashPage = info.flashpage;
+		if (info.hasParent)
+		{
+			loc->parent = info.parent;
+			loc->hasParent = true;
+		}
+		else
+		{
+			loc->hasParent = false;
+		}
+		loc->isRam = true;
+		loc->isFlash = true;
+		addDeviceRamBlock(loc);
+		addDeviceFlashBlock(new MemoryLocation(*loc));
+	}
+	else if (info.isFlash)
+	{
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = locationid;
+		loc->size = info.size;
+		loc->flashAddress = info.flashaddress;
+		loc->flashPage = info.flashpage;
+		if (info.hasParent)
+		{
+			loc->parent = info.parent;
+			loc->hasParent = true;
+		}
+		else
+		{
+			loc->hasParent = false;
+		}
+		loc->isRam = true;
+		loc->isFlash = true;
+		addDeviceFlashBlock(loc);
+	}
+	else if (info.isRam)
+	{
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = locationid;
+		loc->size = info.size;
+		loc->ramAddress = info.ramaddress;
+		loc->ramPage = info.rampage;
+		if (info.hasParent)
+		{
+			loc->parent = info.parent;
+			loc->hasParent = true;
+		}
+		else
+		{
+			loc->hasParent = false;
+		}
+		loc->isRam = true;
+		loc->isFlash = true;
+		addDeviceRamBlock(loc);
+	}
+	else
+	{
+	}
+	/*if (flags.contains(FreeEmsComms::BLOCK_IS_RAM) && flags.contains((FreeEmsComms::BLOCK_IS_FLASH)))
+	{
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = locationid;
+		loc->size = size;
+		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+		{
+			loc->parent = parent;
+			loc->hasParent = true;
+		}
+		loc->isRam = true;
+		loc->isFlash = true;
+		loc->ramAddress = ramaddress;
+		loc->ramPage = rampage;
+		loc->flashAddress = flashaddress;
+		loc->flashPage = flashpage;
+		//m_deviceRamMemoryList.append(loc);
+		emsData->addDeviceRamBlock(loc);
+		emsData->addDeviceFlashBlock(new MemoryLocation(*loc));
+		//m_flashMemoryList.append(new MemoryLocation(*loc));
+		//m_deviceFlashMemoryList.append(new MemoryLocation(*loc));
+
+	}
+	else if (flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
+	{
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = locationid;
+		loc->size = size;
+		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+		{
+			loc->parent = parent;
+			loc->hasParent = true;
+		}
+		loc->isFlash = true;
+		loc->isRam = false;
+		loc->flashAddress = flashaddress;
+		loc->flashPage = flashpage;
+		//m_deviceFlashMemoryList.append(loc);
+		emsData->addDeviceFlashBlock(loc);
+	}
+	else if (flags.contains(FreeEmsComms::BLOCK_IS_RAM))
+	{
+		MemoryLocation *loc = new MemoryLocation();
+		loc->locationid = locationid;
+		loc->size = size;
+		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+		{
+			loc->parent = parent;
+			loc->hasParent = true;
+		}
+		loc->isRam = true;
+		loc->isFlash = false;
+		loc->ramAddress = ramaddress;
+		loc->ramPage = rampage;
+		//m_deviceRamMemoryList.append(loc);
+		emsData->addDeviceRamBlock(loc);
+	}*/
+}

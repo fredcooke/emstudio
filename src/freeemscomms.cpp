@@ -52,6 +52,19 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 	m_blockFlagList.append(BLOCK_IS_LOOKUP_DATA);
 	m_blockFlagList.append(BLOCK_IS_CONFIGURATION);
 
+
+	m_blockFlagToNameMap[BLOCK_HAS_PARENT] = "Parent";
+	m_blockFlagToNameMap[BLOCK_IS_RAM] = "Is Ram";
+	m_blockFlagToNameMap[BLOCK_IS_FLASH] = "Is Flash";
+	m_blockFlagToNameMap[BLOCK_IS_INDEXABLE] = "Is Indexable";
+	m_blockFlagToNameMap[BLOCK_IS_READ_ONLY] = "Is Read Only";
+	m_blockFlagToNameMap[BLOCK_FOR_BACKUP_RESTORE] = "For Backup";
+	m_blockFlagToNameMap[BLOCK_GETS_VERIFIED] = "Is Verified";
+	m_blockFlagToNameMap[BLOCK_IS_2D_TABLE] = "2D Table";
+	m_blockFlagToNameMap[BLOCK_IS_MAIN_TABLE] = "3D Table";
+	m_blockFlagToNameMap[BLOCK_IS_LOOKUP_DATA] = "Lookup Table";
+	m_blockFlagToNameMap[BLOCK_IS_CONFIGURATION] = "Configuration";
+
 }
 FreeEmsComms::~FreeEmsComms()
 {
@@ -1124,6 +1137,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 				QList<LocationIdFlags> flaglist;
 				if (parsedPacket.payload.size() >= 2)
 				{
+					MemoryLocationInfo info;
 					unsigned short test = parsedPacket.payload[0] << 8;
 					unsigned short parent;
 					unsigned char rampage;
@@ -1133,11 +1147,23 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					unsigned short size;
 					test += parsedPacket.payload[1];
 					//qDebug() << "Location ID Info for location:" << QString::number(locationid,16) << "Flags:" << QString::number(test,16);
+
 					for (int j=0;j<m_blockFlagList.size();j++)
 					{
 						if (test & m_blockFlagList[j])
 						{
 							flaglist.append(m_blockFlagList[j]);
+							if (m_blockFlagToNameMap.contains(m_blockFlagList[j]))
+							{
+								info.propertymap.append(QPair<QString,QString>(m_blockFlagToNameMap[m_blockFlagList[j]],"true"));
+							}
+						}
+						else
+						{
+							if (m_blockFlagToNameMap.contains(m_blockFlagList[j]))
+							{
+								info.propertymap.append(QPair<QString,QString>(m_blockFlagToNameMap[m_blockFlagList[j]],"false"));
+							}
 						}
 					}
 					parent = parsedPacket.payload[2] << 8;
@@ -1150,7 +1176,137 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					flashaddress += (unsigned char)parsedPacket.payload[9];
 					size = parsedPacket.payload[10] << 8;
 					size += parsedPacket.payload[11];
-					emit locationIdInfo(locationid,test,flaglist,parent,rampage,flashpage,ramaddress,flashaddress,size);
+					//emit locationIdInfo(locationid,test,flaglist,parent,rampage,flashpage,ramaddress,flashaddress,size);
+					//void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);
+
+					info.locationid = locationid;
+					info.parent = parent;
+					info.ramaddress = ramaddress;
+					info.rampage = rampage;
+					info.flashaddress = flashaddress;
+					info.flashpage = flashpage;
+					info.rawflags = test;
+					info.size = size;
+					if (flaglist.contains(FreeEmsComms::BLOCK_IS_RAM))
+					{
+						info.isRam = true;
+					}
+					else
+					{
+						info.isRam = false;
+					}
+					if (flaglist.contains(FreeEmsComms::BLOCK_IS_FLASH))
+					{
+						info.isFlash = true;
+					}
+					else
+					{
+						info.isFlash = false;
+					}
+					if (flaglist.contains(BLOCK_HAS_PARENT))
+					{
+						info.hasParent = true;
+					}
+					else
+					{
+						info.hasParent = false;
+					}
+					/*
+					if (flaglist.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+					{
+						info.propertymap.append(QPair<QString,QString>("Parent","true"));
+					}
+					else
+					{
+						info.propertymap.append(QPair<QString,QString>("Paernt","false"));
+					}
+					if (flaglist.contains(FreeEmsComms::BLOCK_IS_RAM))
+					{
+						info.propertymap.append(QPair<QString,QString>("RamPage","0x" + QString::number(rampage,16).toUpper()));
+						info.propertymap.append(QPair<QString,QString>("RamAddress","0x" + QString::number(ramaddress,16).toUpper()));
+						info.propertymap.append(QPair<QString,QString>("Is Ram","true"));
+					}
+					else
+					{
+						info.propertymap.append(QPair<QString,QString>("Is Ram","false"));
+						info.propertymap.append(QPair<QString,QString>("RamPage",""));
+						info.propertymap.append(QPair<QString,QString>("RamAddress",""));
+					}
+					if (flaglist.contains(FreeEmsComms::BLOCK_IS_FLASH))
+					{
+						info.propertymap.append(QPair<QString,QString>("Is Flash","true"));
+						info.propertymap.append(QPair<QString,QString>("FlashPage","0x" + QString::number(flashpage,16).toUpper()));
+						info.propertymap.append(QPair<QString,QString>("FlashAddress","0x" + QString::number(flashaddress,16).toUpper()));
+					}
+					else
+					{
+						info.propertymap.append(QPair<QString,QString>("Is Flash","false"));
+						info.propertymap.append(QPair<QString,QString>("FlashPage",""));
+						info.propertymap.append(QPair<QString,QString>("FlashAddress",""));
+					}
+					info.propertymap.append(QPair<QString,QString>("Size",QString::number(size)));
+					if (flaglist.contains(BLOCK_IS_INDEXABLE))
+					{
+						info.propertymap.append(QPair<QString,QString>("indexable","true"));
+					}
+					else
+					{
+						info.propertymap.append(QPair<QString,QString>("indexable","false"));
+					}
+					if (flaglist.contains(FreeEmsComms::BLOCK_IS_READ_ONLY))
+					{
+						info.propertymap.append(QPair<QString,QString>("Is Read Only","true"));
+					}
+					else
+					{
+						info.propertymap.append(QPair<QString,QString>("Is Read Only","false"));
+					}
+					if (flaglist.contains(FreeEmsComms::BLOCK_GETS_VERIFIED))
+					{
+					}
+					else
+					{
+					}
+					if (flaglist.contains(FreeEmsComms::BLOCK_FOR_BACKUP_RESTORE))
+					{
+					}
+					else
+					{
+					}
+					if (flaglist.contains(FreeEmsComms::BLOCK_IS_2D_TABLE))
+					{
+					}
+					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_MAIN_TABLE))
+					{
+					}
+					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_CONFIGURATION))
+					{
+					}
+					else
+					{
+					}*/
+					/*ui.locationIdInfoTableWidget->setColumnCount(17);
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Table Name"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("Flags"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(3,new QTableWidgetItem("Parent"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(4,new QTableWidgetItem("RamPage"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(5,new QTableWidgetItem("FlashPage"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(6,new QTableWidgetItem("RamAddress"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(7,new QTableWidgetItem("FlashAddress"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(8,new QTableWidgetItem("Size"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(9,new QTableWidgetItem("Has Parent"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(10,new QTableWidgetItem("Is Ram"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(11,new QTableWidgetItem("Is Flash"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(12,new QTableWidgetItem("Is Index"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(13,new QTableWidgetItem("Is Read Only"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(14,new QTableWidgetItem("Is Verified"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(15,new QTableWidgetItem("For Backup"));
+					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(16,new QTableWidgetItem("Table Type"));
+				*/
+					//propertymap
+					emit locationIdInfo(locationid,info);
+
 				}
 
 

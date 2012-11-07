@@ -40,6 +40,7 @@ protected:
 public slots:
 	void locationInfoWidgetDoubleClicked(int row, int column);
 	void locationIdInfo(unsigned short locationid,QString title,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
+	void locationIdInfo(unsigned short locationid,QString title,MemoryLocationInfo info);
 	void normalViewClicked();
 	void hexViewClicked();
 private:

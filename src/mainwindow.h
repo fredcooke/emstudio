@@ -73,19 +73,6 @@ public:
 	QString emstudioHash;
 };
 
-class MemoryLocationInfo
-{
-public:
-	unsigned short locationid;
-	unsigned short rawflags;
-	QList<FreeEmsComms::LocationIdFlags> flags;
-	unsigned short parent;
-	unsigned char rampage;
-	unsigned char flashpage;
-	unsigned short ramaddress;
-	unsigned short flashaddress;
-	unsigned short size;
-};
 
 class MainWindow : public QMainWindow
 {
@@ -179,6 +166,7 @@ private:
 	bool m_interrogationInProgress;
 	EmsData *emsData;
 private slots:
+	void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);
 	void tableview3d_show3DTable(unsigned short locationid,Table3DData *data);
 	void emsStatusHardResetRequested();
 	void emsStatusSoftResetRequested();

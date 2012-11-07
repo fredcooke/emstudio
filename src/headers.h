@@ -14,7 +14,6 @@ public:
 	QList<QPair<QString,double> > elementCalc;
 	QString type;
 	unsigned char arraySize;
-
 };
 
 
@@ -72,5 +71,23 @@ public:
 	QList<QPair<QString,double> > xAxisCalc;
 	QList<QPair<QString,double> > yAxisCalc;
 };
+class MemoryLocationInfo
+{
+public:
+	unsigned short locationid;
+	unsigned short rawflags;
+	QList<unsigned short> flags;
+	QList<QPair<QString,QString> > propertymap;
+	bool isRam;
+	bool isFlash;
+	bool hasParent;
+	unsigned short parent;
+	unsigned char rampage;
+	unsigned char flashpage;
+	unsigned short ramaddress;
+	unsigned short flashaddress;
+	unsigned short size;
+};
+
 
 #endif // HEADERS_H
