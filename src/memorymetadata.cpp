@@ -6,25 +6,17 @@
 MemoryMetaData::MemoryMetaData()
 {
 }
-void MemoryMetaData::loadMetaDataFromFile(QString filestr)
+bool MemoryMetaData::parseMetaData(QString json)
 {
-
-
-	qDebug() << "Loading config file from:" << filestr;
-	QFile file(filestr);
-	file.open(QIODevice::ReadOnly);
-	QByteArray filebytes = file.readAll();
-	file.close();
-
 	QJson::Parser parser;
-	QVariant top = parser.parse(filebytes);
+	QVariant top = parser.parse(json.toAscii());
 	if (!top.isValid())
 	{
 		QString errormsg = QString("Error parsing JSON from config file on line number: ") + QString::number(parser.errorLine()) + " error text: " + parser.errorString();
 		//QMessageBox::information(0,"Error",errormsg);
 		qDebug() << "Error parsing JSON";
 		qDebug() << "Line number:" << parser.errorLine() << "error text:" << parser.errorString();
-		return;
+		return false;
 	}
 	QVariantMap topmap = top.toMap();
 	QVariantMap errormap = topmap["errormap"].toMap();
@@ -212,6 +204,17 @@ void MemoryMetaData::loadMetaDataFromFile(QString filestr)
 		}
 		i++;
 	}
+	return true;
+}
+
+bool MemoryMetaData::loadMetaDataFromFile(QString filestr)
+{
+	qDebug() << "Loading config file from:" << filestr;
+	QFile file(filestr);
+	file.open(QIODevice::ReadOnly);
+	QByteArray filebytes = file.readAll();
+	file.close();
+	return parseMetaData(filebytes);
 }
 
 const Table3DMetaData MemoryMetaData::get3DMetaData(unsigned short locationid)

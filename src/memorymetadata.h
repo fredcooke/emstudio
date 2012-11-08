@@ -7,7 +7,8 @@ class MemoryMetaData
 {
 public:
 	MemoryMetaData();
-	void loadMetaDataFromFile(QString filestr);
+	bool loadMetaDataFromFile(QString filestr);
+	bool parseMetaData(QString json);
 	const QMap<unsigned short,QString> errorMap() { return m_errorMap; }
 
 
