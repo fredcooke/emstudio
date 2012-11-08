@@ -3,6 +3,17 @@
 #include <QPair>
 #include <QList>
 #include <QString>
+
+
+enum DataType
+{
+	DATA_UNDEFINED=1,
+	DATA_TABLE_2D=2,
+	DATA_TABLE_3D=3,
+	DATA_TABLE_LOOKUP=4,
+	DATA_CONFIG=5
+};
+
 class ConfigData
 {
 public:
@@ -81,6 +92,7 @@ public:
 	bool isRam;
 	bool isFlash;
 	bool hasParent;
+	DataType type;
 	unsigned short parent;
 	unsigned char rampage;
 	unsigned char flashpage;

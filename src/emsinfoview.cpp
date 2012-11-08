@@ -68,13 +68,13 @@ void EmsInfoView::normalViewClicked()
 	int row = ui.locationIdInfoTableWidget->selectedItems()[0]->row();
 	QString num = ui.locationIdInfoTableWidget->item(row,0)->text().split("x")[1];
 	bool ok = false;
-	int locid = num.toInt(&ok,16);
+	//int locid = num.toInt(&ok,16);
 	if (!ok)
 	{
 		qDebug() << "Numeric conversion failed for:" << num;
 		return;
 	}
-	displayLocationId(locid,true,0); //0 for normal view, 1 for hex view
+	//displayLocationId(locid,true,0); //0 for normal view, 1 for hex view
 }
 
 void EmsInfoView::hexViewClicked()
@@ -86,13 +86,13 @@ void EmsInfoView::hexViewClicked()
 	int row = ui.locationIdInfoTableWidget->selectedItems()[0]->row();
 	QString num = ui.locationIdInfoTableWidget->item(row,0)->text().split("x")[1];
 	bool ok = false;
-	int locid = num.toInt(&ok,16);
+	//int locid = num.toInt(&ok,16);
 	if (!ok)
 	{
 		qDebug() << "Numeric conversion failed for:" << num;
 		return;
 	}
-	displayLocationId(locid,true,1); //0 for normal view, 1 for hex view
+	//displayLocationId(locid,true,1); //0 for normal view, 1 for hex view
 }
 
 void EmsInfoView::setLocalRam(bool dirty)
@@ -142,22 +142,22 @@ void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 		qDebug() << "Numeric conversion failed for:" << num;
 		return;
 	}
-	int type = 0;
-	if (ui.locationIdInfoTableWidget->item(row,16)->text() == "2d Table")
+	DataType type = DATA_UNDEFINED;
+	if (ui.locationIdInfoTableWidget->item(row,2)->text() == "2D Table")
 	{
-		type = 1;
+		type = DATA_TABLE_2D;
 	}
-	else if (ui.locationIdInfoTableWidget->item(row,16)->text() == "Lookup")
+	else if (ui.locationIdInfoTableWidget->item(row,2)->text() == "3D Table")
 	{
-		type = 2;
+		type = DATA_TABLE_3D;
 	}
-	else if (ui.locationIdInfoTableWidget->item(row,16)->text() == "Main Table")
+	else if (ui.locationIdInfoTableWidget->item(row,2)->text() == "Lookup Table")
 	{
-		type = 3;
+		type = DATA_TABLE_LOOKUP;
 	}
-	else if (ui.locationIdInfoTableWidget->item(row,16)->text() == "Config")
+	else if (ui.locationIdInfoTableWidget->item(row,2)->text() == "Configuration")
 	{
-		type = 4;
+		type = DATA_CONFIG;
 	}
 
 
@@ -214,12 +214,13 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,QString title,MemoryL
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(15,new QTableWidgetItem("For Backup"));
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(16,new QTableWidgetItem("Table Type"));
 */
-	ui.locationIdInfoTableWidget->setColumnCount(2+info.propertymap.size());
+	ui.locationIdInfoTableWidget->setColumnCount(3+info.propertymap.size());
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));
 	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Table Name"));
+	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("Type"));
 	for (int i=0;i<info.propertymap.size();i++)
 	{
-		ui.locationIdInfoTableWidget->setHorizontalHeaderItem(2+i,new QTableWidgetItem(info.propertymap[i].first));
+		ui.locationIdInfoTableWidget->setHorizontalHeaderItem(3+i,new QTableWidgetItem(info.propertymap[i].first));
 	}
 	Q_UNUSED(info)
 	qDebug() << "Location ID Info for:" << "0x" + QString::number(locationid,16).toUpper();
@@ -243,6 +244,23 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,QString title,MemoryL
 		foundi = ui.locationIdInfoTableWidget->rowCount()-1;
 	}
 	ui.locationIdInfoTableWidget->setItem(foundi,0,new QTableWidgetItem("0x" + QString::number(locationid,16).toUpper()));
+	if (info.type == DATA_TABLE_2D)
+	{
+		ui.locationIdInfoTableWidget->setItem(foundi,2,new QTableWidgetItem("2D Table"));
+	}
+	else if (info.type == DATA_TABLE_3D)
+	{
+		ui.locationIdInfoTableWidget->setItem(foundi,2,new QTableWidgetItem("3D Table"));
+	}
+	else if (info.type == DATA_TABLE_LOOKUP)
+	{
+		ui.locationIdInfoTableWidget->setItem(foundi,2,new QTableWidgetItem("Lookup Table"));
+	}
+	else if (info.type == DATA_CONFIG)
+	{
+		ui.locationIdInfoTableWidget->setItem(foundi,2,new QTableWidgetItem("Configuration"));
+	}
+
 	/*for (int i=1;i<17;i++)
 	{
 		ui.locationIdInfoTableWidget->setItem(foundi,i,new QTableWidgetItem(""));
@@ -252,7 +270,7 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,QString title,MemoryL
 	//ui.locationIdInfoTableWidget->item(foundi,2)->setText("0x" + QString::number(rawFlags,16).toUpper());
 	for (int i=0;i<info.propertymap.size();i++)
 	{
-		ui.locationIdInfoTableWidget->setItem(foundi,2+i,new QTableWidgetItem(info.propertymap[i].second));
+		ui.locationIdInfoTableWidget->setItem(foundi,3+i,new QTableWidgetItem(info.propertymap[i].second));
 	}
 
 	ui.locationIdInfoTableWidget->resizeColumnsToContents();

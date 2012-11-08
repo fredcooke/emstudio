@@ -1211,6 +1211,22 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					{
 						info.hasParent = false;
 					}
+					if (flaglist.contains(FreeEmsComms::BLOCK_IS_2D_TABLE))
+					{
+						info.type = DATA_TABLE_2D;
+					}
+					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_MAIN_TABLE))
+					{
+						info.type = DATA_TABLE_3D;
+					}
+					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_CONFIGURATION))
+					{
+						info.type = DATA_CONFIG;
+					}
+					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_LOOKUP_DATA))
+					{
+						info.type = DATA_TABLE_LOOKUP;
+					}
 					/*
 					if (flaglist.contains(FreeEmsComms::BLOCK_HAS_PARENT))
 					{

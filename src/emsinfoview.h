@@ -45,7 +45,7 @@ public slots:
 private:
 	Ui::EmsInfo ui;
 signals:
-	void displayLocationId(int locid, bool isram,int type);
+	void displayLocationId(int locid, bool isram,DataType type);
 	void checkSync();
 };
 

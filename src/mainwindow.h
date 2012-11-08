@@ -158,8 +158,8 @@ private:
 	void markDeviceFlashClean();
 	bool m_localRamDirty;
 	bool m_deviceFlashDirty;
-	void updateView(unsigned short locid,QObject *view,QByteArray data,int type);
-	void createView(unsigned short locid,QByteArray data,int type,bool isram, bool isflash);
+	void updateView(unsigned short locid,QObject *view,QByteArray data,DataType type);
+	void createView(unsigned short locid,QByteArray data,DataType type,bool isram, bool isflash);
 	QList<int> m_locIdMsgList;
 	QList<int> m_locIdInfoMsgList;
 	void checkRamFlashSync();
@@ -183,7 +183,7 @@ private slots:
 	void checkSyncRequest();
 	void rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation);
 	void rawDataViewDestroyed(QObject *object);
-	void emsInfoDisplayLocationId(int locid,bool isram,int type);
+	void emsInfoDisplayLocationId(int locid,bool isram,DataType type);
 	void dataViewSaveLocation(unsigned short locationid,QByteArray data,int phyiscallocation);
 	void menu_file_saveOfflineDataClicked();
 	void menu_file_loadOfflineDataClicked();

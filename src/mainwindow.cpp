@@ -32,6 +32,7 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	qRegisterMetaType<MemoryLocationInfo>("MemoryLocationInfo");
+	qRegisterMetaType<DataType>("DataType");
 	qDebug() << "EMStudio commit:" << define2string(GIT_COMMIT);
 	qDebug() << "Full hash:" << define2string(GIT_HASH);
 	progressView=0;
@@ -210,10 +211,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(operatingSystem(QString)),this,SLOT(emsOperatingSystem(QString)));
 	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));
 
+
 	emsInfo = new EmsInfoView();
 	emsInfo->setFirmwareVersion(m_firmwareVersion);
 	emsInfo->setInterfaceVersion(m_interfaceVersion);
-	connect(emsInfo,SIGNAL(displayLocationId(int,bool,int)),this,SLOT(emsInfoDisplayLocationId(int,bool,int)));
+	connect(emsInfo,SIGNAL(displayLocationId(int,bool,DataType)),this,SLOT(emsInfoDisplayLocationId(int,bool,DataType)));
 
 	emsMdiWindow = ui.mdiArea->addSubWindow(emsInfo);
 	emsMdiWindow->setGeometry(emsInfo->geometry());
@@ -652,7 +654,7 @@ void MainWindow::menu_windows_PacketStatusClicked()
 	QApplication::postEvent(packetStatusMdiWindow, new QEvent(QEvent::Show));
 	QApplication::postEvent(packetStatusMdiWindow, new QEvent(QEvent::WindowActivate));
 }
-void MainWindow::updateView(unsigned short locid,QObject *view,QByteArray data,int type)
+void MainWindow::updateView(unsigned short locid,QObject *view,QByteArray data,DataType type)
 {
 	Q_UNUSED(type)
 	DataView *dview = qobject_cast<DataView*>(view);
@@ -663,9 +665,10 @@ void MainWindow::updateView(unsigned short locid,QObject *view,QByteArray data,i
 	QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::WindowActivate));
 
 }
-void MainWindow::createView(unsigned short locid,QByteArray data,int type,bool isram, bool isflash)
+void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,bool isram, bool isflash)
 {
-	if (type == 1)
+	qDebug() << "Table Type:" << type;
+	if (type == DATA_TABLE_2D)
 	{
 		qDebug() << "Creating new table view for location: 0x" << QString::number(locid,16).toUpper();
 		TableView2D *view = new TableView2D(isram,isflash);
@@ -703,7 +706,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,int type,bool i
 		QApplication::postEvent(win, new QEvent(QEvent::Show));
 		QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
 	}
-	else if (type == 3)
+	else if (type == DATA_TABLE_3D)
 	{
 		TableView3D *view = new TableView3D(isram,isflash);
 		connect(view,SIGNAL(show3DTable(unsigned short,Table3DData*)),this,SLOT(tableview3d_show3DTable(unsigned short,Table3DData*)));
@@ -790,7 +793,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,int type,bool i
 	}
 }
 
-void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,int type)
+void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,DataType type)
 {
 	Q_UNUSED(type)
 	Q_UNUSED(isram)
@@ -1221,6 +1224,7 @@ void MainWindow::locationIdInfo(unsigned short locationid,MemoryLocationInfo inf
 	}
 	//emsInfo->locationIdInfo(locationid,title,rawFlags,flags,parent,rampage,flashpage,ramaddress,flashaddress,size);
 	emsInfo->locationIdInfo(locationid,title,info);
+	emsData->passLocationInfo(locationid,info);
 	/*if (flags.contains(FreeEmsComms::BLOCK_IS_RAM) && flags.contains((FreeEmsComms::BLOCK_IS_FLASH)))
 	{
 		MemoryLocation *loc = new MemoryLocation();
