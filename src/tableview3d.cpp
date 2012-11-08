@@ -730,6 +730,8 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data)
 }
 void TableView3D::passDatalog(QVariantMap data)
 {
+	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+	ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
 	if (data.contains(m_metaData.xHighlight) && data.contains(m_metaData.yHighlight))
 	{
 		double xval = data[m_metaData.xHighlight].toDouble();
@@ -820,6 +822,8 @@ void TableView3D::passDatalog(QVariantMap data)
 			qDebug() << "Error parsing datalog, xloc and yloc aren't != -1";
 		}
 	}
+	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 }
 bool TableView3D::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata)
 {
