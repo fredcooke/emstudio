@@ -184,7 +184,6 @@ private slots:
 	void rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation);
 	void rawDataViewDestroyed(QObject *object);
 	void emsInfoDisplayLocationId(int locid,bool isram,int type);
-	void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void dataViewSaveLocation(unsigned short locationid,QByteArray data,int phyiscallocation);
 	void menu_file_saveOfflineDataClicked();
 	void menu_file_loadOfflineDataClicked();

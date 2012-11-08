@@ -202,7 +202,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
-	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
 	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
@@ -319,6 +319,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 }
 void MainWindow::menu_file_saveOfflineDataClicked()
 {
+	/*
 	QString filename = QFileDialog::getSaveFileName(this,"Save Offline File",".","Offline JSON Files (*.json)");
 	if (filename == "")
 	{
@@ -382,10 +383,12 @@ void MainWindow::menu_file_saveOfflineDataClicked()
 	outfile.write(out);
 	outfile.flush();
 	outfile.close();
+	*/
 }
 
 void MainWindow::menu_file_loadOfflineDataClicked()
 {
+	/*
 	QString filename = QFileDialog::getOpenFileName(this,"Load Offline File",".","Offline JSON Files (*.json)");
 	if (filename == "")
 	{
@@ -486,7 +489,7 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 		i++;
 	}
 	checkRamFlashSync();
-	emsMdiWindow->show();
+	emsMdiWindow->show();*/
 }
 
 void MainWindow::emsCommsDisconnected()
@@ -513,7 +516,7 @@ void MainWindow::emsCommsDisconnected()
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
-	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
 	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
@@ -1275,118 +1278,6 @@ void MainWindow::locationIdInfo(unsigned short locationid,MemoryLocationInfo inf
 		//m_deviceRamMemoryList.append(loc);
 		emsData->addDeviceRamBlock(loc);
 	}*/
-}
-
-void MainWindow::locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size)
-{
-	Q_UNUSED(size)
-	Q_UNUSED(rawFlags)
-	Q_UNUSED(parent)
-	Q_UNUSED(rampage)
-	Q_UNUSED(flashpage)
-	Q_UNUSED(ramaddress)
-	Q_UNUSED(flashaddress)
-	QString title;
-	if (m_memoryInfoMap.contains(locationid))
-	{
-		//Duplication location id info
-		qDebug() << "Duplicate location ID recieved from ECU:" << "0x" + QString::number(locationid,16).toUpper();
-	}
-	m_memoryInfoMap[locationid] = MemoryLocationInfo();
-	m_memoryInfoMap[locationid].locationid = locationid;
-	m_memoryInfoMap[locationid].rawflags = rawFlags;
-	m_memoryInfoMap[locationid].flags = QList<unsigned short>();
-	for (int i=0;i<flags.size();i++)
-	{
-		m_memoryInfoMap[locationid].flags.append(flags[i]);
-	}
-	m_memoryInfoMap[locationid].parent = parent;
-	m_memoryInfoMap[locationid].flashpage = flashpage;
-	m_memoryInfoMap[locationid].rampage = rampage;
-	m_memoryInfoMap[locationid].flashaddress = flashaddress;
-	m_memoryInfoMap[locationid].ramaddress = ramaddress;
-	m_memoryInfoMap[locationid].size = size;
-	if (m_memoryMetaData.has2DMetaData(locationid))
-	{
-		title = m_memoryMetaData.get2DMetaData(locationid).tableTitle;
-		if (m_memoryMetaData.get2DMetaData(locationid).size != size)
-		{
-			interrogateProgressViewCancelClicked();
-			QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(size) + " expected: " + QString::number(m_memoryMetaData.get2DMetaData(locationid).size));
-		}
-	}
-	if (m_memoryMetaData.has3DMetaData(locationid))
-	{
-		title = m_memoryMetaData.get3DMetaData(locationid).tableTitle;
-		if (m_memoryMetaData.get3DMetaData(locationid).size != size)
-		{
-			interrogateProgressViewCancelClicked();
-			QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(size) + " expected: " + QString::number(m_memoryMetaData.get3DMetaData(locationid).size));
-		}
-	}
-	if (m_memoryMetaData.hasRORMetaData(locationid))
-	{
-		title = m_memoryMetaData.getRORMetaData(locationid).dataTitle;
-		//m_readOnlyMetaDataMap[locationid]
-	}
-	emsInfo->locationIdInfo(locationid,title,rawFlags,flags,parent,rampage,flashpage,ramaddress,flashaddress,size);
-	if (flags.contains(FreeEmsComms::BLOCK_IS_RAM) && flags.contains((FreeEmsComms::BLOCK_IS_FLASH)))
-	{
-		MemoryLocation *loc = new MemoryLocation();
-		loc->locationid = locationid;
-		loc->size = size;
-		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
-		{
-			loc->parent = parent;
-			loc->hasParent = true;
-		}
-		loc->isRam = true;
-		loc->isFlash = true;
-		loc->ramAddress = ramaddress;
-		loc->ramPage = rampage;
-		loc->flashAddress = flashaddress;
-		loc->flashPage = flashpage;
-		//m_deviceRamMemoryList.append(loc);
-		emsData->addDeviceRamBlock(loc);
-		emsData->addDeviceFlashBlock(new MemoryLocation(*loc));
-		//m_flashMemoryList.append(new MemoryLocation(*loc));
-		//m_deviceFlashMemoryList.append(new MemoryLocation(*loc));
-
-	}
-	else if (flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
-	{
-		MemoryLocation *loc = new MemoryLocation();
-		loc->locationid = locationid;
-		loc->size = size;
-		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
-		{
-			loc->parent = parent;
-			loc->hasParent = true;
-		}
-		loc->isFlash = true;
-		loc->isRam = false;
-		loc->flashAddress = flashaddress;
-		loc->flashPage = flashpage;
-		//m_deviceFlashMemoryList.append(loc);
-		emsData->addDeviceFlashBlock(loc);
-	}
-	else if (flags.contains(FreeEmsComms::BLOCK_IS_RAM))
-	{
-		MemoryLocation *loc = new MemoryLocation();
-		loc->locationid = locationid;
-		loc->size = size;
-		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
-		{
-			loc->parent = parent;
-			loc->hasParent = true;
-		}
-		loc->isRam = true;
-		loc->isFlash = false;
-		loc->ramAddress = ramaddress;
-		loc->ramPage = rampage;
-		//m_deviceRamMemoryList.append(loc);
-		emsData->addDeviceRamBlock(loc);
-	}
 }
 
 void MainWindow::settingsCancelClicked()
