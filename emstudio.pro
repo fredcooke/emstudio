@@ -85,7 +85,8 @@ SOURCES += src/main.cpp\
     src/configview.cpp \
     src/configblock.cpp \
     src/emsdata.cpp \
-    src/memorymetadata.cpp
+    src/memorymetadata.cpp \
+    src/tablewidgetdelegate.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -128,7 +129,8 @@ HEADERS  += src/mainwindow.h \
     src/configview.h \
     src/configblock.h \
     src/emsdata.h \
-    src/memorymetadata.h
+    src/memorymetadata.h \
+    src/tablewidgetdelegate.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \

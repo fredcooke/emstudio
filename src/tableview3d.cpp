@@ -26,6 +26,7 @@
 #include <QContextMenuEvent>
 #include <QMenu>
 #include <QAction>
+#include "tablewidgetdelegate.h"
 TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 {
 	Q_UNUSED(parent)
@@ -44,6 +45,7 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 	ui.tableWidget->addHotkey(Qt::Key_Minus,Qt::NoModifier);
 	ui.tableWidget->addHotkey(Qt::Key_Underscore,Qt::ShiftModifier);
 	ui.tableWidget->addHotkey(Qt::Key_Equal,Qt::NoModifier);
+	ui.tableWidget->setItemDelegate(new TableWidgetDelegate());
 
 	setContextMenuPolicy(Qt::DefaultContextMenu);
 	//QAction* fooAction = new QAction("foo",this);
@@ -730,8 +732,6 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data)
 }
 void TableView3D::passDatalog(QVariantMap data)
 {
-	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
-	ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
 	if (data.contains(m_metaData.xHighlight) && data.contains(m_metaData.yHighlight))
 	{
 		double xval = data[m_metaData.xHighlight].toDouble();
@@ -804,26 +804,30 @@ void TableView3D::passDatalog(QVariantMap data)
 			if (xloc == m_oldXLoc && yloc == m_oldYLoc)
 			{
 				//No change, no reason to continue;
-				return;
+				//return;
 			}
+			ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+			ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
 			if (ui.tableWidget->item(m_oldYLoc,m_oldXLoc))
 			{
 				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setTextColor(QColor::fromRgb(0,0,0));
+				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setData(Qt::UserRole+1,false);
 			}
 			m_oldXLoc = xloc;
 			m_oldYLoc = yloc;
 			if (ui.tableWidget->item(m_oldYLoc,m_oldXLoc))
 			{
 				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setTextColor(QColor::fromRgb(255,255,255));
+				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setData(Qt::UserRole+1,true);
 			}
+			connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+			connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 		}
 		else
 		{
 			qDebug() << "Error parsing datalog, xloc and yloc aren't != -1";
 		}
 	}
-	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 }
 bool TableView3D::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata)
 {

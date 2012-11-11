@@ -1,7 +1,9 @@
 #include "tablewidget.h"
 #include <QDebug>
+
 TableWidget::TableWidget(QWidget *parent) : QTableWidget(parent)
 {
+
 }
 void TableWidget::addHotkey(int key,Qt::KeyboardModifier modifier)
 {
