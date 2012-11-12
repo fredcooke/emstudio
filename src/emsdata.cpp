@@ -1,5 +1,5 @@
 #include "emsdata.h"
-
+#include <QDebug>
 EmsData::EmsData()
 {
 }
@@ -365,7 +365,7 @@ void EmsData::passLocationInfo(unsigned short locationid,MemoryLocationInfo info
 		{
 			loc->hasParent = false;
 		}
-		loc->isRam = true;
+		loc->isRam = false;
 		loc->isFlash = true;
 		addDeviceFlashBlock(loc);
 	}
@@ -386,7 +386,7 @@ void EmsData::passLocationInfo(unsigned short locationid,MemoryLocationInfo info
 			loc->hasParent = false;
 		}
 		loc->isRam = true;
-		loc->isFlash = true;
+		loc->isFlash = false;
 		addDeviceRamBlock(loc);
 	}
 	else
