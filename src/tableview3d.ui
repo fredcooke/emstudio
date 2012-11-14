@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>717</width>
-    <height>424</height>
+    <width>758</width>
+    <height>512</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,6 +52,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="tracingCheckBox">
+       <property name="text">
+        <string>Enable Data Tracing</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="showMapPushButton">

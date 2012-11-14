@@ -34,6 +34,7 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 	m_tableMap=0;
 	ui.setupUi(this);
 	tableData=0;
+	m_tracingEnabled = false;
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	connect(ui.savePushButton,SIGNAL(clicked()),this,SLOT(saveClicked()));
@@ -41,6 +42,7 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 	connect(ui.loadRamPushButton,SIGNAL(clicked()),this,SLOT(loadRamClicked()));
 	connect(ui.exportPushButton,SIGNAL(clicked()),this,SLOT(exportClicked()));
 	connect(ui.tableWidget,SIGNAL(hotKeyPressed(int,Qt::KeyboardModifiers)),this,SLOT(hotKeyPressed(int,Qt::KeyboardModifiers)));
+	connect(ui.tracingCheckBox,SIGNAL(stateChanged(int)),this,SLOT(tracingCheckBoxStateChanged(int)));
 	ui.tableWidget->addHotkey(Qt::Key_Plus,Qt::ShiftModifier);
 	ui.tableWidget->addHotkey(Qt::Key_Minus,Qt::NoModifier);
 	ui.tableWidget->addHotkey(Qt::Key_Underscore,Qt::ShiftModifier);
@@ -73,6 +75,28 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 	ui.importPushButton->setVisible(false);
 	connect(ui.showMapPushButton,SIGNAL(clicked()),this,SLOT(showMapClicked()));
 }
+void TableView3D::tracingCheckBoxStateChanged(int newstate)
+{
+	if (newstate == Qt::Checked)
+	{
+		m_tracingEnabled = true;
+	}
+	else
+	{
+		m_tracingEnabled = false;
+		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+		for (int i=0;i<m_highlightItemList.size();i++)
+		{
+			ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setTextColor(QColor::fromRgb(0,0,0));
+			ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setData(Qt::UserRole+1,false);
+		}
+		m_highlightItemList.clear();
+		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
+	}
+}
+
 void TableView3D::setValue(int row, int column,double value)
 {
 	if (row == -1 || column == -1)
@@ -732,6 +756,10 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data)
 }
 void TableView3D::passDatalog(QVariantMap data)
 {
+	if (!m_tracingEnabled)
+	{
+		return;
+	}
 	if (data.contains(m_metaData.xHighlight) && data.contains(m_metaData.yHighlight))
 	{
 		double xval = data[m_metaData.xHighlight].toDouble();

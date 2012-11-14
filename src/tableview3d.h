@@ -57,10 +57,12 @@ private:
 	int m_currRow;
 	int m_currCol;
 	void setValue(int row, int column,double value);
+	bool m_tracingEnabled;
 protected:
 	void contextMenuEvent(QContextMenuEvent *evt);
 	void keyPressEvent(QKeyEvent *event);
 private slots:
+	void tracingCheckBoxStateChanged(int newstate);
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
 	void tableCellChanged(int row,int column);
 	void saveClicked();
