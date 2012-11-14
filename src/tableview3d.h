@@ -38,6 +38,7 @@ public:
 	bool setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata);
 	void passDatalog(QVariantMap data);
 private:
+	QList<QPair<int,int> > m_highlightItemList;
 	int m_oldXLoc;
 	int m_oldYLoc;
 	TableMap3D *m_tableMap;

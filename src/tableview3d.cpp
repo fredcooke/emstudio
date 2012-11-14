@@ -738,6 +738,14 @@ void TableView3D::passDatalog(QVariantMap data)
 		double yval = data[m_metaData.yHighlight].toDouble();
 		int xloc = 1;
 		int yloc = ui.tableWidget->rowCount()-2;
+		int lowerrow = 0;
+		double lowerrowratio = 0;
+		double upperrowratio = 0;
+		double lowercolumnratio = 0;
+		double uppercolumnratio = 0;
+		int higherrow = 0;
+		int lowercolumn = 0;
+		int highercolumn = 0;
 		for (int x=1;x<ui.tableWidget->columnCount();x++)
 		{
 			double testval = ui.tableWidget->item(ui.tableWidget->rowCount()-1,x)->text().toDouble();
@@ -764,6 +772,31 @@ void TableView3D::passDatalog(QVariantMap data)
 			if (xval > lowerlimit && xval < upperlimit)
 			{
 				xloc = x;
+				lowercolumn = x-1;
+				highercolumn = x+1;
+				lowercolumnratio = (xval - lowerlimit) / (upperlimit - lowerlimit);
+				uppercolumnratio = (upperlimit - xval) / (upperlimit - lowerlimit);
+				if (xval > testval)
+				{
+					lowercolumn = x;
+					highercolumn = x+1;
+					lowercolumnratio = (xval - testval) / (nexttestval - testval);
+					uppercolumnratio = (nexttestval - xval) / (nexttestval - testval);
+				}
+				else
+				{
+					lowercolumn = x-1;
+					highercolumn = x;
+					lowercolumnratio = (xval - prevtestval) / (testval - prevtestval);
+					uppercolumnratio = (testval - xval) / (testval - prevtestval);
+				}
+				//0 500 1000
+				//Val is at 750.
+				//lowerrowratio should be 50%, and upper should be 50%
+				//(xval - lowerlimit) / (upperlimit - lowerlimit) //0-1.0
+				//(upperlimit - xval) / (upperlimit - lowerlimit) //0-1.0
+
+
 				break;
 			}
 		}
@@ -795,6 +828,25 @@ void TableView3D::passDatalog(QVariantMap data)
 				if (yval > lowerlimit && yval < upperlimit)
 				{
 					yloc = y;
+					if (yval > testval)
+					{
+						lowerrow = y;
+						higherrow = y+1;
+						lowerrowratio = (yval - testval) / (nexttestval - testval);
+						upperrowratio = (nexttestval - yval) / (nexttestval - testval);
+					}
+					else
+					{
+						lowerrow = y-1;
+						higherrow = y;
+						lowerrowratio = (yval - prevtestval) / (testval - prevtestval);
+						upperrowratio = (testval - yval) / (testval - prevtestval);
+					}
+					//0 500 1000
+					//Val is at 750.
+					//lowerrowratio should be 50%, and upper should be 50%
+					//(xval - lowerlimit) / (upperlimit - lowerlimit) //0-1.0
+					//(upperlimit - xval) / (upperlimit - lowerlimit) //0-1.0
 					break;
 				}
 			}
@@ -808,18 +860,35 @@ void TableView3D::passDatalog(QVariantMap data)
 			}
 			ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 			ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
-			if (ui.tableWidget->item(m_oldYLoc,m_oldXLoc))
+			for (int i=0;i<m_highlightItemList.size();i++)
 			{
-				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setTextColor(QColor::fromRgb(0,0,0));
-				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setData(Qt::UserRole+1,false);
+				ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setTextColor(QColor::fromRgb(0,0,0));
+				ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setData(Qt::UserRole+1,false);
 			}
+			m_highlightItemList.clear();
 			m_oldXLoc = xloc;
 			m_oldYLoc = yloc;
-			if (ui.tableWidget->item(m_oldYLoc,m_oldXLoc))
+
+			m_highlightItemList.append(QPair<int,int>(lowerrow,lowercolumn));
+			ui.tableWidget->item(lowerrow,lowercolumn)->setData(Qt::UserRole+1,true);
+			ui.tableWidget->item(lowerrow,lowercolumn)->setData(Qt::UserRole+2,lowerrowratio);
+
+			m_highlightItemList.append(QPair<int,int>(lowerrow,highercolumn));
+			ui.tableWidget->item(lowerrow,highercolumn)->setData(Qt::UserRole+1,true);
+			ui.tableWidget->item(lowerrow,highercolumn)->setData(Qt::UserRole+2,lowercolumnratio);
+
+			m_highlightItemList.append(QPair<int,int>(higherrow,lowercolumn));
+			ui.tableWidget->item(higherrow,lowercolumn)->setData(Qt::UserRole+1,true);
+			ui.tableWidget->item(higherrow,lowercolumn)->setData(Qt::UserRole+2,upperrowratio);
+
+			m_highlightItemList.append(QPair<int,int>(higherrow,highercolumn));
+			ui.tableWidget->item(higherrow,highercolumn)->setData(Qt::UserRole+1,true);
+			ui.tableWidget->item(higherrow,highercolumn)->setData(Qt::UserRole+2,uppercolumnratio);
+			/*if (ui.tableWidget->item(m_oldYLoc,m_oldXLoc))
 			{
 				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setTextColor(QColor::fromRgb(255,255,255));
 				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setData(Qt::UserRole+1,true);
-			}
+			}*/
 			connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 			connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 		}

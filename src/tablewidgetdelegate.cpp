@@ -22,17 +22,17 @@ void TableWidgetDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
 	{
 		if (index.data(Qt::UserRole+1).toBool())
 		{
+			double val = index.data(Qt::UserRole+2).toDouble();
+			//Val will be 0-100%, as to what percentage it needs to be highlighted.
+
 			QBrush brush = index.data(Qt::BackgroundRole).value<QBrush>();
-			//brush.setColor(QColor::fromRgb(255,255,255));
-			//brush.setColor(QColor::fromRgb(qMin(brush.color().red() + 180,255),qMin(brush.color().green() + 180 ,255),qMin(brush.color().blue() + 180,255)));
 			painter->setBrush(brush);
-			//painter->setBackground(brush.color());
 			painter->drawRect(option.rect.x(),option.rect.y(),option.rect.width()-1,option.rect.height()-1);
 			brush.setStyle(Qt::NoBrush);
 			painter->setBrush(brush);
 			QPen p = painter->pen();
 			p.setWidth(5);
-			p.setColor(QColor::fromRgb(255,255,255));
+			p.setColor(QColor::fromRgb(255 * val,255 * val,255 * val));
 			painter->setPen(p);
 			painter->drawRect(option.rect.x(),option.rect.y(),option.rect.width()-1,option.rect.height()-1);
 		}
