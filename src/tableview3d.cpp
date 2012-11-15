@@ -773,7 +773,7 @@ void TableView3D::passDatalog(QVariantMap data)
 		double uppercolumnratio = 0;
 		int higherrow = 0;
 		int lowercolumn = 0;
-		int highercolumn = 0;
+		int highercolumn = 1;
 		for (int x=1;x<ui.tableWidget->columnCount();x++)
 		{
 			double testval = ui.tableWidget->item(ui.tableWidget->rowCount()-1,x)->text().toDouble();
@@ -806,15 +806,15 @@ void TableView3D::passDatalog(QVariantMap data)
 				uppercolumnratio = (upperlimit - xval) / (upperlimit - lowerlimit);
 				if (xval > testval)
 				{
-					lowercolumn = x;
-					highercolumn = x+1;
+					lowercolumn = x+1;
+					highercolumn = x+2;
 					lowercolumnratio = (xval - testval) / (nexttestval - testval);
 					uppercolumnratio = (nexttestval - xval) / (nexttestval - testval);
 				}
 				else
 				{
-					lowercolumn = x-1;
-					highercolumn = x;
+					lowercolumn = x;
+					highercolumn = x+1;
 					lowercolumnratio = (xval - prevtestval) / (testval - prevtestval);
 					uppercolumnratio = (testval - xval) / (testval - prevtestval);
 				}
@@ -858,15 +858,15 @@ void TableView3D::passDatalog(QVariantMap data)
 					yloc = y;
 					if (yval > testval)
 					{
-						lowerrow = y;
-						higherrow = y+1;
+						lowerrow = y-1;
+						higherrow = y;
 						lowerrowratio = (yval - testval) / (nexttestval - testval);
 						upperrowratio = (nexttestval - yval) / (nexttestval - testval);
 					}
 					else
 					{
-						lowerrow = y-1;
-						higherrow = y;
+						lowerrow = y-2;
+						higherrow = y-1;
 						lowerrowratio = (yval - prevtestval) / (testval - prevtestval);
 						upperrowratio = (testval - yval) / (testval - prevtestval);
 					}
@@ -897,21 +897,38 @@ void TableView3D::passDatalog(QVariantMap data)
 			m_oldXLoc = xloc;
 			m_oldYLoc = yloc;
 
-			m_highlightItemList.append(QPair<int,int>(lowerrow,lowercolumn));
-			ui.tableWidget->item(lowerrow,lowercolumn)->setData(Qt::UserRole+1,true);
-			ui.tableWidget->item(lowerrow,lowercolumn)->setData(Qt::UserRole+2,lowerrowratio);
+			if (lowercolumn > 0 )
+			{
+				if (lowerrow > 0)
+				{
+					m_highlightItemList.append(QPair<int,int>(lowerrow,lowercolumn));
+					ui.tableWidget->item(lowerrow,lowercolumn)->setData(Qt::UserRole+1,true);
+					ui.tableWidget->item(lowerrow,lowercolumn)->setData(Qt::UserRole+2,lowerrowratio);
+				}
+				if (higherrow < ui.tableWidget->rowCount()-1)
+				{
+					m_highlightItemList.append(QPair<int,int>(higherrow,lowercolumn));
+					ui.tableWidget->item(higherrow,lowercolumn)->setData(Qt::UserRole+1,true);
+					ui.tableWidget->item(higherrow,lowercolumn)->setData(Qt::UserRole+2,upperrowratio);
+				}
+			}
 
-			m_highlightItemList.append(QPair<int,int>(lowerrow,highercolumn));
-			ui.tableWidget->item(lowerrow,highercolumn)->setData(Qt::UserRole+1,true);
-			ui.tableWidget->item(lowerrow,highercolumn)->setData(Qt::UserRole+2,lowercolumnratio);
 
-			m_highlightItemList.append(QPair<int,int>(higherrow,lowercolumn));
-			ui.tableWidget->item(higherrow,lowercolumn)->setData(Qt::UserRole+1,true);
-			ui.tableWidget->item(higherrow,lowercolumn)->setData(Qt::UserRole+2,upperrowratio);
 
-			m_highlightItemList.append(QPair<int,int>(higherrow,highercolumn));
-			ui.tableWidget->item(higherrow,highercolumn)->setData(Qt::UserRole+1,true);
-			ui.tableWidget->item(higherrow,highercolumn)->setData(Qt::UserRole+2,uppercolumnratio);
+			if (lowerrow > 0)
+			{
+				m_highlightItemList.append(QPair<int,int>(lowerrow,highercolumn));
+				ui.tableWidget->item(lowerrow,highercolumn)->setData(Qt::UserRole+1,true);
+				ui.tableWidget->item(lowerrow,highercolumn)->setData(Qt::UserRole+2,lowercolumnratio);
+			}
+
+
+			if (higherrow < ui.tableWidget->rowCount()-1)
+			{
+				m_highlightItemList.append(QPair<int,int>(higherrow,highercolumn));
+				ui.tableWidget->item(higherrow,highercolumn)->setData(Qt::UserRole+1,true);
+				ui.tableWidget->item(higherrow,highercolumn)->setData(Qt::UserRole+2,uppercolumnratio);
+			}
 			/*if (ui.tableWidget->item(m_oldYLoc,m_oldXLoc))
 			{
 				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setTextColor(QColor::fromRgb(255,255,255));
