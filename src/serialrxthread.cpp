@@ -43,7 +43,7 @@ void SerialRXThread::run()
 				m_logInFile->write((const char*)buffer,readlen);
 				m_logInFile->flush();
 			}*/
-			emit dataRead(QByteArray((const char*)buffer,readlen));
+			//emit dataRead(QByteArray((const char*)buffer,readlen));
 		}
 		if (readlen == 0)
 		{
