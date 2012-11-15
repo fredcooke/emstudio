@@ -105,8 +105,19 @@ int SerialPort::writeBytes(unsigned char *buf,int len)
 int SerialPort::readBytes(unsigned char *buf,int maxlen)
 {
 	int readlen=0;
-	QMutexLocker locker(m_serialLockMutex);
+	QMutexLocker locker(m_serialLockMutex);	
 #ifdef Q_OS_WIN32
+	DWORD evt;
+	if (!WaitCommEvent(m_portHandle,&evt,NULL))
+	{
+		qDebug() << "Unable to WaitCommEvent!!";
+		return -1;
+	}
+	if (!(evt & EV_RXCHAR))
+	{
+		//No RX
+		return 0;
+	}
 	if (!ReadFile(m_portHandle,(LPVOID)buf,maxlen,(LPDWORD)&readlen,NULL))
 	{
 		//Serial error here
@@ -249,6 +260,7 @@ int SerialPort::openPort(QString portName,int baudrate,bool oddparity)
 	Win_CommTimeouts.WriteTotalTimeoutConstant = 0;
 	SetCommConfig(m_portHandle, &Win_CommConfig, sizeof(COMMCONFIG));
 	SetCommTimeouts(m_portHandle,&Win_CommTimeouts);
+	SetCommMask(m_portHandle,EV_RXCHAR);
 	return 0;
 #else
 
