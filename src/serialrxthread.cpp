@@ -52,7 +52,7 @@ void SerialRXThread::run()
 			//perror("Error:");
 			//printf("\n");
 			//return; //Disable this, now that we are using timeouts.
-			//msleep(10);
+			msleep(10); //Need a sleep now, due to select timeout.
 			continue;
 		}
 		for (int i=0;i<readlen;i++)

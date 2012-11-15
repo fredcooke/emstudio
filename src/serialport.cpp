@@ -113,7 +113,21 @@ int SerialPort::readBytes(unsigned char *buf,int maxlen)
 		qDebug() << "Serial Read error";
 	}
 #else
-	readlen = read(m_portHandle,buf,maxlen);
+	fd_set set;
+	FD_ZERO(&set);
+	FD_SET(m_portHandle,&set);
+	timeval time;
+	time.tv_sec = 0;
+	time.tv_usec = 0;
+	if (select(m_portHandle+1,&set,NULL,NULL,&time))
+	{
+		readlen = read(m_portHandle,buf,maxlen);
+	}
+	else
+	{
+		return 0;
+	}
+
 #endif //Q_OS_WIN32
 	return readlen;
 }
@@ -308,7 +322,7 @@ int SerialPort::openPort(QString portName,int baudrate,bool oddparity)
 	newtio.c_lflag=0;
 	newtio.c_oflag=0;
 	newtio.c_cc[VTIME]=1; //1/10th second timeout, to allow for quitting the read thread
-	newtio.c_cc[VMIN]=1; //We want a pure timer timeout
+	newtio.c_cc[VMIN]=0; //We want a pure timer timeout
 	if (baudrate != -1)
 	{
 		if(cfsetispeed(&newtio, BAUD))
