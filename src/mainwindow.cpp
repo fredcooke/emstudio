@@ -48,7 +48,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	{
 		QDir(appDataDir).mkpath("EMStudio");
 	}
-	m_defaultsDir = QString(getenv("%ProgramFiles%")).replace("\\","/") + "/EMStudio";
+	m_defaultsDir = QApplication::instance()->applicationDirPath();
+
 	m_settingsDir = appDataDir + "/" + "EMStudio";
 	//m_settingsFile = appDataDir + "/" + "EMStudio/EMStudio-config.ini";
 //#elif Q_OS_MAC <- Does not exist. Need OSX checking capabilities somewhere...
