@@ -10,13 +10,16 @@ MemoryMetaData::MemoryMetaData()
 bool MemoryMetaData::parseMetaData(QString json)
 {
 	QJson::Parser parser;
-	QVariant top = parser.parse(json.toAscii());
+	QVariant top = parser.parse(json.toStdString().c_str());
 	if (!top.isValid())
 	{
 		QString errormsg = QString("Error parsing JSON from config file on line number: ") + QString::number(parser.errorLine()) + " error text: " + parser.errorString();
 		//QMessageBox::information(0,"Error",errormsg);
 		qDebug() << "Error parsing JSON";
 		qDebug() << "Line number:" << parser.errorLine() << "error text:" << parser.errorString();
+		qDebug() << "Start Json";
+		qDebug() << "Json:" << json;
+		qDebug() << "End Json";
 		return false;
 	}
 	QVariantMap topmap = top.toMap();
@@ -219,6 +222,7 @@ bool MemoryMetaData::loadMetaDataFromFile(QString filestr)
 		//Can't open the file.
 	}
 	QByteArray filebytes = file.readAll();
+	qDebug() << "Loaded:" << filebytes.size() << "chars from config file";
 	file.close();
 	return parseMetaData(filebytes);
 }

@@ -100,48 +100,71 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	}
 	m_memoryMetaData.loadMetaDataFromFile(filestr);
 
-	QFile decoderfile("decodersettings.json");
-	decoderfile.open(QIODevice::ReadOnly);
-	QByteArray decoderfilebytes = decoderfile.readAll();
-	decoderfile.close();
+	QString decoderfilestr = "";
+	if (QFile::exists(m_settingsDir + "/" + "definitions/decodersettings.json"))
+	{
+		decoderfilestr = m_settingsDir + "/" + "definitions/decodersettings.json";
+	}
+	else if (QFile::exists(m_defaultsDir + "/definitions/decodersettings.json"))
+	{
+		decoderfilestr = m_defaultsDir + "/definitions/decodersettings.json";
+	}
+	else if (QFile::exists("decodersettings.json"))
+	{
+		decoderfilestr = "decodersettings.json";
+	}
+	else
+	{
+		//QMessageBox::information(0,"Error","Error: No freeems.config.json file found!");
+	}
+	if (QFile::exists(decoderfilestr))
+	{
+		QFile decoderfile(decoderfilestr);
+		decoderfile.open(QIODevice::ReadOnly);
+		QByteArray decoderfilebytes = decoderfile.readAll();
+		decoderfile.close();
 
-	QJson::Parser decoderparser;
-	QVariant decodertop = decoderparser.parse(decoderfilebytes);
-	if (!decodertop.isValid())
-	{
-		QString errormsg = QString("Error parsing JSON from config file on line number: ") + QString::number(decoderparser.errorLine()) + " error text: " + decoderparser.errorString();
-		QMessageBox::information(0,"Error",errormsg);
-		qDebug() << "Error parsing JSON";
-		qDebug() << "Line number:" << decoderparser.errorLine() << "error text:" << decoderparser.errorString();
-		return;
-	}
-	QVariantMap decodertopmap = decodertop.toMap();
-	QVariantMap decoderlocationmap = decodertopmap["locations"].toMap();
-	QString str = decoderlocationmap["locationid"].toString();
-	bool ok = false;
-	unsigned short locid = str.toInt(&ok,16);
-	QVariantList decodervalueslist = decoderlocationmap["values"].toList();
-	QList<ConfigBlock> blocklist;
-	for (int i=0;i<decodervalueslist.size();i++)
-	{
-		QVariantMap tmpmap = decodervalueslist[i].toMap();
-		ConfigBlock block;
-		block.setName(tmpmap["name"].toString());
-		block.setType(tmpmap["type"].toString());
-		block.setElementSize(tmpmap["sizeofelement"].toInt());
-		block.setSize(tmpmap["size"].toInt());
-		block.setOffset(tmpmap["offset"].toInt());
-		QList<QPair<QString, double> > calclist;
-		QVariantList calcliststr = tmpmap["calc"].toList();
-		for (int j=0;j<calcliststr.size();j++)
+		QJson::Parser decoderparser;
+		QVariant decodertop = decoderparser.parse(decoderfilebytes);
+		if (!decodertop.isValid())
 		{
-			qDebug() << "XCalc:" << calcliststr[j].toMap()["type"].toString() << calcliststr[j].toMap()["value"].toDouble();
-			calclist.append(QPair<QString,double>(calcliststr[j].toMap()["type"].toString(),calcliststr[j].toMap()["value"].toDouble()));
+			QString errormsg = QString("Error parsing JSON from config file on line number: ") + QString::number(decoderparser.errorLine()) + " error text: " + decoderparser.errorString();
+			QMessageBox::information(0,"Error",errormsg);
+			qDebug() << "Error parsing JSON";
+			qDebug() << "Line number:" << decoderparser.errorLine() << "error text:" << decoderparser.errorString();
+			//return;
 		}
-		block.setCalc(calclist);
-		blocklist.append(block);
+		else
+		{
+			QVariantMap decodertopmap = decodertop.toMap();
+			QVariantMap decoderlocationmap = decodertopmap["locations"].toMap();
+			QString str = decoderlocationmap["locationid"].toString();
+			bool ok = false;
+			unsigned short locid = str.toInt(&ok,16);
+			QVariantList decodervalueslist = decoderlocationmap["values"].toList();
+			QList<ConfigBlock> blocklist;
+			for (int i=0;i<decodervalueslist.size();i++)
+			{
+				QVariantMap tmpmap = decodervalueslist[i].toMap();
+				ConfigBlock block;
+				block.setName(tmpmap["name"].toString());
+				block.setType(tmpmap["type"].toString());
+				block.setElementSize(tmpmap["sizeofelement"].toInt());
+				block.setSize(tmpmap["size"].toInt());
+				block.setOffset(tmpmap["offset"].toInt());
+				QList<QPair<QString, double> > calclist;
+				QVariantList calcliststr = tmpmap["calc"].toList();
+				for (int j=0;j<calcliststr.size();j++)
+				{
+					qDebug() << "XCalc:" << calcliststr[j].toMap()["type"].toString() << calcliststr[j].toMap()["value"].toDouble();
+					calclist.append(QPair<QString,double>(calcliststr[j].toMap()["type"].toString(),calcliststr[j].toMap()["value"].toDouble()));
+				}
+				block.setCalc(calclist);
+				blocklist.append(block);
+			}
+			m_configBlockMap[locid] = blocklist;
+		}
 	}
-	m_configBlockMap[locid] = blocklist;
 /*
 
 		anglesOfTDC: {ANGLE(0), ANGLE(90), ANGLE(180), ANGLE(270), ANGLE(360), ANGLE(450), ANGLE(540), ANGLE(630),ANGLE(0),ANGLE(360)},
@@ -241,17 +264,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	if (QFile::exists(m_defaultsDir + "/" + "dashboards/gauges.qml"))
 	{
 		//qml file is in the program files directory, or in /usr/share
-		dataGauges->setFile(m_defaultsDir + "/" + "dashboards/gauges.qml");
+		dataGauges->setFile("file://" + m_defaultsDir + "/" + "dashboards/gauges.qml");
 	}
 	else if (QFile::exists("src/gauges.qml"))
 	{
 		//We're operating out of the src directory
-		dataGauges->setFile("src/gauges.qml");
+		dataGauges->setFile("file://src/gauges.qml");
 	}
-	else
+	else if (QFile::exists("gauges.qml"))
 	{
 		//Running with no install, but not src?? Still handle it.
-		dataGauges->setFile("gauges.qml");
+		dataGauges->setFile("file://gauges.qml");
 	}
 
 	dataTables = new TableView();
