@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QByteArray>
 #include <qjson/parser.h>
+#include <QMessageBox>
 MemoryMetaData::MemoryMetaData()
 {
 }
@@ -211,7 +212,12 @@ bool MemoryMetaData::loadMetaDataFromFile(QString filestr)
 {
 	qDebug() << "Loading config file from:" << filestr;
 	QFile file(filestr);
-	file.open(QIODevice::ReadOnly);
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		QMessageBox::information(0,"Error","Error opening config file: " + file.errorString());
+		return false;
+		//Can't open the file.
+	}
 	QByteArray filebytes = file.readAll();
 	file.close();
 	return parseMetaData(filebytes);
