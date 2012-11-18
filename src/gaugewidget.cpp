@@ -44,13 +44,16 @@ GaugeWidget::GaugeWidget(QWidget *parent) : QDeclarativeView(parent)
 
 void GaugeWidget::setFile(QString file)
 {
-	setSource(QUrl(file));
-	for (int i=0;i<rootObject()->childItems().size();i++)
+	setSource(QUrl::fromLocalFile(file));
+	if (rootObject())
 	{
-		QGraphicsObject *obj = qobject_cast<QGraphicsObject*>(rootObject()->childItems()[i]);
-		if (obj)
+		for (int i=0;i<rootObject()->childItems().size();i++)
 		{
-			propertylist.append(obj->property("propertyMapProperty").toString());
+			QGraphicsObject *obj = qobject_cast<QGraphicsObject*>(rootObject()->childItems()[i]);
+			if (obj)
+			{
+				propertylist.append(obj->property("propertyMapProperty").toString());
+			}
 		}
 	}
 }

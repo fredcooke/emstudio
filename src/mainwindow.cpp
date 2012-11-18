@@ -264,17 +264,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	if (QFile::exists(m_defaultsDir + "/" + "dashboards/gauges.qml"))
 	{
 		//qml file is in the program files directory, or in /usr/share
-		dataGauges->setFile("file://" + m_defaultsDir + "/" + "dashboards/gauges.qml");
+		dataGauges->setFile(m_defaultsDir + "/" + "dashboards/gauges.qml");
 	}
 	else if (QFile::exists("src/gauges.qml"))
 	{
 		//We're operating out of the src directory
-		dataGauges->setFile("file://src/gauges.qml");
+		dataGauges->setFile("src/gauges.qml");
 	}
 	else if (QFile::exists("gauges.qml"))
 	{
 		//Running with no install, but not src?? Still handle it.
-		dataGauges->setFile("file://gauges.qml");
+		dataGauges->setFile("gauges.qml");
 	}
 
 	dataTables = new TableView();
