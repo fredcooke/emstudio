@@ -53,6 +53,7 @@ Section "EMStudio (Required)" ;No components page, name is not important
 
   SetOutPath "$INSTDIR\definitions"
   File "freeems.config.json"
+  File "decodersettings.json"
   SetOutPath "$INSTDIR\dashboards"
   File "src/gauges.qml"
   
