@@ -200,6 +200,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionGauges,SIGNAL(triggered()),this,SLOT(menu_windows_GaugesClicked()));
 	connect(ui.actionTables,SIGNAL(triggered()),this,SLOT(menu_windows_TablesClicked()));
 	connect(ui.actionFlags,SIGNAL(triggered()),this,SLOT(menu_windows_FlagsClicked()));
+	connect(ui.actionInterrogation_Progress,SIGNAL(triggered()),this,SLOT(menu_windows_interrogateProgressViewClicked()));
 	connect(ui.actionExit_3,SIGNAL(triggered()),this,SLOT(close()));
 	connect(ui.actionPacket_Status,SIGNAL(triggered()),this,SLOT(menu_windows_PacketStatusClicked()));
 	connect(ui.actionAbout,SIGNAL(triggered()),this,SLOT(menu_aboutClicked()));
@@ -343,6 +344,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	logfile = new QFile("myoutput.log");
 	logfile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 }
+void MainWindow::menu_windows_interrogateProgressViewClicked()
+{
+	interrogateProgressMdiWindow->show();
+	QApplication::postEvent(interrogateProgressMdiWindow, new QEvent(QEvent::Show));
+	QApplication::postEvent(interrogateProgressMdiWindow, new QEvent(QEvent::WindowActivate));
+}
+
 void MainWindow::menu_file_saveOfflineDataClicked()
 {
 	/*
@@ -907,7 +915,6 @@ void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int p
 void MainWindow::interrogateProgressViewDestroyed(QObject *object)
 {
 	Q_UNUSED(object);
-	progressView = 0;
 	if (m_interrogationInProgress)
 	{
 		m_interrogationInProgress = false;
@@ -920,8 +927,6 @@ void MainWindow::interrogateProgressViewDestroyed(QObject *object)
 		return;
 	}
 	win->hide();
-	ui.mdiArea->removeSubWindow(win);
-	win->deleteLater();
 
 
 }
@@ -1479,16 +1484,17 @@ void MainWindow::emsCommsConnected()
 
 	if (progressView)
 	{
-		QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>(progressView->parent());
-		ui.mdiArea->removeSubWindow(win);
-		delete progressView;
+		progressView->reset();
 	}
-	progressView = new InterrogateProgressView();
-	connect(progressView,SIGNAL(destroyed(QObject*)),this,SLOT(interrogateProgressViewDestroyed(QObject*)));
-	interrogateProgressMdiWindow = ui.mdiArea->addSubWindow(progressView);
-	interrogateProgressMdiWindow->setGeometry(progressView->geometry());
-	connect(progressView,SIGNAL(cancelClicked()),this,SLOT(interrogateProgressViewCancelClicked()));
-	progressView->setMaximum(0);
+	else
+	{
+		progressView = new InterrogateProgressView();
+		connect(progressView,SIGNAL(destroyed(QObject*)),this,SLOT(interrogateProgressViewDestroyed(QObject*)));
+		interrogateProgressMdiWindow = ui.mdiArea->addSubWindow(progressView);
+		interrogateProgressMdiWindow->setGeometry(progressView->geometry());
+		connect(progressView,SIGNAL(cancelClicked()),this,SLOT(interrogateProgressViewCancelClicked()));
+		progressView->setMaximum(0);
+	}
 	progressView->show();
 	interrogateProgressMdiWindow->show();
 	progressView->addOutput("Connected to EMS");
@@ -1733,9 +1739,16 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 		if (interrogationSequenceList.size() == 0)
 		{
 			m_interrogationInProgress = false;
-			if (progressView) progressView->hide();
-			if (progressView) progressView->deleteLater();
-			if (progressView) progressView=0;
+			if (progressView)
+			{
+				//progressView->hide();
+				QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>(progressView->parent());
+				if (win)
+				{
+					win->hide();
+				}
+				progressView->done();
+			}
 			//this->setEnabled(true);
 			qDebug() << "Interrogation complete";
 

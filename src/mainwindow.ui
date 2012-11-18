@@ -75,6 +75,7 @@
     <addaction name="actionFlags"/>
     <addaction name="actionPacket_Status"/>
     <addaction name="actionEMS_Status"/>
+    <addaction name="actionInterrogation_Progress"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -174,6 +175,11 @@
   <action name="actionEMS_Status">
    <property name="text">
     <string>EMS Status</string>
+   </property>
+  </action>
+  <action name="actionInterrogation_Progress">
+   <property name="text">
+    <string>Interrogation Progress</string>
    </property>
   </action>
  </widget>

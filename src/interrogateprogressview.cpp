@@ -17,16 +17,34 @@
 ****************************************************************************/
 
 #include "interrogateprogressview.h"
-
+#include <QMdiSubWindow>
 
 InterrogateProgressView::InterrogateProgressView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
 	connect(ui.cancelPushButton,SIGNAL(clicked()),this,SLOT(cancelClickedSlot()));
+	reset();
+
+
+}
+void InterrogateProgressView::closeEvent(QCloseEvent *event)
+{
+	event->ignore();
+	((QMdiSubWindow*)this->parent())->hide();
+}
+void InterrogateProgressView::reset()
+{
+	ui.cancelPushButton->setEnabled(true);
+	ui.outputTableWidget->clearContents();
+	ui.outputTableWidget->setRowCount(0);
+
 	ui.outputTableWidget->setColumnCount(3);
 	ui.outputTableWidget->setColumnWidth(0,50);
 	ui.outputTableWidget->setColumnWidth(1,300);
 	ui.outputTableWidget->setColumnWidth(2,100);
+
+
+	ui.overviewTableWidget->clear();
 
 	ui.overviewTableWidget->setColumnCount(2);
 	ui.overviewTableWidget->setColumnWidth(0,300);
@@ -131,6 +149,11 @@ void InterrogateProgressView::taskSucceed(int sequencenumber)
 			ui.outputTableWidget->scrollToItem(ui.outputTableWidget->item(i,0));
 		}
 	}
+}
+void InterrogateProgressView::done()
+{
+	ui.progressBar->setValue(ui.progressBar->maximum());
+	ui.cancelPushButton->setEnabled(false);
 }
 
 void InterrogateProgressView::setProgress(int progress)

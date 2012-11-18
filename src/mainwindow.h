@@ -193,6 +193,7 @@ private slots:
 	void menu_windows_TablesClicked();
 	void menu_windows_FlagsClicked();
 	void menu_windows_PacketStatusClicked();
+	void menu_windows_interrogateProgressViewClicked();
 	void menu_settingsClicked();
 	void menu_connectClicked();
 	void menu_aboutClicked();

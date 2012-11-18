@@ -20,6 +20,7 @@
 #define INTERROGATEPROGRESSVIEW_H
 
 #include <QWidget>
+#include <QCloseEvent>
 #include "ui_interrogateprogressview.h"
 #include "overviewprogressitemdelegate.h"
 class InterrogateProgressView : public QWidget
@@ -32,11 +33,15 @@ public:
 	void setProgress(int progress);
 	void setMaximum(int maximum);
 	void addOutput(QString output);
+	void reset();
+	void done();
 	void addTask(QString task, int sequencenumber,int type);
 	void taskFail(int sequencenumber);
 	void taskSucceed(int sequencenumber);
 	int maximum() { return ui.progressBar->maximum(); }
 	int progress() { return ui.progressBar->value(); }
+protected:
+	void closeEvent(QCloseEvent *event);
 private:
 	Ui::InterrogateProgressView ui;
 	QMap<int,int> m_typeToOverviewListMap;
