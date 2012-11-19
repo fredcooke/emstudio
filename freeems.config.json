@@ -41,7 +41,7 @@
   "ytitle" : "load",
   "ycalc" : [{ "type":"div","value" : "100.0" }],
   "ydp" : "0",
-  "xhighlight" : "MAP",
+  "yhighlight" : "MAP",
   "ztitle" : "Timing",
   "zcalc" : [{ "type":"div","value" : "1024.0"}],
   "zdp" : "1",
