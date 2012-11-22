@@ -321,10 +321,16 @@ bool EmsData::localRamHasChildren(unsigned short id)
 	}
 	return false;
 }
-QString EmsData::serialize(bool withdata)
+QString EmsData::serialize(unsigned short id)
 {
-	Q_UNUSED(withdata)
-	return "";
+	QString val = "";
+	QByteArray block = getDeviceFlashBlock(id);
+	for (int j=0;j<block.size();j++)
+	{
+		val += QString::number((unsigned char)block[j],16).toUpper() + ",";
+	}
+	val = val.mid(0,val.length()-1);
+	return val;
 }
 
 void EmsData::passLocationInfo(unsigned short locationid,MemoryLocationInfo info)

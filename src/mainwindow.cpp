@@ -31,6 +31,7 @@
 #define TABLE_2D_PAYLOAD_SIZE 64
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+	m_offlineMode = true;
 	qRegisterMetaType<MemoryLocationInfo>("MemoryLocationInfo");
 	qRegisterMetaType<DataType>("DataType");
 	qDebug() << "EMStudio commit:" << define2string(GIT_COMMIT);
@@ -353,7 +354,7 @@ void MainWindow::menu_windows_interrogateProgressViewClicked()
 
 void MainWindow::menu_file_saveOfflineDataClicked()
 {
-	/*
+
 	QString filename = QFileDialog::getSaveFileName(this,"Save Offline File",".","Offline JSON Files (*.json)");
 	if (filename == "")
 	{
@@ -374,35 +375,48 @@ void MainWindow::menu_file_saveOfflineDataClicked()
 		id["ramaddress"] = QString::number((unsigned short)i.value().ramaddress,16).toUpper();
 		id["flashaddress"] = QString::number((unsigned short)i.value().flashaddress,16).toUpper();
 		id["parent"] = QString::number((unsigned short)i.value().parent,16).toUpper();
+		id["hasparent"] = i.value().hasParent;
+		id["isflash"] = i.value().isRam;
+		id["isram"] = i.value().isFlash;
 		id["size"] = QString::number((unsigned short)i.value().size,16).toUpper();
-		metaMap[QString::number((unsigned short)i.key(),16).toUpper()] = id;
-		if (!i.value().flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
+		if (i.value().type == DATA_TABLE_2D)
 		{
-			if (!i.value().flags.contains(FreeEmsComms::BLOCK_IS_READ_ONLY))
+			id["type"] = "DATA_TABLE_2D";
+		}
+		else if (i.value().type == DATA_TABLE_3D)
+		{
+			id["type"] = "DATA_TABLE_3D";
+		}
+		else if (i.value().type == DATA_TABLE_LOOKUP)
+		{
+			id["type"] = "DATA_TABLE_LOOKUP";
+		}
+		else if (i.value().type == DATA_CONFIG)
+		{
+			id["type"] = "DATA_CONFIG";
+		}
+		else if (i.value().type == DATA_UNDEFINED)
+		{
+			id["type"] = "DATA_UNDEFINED";
+		}
+		QVariantMap properties;
+		for (int j=0;j<i.value().propertymap.size();j++)
+		{
+			properties[i.value().propertymap[j].first] = i.value().propertymap[j].second;
+		}
+		id["properties"] = properties;
+		metaMap[QString::number((unsigned short)i.key(),16).toUpper()] = id;
+		if (!i.value().hasParent)
+		{
+			if (i.value().isFlash)
 			{
-				if (i.value().flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
-				{
-					QString val = "";
-
-					QByteArray block = emsData->getDeviceFlashBlock(i.key());
-					for (int j=0;j<block.size();j++)
-					{
-						val += QString::number((unsigned char)block[j],16).toUpper() + ",";
-					}
-					val = val.mid(0,val.length()-1);
-					flashMap[QString::number((unsigned short)i.key(),16).toUpper()] = val;
-				}
-				if (i.value().flags.contains(FreeEmsComms::BLOCK_IS_RAM))
-				{
-					QString val = "";
-					QByteArray block = emsData->getDeviceRamBlock(i.key());
-					for (int j=0;j<block.size();j++)
-					{
-						val += QString::number((unsigned char)block[j],16).toUpper() + ",";
-					}
-					val = val.mid(0,val.length()-1);
-					ramMap[QString::number((unsigned short)i.key(),16).toUpper()] = val;
-				}
+				QString val = emsData->serialize(i.key());
+				flashMap[QString::number((unsigned short)i.key(),16).toUpper()] = val;
+			}
+			if (i.value().isRam)
+			{
+				QString val = emsData->serialize(i.key());
+				ramMap[QString::number((unsigned short)i.key(),16).toUpper()] = val;
 			}
 		}
 		i++;
@@ -417,12 +431,11 @@ void MainWindow::menu_file_saveOfflineDataClicked()
 	outfile.write(out);
 	outfile.flush();
 	outfile.close();
-	*/
 }
 
 void MainWindow::menu_file_loadOfflineDataClicked()
 {
-	/*
+
 	QString filename = QFileDialog::getOpenFileName(this,"Load Offline File",".","Offline JSON Files (*.json)");
 	if (filename == "")
 	{
@@ -447,12 +460,18 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 	QVariantMap flashMap = top["flash"].toMap();
 	QVariantMap metaMap = top["meta"].toMap();
 	QVariantMap::const_iterator i = metaMap.constBegin();
+
 	while (i != metaMap.constEnd())
 	{
 		bool ok;
-		MemoryLocation *loc = new MemoryLocation();
-		loc->locationid = i.key().toInt();
-		m_tempMemoryList.append(loc);
+		MemoryLocationInfo info;
+		//MemoryLocation *loc = new MemoryLocation();
+		//loc->locationid = i.key().toInt();
+		info.locationid = i.key().toInt();
+		info.hasParent = i.value().toMap()["hasparent"].toBool();
+		info.isFlash = i.value().toMap()["isflash"].toBool();
+		info.isRam = i.value().toMap()["isram"].toBool();
+		//m_tempMemoryList.append(loc);
 		unsigned short flags =i.value().toMap()["flags"].toString().toInt(&ok,16);
 		unsigned char rampage = i.value().toMap()["rampage"].toString().toInt(&ok,16);
 		unsigned short ramaddress = i.value().toMap()["ramaddress"].toString().toInt(&ok,16);
@@ -461,35 +480,57 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 		unsigned short parent = i.value().toMap()["parent"].toString().toInt(&ok,16);
 		unsigned short size = i.value().toMap()["size"].toString().toInt(&ok,16);
 		unsigned short id = i.key().toInt(&ok,16);
-		QList<FreeEmsComms::LocationIdFlags> m_blockFlagList;
-		m_blockFlagList.append(FreeEmsComms::BLOCK_HAS_PARENT);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_RAM);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_FLASH);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_INDEXABLE);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_READ_ONLY);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_GETS_VERIFIED);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_FOR_BACKUP_RESTORE);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_SPARE_7);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_SPARE_8);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_SPARE_9);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_SPARE_10);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_SPARE_11);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_2D_TABLE);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_MAIN_TABLE);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_LOOKUP_DATA);
-		m_blockFlagList.append(FreeEmsComms::BLOCK_IS_CONFIGURATION);
-		QList<FreeEmsComms::LocationIdFlags> nflags;
-		for (int j=0;j<m_blockFlagList.size();j++)
+		QString type = i.value().toMap()["type"].toString();
+
+		info.rampage = rampage;
+		info.parent = parent;
+		info.flashpage = flashpage;
+		info.ramaddress = ramaddress;
+		info.flashaddress = flashaddress;
+		info.size = size;
+		info.rawflags = flags;
+		if (type == "DATA_TABLE_2D")
 		{
-			if (flags & m_blockFlagList[j])
-			{
-				nflags.append(m_blockFlagList[j]);
-			}
+			info.type = DATA_TABLE_2D;
 		}
-		locationIdInfo(id,flags,nflags,parent,rampage,flashpage,ramaddress,flashaddress,size);
+		else if (type == "DATA_TABLE_3D")
+		{
+			info.type = DATA_TABLE_3D;
+		}
+		else if (type == "DATA_TABLE_LOOKUP")
+		{
+			info.type = DATA_TABLE_LOOKUP;
+		}
+		else if (type == "DATA_CONFIG")
+		{
+			info.type = DATA_CONFIG;
+		}
+		else if (type == "DATA_UNDEFINED")
+		{
+			info.type = DATA_UNDEFINED;
+		}
+		else
+		{
+			info.type = DATA_UNDEFINED;
+		}
+		QVariantMap properties = i.value().toMap()["properties"].toMap();
+		for (QVariantMap::const_iterator j=properties.constBegin();j!=properties.constEnd();j++)
+		{
+			info.propertymap.append(QPair<QString,QString>(j.key(),j.value().toString()));
+		}
+		locationIdInfo(id,info);
+
+		//locationIdInfo(id,flags,nflags,parent,rampage,flashpage,ramaddress,flashaddress,size);
 		i++;
 	}
 	populateParentLists();
+
+	disconnect(this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	disconnect(this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	disconnect(this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	disconnect(this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 
 	i = ramMap.constBegin();
 	while (i != ramMap.constEnd())
@@ -523,7 +564,9 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 		i++;
 	}
 	checkRamFlashSync();
-	emsMdiWindow->show();*/
+	emsMdiWindow->show();
+	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 }
 
 void MainWindow::emsCommsDisconnected()
@@ -565,7 +608,7 @@ void MainWindow::emsCommsDisconnected()
 	emsComms->setInterByteSendDelay(m_comInterByte);
 
 	ui.actionConnect->setEnabled(true);
-
+	m_offlineMode = true;
 }
 
 void MainWindow::setDevice(QString dev)
@@ -607,7 +650,14 @@ void MainWindow::reloadDataFromDevice(unsigned short locationid,bool isram)
 {
 	if (isram)
 	{
-		emsComms->retrieveBlockFromRam(locationid,0,0);
+		if (m_offlineMode)
+		{
+			QMessageBox::information(0,"Error","Unable to retrieve from ram during offline mode. Please connect to the ECU for this functionality");
+		}
+		else
+		{
+			emsComms->retrieveBlockFromRam(locationid,0,0);
+		}
 	}
 	else
 	{
@@ -620,13 +670,23 @@ void MainWindow::reloadDataFromDevice(unsigned short locationid,bool isram)
 		if (emsData->hasLocalRamBlock(locationid))
 		{
 			view->setData(locationid,emsData->getLocalFlashBlock(locationid));
-			emsComms->updateBlockInRam(locationid,0,emsData->getLocalFlashBlock(locationid).size(),emsData->getLocalFlashBlock(locationid));
-			emsComms->retrieveBlockFromFlash(locationid,0,0);
+			if (!m_offlineMode)
+			{
+				emsComms->updateBlockInRam(locationid,0,emsData->getLocalFlashBlock(locationid).size(),emsData->getLocalFlashBlock(locationid));
+				emsComms->retrieveBlockFromFlash(locationid,0,0);
+			}
 			emsData->setLocalRamBlock(locationid,emsData->getLocalFlashBlock(locationid));
 		}
 		else if (emsData->hasLocalFlashBlock(locationid))
 		{
-			emsComms->retrieveBlockFromFlash(locationid,0,0);
+			if (m_offlineMode)
+			{
+				QMessageBox::information(0,"Error","Unable to retrieve block from flash during offline mode. Please connect to the ECU for this functionality");
+			}
+			else
+			{
+				emsComms->retrieveBlockFromFlash(locationid,0,0);
+			}
 		}
 		else
 		{
@@ -736,6 +796,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 		connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 		connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
 		connect(view,SIGNAL(reloadTableData(unsigned short,bool)),this,SLOT(tableview2d_reloadTableData(unsigned short,bool)));
+		connect(view,SIGNAL(reloadTableData(unsigned short,bool)),this,SLOT(reloadDataFromDevice(unsigned short,bool)));
 		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 		win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
 		win->setGeometry(view->geometry());
@@ -774,7 +835,8 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 		//connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
 		connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 		connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
-		connect(view,SIGNAL(reloadTableData(unsigned short,bool)),this,SLOT(tableview3d_reloadTableData(unsigned short,bool)));
+		//connect(view,SIGNAL(reloadTableData(unsigned short,bool)),this,SLOT(tableview3d_reloadTableData(unsigned short,bool)));
+		connect(view,SIGNAL(reloadTableData(unsigned short,bool)),this,SLOT(reloadDataFromDevice(unsigned short,bool)));
 		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 		win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
 		win->setGeometry(view->geometry());
@@ -1459,6 +1521,7 @@ void MainWindow::error(QString msg)
 }
 void MainWindow::interrogateProgressViewCancelClicked()
 {
+	m_offlineMode = true;
 	emsComms->disconnectSerial();
 	emsComms->wait(1000);
 	emsComms->terminate();
@@ -1487,7 +1550,7 @@ void MainWindow::emsOperatingSystem(QString os)
 void MainWindow::emsCommsConnected()
 {
 	//New log and settings file here.
-
+	m_offlineMode = false;
 	if (progressView)
 	{
 		progressView->reset();
@@ -1998,7 +2061,10 @@ void MainWindow::saveFlashLocationIdBlock(unsigned short locationid,QByteArray d
 void MainWindow::saveFlashLocationId(unsigned short locationid)
 {
 	qDebug() << "Burning block from ram to flash for locationid:" << "0x"+QString::number(locationid,16).toUpper();
-	emsComms->burnBlockFromRamToFlash(locationid,0,0);
+	if (!m_offlineMode)
+	{
+		emsComms->burnBlockFromRamToFlash(locationid,0,0);
+	}
 	if (emsData->hasLocalFlashBlock(locationid))
 	{
 		if(emsData->hasDeviceRamBlock(locationid))
@@ -2029,7 +2095,10 @@ void MainWindow::saveSingleData(unsigned short locationid,QByteArray data, unsig
 	qDebug() << "Offset:" << offset << "Size:" << size  <<  "Data:" << data;
 	m_currentRamLocationId = locationid;
 	m_waitingForRamWriteConfirmation = true;
-	emsComms->updateBlockInRam(locationid,offset,size,data);
+	if (!m_offlineMode)
+	{
+		emsComms->updateBlockInRam(locationid,offset,size,data);
+	}
 }
 
 void MainWindow::stopLogButtonClicked()

@@ -1227,6 +1227,10 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					{
 						info.type = DATA_TABLE_LOOKUP;
 					}
+					else
+					{
+						info.type = DATA_UNDEFINED;
+					}
 					/*
 					if (flaglist.contains(FreeEmsComms::BLOCK_HAS_PARENT))
 					{
