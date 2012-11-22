@@ -20,15 +20,24 @@
 #include <QDebug>
 Table2DData::Table2DData() : TableData()
 {
-
+	m_writesEnabled = true;
 }
 
 Table2DData::Table2DData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata) : TableData()
 {
+	m_writesEnabled = true;
 	m_isFlashOnly = isflashonly;
 	setData(locationid,payload,metadata);
 }
+void Table2DData::writeWholeLocation()
+{
+	emit saveSingleData(m_locationId,data(),0,data().size());
+}
 
+void Table2DData::setWritesEnabled(bool enabled)
+{
+	m_writesEnabled = enabled;
+}
 void Table2DData::setData(unsigned short locationid, QByteArray payload,Table2DMetaData metadata)
 {
 	m_metaData = metadata;
@@ -37,6 +46,7 @@ void Table2DData::setData(unsigned short locationid, QByteArray payload,Table2DM
 	m_minXAxis = calcAxis(0,metadata.xAxisCalc);
 	m_minYAxis = calcAxis(0,metadata.yAxisCalc);
 	m_locationId = locationid;
+
 	for (int i=0;i<payload.size()/2;i+=2)
 	{
 		unsigned short x = (((unsigned char)payload[i]) << 8) + ((unsigned char)payload[i+1]);
@@ -90,17 +100,18 @@ void Table2DData::setCell(int row, int column,double newval)
 	//void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
 	//Data is 64
 	//offset = column + (row * 32), size == 2
+	qDebug() << "Update:" << row << column << newval;
 	unsigned short val = 0;
 	if (row == 0)
 	{
 		val = backConvertAxis(newval,m_metaData.xAxisCalc);
-		m_axis.replace(column,val);
+		m_axis.replace(column,newval);
 	}
 	else if (row == 1)
 	{
 
 		val = backConvertAxis(newval,m_metaData.yAxisCalc);
-		m_values.replace(column,val);
+		m_values.replace(column,newval);
 	}
 	QByteArray data;
 	data.append((char)((val >> 8) & 0xFF));
@@ -113,22 +124,27 @@ void Table2DData::setCell(int row, int column,double newval)
 	//data.append((char)(newval & 0xFF));
 	if (!m_isFlashOnly)
 	{
-		emit saveSingleData(m_locationId,data,(column*2)+(row * 32),2);
+		if (m_writesEnabled)
+		{
+			emit saveSingleData(m_locationId,data,(column*2)+(row * 32),2);
+		}
 	}
 }
 
-/*QByteArray Table2DData::data()
+QByteArray Table2DData::data()
 {
 	QByteArray data;
 	for (int i=0;i<m_axis.size();i++)
 	{
-		data.append((char)((m_axis[i] >> 8) & 0xFF));
-		data.append((char)(m_axis[i] & 0xFF));
+		unsigned short val = backConvertAxis(m_axis[i],m_metaData.xAxisCalc);
+		data.append((char)((val >> 8) & 0xFF));
+		data.append((char)(val & 0xFF));
 	}
 	for (int i=0;i<m_values.size();i++)
 	{
-		data.append((char)((m_values[i] >> 8) & 0xFF));
-		data.append((char)(m_values[i] & 0xFF));
+		unsigned short val = backConvertAxis(m_values[i],m_metaData.yAxisCalc);
+		data.append((char)((val >> 8) & 0xFF));
+		data.append((char)(val & 0xFF));
 	}
 	return data;
-}*/
+}

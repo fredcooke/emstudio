@@ -38,7 +38,7 @@ void TableWidget::keyPressEvent(QKeyEvent *event)
 			}
 		}
 	}
-	qDebug() << "Unhandled event:" << event->key() << event->modifiers();
+	//qDebug() << "Unhandled event:" << event->key() << event->modifiers();
 	event->ignore();
 	QTableWidget::keyPressEvent(event);
 }

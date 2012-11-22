@@ -342,7 +342,8 @@ void TableView2D::keyPressEvent(QKeyEvent *event)
 				return;
 			}
 		}
-
+		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
 		foreach(QString line,datastringsplit)
 		{
 			QStringList linesplit = line.split("\t");
@@ -357,9 +358,26 @@ void TableView2D::keyPressEvent(QKeyEvent *event)
 			newcolumn=0;
 			newrow++;
 		}
+		writeTable(true);
+		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 		return;
 	}
 	QWidget::keyPressEvent(event);
+}
+void TableView2D::writeTable(bool ram)
+{
+	if (ram)
+	{
+		tableData->setWritesEnabled(false);
+		for (int j=0;j<ui.tableWidget->columnCount();j++)
+		{
+			tableData->setCell(0,j,ui.tableWidget->item(0,j)->text().toDouble());
+			tableData->setCell(1,j,ui.tableWidget->item(1,j)->text().toDouble());
+		}
+		tableData->writeWholeLocation();
+		tableData->setWritesEnabled(true);
+	}
 }
 void TableView2D::exportJson(QString filename)
 {

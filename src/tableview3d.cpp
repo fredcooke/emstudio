@@ -369,6 +369,12 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 			}
 		}
 
+		//Disable signals, so we can write the table all at once
+		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+		bool valid = true;
+		QMap<int,QMap<int,QString> > tmpvaluemap;
+		QStringList invalidreasons;
 		foreach(QString line,datastringsplit)
 		{
 			QStringList linesplit = line.split("\t");
@@ -376,6 +382,17 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 			{
 				if (item != "")
 				{
+					if (!tmpvaluemap.contains(rowindex+newrow))
+					{
+						tmpvaluemap[rowindex+newrow] = QMap<int,QString>();
+					}
+					tmpvaluemap[rowindex+newrow][columnindex+newcolumn] = ui.tableWidget->item(rowindex+newrow,columnindex+newcolumn)->text();
+					QString verifystr = verifyValue(rowindex+newrow,columnindex+newcolumn,item);
+					if (verifystr != "GOOD")
+					{
+						invalidreasons.append(verifystr);
+						valid = false;
+					}
 					ui.tableWidget->item(rowindex+newrow,columnindex+newcolumn)->setText(item);
 				}
 				newcolumn++;
@@ -383,8 +400,110 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 			newcolumn=0;
 			newrow++;
 		}
+		//Write the values, and re-enable the signals.
+		if (valid)
+		{
+			writeTable(true);
+		}
+		else
+		{
+			for (QMap<int,QMap<int,QString> >::const_iterator i=tmpvaluemap.constBegin();i!=tmpvaluemap.constEnd();i++)
+			{
+				for (QMap<int,QString>::const_iterator j=i.value().constBegin();j!=i.value().constEnd();j++)
+				{
+					ui.tableWidget->item(i.key(),j.key())->setText(j.value());
+				}
+			}
+			QString errorstr = "";
+			foreach(QString reason,invalidreasons)
+			{
+				errorstr += reason + ",";
+			}
+
+			QMessageBox::information(0,"Error",errorstr);
+		}
+		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	}
 }
+QString TableView3D::verifyValue(int row,int column,QString item)
+{
+	if (row == ui.tableWidget->rowCount()-1 && column == 0)
+	{
+		qDebug() << "This should not happen! Bottom right corner ignored!";
+		return "INVALID INDEX";
+	}
+	double tempValue = item.toDouble();
+
+	if (row == ui.tableWidget->rowCount()-1)
+	{
+		if (tempValue > tableData->maxXAxis())
+		{
+			return "Axis value entered too large!";
+		}
+		else if (tempValue < tableData->minXAxis())
+		{
+			return "Axis value entered too small";
+		}
+	}
+	else if (column == 0)
+	{
+		if (tempValue > tableData->maxYAxis())
+		{
+			return "Axis value too large";
+		}
+		else if (tempValue < tableData->minYAxis())
+		{
+			return  "Axis value too small";
+		}
+	}
+	else
+	{
+		if (tempValue > tableData->maxZAxis())
+		{
+			return "Value too large for table";
+		}
+		if (tempValue < tableData->minZAxis())
+		{
+			return "Value too small for table";
+		}
+	}
+	return "GOOD";
+}
+
+void TableView3D::writeTable(bool ram)
+{
+	if (ram)
+	{
+		tableData->setWritesEnabled(false);
+		for (int i=0;i<ui.tableWidget->rowCount();i++)
+		{
+			for (int j=0;j<ui.tableWidget->columnCount();j++)
+			{
+				if (i == ui.tableWidget->rowCount()-1)
+				{
+					if (j != 0)
+					{
+						//X Axis
+						tableData->setXAxis(j-1,ui.tableWidget->item((ui.tableWidget->rowCount()-1),j)->text().toDouble());
+					}
+				}
+				else if (j == 0)
+				{
+					//Y axis
+					tableData->setYAxis(i,ui.tableWidget->item((ui.tableWidget->rowCount()-2)-i,j)->text().toDouble());
+				}
+				else
+				{
+					tableData->setCell(j-1,i,ui.tableWidget->item((ui.tableWidget->rowCount()-2)-i,/*(ui.tableWidget->columnCount())-*/j)->text().toDouble());
+				}
+			}
+		}
+		tableData->writeWholeLocation();
+		tableData->setWritesEnabled(true);
+	}
+}
+
 void TableView3D::showMapClicked()
 {
 	emit show3DTable(m_locationId,tableData);

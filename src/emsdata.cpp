@@ -203,9 +203,12 @@ QList<unsigned short> EmsData::getChildrenOfLocalRamLocation(unsigned short id)
 	QList<unsigned short> retVal;
 	for (int i=0;i<m_ramMemoryList.size();i++)
 	{
-		if (m_ramMemoryList[i]->parent == id)
+		if (m_ramMemoryList[i]->hasParent)
 		{
-			retVal.append(m_ramMemoryList[i]->locationid);
+			if (m_ramMemoryList[i]->parent == id)
+			{
+				retVal.append(m_ramMemoryList[i]->locationid);
+			}
 		}
 	}
 	return retVal;

@@ -58,6 +58,8 @@ private:
 	int m_currCol;
 	void setValue(int row, int column,double value);
 	bool m_tracingEnabled;
+	void writeTable(bool ram);
+	QString verifyValue(int row,int column,QString item);
 protected:
 	void contextMenuEvent(QContextMenuEvent *evt);
 	void keyPressEvent(QKeyEvent *event);

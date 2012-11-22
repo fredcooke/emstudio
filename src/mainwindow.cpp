@@ -594,6 +594,11 @@ void MainWindow::tableview3d_reloadTableData(unsigned short locationid,bool ram)
 				table->setData(locationid,emsData->getLocalFlashBlock(locationid));
 				emsData->setLocalRamBlock(locationid,emsData->getLocalFlashBlock(locationid));
 				emsComms->updateBlockInRam(locationid,0,emsData->getLocalFlashBlock(locationid).size(),emsData->getLocalFlashBlock(locationid));
+				emsData->setDeviceRamBlock(locationid,emsData->getLocalFlashBlock(locationid));
+			}
+			else
+			{
+				qDebug() << "Unable to find TableView3D to pass data to";
 			}
 		}
 	}
@@ -647,6 +652,7 @@ void MainWindow::tableview2d_reloadTableData(unsigned short locationid,bool isra
 				table->setData(locationid,emsData->getLocalFlashBlock(locationid));
 				emsComms->updateBlockInRam(locationid,0,emsData->getLocalFlashBlock(locationid).size(),emsData->getLocalFlashBlock(locationid));
 				emsData->setLocalRamBlock(locationid,emsData->getLocalFlashBlock(locationid));
+				emsData->setDeviceRamBlock(locationid,emsData->getLocalFlashBlock(locationid));
 			}
 		}
 	}

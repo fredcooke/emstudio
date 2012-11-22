@@ -31,7 +31,7 @@ public:
 	Table2DData();
 	Table2DData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata);
 	void setData(unsigned short locationid,QByteArray payload,Table2DMetaData metadata);
-	//QByteArray data();
+	QByteArray data();
 	double maxXAxis();
 	double maxYAxis();
 	double minXAxis();
@@ -41,8 +41,11 @@ public:
 	int columns();
 	int rows();
 	void setCell(int row, int column,double newval);
+	void setWritesEnabled(bool enabled);
+	void writeWholeLocation();
 private:
 	bool m_isFlashOnly;
+	bool m_writesEnabled;
 	double m_maxXAxis;
 	double m_maxYAxis;
 	double m_minXAxis;

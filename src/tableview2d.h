@@ -57,6 +57,7 @@ private:
 	int m_currCol;
 	void exportJson(QString filename);
 	void setValue(int row, int column,double value);
+	void writeTable(bool ram);
 protected:
 	void resizeEvent(QResizeEvent *evt);
 	void keyPressEvent(QKeyEvent *event);

@@ -44,7 +44,10 @@ public:
 	double minXAxis();
 	double minYAxis();
 	double minZAxis();
+	void setWritesEnabled(bool enabled);
+	void writeWholeLocation();
 private:
+	bool m_writesEnabled;
 	bool m_isFlashOnly;
 	unsigned short m_locationId;
 	QList<double> m_xAxis;

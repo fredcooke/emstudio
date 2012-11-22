@@ -20,6 +20,7 @@
 #include <QDebug>
 Table3DData::Table3DData(unsigned short locationid, bool isflashonly,QByteArray data,Table3DMetaData metadata) : TableData()
 {
+	m_writesEnabled = true;
 	m_isFlashOnly = isflashonly;
 	setData(locationid,data,metadata);
 }
@@ -107,8 +108,16 @@ void Table3DData::setXAxis(int index,double val)
 	data.append((char)(newval & 0xFF));
 	if (!m_isFlashOnly)
 	{
-		emit saveSingleData(m_locationId,data,4+(index*2),2);
+		if (m_writesEnabled)
+		{
+			emit saveSingleData(m_locationId,data,4+(index*2),2);
+		}
+		m_xAxis[index] = val;
 	}
+}
+void Table3DData::writeWholeLocation()
+{
+	emit saveSingleData(m_locationId,data(),0,data().size());
 }
 
 void Table3DData::setYAxis(int index,double val)
@@ -119,7 +128,11 @@ void Table3DData::setYAxis(int index,double val)
 	data.append((char)(newval & 0xFF));
 	if (!m_isFlashOnly)
 	{
-		emit saveSingleData(m_locationId,data,58+(index*2),2);
+		if (m_writesEnabled)
+		{
+			emit saveSingleData(m_locationId,data,58+(index*2),2);
+		}
+		m_yAxis[index] = val;
 	}
 }
 
@@ -129,15 +142,66 @@ void Table3DData::setCell(int yIndex, int xIndex,double val)
 	unsigned short newval = backConvertAxis(val,m_metaData.zAxisCalc);
 	data.append((char)((newval >> 8) & 0xFF));
 	data.append((char)(newval & 0xFF));
-	qDebug() << "Attempting to save data at:" << yIndex << xIndex;
+	//qDebug() << "Attempting to save data at:" << yIndex << xIndex << val;
 	if (!m_isFlashOnly)
 	{
-		emit saveSingleData(m_locationId,data,100+(xIndex*2)+(yIndex * (m_xAxis.size()*2)),2);
+		if (m_writesEnabled)
+		{
+			emit saveSingleData(m_locationId,data,100+(xIndex*2)+(yIndex * (m_xAxis.size()*2)),2);
+		}
+		m_values[xIndex][yIndex] = val;
 	}
 }
+void Table3DData::setWritesEnabled(bool enabled)
+{
+	m_writesEnabled = enabled;
+}
+
 QByteArray Table3DData::data()
 {
-	return QByteArray();
+	QByteArray data;
+
+	unsigned short xaxissize = m_xAxis.size();
+	data.append((char)((xaxissize>> 8) & 0xFF));
+	data.append((char)(xaxissize & 0xFF));
+
+	unsigned short yaxissize = m_yAxis.size();
+	data.append((char)((yaxissize>> 8) & 0xFF));
+	data.append((char)(yaxissize & 0xFF));
+	for (int i=0;i<m_xAxis.size();i++)
+	{
+		unsigned short val = backConvertAxis(m_xAxis[i],m_metaData.xAxisCalc);
+		data.append((char)((val>> 8) & 0xFF));
+		data.append((char)(val & 0xFF));
+	}
+	for (int i=data.size();i<58;i++)
+	{
+		data.append((char)0x00);
+	}
+	for (int i=0;i<m_yAxis.size();i++)
+	{
+		unsigned short val = backConvertAxis(m_yAxis[i],m_metaData.yAxisCalc);
+		data.append((char)((val>> 8) & 0xFF));
+		data.append((char)(val & 0xFF));
+	}
+	for (int i=data.size();i<100;i++)
+	{
+		data.append((char)0x00);
+	}
+	for (int i=0;i<m_values.size();i++)
+	{
+		for (int j=0;j<m_values[i].size();j++)
+		{
+			unsigned short val = backConvertAxis(m_values[i][j],m_metaData.zAxisCalc);
+			data.append((char)((val>> 8) & 0xFF));
+			data.append((char)(val & 0xFF));
+		}
+	}
+	for (int i=data.size();i<1024;i++)
+	{
+		data.append((char)0x00);
+	}
+	return data;
 }
 
 QList<double> Table3DData::yAxis()
