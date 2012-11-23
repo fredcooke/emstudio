@@ -376,8 +376,8 @@ void MainWindow::menu_file_saveOfflineDataClicked()
 		id["flashaddress"] = QString::number((unsigned short)i.value().flashaddress,16).toUpper();
 		id["parent"] = QString::number((unsigned short)i.value().parent,16).toUpper();
 		id["hasparent"] = i.value().hasParent;
-		id["isflash"] = i.value().isRam;
-		id["isram"] = i.value().isFlash;
+		id["isram"] = i.value().isRam;
+		id["isflash"] = i.value().isFlash;
 		id["size"] = QString::number((unsigned short)i.value().size,16).toUpper();
 		if (i.value().type == DATA_TABLE_2D)
 		{
@@ -410,12 +410,12 @@ void MainWindow::menu_file_saveOfflineDataClicked()
 		{
 			if (i.value().isFlash)
 			{
-				QString val = emsData->serialize(i.key());
+				QString val = emsData->serialize(i.key(),false);
 				flashMap[QString::number((unsigned short)i.key(),16).toUpper()] = val;
 			}
 			if (i.value().isRam)
 			{
-				QString val = emsData->serialize(i.key());
+				QString val = emsData->serialize(i.key(),true);
 				ramMap[QString::number((unsigned short)i.key(),16).toUpper()] = val;
 			}
 		}
@@ -463,11 +463,13 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 
 	while (i != metaMap.constEnd())
 	{
+
 		bool ok;
+
 		MemoryLocationInfo info;
 		//MemoryLocation *loc = new MemoryLocation();
 		//loc->locationid = i.key().toInt();
-		info.locationid = i.key().toInt();
+		info.locationid = i.key().toInt(&ok,16);
 		info.hasParent = i.value().toMap()["hasparent"].toBool();
 		info.isFlash = i.value().toMap()["isflash"].toBool();
 		info.isRam = i.value().toMap()["isram"].toBool();
@@ -529,8 +531,8 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 	disconnect(this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	disconnect(this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	disconnect(this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 
 	i = ramMap.constBegin();
 	while (i != ramMap.constEnd())
@@ -544,7 +546,7 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 		{
 			bytes.append(valsplit[j].toInt(&ok,16));
 		}
-		ramBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
+		interrogateRamBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
 		i++;
 	}
 
@@ -560,7 +562,7 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 		{
 			bytes.append(valsplit[j].toInt(&ok,16));
 		}
-		flashBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
+		interrogateFlashBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
 		i++;
 	}
 	checkRamFlashSync();
@@ -2078,6 +2080,22 @@ void MainWindow::saveFlashLocationId(unsigned short locationid)
 
 void MainWindow::saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size)
 {
+	if (m_offlineMode)
+	{
+		if (emsData->hasDeviceRamBlock(locationid))
+		{
+			if (emsData->getDeviceRamBlock(locationid).mid(offset,size) == data)
+			{
+				qDebug() << "Data in application memory unchanged, no reason to send write for single value";
+				return;
+			}
+			emsData->setDeviceRamBlock(locationid,emsData->getDeviceRamBlock(locationid).replace(offset,size,data));
+		}
+		else
+		{
+			qDebug() << "Attempted to save data for single value at location id:" << "0x" + QString::number(locationid,16) << "but no valid location found in Ram list.";
+		}
+	}
 	if (emsData->hasLocalRamBlock(locationid))
 	{
 		if (emsData->getLocalRamBlock(locationid).mid(offset,size) == data)

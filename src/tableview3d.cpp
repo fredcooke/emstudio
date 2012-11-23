@@ -194,6 +194,7 @@ void TableView3D::setValue(int row, int column,double value)
 	}
 	//ui.tableWidget->resizeColumnsToContents();
 	resizeColumnWidths();
+	reColorTable(row,column);
 }
 
 void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
@@ -873,6 +874,82 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data)
 	return true;
 	//return passData(locationid,data,physicallocation,Table3DMetaData());
 }
+void TableView3D::reColorTable(int rownum,int colnum)
+{
+	qDebug() << "Recoloring" << rownum << colnum;
+	if (rownum == ui.tableWidget->rowCount()-1 || colnum == 0)
+	{
+		return;
+	}
+	if (rownum == -1 && colnum == -1)
+	{
+		//Recolor the whole table
+		for (int row=0;row<tableData->rows();row++)
+		{
+			for (int col=0;col<tableData->columns();col++)
+			{
+				double val = tableData->values()[row][col];
+				//ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
+				if (val < tableData->maxZAxis()/4)
+				{
+					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxZAxis()/4.0))),255));
+				}
+				else if (val < ((tableData->maxZAxis()/4)*2))
+				{
+					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((tableData->maxZAxis()/4.0)))/(tableData->maxZAxis()/4.0)))));
+				}
+				else if (val < ((tableData->maxZAxis()/4)*3))
+				{
+					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((tableData->maxZAxis()/4.0)*2))/(tableData->maxZAxis()/4.0))),255,0));
+				}
+				else
+				{
+					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxZAxis()/4.0)*3))/(tableData->maxZAxis()/4.0))),0));
+				}
+			}
+		}
+	}
+	else
+	{
+
+		/*
+
+		(9) = 5+4;
+		10-1-4=5
+		10-1-3=6
+
+		10-1-0=9
+		10-1-9=0
+
+		rownum == 0
+		tabledata->values()[(tableData->rows()-1)-rownum][colnum-1]
+
+*/
+
+		qDebug() << "Loc:" << (tableData->rows()-1)-(rownum) << colnum - 1;
+		double val = tableData->values()[(tableData->rows()-1)-(rownum)][colnum-1];
+		qDebug() << "Value:" << val;
+
+		//ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
+		if (val < tableData->maxZAxis()/4)
+		{
+			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxZAxis()/4.0))),255));
+		}
+		else if (val < ((tableData->maxZAxis()/4)*2))
+		{
+			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((tableData->maxZAxis()/4.0)))/(tableData->maxZAxis()/4.0)))));
+		}
+		else if (val < ((tableData->maxZAxis()/4)*3))
+		{
+			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb((255*((val-((tableData->maxZAxis()/4.0)*2))/(tableData->maxZAxis()/4.0))),255,0));
+		}
+		else
+		{
+			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxZAxis()/4.0)*3))/(tableData->maxZAxis()/4.0))),0));
+		}
+	}
+}
+
 void TableView3D::passDatalog(QVariantMap data)
 {
 	if (!m_tracingEnabled)

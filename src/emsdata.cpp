@@ -321,10 +321,18 @@ bool EmsData::localRamHasChildren(unsigned short id)
 	}
 	return false;
 }
-QString EmsData::serialize(unsigned short id)
+QString EmsData::serialize(unsigned short id,bool isram)
 {
 	QString val = "";
-	QByteArray block = getDeviceFlashBlock(id);
+	QByteArray block;
+	if (isram)
+	{
+		block = getDeviceRamBlock(id);
+	}
+	else
+	{
+		block = getDeviceFlashBlock(id);
+	}
 	for (int j=0;j<block.size();j++)
 	{
 		val += QString::number((unsigned char)block[j],16).toUpper() + ",";

@@ -34,7 +34,7 @@ public:
 	bool localRamHasParent(unsigned short id);
 	bool localRamHasChildren(unsigned short id);
 
-	QString serialize(unsigned short id);
+	QString serialize(unsigned short id,bool isram);
 
 	void populateLocalRamAndFlash();
 	void populateDeviceRamAndFlashParents();

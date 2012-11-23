@@ -260,6 +260,10 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,QString title,MemoryL
 	{
 		ui.locationIdInfoTableWidget->setItem(foundi,2,new QTableWidgetItem("Configuration"));
 	}
+	else
+	{
+		ui.locationIdInfoTableWidget->setItem(foundi,2,new QTableWidgetItem("Undefined"));
+	}
 
 	/*for (int i=1;i<17;i++)
 	{
