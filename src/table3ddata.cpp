@@ -149,7 +149,7 @@ void Table3DData::setCell(int yIndex, int xIndex,double val)
 		{
 			emit saveSingleData(m_locationId,data,100+(xIndex*2)+(yIndex * (m_xAxis.size()*2)),2);
 		}
-		m_values[xIndex][yIndex] = val;
+		m_values[yIndex][xIndex] = val;
 	}
 }
 void Table3DData::setWritesEnabled(bool enabled)
