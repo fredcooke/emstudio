@@ -495,7 +495,7 @@ void TableView3D::writeTable(bool ram)
 				}
 				else
 				{
-					tableData->setCell(j-1,i,ui.tableWidget->item((ui.tableWidget->rowCount()-2)-i,/*(ui.tableWidget->columnCount())-*/j)->text().toDouble());
+					tableData->setCell(i,j-1,ui.tableWidget->item((ui.tableWidget->rowCount()-2)-i,/*(ui.tableWidget->columnCount())-*/j)->text().toDouble());
 				}
 			}
 		}
