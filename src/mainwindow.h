@@ -166,6 +166,7 @@ private:
 	void checkRamFlashSync();
 	bool m_interrogationInProgress;
 	EmsData *emsData;
+	EmsData *checkEmsData;
 private slots:
 	void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);
 	void tableview3d_show3DTable(unsigned short locationid,Table3DData *data);

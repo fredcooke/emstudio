@@ -40,6 +40,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_interrogationInProgress = false;
 
 	emsData = new EmsData();
+
+	//Create this, even though we only need it during offline to online transitions.
+	checkEmsData = new EmsData();
+
 	m_settingsFile = "settings.ini";
 	//TODO: Figure out proper directory names
 #ifdef Q_OS_WIN32
@@ -1059,8 +1063,10 @@ void MainWindow::interrogateRamBlockRetrieved(unsigned short locationid,QByteArr
 		else
 		{
 			//This should not happen during interrogation.
+			//Correction, this happens when interrogation during offline mode happens.
 			qDebug() << "Ram block retrieved during interrogation, but it already had a payload!" << "0x" + QString::number(locationid,16).toUpper();
-			emsData->setDeviceRamBlock(locationid,payload);
+			//emsData->setDeviceRamBlock(locationid,payload);
+			checkEmsData->setDeviceRamBlock(locationid,payload);
 			return;
 		}
 	}
@@ -1080,7 +1086,8 @@ void MainWindow::interrogateFlashBlockRetrieved(unsigned short locationid,QByteA
 		else
 		{
 			qDebug() << "Flash block retrieved during interrogation, but it already had a payload!" << "0x" + QString::number(locationid,16).toUpper();
-			emsData->setDeviceFlashBlock(locationid,payload);
+			//emsData->setDeviceFlashBlock(locationid,payload);
+			checkEmsData->setDeviceFlashBlock(locationid,payload);
 			return;
 		}
 	}
@@ -1324,6 +1331,7 @@ void MainWindow::locationIdInfo(unsigned short locationid,MemoryLocationInfo inf
 	//emsInfo->locationIdInfo(locationid,title,rawFlags,flags,parent,rampage,flashpage,ramaddress,flashaddress,size);
 	emsInfo->locationIdInfo(locationid,title,info);
 	emsData->passLocationInfo(locationid,info);
+	checkEmsData->passLocationInfo(locationid,info);
 	/*if (flags.contains(FreeEmsComms::BLOCK_IS_RAM) && flags.contains((FreeEmsComms::BLOCK_IS_FLASH)))
 	{
 		MemoryLocation *loc = new MemoryLocation();
@@ -1552,7 +1560,7 @@ void MainWindow::emsOperatingSystem(QString os)
 void MainWindow::emsCommsConnected()
 {
 	//New log and settings file here.
-	m_offlineMode = false;
+	//m_offlineMode = false;
 	if (progressView)
 	{
 		progressView->reset();
@@ -1566,6 +1574,10 @@ void MainWindow::emsCommsConnected()
 		connect(progressView,SIGNAL(cancelClicked()),this,SLOT(interrogateProgressViewCancelClicked()));
 		progressView->setMaximum(0);
 	}
+	disconnect(this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	disconnect(this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	progressView->show();
 	interrogateProgressMdiWindow->show();
 	progressView->addOutput("Connected to EMS");
@@ -1768,6 +1780,50 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 		m_locIdInfoMsgList.removeOne(sequencenumber);
 		if (m_locIdInfoMsgList.size() == 0)
 		{
+			if (m_offlineMode)
+			{
+				//We were offline. Let's check.
+				QList<unsigned short> ramlocs = checkEmsData->getTopLevelDeviceRamLocations();
+				QList<unsigned short> flashlocs = checkEmsData->getTopLevelDeviceFlashLocations();
+				bool ramdirty = false;
+				bool flashdirty = false;
+				for (int i=0;i<ramlocs.size();i++)
+				{
+					if (!(emsData->getDeviceRamBlock(ramlocs[i])==checkEmsData->getDeviceRamBlock(ramlocs[i])))
+					{
+						ramdirty = true;
+					}
+				}
+				for (int i=0;i<flashlocs.size();i++)
+				{
+					if (!(emsData->getDeviceFlashBlock(ramlocs[i]) == checkEmsData->getDeviceFlashBlock(ramlocs[i])))
+					{
+						flashdirty = true;
+					}
+				}
+				if (ramdirty)
+				{
+					if (QMessageBox::information(0,"Warning","RAM from offline mode does not equal ram on device! Do you wish to write offline RAM data to the device?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Ok)
+					{
+						for (int i=0;i<ramlocs.size();i++)
+						{
+							emsData->setDeviceRamBlock(ramlocs[i],checkEmsData->getDeviceRamBlock(ramlocs[i]));
+						}
+					}
+				}
+				if (flashdirty)
+				{
+					if (QMessageBox::information(0,"Warning","Flash from offline mode does not equal flash on device! Do you wish to write offline flash data to the device?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Ok)
+					{
+						for (int i=0;i<flashlocs.size();i++)
+						{
+							emsData->setDeviceFlashBlock(flashlocs[i],checkEmsData->getDeviceFlashBlock(flashlocs[i]));
+						}
+					}
+
+				}
+				m_offlineMode = false;
+			}
 			qDebug() << "All Ram and Flash locations updated";
 			//End of the location ID information messages.
 			checkRamFlashSync();
@@ -2044,6 +2100,7 @@ void MainWindow::populateParentLists()
 	qDebug() << m_deviceRamMemoryList.size() << "Device Ram locations";
 	qDebug() << m_ramMemoryList.size() << "Application Ram locations";*/
 	emsData->populateDeviceRamAndFlashParents();
+	checkEmsData->populateDeviceRamAndFlashParents();
 }
 
 void MainWindow::pauseLogButtonClicked()
