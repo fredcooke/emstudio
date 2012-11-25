@@ -363,8 +363,19 @@ void EmsData::passLocationInfo(unsigned short locationid,MemoryLocationInfo info
 		}
 		loc->isRam = true;
 		loc->isFlash = true;
-		addDeviceRamBlock(loc);
-		addDeviceFlashBlock(new MemoryLocation(*loc));
+		if (!hasDeviceFlashBlock(locationid))
+		{
+			addDeviceFlashBlock(new MemoryLocation(*loc));
+		}
+		if (!hasDeviceRamBlock(locationid))
+		{
+			addDeviceRamBlock(loc);
+		}
+		else
+		{
+			delete loc;
+		}
+
 	}
 	else if (info.isFlash)
 	{
@@ -384,7 +395,15 @@ void EmsData::passLocationInfo(unsigned short locationid,MemoryLocationInfo info
 		}
 		loc->isRam = false;
 		loc->isFlash = true;
-		addDeviceFlashBlock(loc);
+		if (!hasDeviceFlashBlock(locationid))
+		{
+			addDeviceFlashBlock(loc);
+		}
+		else
+		{
+			delete loc;
+		}
+
 	}
 	else if (info.isRam)
 	{
@@ -404,7 +423,15 @@ void EmsData::passLocationInfo(unsigned short locationid,MemoryLocationInfo info
 		}
 		loc->isRam = true;
 		loc->isFlash = false;
-		addDeviceRamBlock(loc);
+		if (!hasDeviceRamBlock(locationid))
+		{
+			addDeviceRamBlock(loc);
+		}
+		else
+		{
+			delete loc;
+		}
+
 	}
 	else
 	{
