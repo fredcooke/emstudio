@@ -209,6 +209,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionExit_3,SIGNAL(triggered()),this,SLOT(close()));
 	connect(ui.actionPacket_Status,SIGNAL(triggered()),this,SLOT(menu_windows_PacketStatusClicked()));
 	connect(ui.actionAbout,SIGNAL(triggered()),this,SLOT(menu_aboutClicked()));
+	ui.actionInterrogation_Progress->setEnabled(false);
 
 	emsInfo=0;
 	dataTables=0;
@@ -1589,6 +1590,7 @@ void MainWindow::emsCommsConnected()
 	}
 	else
 	{
+		ui.actionInterrogation_Progress->setEnabled(true);
 		progressView = new InterrogateProgressView();
 		connect(progressView,SIGNAL(destroyed(QObject*)),this,SLOT(interrogateProgressViewDestroyed(QObject*)));
 		interrogateProgressMdiWindow = ui.mdiArea->addSubWindow(progressView);
