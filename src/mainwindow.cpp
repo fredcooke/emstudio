@@ -589,6 +589,9 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 
 void MainWindow::emsCommsDisconnected()
 {
+	emsComms->stop();
+	emsComms->terminate();
+	emsComms->deleteLater();
 	ui.actionConnect->setEnabled(true);
 	ui.actionDisconnect->setEnabled(false);
 	emsComms = 0;
