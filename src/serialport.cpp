@@ -34,9 +34,17 @@ void SerialPort::setBaud(int baudrate)
 {
 	m_baud = baudrate;
 }
-bool SerialPort::verifyFreeEMS(QString portname)
+SerialError SerialPort::verifyFreeEMS(QString portname)
 {
-	openPort(portname,115200,false);
+	int errornum = openPort(portname,115200,false);
+	if (errornum == -2)
+	{
+		return UNABLE_TO_AQUIRE;
+	}
+	else if (errornum < 0)
+	{
+		return UNABLE_TO_CONNECT;
+	}
 	unsigned char ret = 0x0D;
 	int writei =0;
 #ifdef Q_OS_WIN32
@@ -47,7 +55,7 @@ bool SerialPort::verifyFreeEMS(QString portname)
 	if (writei <= 0)
 	{
 		qDebug() << "Error writing to verify FreeEMS";
-		return false;
+		return UNABLE_TO_WRITE;
 	}
 	unsigned char buf[3];
 #ifdef Q_OS_WIN32
@@ -75,20 +83,20 @@ bool SerialPort::verifyFreeEMS(QString portname)
 				{
 					//Serial monitor running
 					closePort();
-					return false;
+					return LOADER_MODE;
 				}
 				else
 				{
 					//Probably not;
 					closePort();
-					return true;
+					return NONE;
 				}
 			}
 		}
 	}
 	//nothing on the port here either.
 	closePort();
-	return true;
+	return NONE;
 }
 
 void SerialPort::setInterByteSendDelay(int milliseconds)

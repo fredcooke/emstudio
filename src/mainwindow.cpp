@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_offlineMode = false;
 	qRegisterMetaType<MemoryLocationInfo>("MemoryLocationInfo");
 	qRegisterMetaType<DataType>("DataType");
+	qRegisterMetaType<SerialError>("SerialError");
 	qDebug() << "EMStudio commit:" << define2string(GIT_COMMIT);
 	qDebug() << "Full hash:" << define2string(GIT_HASH);
 	progressView=0;
@@ -222,7 +223,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsComms = new FreeEmsComms(this);
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
-	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
+	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
+	connect(emsComms,SIGNAL(error(SerialError,QString)),this,SLOT(error(SerialError,QString)));
 	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
@@ -444,6 +446,7 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 	QString filename = QFileDialog::getOpenFileName(this,"Load Offline File",".","Offline JSON Files (*.json)");
 	if (filename == "")
 	{
+		qDebug() << "No offline file selected!";
 		return;
 	}
 	//QByteArray out = serializer.serialize(top);
@@ -594,7 +597,9 @@ void MainWindow::emsCommsDisconnected()
 	emsComms = new FreeEmsComms(this);
 	emsComms->setLogFileName(m_logFileName);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
-	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
+	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
+	connect(emsComms,SIGNAL(error(SerialError,QString)),this,SLOT(error(SerialError,QString)));
+
 	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
@@ -1547,6 +1552,29 @@ void MainWindow::firmwareVersion(QString version)
 	}
 	emsinfo.firmwareVersion = version;
 }
+void MainWindow::error(SerialError error,QString msg)
+{
+	Q_UNUSED(error); //We don't actually use the error here, since we treat every error the same.
+
+	switch (QMessageBox::information(0,"",msg,"Ok","Retry","Load Offline Data"))
+	{
+	case 0:		//Ok
+		//We do nothing here.
+		break;
+	case 1:		//Retry
+		//Delay of 2 seconds to allow for this function to return, and the emscomms loop to be destroyed
+		QTimer::singleShot(2000,this,SLOT(menu_connectClicked()));
+		break;
+	case 2:		//Load Offline Data
+		//Delay here, to ensure that it goes into the event loop and isn't directly called.
+		QTimer::singleShot(500,this,SLOT(menu_file_loadOfflineDataClicked()));
+		break;
+	default:
+		qDebug() << "WEEEE";
+		break;
+	}
+}
+
 void MainWindow::error(QString msg)
 {
 	//Q_UNUSED(msg)

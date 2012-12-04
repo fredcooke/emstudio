@@ -530,7 +530,32 @@ void FreeEmsComms::run()
 			if (m_threadReqList[i].type == SERIAL_CONNECT)
 			{
 				//qDebug() << "SERIAL_CONNECT";
-				if (!serialPort->verifyFreeEMS(m_threadReqList[i].args[0].toString()))
+				SerialError errortype = serialPort->verifyFreeEMS(m_threadReqList[i].args[0].toString());
+				if (errortype != NONE)
+				{
+					qDebug() << "Unable to verify ECU";
+					QString errorstr = "";
+					if (errortype == UNABLE_TO_CONNECT)
+					{
+						errorstr = "Unable to open serial port " + m_threadReqList[i].args[0].toString() + " Please ensure no other application has the port open and that the port exists!";
+					}
+					else if (errortype == UNABLE_TO_AQUIRE)
+					{
+						errorstr = "Unable to open serial port " + m_threadReqList[i].args[0].toString() + " due to another freeems application locking the port. Please close all other freeems related applications and try again.";
+					}
+					else if (errortype == UNABLE_TO_WRITE)
+					{
+						errorstr = "Unable to open serial port " + m_threadReqList[i].args[0].toString() + " Please ensure no other application has the port open and that the port exists!";
+					}
+					emit error(errortype,errorstr);
+					serialconnected = false;
+					serialPort->closePort();
+					emit disconnected();
+					m_threadReqList.removeAt(i);
+					i--;
+					continue;
+				}
+				/*if (!serialPort->verifyFreeEMS(m_threadReqList[i].args[0].toString()))
 				{
 					qDebug() << "FreeEMS is either in Serial Monitor mode, or EMStudio is connected to the wrong port";
 					emit error("FreeEMS is either in Serial Monitor mode, or EMStudio is connected to the wrong port");
@@ -540,20 +565,22 @@ void FreeEmsComms::run()
 					m_threadReqList.removeAt(i);
 					i--;
 					continue;
-				}
+				}*/
 				emit debugVerbose("SERIAL_CONNECT");
 				int errornum = 0;
 				if ((errornum = serialPort->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt())))
 				{
 					if (errornum == -1)
 					{
+						emit error(UNABLE_TO_CONNECT,"Unable to open serial port " + m_threadReqList[i].args[0].toString() + " Please ensure no other application has the port open and that the port exists!");
 						qDebug() << "Unable to connect to COM port";
-						emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()));
+						//emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()));
 					}
 					else if (errornum == -2)
 					{
+						emit error(UNABLE_TO_AQUIRE,"Unable to open serial port " + m_threadReqList[i].args[0].toString() + " due to another freeems application locking the port. Please close all other freeems related applications and try again.");
 						qDebug() << "Unable to connect to COM port due to process lock";
-						emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()) + " due to another process holding lock on the port");
+						//emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()) + " due to another process holding lock on the port");
 					}
 					//return;
 					m_threadReqList.removeAt(i);
@@ -567,8 +594,6 @@ void FreeEmsComms::run()
 				emit connected();
 				m_threadReqList.removeAt(i);
 				i--;
-
-
 				rxThread->start(serialPort);
 
 			}

@@ -23,6 +23,7 @@
 #include <QDebug>
 #include <QMutex>
 #include <qglobal.h>
+#include "headers.h"
 #ifdef Q_OS_WIN32
 #include <windows.h>
 #else
@@ -40,7 +41,7 @@ class SerialPort : public QObject
 	Q_OBJECT
 public:
     SerialPort(QObject *parent=0);
-    bool verifyFreeEMS(QString portname);
+    SerialError verifyFreeEMS(QString portname);
     void setPort(QString portname);
     void setBaud(int baudrate);
     int openPort(QString portName,int baudrate,bool oddparity = true);

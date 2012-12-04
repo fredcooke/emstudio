@@ -13,6 +13,17 @@ enum DataType
 	DATA_TABLE_LOOKUP=4,
 	DATA_CONFIG=5
 };
+enum SerialError
+{
+	UNABLE_TO_CONNECT, //Unable to open the com port
+	UNABLE_TO_AQUIRE, //Unable to aquire a lock on the com port
+	UNABLE_TO_READ,
+	UNABLE_TO_WRITE,
+	NO_DATA, //Opened com port, but no respose to messages/no data?
+	INVALID_DATA, //Opened com port, garbage data
+	LOADER_MODE, //Opened com port, in loader mode
+	NONE //No error
+};
 
 class ConfigData
 {
