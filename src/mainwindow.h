@@ -84,6 +84,7 @@ public:
 	void setDevice(QString dev);
 	void connectToEms();
 private:
+	bool m_checkEmsDataInUse;
 	bool m_offlineMode;
 	QMap<unsigned short,MemoryLocationInfo> m_memoryInfoMap;
 	Interrogation emsinfo;

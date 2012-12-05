@@ -32,6 +32,7 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	m_offlineMode = false;
+	m_checkEmsDataInUse = false;
 	qRegisterMetaType<MemoryLocationInfo>("MemoryLocationInfo");
 	qRegisterMetaType<DataType>("DataType");
 	qRegisterMetaType<SerialPortStatus>("SerialPortStatus");
@@ -224,7 +225,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
 	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
-	connect(emsComms,SIGNAL(error(SerialError,QString)),this,SLOT(error(SerialError,QString)));
+	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
 	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
@@ -601,7 +602,7 @@ void MainWindow::emsCommsDisconnected()
 	emsComms->setLogFileName(m_logFileName);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
-	connect(emsComms,SIGNAL(error(SerialError,QString)),this,SLOT(error(SerialError,QString)));
+	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
 
 	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
@@ -1087,6 +1088,7 @@ void MainWindow::interrogateRamBlockRetrieved(unsigned short locationid,QByteArr
 			qDebug() << "Ram block retrieved during interrogation, but it already had a payload!" << "0x" + QString::number(locationid,16).toUpper();
 			//emsData->setDeviceRamBlock(locationid,payload);
 			checkEmsData->setDeviceRamBlock(locationid,payload);
+			m_checkEmsDataInUse = true;
 			return;
 		}
 	}
@@ -1108,6 +1110,7 @@ void MainWindow::interrogateFlashBlockRetrieved(unsigned short locationid,QByteA
 			qDebug() << "Flash block retrieved during interrogation, but it already had a payload!" << "0x" + QString::number(locationid,16).toUpper();
 			//emsData->setDeviceFlashBlock(locationid,payload);
 			checkEmsData->setDeviceFlashBlock(locationid,payload);
+			m_checkEmsDataInUse = true;
 			return;
 		}
 	}
@@ -1840,7 +1843,7 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 		m_locIdInfoMsgList.removeOne(sequencenumber);
 		if (m_locIdInfoMsgList.size() == 0)
 		{
-			if (m_offlineMode)
+			if (m_offlineMode && m_checkEmsDataInUse)
 			{
 				//We were offline. Let's check.
 				QList<unsigned short> ramlocs = checkEmsData->getTopLevelDeviceRamLocations();
