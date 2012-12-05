@@ -13,10 +13,10 @@ enum DataType
 	DATA_TABLE_LOOKUP=4,
 	DATA_CONFIG=5
 };
-enum SerialError
+enum SerialPortStatus
 {
 	UNABLE_TO_CONNECT, //Unable to open the com port
-	UNABLE_TO_AQUIRE, //Unable to aquire a lock on the com port
+	UNABLE_TO_LOCK, //Unable to aquire a lock on the com port
 	UNABLE_TO_READ,
 	UNABLE_TO_WRITE,
 	NO_DATA, //Opened com port, but no respose to messages/no data?

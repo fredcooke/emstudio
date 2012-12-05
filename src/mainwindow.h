@@ -231,7 +231,7 @@ private slots:
 	void interfaceVersion(QString version);
 	void firmwareVersion(QString version);
 	void error(QString msg);
-	void error(SerialError error,QString msg);
+	void error(SerialPortStatus error,QString msg);
 	void commandSuccessful(int sequencenumber);
 	void commandFailed(int sequencenumber,unsigned short errornum);
 	void commandTimedOut(int sequencenumber);

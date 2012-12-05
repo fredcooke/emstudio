@@ -187,7 +187,7 @@ signals:
 	void debug(QString msg);
 	//void error(QString msg);
 	//void error(QString msg);
-	void error(SerialError error,QString msg = QString());
+	void error(SerialPortStatus error,QString msg = QString());
 	void commandSuccessful(int sequencenumber);
 	void commandFailed(int sequencenumber,unsigned short errornum);
 	void commandTimedOut(int sequencenumber);

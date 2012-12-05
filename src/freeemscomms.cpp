@@ -530,7 +530,7 @@ void FreeEmsComms::run()
 			if (m_threadReqList[i].type == SERIAL_CONNECT)
 			{
 				//qDebug() << "SERIAL_CONNECT";
-				SerialError errortype = serialPort->verifyFreeEMS(m_threadReqList[i].args[0].toString());
+				SerialPortStatus errortype = serialPort->verifyFreeEMS(m_threadReqList[i].args[0].toString());
 				if (errortype != NONE)
 				{
 					qDebug() << "Unable to verify ECU";
@@ -539,13 +539,18 @@ void FreeEmsComms::run()
 					{
 						errorstr = "Unable to open serial port " + m_threadReqList[i].args[0].toString() + " Please ensure no other application has the port open and that the port exists!";
 					}
-					else if (errortype == UNABLE_TO_AQUIRE)
+					else if (errortype == UNABLE_TO_LOCK)
 					{
-						errorstr = "Unable to open serial port " + m_threadReqList[i].args[0].toString() + " due to another freeems application locking the port. Please close all other freeems related applications and try again.";
+						errorstr = "Unable to open serial port " + m_threadReqList[i].args[0].toString() + " because another compatible application has locked it. Please close all serial port related applications and try again.";
 					}
 					else if (errortype == UNABLE_TO_WRITE)
 					{
 						errorstr = "Unable to open serial port " + m_threadReqList[i].args[0].toString() + " Please ensure no other application has the port open and that the port exists!";
+					}
+					else if (errortype == LOADER_MODE)
+					{
+						//TODO Fix this when we have the ability to reset SM mode
+						errorstr = "Unable to connect to ECU. SerialMonitor mode detected! Please remove SM jumper, reset the ECU and click retry!";
 					}
 					emit error(errortype,errorstr);
 					serialconnected = false;
@@ -578,7 +583,7 @@ void FreeEmsComms::run()
 					}
 					else if (errornum == -2)
 					{
-						emit error(UNABLE_TO_AQUIRE,"Unable to open serial port " + m_threadReqList[i].args[0].toString() + " due to another freeems application locking the port. Please close all other freeems related applications and try again.");
+						emit error(UNABLE_TO_LOCK,"Unable to open serial port " + m_threadReqList[i].args[0].toString() + " due to another freeems application locking the port. Please close all other freeems related applications and try again.");
 						qDebug() << "Unable to connect to COM port due to process lock";
 						//emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()) + " due to another process holding lock on the port");
 					}

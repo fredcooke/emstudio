@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_offlineMode = false;
 	qRegisterMetaType<MemoryLocationInfo>("MemoryLocationInfo");
 	qRegisterMetaType<DataType>("DataType");
-	qRegisterMetaType<SerialError>("SerialError");
+	qRegisterMetaType<SerialPortStatus>("SerialPortStatus");
 	qDebug() << "EMStudio commit:" << define2string(GIT_COMMIT);
 	qDebug() << "Full hash:" << define2string(GIT_HASH);
 	progressView=0;
@@ -1555,7 +1555,7 @@ void MainWindow::firmwareVersion(QString version)
 	}
 	emsinfo.firmwareVersion = version;
 }
-void MainWindow::error(SerialError error,QString msg)
+void MainWindow::error(SerialPortStatus error,QString msg)
 {
 	Q_UNUSED(error); //We don't actually use the error here, since we treat every error the same.
 
@@ -1566,6 +1566,10 @@ void MainWindow::error(SerialError error,QString msg)
 		break;
 	case 1:		//Retry
 		//Delay of 2 seconds to allow for this function to return, and the emscomms loop to be destroyed
+		if (error == LOADER_MODE)
+		{
+			//We need to send a SM reset, this is not supported yet.
+		}
 		QTimer::singleShot(2000,this,SLOT(menu_connectClicked()));
 		break;
 	case 2:		//Load Offline Data

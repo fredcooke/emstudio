@@ -34,12 +34,12 @@ void SerialPort::setBaud(int baudrate)
 {
 	m_baud = baudrate;
 }
-SerialError SerialPort::verifyFreeEMS(QString portname)
+SerialPortStatus SerialPort::verifyFreeEMS(QString portname)
 {
 	int errornum = openPort(portname,115200,false);
 	if (errornum == -2)
 	{
-		return UNABLE_TO_AQUIRE;
+		return UNABLE_TO_LOCK;
 	}
 	else if (errornum < 0)
 	{
