@@ -609,6 +609,11 @@ void FreeEmsComms::run()
 			else if (m_threadReqList[i].type == SERIAL_DISCONNECT)
 			{
 				emit debugVerbose("SERIAL_DISCONNECT");
+				rxThread->stop();
+				rxThread->wait(500);
+				rxThread->terminate();
+				rxThread->deleteLater();
+
 				serialPort->closePort();
 				serialconnected = false;
 				emit disconnected();
