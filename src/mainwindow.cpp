@@ -170,15 +170,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 			m_configBlockMap[locid] = blocklist;
 		}
 	}
-/*
-
-		anglesOfTDC: {ANGLE(0), ANGLE(90), ANGLE(180), ANGLE(270), ANGLE(360), ANGLE(450), ANGLE(540), ANGLE(630),ANGLE(0),ANGLE(360)},
-		outputEventPinNumbers:       {0,0,0,0,0,0,0,0,2,4}, // LTCC e-dizzy, semi-sequential injection 1/6, 8/5, 4/7, 3/2, and repeat
-		schedulingConfigurationBits: {0,0,0,0,0,0,0,0,1,1}, // See below two lines
-		decoderEngineOffset:               ANGLE(0.00), // Dist is at 0 degrees.
-		numberOfConfiguredOutputEvents:             10, // First half ignition, second half injection
-		numberOfInjectionsPerEngineCycle:            4  // Full sync semi-sequential
-*/
 
 	qDebug() << m_memoryMetaData.errorMap().keys().size() << "Error Keys Loaded";
 	qDebug() << m_memoryMetaData.table3DMetaData().size() << "3D Tables Loaded";
@@ -235,10 +226,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
-	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
-	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(ramBlockUpdate(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(flashBlockUpdate(unsigned short,QByteArray,QByteArray)));
 	emsData->setInterrogation(true);
 	connect(emsComms,SIGNAL(decoderName(QString)),this,SLOT(emsDecoderName(QString)));
 	connect(emsComms,SIGNAL(operatingSystem(QString)),this,SLOT(emsOperatingSystem(QString)));
@@ -539,13 +529,7 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 	}
 	populateParentLists();
 
-	//disconnect(this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	//disconnect(this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	//disconnect(this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	//disconnect(this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	emsData->setInterrogation(false);
-	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	emsData->setInterrogation(true);
 
 	i = ramMap.constBegin();
 	while (i != ramMap.constEnd())
@@ -586,11 +570,7 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 	}
 	checkRamFlashSync();
 	emsMdiWindow->show();
-	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 
-	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	emsData->setInterrogation(false);
 }
 
@@ -625,8 +605,8 @@ void MainWindow::emsCommsDisconnected()
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
 	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
-	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(ramBlockUpdate(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(flashBlockUpdate(unsigned short,QByteArray,QByteArray)));
 	emsData->setInterrogation(true);
 	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
@@ -1156,10 +1136,7 @@ void MainWindow::settingsSaveClicked()
 	m_clearLogs = comSettingsWidget->getClearDataLogs();
 	m_logsToKeep = comSettingsWidget->getNumLogsToSave();
 	m_logDirectory = comSettingsWidget->getDataLogDir();
-	/*if (!subwin)
-	{
-		subwin->deleteLater();
-	}*/
+
 	comSettingsWidget->hide();
 	QSettings settings(m_settingsFile,QSettings::IniFormat);
 	settings.beginGroup("comms");
@@ -1217,63 +1194,6 @@ void MainWindow::locationIdInfo(unsigned short locationid,MemoryLocationInfo inf
 	{
 		checkEmsData->passLocationInfo(locationid,info);
 	}
-	/*if (flags.contains(FreeEmsComms::BLOCK_IS_RAM) && flags.contains((FreeEmsComms::BLOCK_IS_FLASH)))
-	{
-		MemoryLocation *loc = new MemoryLocation();
-		loc->locationid = locationid;
-		loc->size = size;
-		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
-		{
-			loc->parent = parent;
-			loc->hasParent = true;
-		}
-		loc->isRam = true;
-		loc->isFlash = true;
-		loc->ramAddress = ramaddress;
-		loc->ramPage = rampage;
-		loc->flashAddress = flashaddress;
-		loc->flashPage = flashpage;
-		//m_deviceRamMemoryList.append(loc);
-		emsData->addDeviceRamBlock(loc);
-		emsData->addDeviceFlashBlock(new MemoryLocation(*loc));
-		//m_flashMemoryList.append(new MemoryLocation(*loc));
-		//m_deviceFlashMemoryList.append(new MemoryLocation(*loc));
-
-	}
-	else if (flags.contains(FreeEmsComms::BLOCK_IS_FLASH))
-	{
-		MemoryLocation *loc = new MemoryLocation();
-		loc->locationid = locationid;
-		loc->size = size;
-		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
-		{
-			loc->parent = parent;
-			loc->hasParent = true;
-		}
-		loc->isFlash = true;
-		loc->isRam = false;
-		loc->flashAddress = flashaddress;
-		loc->flashPage = flashpage;
-		//m_deviceFlashMemoryList.append(loc);
-		emsData->addDeviceFlashBlock(loc);
-	}
-	else if (flags.contains(FreeEmsComms::BLOCK_IS_RAM))
-	{
-		MemoryLocation *loc = new MemoryLocation();
-		loc->locationid = locationid;
-		loc->size = size;
-		if (flags.contains(FreeEmsComms::BLOCK_HAS_PARENT))
-		{
-			loc->parent = parent;
-			loc->hasParent = true;
-		}
-		loc->isRam = true;
-		loc->isFlash = false;
-		loc->ramAddress = ramaddress;
-		loc->ramPage = rampage;
-		//m_deviceRamMemoryList.append(loc);
-		emsData->addDeviceRamBlock(loc);
-	}*/
 }
 
 void MainWindow::settingsCancelClicked()
@@ -1812,15 +1732,7 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 			//this->setEnabled(true);
 			qDebug() << "Interrogation complete";
 
-			//Disconnect from the interrogation slots, and connect to the primary slots.
-			//disconnect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-			emsComms->disconnect(SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-			emsComms->disconnect(SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-			//disconnect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-			//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-			//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-			connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-			connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+			emsData->setInterrogation(false);
 
 
 			//emsInfo->show();
