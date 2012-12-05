@@ -25,10 +25,6 @@
 #include <QSettings>
 #include <tableview2d.h>
 #include <qjson/parser.h>
-#define define2string_p(x) #x
-#define define2string(x) define2string_p(x)
-#define TABLE_3D_PAYLOAD_SIZE 1024
-#define TABLE_2D_PAYLOAD_SIZE 64
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	m_offlineMode = false;
@@ -42,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_interrogationInProgress = false;
 
 	emsData = new EmsData();
+	connect(emsData,SIGNAL(updateRequired(unsigned short)),this,SLOT(updateDataWindows(unsigned short)));
 
 	//Create this, even though we only need it during offline to online transitions.
 	checkEmsData = new EmsData();
@@ -106,6 +103,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 		QMessageBox::information(0,"Error","Error: No freeems.config.json file found!");
 	}
 	m_memoryMetaData.loadMetaDataFromFile(filestr);
+	emsData->setMetaData(m_memoryMetaData);
 
 	QString decoderfilestr = "";
 	if (QFile::exists(m_settingsDir + "/" + "definitions/decodersettings.json"))
@@ -239,8 +237,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
 	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
-	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	emsData->setInterrogation(true);
 	connect(emsComms,SIGNAL(decoderName(QString)),this,SLOT(emsDecoderName(QString)));
 	connect(emsComms,SIGNAL(operatingSystem(QString)),this,SLOT(emsOperatingSystem(QString)));
 	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));
@@ -540,10 +539,11 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 	}
 	populateParentLists();
 
-	disconnect(this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	disconnect(this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	disconnect(this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	disconnect(this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//disconnect(this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//disconnect(this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//disconnect(this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//disconnect(this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	emsData->setInterrogation(false);
 	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 
@@ -577,15 +577,21 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 		}
 		if (m_memoryInfoMap[i.key().toInt(&ok,16)].isRam)
 		{
-			interrogateRamBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
+			//interrogateRamBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
+			emsData->ramBlockUpdate(i.key().toInt(&ok,16),QByteArray(),bytes);
 		}
-		interrogateFlashBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
+		//interrogateFlashBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
+		emsData->flashBlockUpdate(i.key().toInt(&ok,16),QByteArray(),bytes);
 		i++;
 	}
 	checkRamFlashSync();
 	emsMdiWindow->show();
-	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+
+	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	emsData->setInterrogation(false);
 }
 
 void MainWindow::emsCommsDisconnected()
@@ -619,8 +625,9 @@ void MainWindow::emsCommsDisconnected()
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
 	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
-	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	emsData->setInterrogation(true);
 	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
@@ -1069,162 +1076,6 @@ void MainWindow::markDeviceFlashClean()
 	emsInfo->setDeviceFlash(false);
 }
 
-void MainWindow::interrogateRamBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
-{
-	Q_UNUSED(header)
-	qDebug() << "Interrogation Ram block" << "0x" + QString::number(locationid,16).toUpper();
-	if (emsData->hasDeviceRamBlock(locationid))
-	{
-		if (emsData->getDeviceRamBlock(locationid).isEmpty())
-		{
-			//Initial retrieval.
-			emsData->setDeviceRamBlock(locationid,payload);
-			return;
-		}
-		else
-		{
-			//This should not happen during interrogation.
-			//Correction, this happens when interrogation during offline mode happens.
-			qDebug() << "Ram block retrieved during interrogation, but it already had a payload!" << "0x" + QString::number(locationid,16).toUpper();
-			//emsData->setDeviceRamBlock(locationid,payload);
-			checkEmsData->setDeviceRamBlock(locationid,payload);
-			m_checkEmsDataInUse = true;
-			return;
-		}
-	}
-	qDebug() << "Ram block retrieved that should not exist!!" << "0x" + QString::number(locationid,16).toUpper() << "with a size of:" << payload.size();
-}
-void MainWindow::interrogateFlashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
-{
-	Q_UNUSED(header)
-	qDebug() << "Interrogation Flash block" << "0x" + QString::number(locationid,16).toUpper();
-	if (emsData->hasDeviceFlashBlock(locationid))
-	{
-		if (emsData->getDeviceFlashBlock(locationid).isEmpty())
-		{
-			emsData->setDeviceFlashBlock(locationid,payload);
-			return;
-		}
-		else
-		{
-			qDebug() << "Flash block retrieved during interrogation, but it already had a payload!" << "0x" + QString::number(locationid,16).toUpper();
-			//emsData->setDeviceFlashBlock(locationid,payload);
-			checkEmsData->setDeviceFlashBlock(locationid,payload);
-			m_checkEmsDataInUse = true;
-			return;
-		}
-	}
-	qDebug() << "Flash block retrieved that should not exist!!" << "0x" + QString::number(locationid,16).toUpper() << "with a size of:" << payload.size();
-}
-
-//Used to verify that a block of memory matches what meta data thinks it should be.
-bool MainWindow::verifyMemoryBlock(unsigned short locationid,QByteArray header,QByteArray payload)
-{
-	Q_UNUSED(header)
-	if (m_memoryMetaData.has2DMetaData(locationid))
-	{
-		if (payload.size() != TABLE_2D_PAYLOAD_SIZE)
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
-	if (m_memoryMetaData.has3DMetaData(locationid))
-	{
-		if (payload.size() != TABLE_3D_PAYLOAD_SIZE)
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
-	//If we get here, the table does not exist in meta data
-	return true;
-
-}
-
-void MainWindow::ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
-{
-	Q_UNUSED(header)
-	qDebug() << "Ram Block retrieved:" << "0x" + QString::number(locationid,16).toUpper();
-	if (!emsData->hasDeviceRamBlock(locationid))
-	{
-		//This should not happen
-		/*RawDataBlock *block = new RawDataBlock();
-		block->locationid = locationid;
-		block->header = header;
-		block->data = payload;
-		//m_flashRawBlockList.append(block);
-		m_deviceRamRawBlockList.append(block);*/
-	}
-	else
-	{
-		//Check to see if it's supposed to be a table, and if so, check size
-		if (!verifyMemoryBlock(locationid,header,payload))
-		{
-			QMessageBox::information(this,"Error","RAM Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen");
-			return;
-		}
-		if (emsData->getDeviceRamBlock(locationid).isEmpty())
-		{
-			//This should not happen
-			qDebug() << "Ram block on device while ram block on tuner is empty! This should not happen" << "0x" + QString::number(locationid,16).toUpper();
-			qDebug() << "Current block size:" << emsData->getDeviceRamBlock(locationid).size();
-			emsData->setDeviceRamBlock(locationid,payload);
-		}
-		else
-		{
-			if (emsData->getDeviceRamBlock(locationid) != payload)
-			{
-				qDebug() << "Ram block on device does not match ram block on tuner! This should ONLY happen during a manual update!";
-				qDebug() << "Tuner ram size:" << emsData->getDeviceRamBlock(locationid).size();
-				emsData->setDeviceRamBlock(locationid,payload);
-				emsData->setLocalRamBlock(locationid,payload);
-			}
-		}
-		updateDataWindows(locationid);
-	}
-	return;
-}
-
-
-void MainWindow::flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload)
-{
-	qDebug() << "Flash Block retrieved:" << "0x" + QString::number(locationid,16).toUpper();
-	Q_UNUSED(header)
-	if (!verifyMemoryBlock(locationid,header,payload))
-	{
-		interrogateProgressViewCancelClicked();
-		QMessageBox::information(this,"Error","Flash Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen");
-		return;
-	}
-	if (emsData->hasDeviceFlashBlock(locationid))
-	{
-			if (emsData->getDeviceFlashBlock(locationid).isEmpty())
-			{
-				emsData->setDeviceFlashBlock(locationid,payload);
-				return;
-			}
-			else
-			{
-				if (emsData->getDeviceFlashBlock(locationid) != payload)
-				{
-
-					qDebug() << "Flash block in memory does not match flash block on tuner! This should not happen!";
-					qDebug() << "Flash size:" << emsData->getDeviceFlashBlock(locationid).size();
-					qDebug() << "Flash ID:" << "0x" + QString::number(locationid,16).toUpper();
-					emsData->setDeviceFlashBlock(locationid,payload);
-				}
-			}
-	}
-	updateDataWindows(locationid);
-	return;
-}
 
 void MainWindow::ui_saveDataButtonClicked()
 {
@@ -1637,10 +1488,11 @@ void MainWindow::emsCommsConnected()
 		progressView->setMaximum(0);
 	}
 	interrogationSequenceList.clear();
-	disconnect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,0);
-	disconnect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,0);
-	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//disconnect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,0);
+	//disconnect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,0);
+	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+	emsData->setInterrogation(true);
 	progressView->show();
 	interrogateProgressMdiWindow->show();
 	progressView->addOutput("Connected to EMS");
@@ -1965,8 +1817,10 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 			emsComms->disconnect(SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 			emsComms->disconnect(SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 			//disconnect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-			connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-			connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+			//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+			//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+			connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)));
+			connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
 
 
 			//emsInfo->show();

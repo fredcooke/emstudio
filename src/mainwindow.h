@@ -134,7 +134,7 @@ private:
 	DataPacketDecoder *dataPacketDecoder;
 	void populateDataFields();
 	void updateRamLocation(unsigned short locationid);
-	void updateDataWindows(unsigned short locationid);
+
 	Ui::MainWindow ui;
 	//LogLoader *logLoader;
 	FreeEmsComms *emsComms;
@@ -169,15 +169,13 @@ private:
 	EmsData *emsData;
 	EmsData *checkEmsData;
 private slots:
+	void updateDataWindows(unsigned short locationid);
 	void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);
 	void tableview3d_show3DTable(unsigned short locationid,Table3DData *data);
 	void emsStatusHardResetRequested();
 	void emsStatusSoftResetRequested();
 	void tableMap3DDestroyed(QObject *object);
 	void interrogateProgressViewDestroyed(QObject *object);
-	void interrogateRamBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
-	void interrogateFlashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
-	bool verifyMemoryBlock(unsigned short locationid,QByteArray header,QByteArray payload);
 	void emsOperatingSystem(QString os);
 	void emsDecoderName(QString name);
 	void emsFirmwareBuildDate(QString date);
@@ -226,8 +224,6 @@ private slots:
 	void locationIdList(QList<unsigned short> idlist);
 	//void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
-	void ramBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
-	void flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QString version);
 	void firmwareVersion(QString version);

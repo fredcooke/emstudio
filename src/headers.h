@@ -5,6 +5,12 @@
 #include <QString>
 
 
+#define define2string_p(x) #x
+#define define2string(x) define2string_p(x)
+#define TABLE_3D_PAYLOAD_SIZE 1024
+#define TABLE_2D_PAYLOAD_SIZE 64
+
+
 enum DataType
 {
 	DATA_UNDEFINED=1,

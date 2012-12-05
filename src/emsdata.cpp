@@ -1,7 +1,9 @@
 #include "emsdata.h"
 #include <QDebug>
-EmsData::EmsData()
+EmsData::EmsData() : QObject()
 {
+	m_interrogationInProgress = false;
+	m_checkEmsDataInUse = false;
 }
 QByteArray EmsData::getLocalRamBlock(unsigned short id)
 {
@@ -158,6 +160,35 @@ void EmsData::populateDeviceRamAndFlashParents()
 			}
 		}
 	}
+
+
+	for (int i=0;i<m_duplicateFlashMemoryList.size();i++)
+	{
+		if (m_duplicateFlashMemoryList[i]->hasParent && m_duplicateFlashMemoryList[i]->getParent() == 0)
+		{
+			for (int j=0;j<m_duplicateFlashMemoryList.size();j++)
+			{
+				if (m_duplicateFlashMemoryList[i]->parent== m_duplicateFlashMemoryList[j]->locationid)
+				{
+					m_duplicateFlashMemoryList[i]->setParent(m_duplicateFlashMemoryList[j]);
+				}
+			}
+		}
+	}
+	for (int i=0;i<m_duplicateRamMemoryList.size();i++)
+	{
+		if (m_duplicateRamMemoryList[i]->hasParent && m_duplicateRamMemoryList[i]->getParent() == 0)
+		{
+			for (int j=0;j<m_duplicateRamMemoryList.size();j++)
+			{
+				if (m_duplicateRamMemoryList[i]->parent== m_duplicateRamMemoryList[j]->locationid)
+				{
+					m_duplicateRamMemoryList[i]->setParent(m_duplicateRamMemoryList[j]);
+				}
+			}
+		}
+	}
+
 }
 
 void EmsData::setDeviceFlashBlock(unsigned short id,QByteArray data)
@@ -182,6 +213,7 @@ void EmsData::clearAllMemory()
 void EmsData::addDeviceRamBlock(MemoryLocation *loc)
 {
 	m_deviceRamMemoryList.append(loc);
+	m_duplicateRamMemoryList.append(new MemoryLocation(*loc));
 }
 
 void EmsData::addLocalFlashBlock(MemoryLocation *loc)
@@ -197,6 +229,7 @@ void EmsData::addLocalRamBlock(MemoryLocation *loc)
 void EmsData::addDeviceFlashBlock(MemoryLocation *loc)
 {
 	m_deviceFlashMemoryList.append(loc);
+	m_duplicateFlashMemoryList.append(new MemoryLocation(*loc));
 }
 QList<unsigned short> EmsData::getChildrenOfLocalRamLocation(unsigned short id)
 {
@@ -493,4 +526,180 @@ void EmsData::passLocationInfo(unsigned short locationid,MemoryLocationInfo info
 		//m_deviceRamMemoryList.append(loc);
 		emsData->addDeviceRamBlock(loc);
 	}*/
+}
+
+
+void EmsData::ramBlockUpdate(unsigned short locationid, QByteArray header, QByteArray payload)
+{
+	Q_UNUSED(header)
+	qDebug() << "Ram Block retrieved:" << "0x" + QString::number(locationid,16).toUpper();
+	if (!hasDeviceRamBlock(locationid))
+	{
+		//This should not happen
+		/*RawDataBlock *block = new RawDataBlock();
+		block->locationid = locationid;
+		block->header = header;
+		block->data = payload;
+		//m_flashRawBlockList.append(block);
+		m_deviceRamRawBlockList.append(block);*/
+	}
+	else
+	{
+		//Check to see if it's supposed to be a table, and if so, check size
+		if (!verifyMemoryBlock(locationid,header,payload))
+		{
+			//QMessageBox::information(this,"Error","RAM Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen");
+			qDebug() << "RAM Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen";
+			return;
+		}
+		if (getDeviceRamBlock(locationid).isEmpty())
+		{
+			//This should not happen
+			qDebug() << "Ram block on device while ram block on tuner is empty! This should not happen" << "0x" + QString::number(locationid,16).toUpper();
+			qDebug() << "Current block size:" << getDeviceRamBlock(locationid).size();
+			setDeviceRamBlock(locationid,payload);
+		}
+		else
+		{
+			if (m_interrogationInProgress)
+			{
+				//checkEmsData->setDeviceRamBlock(locationid,payload);
+				for (int i=0;i<m_duplicateRamMemoryList.size();i++)
+				{
+					if (m_duplicateRamMemoryList[i]->locationid == locationid)
+					{
+						m_duplicateRamMemoryList[i]->setData(payload);
+						break;
+					}
+				}
+				m_checkEmsDataInUse = true;
+			}
+			else
+			{
+				if (getDeviceRamBlock(locationid) != payload)
+				{
+					qDebug() << "Ram block on device does not match ram block on tuner! This should ONLY happen during a manual update!";
+					qDebug() << "Tuner ram size:" << getDeviceRamBlock(locationid).size();
+					setDeviceRamBlock(locationid,payload);
+					setLocalRamBlock(locationid,payload);
+				}
+			}
+		}
+		//updateDataWindows(locationid);
+		emit updateRequired(locationid);
+	}
+	return;
+}
+
+void EmsData::flashBlockUpdate(unsigned short locationid, QByteArray header, QByteArray payload)
+{
+	qDebug() << "Flash Block retrieved:" << "0x" + QString::number(locationid,16).toUpper();
+	Q_UNUSED(header)
+	if (!verifyMemoryBlock(locationid,header,payload))
+	{
+		//QMessageBox::information(this,"Error","Flash Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen");
+		qDebug() << "Flash Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen";
+		return;
+	}
+	if (hasDeviceFlashBlock(locationid))
+	{
+			if (getDeviceFlashBlock(locationid).isEmpty())
+			{
+				setDeviceFlashBlock(locationid,payload);
+				return;
+			}
+			else
+			{
+				if (m_interrogationInProgress)
+				{
+					//checkEmsData->setDeviceFlashBlock(locationid,payload);
+					for (int i=0;i<m_duplicateFlashMemoryList.size();i++)
+					{
+						if (m_duplicateFlashMemoryList[i]->locationid == locationid)
+						{
+							m_duplicateFlashMemoryList[i]->setData(payload);
+							break;
+						}
+					}
+					m_checkEmsDataInUse = true;
+				}
+				else
+				{
+					if (getDeviceFlashBlock(locationid) != payload)
+					{
+						qDebug() << "Flash block in memory does not match flash block on tuner! This should not happen!";
+						qDebug() << "Flash size:" << getDeviceFlashBlock(locationid).size();
+						qDebug() << "Flash ID:" << "0x" + QString::number(locationid,16).toUpper();
+						setDeviceFlashBlock(locationid,payload);
+					}
+				}
+			}
+	}
+	emit updateRequired(locationid);
+	//updateDataWindows(locationid);
+	return;
+}
+bool EmsData::verifyMemoryBlock(unsigned short locationid,QByteArray header,QByteArray payload)
+{
+	Q_UNUSED(header)
+	if (m_memoryMetaData.has2DMetaData(locationid))
+	{
+		if (payload.size() != TABLE_2D_PAYLOAD_SIZE)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	if (m_memoryMetaData.has3DMetaData(locationid))
+	{
+		if (payload.size() != TABLE_3D_PAYLOAD_SIZE)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	//If we get here, the table does not exist in meta data
+	return true;
+
+}
+
+
+QList<unsigned short> EmsData::getDuplicateTopLevelDeviceFlashLocations()
+{
+	if (!m_checkEmsDataInUse)
+	{
+		return QList<unsigned short>();
+	}
+	QList<unsigned short> retval;
+	for (int i=0;i<m_duplicateFlashMemoryList.size();i++)
+	{
+		if ((m_duplicateFlashMemoryList[i]->data() != getDeviceFlashBlock(m_duplicateFlashMemoryList[i]->locationid)) && !m_duplicateFlashMemoryList[i]->hasParent)
+		{
+			retval.append(m_duplicateFlashMemoryList[i]->locationid);
+		}
+	}
+	return retval;
+}
+
+QList<unsigned short> EmsData::getDuplicateTopLevelDeviceRamLocations()
+{
+	if (!m_checkEmsDataInUse)
+	{
+		return QList<unsigned short>();
+	}
+	QList<unsigned short> retval;
+	for (int i=0;i<m_duplicateRamMemoryList.size();i++)
+	{
+		if ((m_duplicateRamMemoryList[i]->data() != getDeviceRamBlock(m_duplicateRamMemoryList[i]->locationid)) && !m_duplicateRamMemoryList[i]->hasParent)
+		{
+			retval.append(m_duplicateRamMemoryList[i]->locationid);
+		}
+	}
+	return retval;
 }
