@@ -585,6 +585,7 @@ void MainWindow::emsCommsDisconnected()
 
 	//Need to reset everything here.
 	emsComms = new FreeEmsComms(this);
+	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
