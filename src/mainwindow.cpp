@@ -1566,14 +1566,76 @@ void MainWindow::commandTimedOut(int sequencenumber)
 	if (m_waitingForRamWriteConfirmation)
 	{
 		m_waitingForRamWriteConfirmation = false;
-		m_currentRamLocationId=0;
-		return;
+		if (emsData->hasLocalRamBlock(m_currentRamLocationId))
+		{
+			if (emsData->hasDeviceRamBlock(m_currentRamLocationId))
+			{
+				qDebug() << "Data reverting for location id 0x" + QString::number(m_currentRamLocationId,16);
+				if (emsData->getLocalRamBlock(m_currentRamLocationId) == emsData->getDeviceRamBlock(m_currentRamLocationId))
+				{
+					qDebug() << "Data valid. No need for a revert.";
+				}
+				else
+				{
+					qDebug() << "Invalid data, reverting...";
+					emsData->setLocalRamBlock(m_currentRamLocationId,emsData->getDeviceRamBlock(m_currentRamLocationId));
+					/*if (m_ramMemoryList[i]->data() != m_deviceRamMemoryList[j]->data())
+					{
+						qDebug() << "Failed to revert!!!";
+					}*/
+					updateRamLocation(m_currentRamLocationId);
+				}
+			}
+		}
+		else
+		{
+			qDebug() << "Unable to find memory location " << QString::number(m_currentRamLocationId,16) << "in local or device memory!";
+		}
+		//Find all windows that use that location id
+		m_currentRamLocationId = 0;
+		//checkRamFlashSync();
+	}
+	else
+	{
+		//qDebug() << "Error reverting! " << QString::number(m_currentRamLocationId,16) << "Location not found!";
 	}
 	if (m_waitingForFlashWriteConfirmation)
 	{
 		m_waitingForFlashWriteConfirmation = false;
-		m_currentFlashLocationId=0;
+		if (emsData->hasLocalFlashBlock(m_currentFlashLocationId))
+		{
+			if (emsData->hasDeviceFlashBlock(m_currentFlashLocationId))
+			{
+				qDebug() << "Data reverting for location id 0x" + QString::number(m_currentFlashLocationId,16);
+				if (emsData->getLocalFlashBlock(m_currentFlashLocationId) == emsData->getDeviceFlashBlock(m_currentFlashLocationId))
+				{
+					qDebug() << "Data valid. No need for a revert.";
+				}
+				else
+				{
+					qDebug() << "Invalid data, reverting...";
+					//m_flashMemoryList[i]->setData(m_deviceFlashMemoryList[j]->data());
+					emsData->setLocalFlashBlock(m_currentFlashLocationId,emsData->getDeviceFlashBlock(m_currentFlashLocationId));
+					/*if (m_flashMemoryList[i]->data() != m_deviceFlashMemoryList[j]->data())
+					{
+						qDebug() << "Failed to revert!!!";
+					}*/
+					updateRamLocation(m_currentFlashLocationId);
+				}
+			}
+		}
+		else
+		{
+			qDebug() << "Unable to find memory location " << QString::number(m_currentFlashLocationId,16) << "in local or device memory!";
+		}
+		//Find all windows that use that location id
+		m_currentFlashLocationId = 0;
+		//checkRamFlashSync();
 		return;
+	}
+	else
+	{
+		//qDebug() << "Error reverting! " << QString::number(m_currentFlashLocationId,16) << "Location not found!";
 	}
 	if (m_interrogationInProgress)
 	{
