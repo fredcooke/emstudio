@@ -753,6 +753,12 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data)
 	ui.tableWidget->verticalHeader()->hide();
 	ui.tableWidget->setRowCount(tableData->rows()+1);
 	ui.tableWidget->setColumnCount(tableData->columns()+1);
+	if (tableData->yAxis().size() == 0 || tableData->xAxis().size() == 0)
+	{
+		//Invalid/empty data
+		qDebug() << "3D Table axis had zero values. This is INVALID and should be fixed.";
+		return false;
+	}
 	double first = tableData->yAxis()[0];
 	int order = 0;
 	for (int i=0;i<tableData->rows();i++)

@@ -545,6 +545,12 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data)
 	ui.tableWidget->clear();
 	ui.tableWidget->setColumnCount(0);
 	ui.tableWidget->setRowCount(2);
+	if (tableData->axis().size() == 0)
+	{
+		//Invalid/empty data
+		qDebug() << "2D Table axis had zero values. This is INVALID and should be fixed.";
+		return false;
+	}
 	double first = tableData->axis()[0];
 	int order = 0;
 	for (int i=0;i<tableData->columns();i++)
@@ -565,6 +571,7 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data)
 			if (tableData->axis()[i] > first)
 			{
 				//Out of order table axis.
+				qDebug() << "2D Table axis is out of order!";
 				return false;
 			}
 		}
@@ -573,6 +580,7 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data)
 			if (tableData->axis()[i] < first)
 			{
 				//Out of order table axis.
+				qDebug() << "2D Table axis is out of order!";
 				return false;
 			}
 		}
