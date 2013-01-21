@@ -644,7 +644,7 @@ bool EmsData::verifyMemoryBlock(unsigned short locationid,QByteArray header,QByt
 	Q_UNUSED(header)
 	if (m_memoryMetaData.has2DMetaData(locationid))
 	{
-		if (payload.size() != TABLE_2D_PAYLOAD_SIZE)
+		if ((unsigned int)payload.size() != m_memoryMetaData.get2DMetaData(locationid).size)
 		{
 			return false;
 		}
@@ -655,7 +655,7 @@ bool EmsData::verifyMemoryBlock(unsigned short locationid,QByteArray header,QByt
 	}
 	if (m_memoryMetaData.has3DMetaData(locationid))
 	{
-		if (payload.size() != TABLE_3D_PAYLOAD_SIZE)
+		if ((unsigned int)payload.size() != m_memoryMetaData.get3DMetaData(locationid).size)
 		{
 			return false;
 		}

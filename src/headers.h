@@ -7,8 +7,8 @@
 
 #define define2string_p(x) #x
 #define define2string(x) define2string_p(x)
-#define TABLE_3D_PAYLOAD_SIZE 1024
-#define TABLE_2D_PAYLOAD_SIZE 64
+//#define TABLE_3D_PAYLOAD_SIZE 1024 //Pushing this into meta data rather than having it hardcoded
+//#define TABLE_2D_PAYLOAD_SIZE 64 //Pushing this into meta data rather than having it hardcoded
 
 
 enum DataType
