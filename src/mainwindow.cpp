@@ -587,6 +587,7 @@ void MainWindow::emsCommsDisconnected()
 {
 	emsComms->stop();
 	emsComms->terminate();
+	emsComms->wait(250); //Join it, fixes a race condition where the thread deletes before it's finished.
 	emsComms->deleteLater();
 	ui.actionConnect->setEnabled(true);
 	ui.actionDisconnect->setEnabled(false);
