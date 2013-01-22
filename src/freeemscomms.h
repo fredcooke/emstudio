@@ -65,6 +65,7 @@ public:
 	int retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size);
 	int burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size);
 	void setInterByteSendDelay(int milliseconds);
+	void setlogsDebugEnabled(bool enabled);
 protected:
 	void run();
 private:
@@ -140,6 +141,7 @@ private:
 		int sequencenumber;
 		void addArg(QVariant arg,int size=0) { args.append(arg); argsize.append(size);}
 	};
+	bool m_debugLogsEnabled;
 	QMap<FreeEmsComms::LocationIdFlags,QString> m_blockFlagToNameMap;
 	bool m_terminateLoop;
 	QMutex m_waitingInfoMutex;

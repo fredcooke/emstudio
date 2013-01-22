@@ -34,6 +34,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 	m_logInFile=0;
 	m_logOutFile=0;
 	m_logInOutFile=0;
+	m_debugLogsEnabled = false;
 	m_sequenceNumber = 1;
 	m_blockFlagList.append(BLOCK_HAS_PARENT);
 	m_blockFlagList.append(BLOCK_IS_RAM);
@@ -84,12 +85,16 @@ void FreeEmsComms::disconnectSerial()
 }
 void FreeEmsComms::openLogs()
 {
+	qDebug() << "Open logs:" << m_logsDirectory + "/" + m_logsFilename + ".bin";
 	m_logInFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".bin");
 	m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-	m_logInOutFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".both.bin");
-	m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
-	m_logOutFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".toecu.bin");
-	m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+	if (m_debugLogsEnabled)
+	{
+		m_logInOutFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".both.bin");
+		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		m_logOutFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".toecu.bin");
+		m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+	}
 }
 
 void FreeEmsComms::connectSerial(QString port,int baud)
@@ -120,13 +125,16 @@ void FreeEmsComms::setLogsEnabled(bool enabled)
 		delete m_logInFile;
 		m_logInFile=0;
 
-		m_logInOutFile->close();
-		delete m_logInOutFile;
-		m_logInOutFile=0;
+		if (m_debugLogsEnabled)
+		{
+			m_logInOutFile->close();
+			delete m_logInOutFile;
+			m_logInOutFile=0;
 
-		m_logOutFile->close();
-		delete m_logOutFile;
-		m_logOutFile=0;
+			m_logOutFile->close();
+			delete m_logOutFile;
+			m_logOutFile=0;
+		}
 	}
 	else if (!m_logsEnabled && enabled)
 	{
@@ -134,6 +142,26 @@ void FreeEmsComms::setLogsEnabled(bool enabled)
 	}
 	m_logsEnabled = enabled;
 	//serialThread->setLogsEnabled(enabled);
+}
+void FreeEmsComms::setlogsDebugEnabled(bool enabled)
+{
+	if (m_logsEnabled && enabled && !m_debugLogsEnabled)
+	{
+		m_logInOutFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".both.bin");
+		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+		m_logOutFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".toecu.bin");
+		m_logOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+	}
+	else if (m_logsEnabled && !enabled && m_debugLogsEnabled)
+	{
+		m_logInOutFile->close();
+		m_logInOutFile->deleteLater();
+		m_logInOutFile=0;
+		m_logOutFile->close();
+		m_logOutFile->deleteLater();
+		m_logOutFile=0;
+	}
+	m_debugLogsEnabled = enabled;
 }
 
 void FreeEmsComms::setLogDirectory(QString dir)
@@ -1466,17 +1494,24 @@ void FreeEmsComms::dataLogWrite(QByteArray buffer)
 {
 	if (m_logsEnabled)
 	{
-		m_logOutFile->write(buffer);
-		m_logInOutFile->write(buffer);
+		if (m_debugLogsEnabled)
+		{
+			m_logOutFile->write(buffer);
+			m_logInOutFile->write(buffer);
+		}
 	}
 }
+
 
 void FreeEmsComms::dataLogRead(QByteArray buffer)
 {
 	if (m_logsEnabled)
 	{
 		m_logInFile->write(buffer);
-		m_logInOutFile->write(buffer);
+		if (m_debugLogsEnabled)
+		{
+			m_logInOutFile->write(buffer);
+		}
 	}
 }
 

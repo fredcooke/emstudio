@@ -150,6 +150,7 @@ private:
 	QString m_settingsFile;
 	QString m_settingsDir;
 	QString m_defaultsDir;
+	QString m_localHomeDir;
 	QString m_logDirectory;
 	QString m_firmwareVersion;
 	QString m_interfaceVersion;
@@ -159,6 +160,7 @@ private:
 	void markRamClean();
 	void markDeviceFlashClean();
 	bool m_localRamDirty;
+	bool m_debugLogs;
 	bool m_deviceFlashDirty;
 	void updateView(unsigned short locid,QObject *view,QByteArray data,DataType type);
 	void createView(unsigned short locid,QByteArray data,DataType type,bool isram, bool isflash);

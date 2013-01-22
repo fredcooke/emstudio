@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	qDebug() << "Full hash:" << define2string(GIT_HASH);
 	progressView=0;
 	m_interrogationInProgress = false;
+	m_debugLogs = false;
 
 	emsData = new EmsData();
 	connect(emsData,SIGNAL(updateRequired(unsigned short)),this,SLOT(updateDataWindows(unsigned short)));
@@ -55,11 +56,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_defaultsDir = QApplication::instance()->applicationDirPath();
 
 	m_settingsDir = appDataDir + "/" + "EMStudio";
+	//%HOMEPATH%//m_localHomeDir
+	m_localHomeDir = getenv("%USERPROFILE%").replace("\\","/") + "/EMStudio";
 	//m_settingsFile = appDataDir + "/" + "EMStudio/EMStudio-config.ini";
-//#elif Q_OS_MAC <- Does not exist. Need OSX checking capabilities somewhere...
-	//Oh wait, it does not exist since I'm developing on a *nix box.
-//#elif Q_OS_LINUX
-#else
+//#elif Q_OS_MAC //<- Does not exist. Need OSX checking capabilities somewhere...
+	//Linux and Mac function identically here for now...
+#else //if Q_OS_LINUX
 	QString appDataDir = getenv("HOME");
 	if (!QDir(appDataDir).exists(".EMStudio"))
 	{
@@ -67,9 +69,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	}
 	m_defaultsDir = "/usr/share/EMStudio";
 	m_settingsDir = appDataDir + "/" + ".EMStudio";
+	m_localHomeDir = appDataDir + "/" + "EMStudio";
 	//m_settingsFile = appDataDir + "/" + ".EMStudio/EMStudio-config.ini";
 #endif
-
+	if (!QFile::exists(m_localHomeDir + "/logs"))
+	{
+		QDir(m_localHomeDir).mkpath(m_localHomeDir + "/logs");
+	}
 	//Settings, then defaults, then fallback to local
 	if (QFile::exists(m_settingsDir + "/EMStudio-config.ini"))
 	{
@@ -316,7 +322,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_saveLogs = settings.value("savelogs",true).toBool();
 	m_clearLogs = settings.value("clearlogs",false).toBool();
 	m_logsToKeep = settings.value("logstokeep",0).toInt();
-	m_logDirectory = settings.value("logdir",".").toString();
+	//emsComms->setLogFileName(m_localHomeDir + "/logs/" + m_logFileName); m_localHomeDir
+	m_logDirectory = settings.value("logdir",m_localHomeDir + "/logs").toString();
+	m_debugLogs = settings.value("debuglogs",false).toBool();
 	settings.endGroup();
 
 	emsComms->setBaud(m_comBaud);
@@ -324,6 +332,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsComms->setLogDirectory(m_logDirectory);
 	emsComms->setLogsEnabled(m_saveLogs);
 	emsComms->setInterByteSendDelay(m_comInterByte);
+	emsComms->setlogsDebugEnabled(m_debugLogs);
 
 	pidcount = 0;
 
@@ -586,7 +595,7 @@ void MainWindow::emsCommsDisconnected()
 	//Need to reset everything here.
 	emsComms = new FreeEmsComms(this);
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
-	emsComms->setLogFileName(m_logFileName);
+	emsComms->setLogFileName(m_localHomeDir + "/logs/" + m_logFileName);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
 	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
@@ -618,6 +627,7 @@ void MainWindow::emsCommsDisconnected()
 	emsComms->setLogDirectory(m_logDirectory);
 	emsComms->setLogsEnabled(m_saveLogs);
 	emsComms->setInterByteSendDelay(m_comInterByte);
+	emsComms->setlogsDebugEnabled(m_debugLogs);
 
 	ui.actionConnect->setEnabled(true);
 	m_offlineMode = true;
@@ -1148,6 +1158,7 @@ void MainWindow::settingsSaveClicked()
 	settings.setValue("clearlogs",m_clearLogs);
 	settings.setValue("logstokeep",m_logsToKeep);
 	settings.setValue("logdir",m_logDirectory);
+	settings.setValue("debuglogs",m_debugLogs);
 	settings.endGroup();
 	QMdiSubWindow *subwin = qobject_cast<QMdiSubWindow*>(comSettingsWidget->parent());
 	ui.mdiArea->removeSubWindow(subwin);
@@ -1854,7 +1865,7 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 			//top["memory"] = memorylocations;
 			if (m_saveLogs)
 			{
-				QFile *settingsFile = new QFile(m_logDirectory + "/" + m_logFileName + ".meta.json");
+				QFile *settingsFile = new QFile(m_localHomeDir + "/logs/" + m_logFileName + ".meta.json");
 				settingsFile->open(QIODevice::ReadWrite);
 				settingsFile->write(jsonSerializer.serialize(top));
 				settingsFile->close();
