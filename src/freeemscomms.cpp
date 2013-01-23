@@ -1231,16 +1231,16 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 							}
 						}
 					}
-					parent = parsedPacket.payload[2] << 8;
-					parent += parsedPacket.payload[3];
-					rampage = parsedPacket.payload[4];
-					flashpage = parsedPacket.payload[5];
+					parent = ((unsigned char)parsedPacket.payload[2]) << 8;
+					parent += (unsigned char)parsedPacket.payload[3];
+					rampage = (unsigned char)parsedPacket.payload[4];
+					flashpage = (unsigned char)parsedPacket.payload[5];
 					ramaddress = ((unsigned char)parsedPacket.payload[6]) << 8;
 					ramaddress += (unsigned char)parsedPacket.payload[7];
 					flashaddress = ((unsigned char)parsedPacket.payload[8]) << 8;
 					flashaddress += (unsigned char)parsedPacket.payload[9];
-					size = parsedPacket.payload[10] << 8;
-					size += parsedPacket.payload[11];
+					size = ((unsigned char)parsedPacket.payload[10]) << 8;
+					size += (unsigned char)parsedPacket.payload[11];
 					//emit locationIdInfo(locationid,test,flaglist,parent,rampage,flashpage,ramaddress,flashaddress,size);
 					//void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);
 
