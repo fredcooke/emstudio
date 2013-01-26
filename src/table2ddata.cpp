@@ -126,7 +126,7 @@ void Table2DData::setCell(int row, int column,double newval)
 	{
 		if (m_writesEnabled)
 		{
-			emit saveSingleData(m_locationId,data,(column*2)+(row * 32),2);
+			emit saveSingleData(m_locationId,data,(column*2)+(row * (m_metaData.size / 2.0)),2);
 		}
 	}
 }
