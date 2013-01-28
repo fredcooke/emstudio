@@ -57,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	m_settingsDir = appDataDir + "/" + "EMStudio";
 	//%HOMEPATH%//m_localHomeDir
-	m_localHomeDir = getenv("%USERPROFILE%").replace("\\","/") + "/EMStudio";
+	m_localHomeDir = QString(getenv("%USERPROFILE%")).replace("\\","/") + "/EMStudio";
 	//m_settingsFile = appDataDir + "/" + "EMStudio/EMStudio-config.ini";
 //#elif Q_OS_MAC //<- Does not exist. Need OSX checking capabilities somewhere...
 	//Linux and Mac function identically here for now...
