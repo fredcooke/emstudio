@@ -22,7 +22,7 @@
 #include <QCloseEvent>
 #include "ui_datagauges.h"
 #include "gaugewidget.h"
-#include "datapacketdecoder.h"
+#include "freeems/datapacketdecoder.h"
 class GaugeView : public QWidget
 {
 	Q_OBJECT

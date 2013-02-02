@@ -18,6 +18,7 @@
 #include "emsinfoview.h"
 #include <QMdiSubWindow>
 #include <QMessageBox>
+#include <QDebug>
 EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);

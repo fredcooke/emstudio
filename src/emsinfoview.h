@@ -21,7 +21,8 @@
 #include <QWidget>
 #include <QCloseEvent>
 #include "ui_emsinfo.h"
-#include "freeemscomms.h"
+#include "headers.h"
+//#include "freeemscomms.h"
 class EmsInfoView : public QWidget
 {
     Q_OBJECT

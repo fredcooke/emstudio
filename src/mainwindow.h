@@ -27,12 +27,12 @@
 #include "emsdata.h"
 #include "memorymetadata.h"
 //#include "logloader.h"
-#include "freeemscomms.h"
+#include "freeems/freeemscomms.h"
 #include "configblock.h"
 #include <QTimer>
 #include <qjson/serializer.h>
 #include "headers.h"
-#include "datapacketdecoder.h"
+#include "freeems/datapacketdecoder.h"
 #include "comsettings.h"
 #include "emsinfoview.h"
 #include "tableview.h"

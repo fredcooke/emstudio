@@ -50,10 +50,10 @@ SOURCES += src/main.cpp\
     src/freeemspacket.cpp \
     src/datafield.cpp \
     src/logloader.cpp \
-    src/freeemscomms.cpp \
+    src/freeems/freeemscomms.cpp \
     src/gaugewidget.cpp \
     src/gaugeitem.cpp \
-    src/datapacketdecoder.cpp \
+    src/freeems/datapacketdecoder.cpp \
     src/comsettings.cpp \
     src/rawdatadisplay.cpp \
     src/qhexedit.cpp \
@@ -79,7 +79,7 @@ SOURCES += src/main.cpp\
     src/dataview.cpp \
     src/emsstatus.cpp \
     src/tablemap3d.cpp \
-    src/serialrxthread.cpp \
+    src/freeems/serialrxthread.cpp \
     src/tablewidget.cpp \
     src/serialport.cpp \
     src/configview.cpp \
@@ -93,10 +93,10 @@ HEADERS  += src/mainwindow.h \
     src/freeemspacket.h \
     src/datafield.h \
     src/logloader.h \
-    src/freeemscomms.h \
+    src/freeems/freeemscomms.h \
     src/gaugewidget.h \
     src/gaugeitem.h \
-    src/datapacketdecoder.h \
+    src/freeems/datapacketdecoder.h \
     src/comsettings.h \
     src/rawdatadisplay.h \
     src/qhexedit.h \
@@ -123,7 +123,7 @@ HEADERS  += src/mainwindow.h \
     src/dataview.h \
     src/emsstatus.h \
     src/tablemap3d.h \
-    src/serialrxthread.h \
+    src/freeems/serialrxthread.h \
     src/tablewidget.h \
     src/serialport.h \
     src/configview.h \

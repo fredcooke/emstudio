@@ -21,7 +21,7 @@
 #include <QWidget>
 #include <QCloseEvent>
 #include <QMdiSubWindow>
-#include "datapacketdecoder.h"
+#include "freeems/datapacketdecoder.h"
 #include "ui_dataflags.h"
 class FlagView : public QWidget
 {
