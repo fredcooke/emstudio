@@ -16,6 +16,116 @@ SerialRXThread::~SerialRXThread()
 	this->terminate();
 	this->wait(1000);
 }
+QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
+{
+
+	unsigned char buf;
+	int len = 0;
+	bool m_inpacket = false;
+	bool m_inescape = false;
+	QByteArray qbuffer;
+	int attempts = 0; //This allows for a 2 second timeout.
+	while (attempts <= 50)
+	{
+		len = port->readBytes(&buf,1);
+		if (len < 0)
+		{
+			qDebug() << "Timeout";
+		}
+		else if (len == 0)
+		{
+			//This should be an error
+			qDebug() << "Nothing to read:" << attempts;
+			//perror("Error:");
+			//printf("\n");
+			//return; //Disable this, now that we are using timeouts.
+			msleep(10); //Need a sleep now, due to select timeout.
+			attempts++;
+			continue;
+		}
+		else
+		{
+			if (buf == 0xAA)
+			{
+				if (m_inpacket)
+				{
+					//Start byte in the middle of a packet
+					//Clear out the buffer and start fresh
+					m_inescape = false;
+					//emit dataRead(bufToEmit);
+					qbuffer.clear();
+					qDebug() << "Buffer error";
+				}
+				//Start of packet
+				m_inpacket = true;
+			}
+			else if (buf == 0xCC && m_inpacket)
+			{
+				//End of packet
+				m_inpacket = false;
+
+				//New Location of checksum
+				unsigned char sum = 0;
+				for (int i=0;i<qbuffer.size()-1;i++)
+				{
+					sum += qbuffer[i];
+				}
+
+				if (sum != (unsigned char)qbuffer[qbuffer.size()-1])
+				{
+					qDebug() << "BAD CHECKSUM!";
+					qbuffer.clear();
+				}
+				else
+				{
+					return qbuffer.mid(0,qbuffer.length()-1);
+				}
+			}
+			else
+			{
+				if (m_inpacket && !m_inescape)
+				{
+					if (buf == 0xBB)
+					{
+						//Need to escape the next byte
+						m_inescape = true;
+					}
+					else
+					{
+						qbuffer.append(buf);
+					}
+
+				}
+				else if (m_inpacket && m_inescape)
+				{
+					if (buf == 0x55)
+					{
+						qbuffer.append((char)0xAA);
+					}
+					else if (buf == 0x44)
+					{
+						qbuffer.append((char)0xBB);
+					}
+					else if (buf == 0x33)
+					{
+						qbuffer.append((char)0xCC);
+					}
+					else
+					{
+						qDebug() << "Error, escaped character is not valid!:" << QString::number(buf,16);
+					}
+					m_inescape = false;
+				}
+				else
+				{
+					//qDebug() << "Byte out of a packet:" << QString::number(buffer[i],16);
+				}
+			}
+		}
+	}
+	return QByteArray();
+}
+
 void SerialRXThread::run()
 {
 	//qint64 currms = QDateTime::currentMSecsSinceEpoch();

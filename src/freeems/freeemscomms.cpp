@@ -624,6 +624,60 @@ void FreeEmsComms::run()
 					continue;
 				}
 				qDebug() << "Serial connected!";
+				//Before we finish emitting the fact that we are connected, let's verify this is a freeems system we are talking to.
+				if (!sendPacket(GET_FIRMWARE_VERSION))
+				{
+					qDebug() << "Error writing packet. Quitting thread";
+					return;
+				}
+				int dataattempts = 0;
+				int nodataattempts=0;
+				bool good = false;
+				bool nodata = true;
+				while (dataattempts < 10 && !good && nodataattempts < 4)
+				{
+					QByteArray result = rxThread->readSinglePacket(serialPort);
+					if (result.size() > 0)
+					{
+						dataattempts++;
+						nodata = false;
+						Packet p = parseBuffer(result);
+						if (p.isValid && p.payloadid == GET_FIRMWARE_VERSION+1)
+						{
+							//We're good!
+							good = true;
+						}
+					}
+					else
+					{
+						nodataattempts++;
+					}
+				}
+				if (!good)
+				{
+					SerialPortStatus errortype;
+					QString errorstr = "";
+					if (nodata)
+					{
+						errortype = NO_DATA;
+						errorstr = "Unable to communicate with ECU, Serial port is unresponsive. Please verify your FreeEMS Board is plugged in, powered up, and all serial settings are properly set.";
+					}
+					else
+					{
+						errortype = INVALID_DATA;
+						errorstr = "Unable to communicate with FreeEMS, corrupt data received. Please verify serial settings, in particular double check the baud rate.";
+					}
+					emit error(errortype,errorstr);
+					serialconnected = false;
+					serialPort->closePort();
+					emit disconnected();
+					//On a disconnect, we are going to be deleting this thread, so go ahead and quit out;
+					return;
+					m_threadReqList.removeAt(i);
+					i--;
+					continue;
+				}
+
 				serialconnected = true;
 				emit debug("Connected to serial port");
 				emit connected();
