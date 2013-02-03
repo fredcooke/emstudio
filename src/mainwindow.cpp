@@ -219,6 +219,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsComms = new FreeEmsComms(this);
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
+
 	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
 	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
 	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
@@ -596,7 +597,8 @@ void MainWindow::emsCommsDisconnected()
 	//Need to reset everything here.
 	emsComms = new FreeEmsComms(this);
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
-	emsComms->setLogFileName(m_localHomeDir + "/logs/" + m_logFileName);
+	emsComms->setLogFileName(m_logFileName);
+	emsComms->setLogDirectory(m_logDirectory);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
 	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
@@ -625,7 +627,6 @@ void MainWindow::emsCommsDisconnected()
 	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
 	emsComms->setBaud(m_comBaud);
 	emsComms->setPort(m_comPort);
-	emsComms->setLogDirectory(m_logDirectory);
 	emsComms->setLogsEnabled(m_saveLogs);
 	emsComms->setInterByteSendDelay(m_comInterByte);
 	emsComms->setlogsDebugEnabled(m_debugLogs);
