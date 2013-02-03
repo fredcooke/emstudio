@@ -657,17 +657,18 @@ void FreeEmsComms::run()
 				if (!good)
 				{
 					QString errorstr = "";
+					SerialPortStatus errortype = NONE;
 					if (nodata)
 					{
 						errorstr = "Unable to communicate with ECU, Serial port is unresponsive. Please verify your FreeEMS Board is plugged in, powered up, and all serial settings are properly set.";
-						emit error(NO_DATA,errorstr);
+						errortype = (SerialPortStatus)NO_DATA;
 					}
 					else
 					{
 						errorstr = "Unable to communicate with FreeEMS, corrupt data received. Please verify serial settings, in particular double check the baud rate.";
-						emit error(INVALID_DATA,errorstr);
+						errortype = (SerialPortStatus)INVALID_DATA;
 					}
-
+					emit error(errortype,errorstr);
 					serialconnected = false;
 					serialPort->closePort();
 					emit disconnected();
