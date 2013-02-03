@@ -24,7 +24,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 {
 	qRegisterMetaType<QList<unsigned short> >("QList<unsigned short>");
 	qRegisterMetaType<QList<FreeEmsComms::LocationIdFlags> >("QList<FreeEmsComms::LocationIdFlags>");
-	qRegisterMetaType<SerialPortStatus>("Serial Port Status");
+	qRegisterMetaType<SerialPortStatus>("SerialPortStatus");
 	serialPort = new SerialPort(this);
 	connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
 	connect(serialPort,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)),Qt::DirectConnection);
