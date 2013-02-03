@@ -24,6 +24,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
 {
 	qRegisterMetaType<QList<unsigned short> >("QList<unsigned short>");
 	qRegisterMetaType<QList<FreeEmsComms::LocationIdFlags> >("QList<FreeEmsComms::LocationIdFlags>");
+	qRegisterMetaType<SerialPortStatus>("SerialPortStatus");
 	serialPort = new SerialPort(this);
 	connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
 	connect(serialPort,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)),Qt::DirectConnection);
@@ -655,17 +656,17 @@ void FreeEmsComms::run()
 				}
 				if (!good)
 				{
-					SerialPortStatus errortype;
 					QString errorstr = "";
+					SerialPortStatus errortype = NONE;
 					if (nodata)
 					{
-						errortype = NO_DATA;
 						errorstr = "Unable to communicate with ECU, Serial port is unresponsive. Please verify your FreeEMS Board is plugged in, powered up, and all serial settings are properly set.";
+						errortype = (SerialPortStatus)NO_DATA;
 					}
 					else
 					{
-						errortype = INVALID_DATA;
 						errorstr = "Unable to communicate with FreeEMS, corrupt data received. Please verify serial settings, in particular double check the baud rate.";
+						errortype = (SerialPortStatus)INVALID_DATA;
 					}
 					emit error(errortype,errorstr);
 					serialconnected = false;
