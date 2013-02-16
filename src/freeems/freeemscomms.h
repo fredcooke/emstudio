@@ -25,9 +25,10 @@
 #include <QDateTime>
 #include "serialport.h"
 #include "serialrxthread.h"
+#include "emscomms.h"
 #include "logloader.h"
 #include "headers.h"
-class FreeEmsComms : public QThread
+class FreeEmsComms : public EmsComms
 {
 	Q_OBJECT
 public:
@@ -57,7 +58,7 @@ public:
 	void disconnectSerial();
 	void loadLog(QString filename);
 	void playLog();
-	void populateDataFields();
+	//void populateDataFields();
 	QByteArray generatePacket(QByteArray header,QByteArray payload);
 	int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
 	int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);

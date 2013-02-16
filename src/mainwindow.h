@@ -27,7 +27,7 @@
 #include "emsdata.h"
 #include "memorymetadata.h"
 //#include "logloader.h"
-#include "freeems/freeemscomms.h"
+#include "emscomms.h"
 #include "configblock.h"
 #include <QTimer>
 #include <qjson/serializer.h>
@@ -137,7 +137,7 @@ private:
 
 	Ui::MainWindow ui;
 	//LogLoader *logLoader;
-	FreeEmsComms *emsComms;
+	EmsComms *emsComms;
 	int pidcount;
 	QTimer *timer;
 	QTimer *guiUpdateTimer;

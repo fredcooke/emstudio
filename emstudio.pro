@@ -76,12 +76,12 @@ SOURCES += src/main.cpp\
     src/emsstatus.cpp \
     src/tablemap3d.cpp \
     src/tablewidget.cpp \
-    src/serialport.cpp \
     src/configview.cpp \
     src/configblock.cpp \
     src/emsdata.cpp \
     src/memorymetadata.cpp \
     src/tablewidgetdelegate.cpp \
+    src/freeems/serialport.cpp \
     src/freeems/freeemscomms.cpp \
     src/freeems/datapacketdecoder.cpp \
     src/freeems/serialrxthread.cpp \
@@ -120,7 +120,6 @@ HEADERS  += src/mainwindow.h \
     src/emsstatus.h \
     src/tablemap3d.h \
     src/tablewidget.h \
-    src/serialport.h \
     src/configview.h \
     src/configblock.h \
     src/emsdata.h \
@@ -128,6 +127,8 @@ HEADERS  += src/mainwindow.h \
     src/table3ddata.h \
     src/memorymetadata.h \
     src/tablewidgetdelegate.h \
+    src/emscomms.h \
+    src/freeems/serialport.h \
     src/freeems/serialrxthread.h \
     src/freeems/freeemscomms.h \
     src/freeems/datapacketdecoder.h \
