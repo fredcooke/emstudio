@@ -131,70 +131,116 @@ void TableView3D::setValue(int row, int column,double value)
 	//tempValue = ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
 
 	//New value has been accepted. Let's write it.
-	if (row == ui.tableWidget->rowCount()-1)
-	{
-		setSilentValue(row,column,formatNumber(tempValue,m_metaData.xDp));
-		if (tempValue > tableData->maxXAxis())
-		{
-			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
-			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			return;
-		}
-		else if (tempValue < tableData->minXAxis())
-		{
-			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
-			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			return;
-		}
 
-		currentvalue = oldValue;
-		tableData->setXAxis(column-1,currentvalue);
-	}
-	else if (column == 0)
+	//If the value is an axis, and there are multiple cells selected, cancel the edit!
+	for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
 	{
-		setSilentValue(row,column,formatNumber(tempValue,m_metaData.yDp));
-		if (tempValue > tableData->maxYAxis())
+		if (ui.tableWidget->selectedItems()[i]->row() == ui.tableWidget->rowCount()-1)
 		{
-			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minYAxis()) + "-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			setSilentValue(row,column,formatNumber(currentvalue,m_metaData.yDp));
+			qDebug() << "XAxis edit attempted with multiple cells selected. This is not allowed";
 			return;
 		}
-		else if (tempValue < tableData->minYAxis())
+		if (ui.tableWidget->selectedItems()[i]->column() == 0)
 		{
-			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minYAxis()) + "-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			setSilentValue(row,column,formatNumber(currentvalue,m_metaData.yDp));
+			qDebug() << "YAxis edit attempted with multiple cells selected. This is not allowed";
 			return;
 		}
+	}
+	if (tempValue > tableData->maxZAxis())
+	{
+		QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+		setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
+		return;
+	}
+	if (tempValue < tableData->minZAxis())
+	{
+		QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+		setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
+		return;
+	}
+	if (ui.tableWidget->selectedItems().size() > 1)
+	{
 		currentvalue = oldValue;
-		tableData->setYAxis(ui.tableWidget->rowCount()-(row+2),currentvalue);
+		qDebug() << "Setting all cells to" << currentvalue << "for" << row << column;
+		tableData->setWritesEnabled(false);
+		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
+		{
+			setSilentValue(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column(),formatNumber(tempValue,m_metaData.zDp));
+			tableData->setCell(ui.tableWidget->rowCount()-(ui.tableWidget->selectedItems()[i]->row()+2),ui.tableWidget->selectedItems()[i]->column()-1,currentvalue);
+		}
+		tableData->setWritesEnabled(true);
+		tableData->writeWholeLocation();
 	}
 	else
 	{
-		setSilentValue(row,column,formatNumber(tempValue,m_metaData.zDp));
-		if (tempValue > tableData->maxZAxis())
+		if (row == ui.tableWidget->rowCount()-1)
 		{
-			QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
-			return;
+			setSilentValue(row,column,formatNumber(tempValue,m_metaData.xDp));
+			if (tempValue > tableData->maxXAxis())
+			{
+				QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
+				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+				return;
+			}
+			else if (tempValue < tableData->minXAxis())
+			{
+				QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
+				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+				return;
+			}
+
+			currentvalue = oldValue;
+			tableData->setXAxis(column-1,currentvalue);
 		}
-		if (tempValue < tableData->minZAxis())
+		else if (column == 0)
 		{
-			QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-			//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-			setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
-			return;
+			setSilentValue(row,column,formatNumber(tempValue,m_metaData.yDp));
+			if (tempValue > tableData->maxYAxis())
+			{
+				QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minYAxis()) + "-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.yDp));
+				return;
+			}
+			else if (tempValue < tableData->minYAxis())
+			{
+				QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minYAxis()) + "-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.yDp));
+				return;
+			}
+			currentvalue = oldValue;
+			tableData->setYAxis(ui.tableWidget->rowCount()-(row+2),currentvalue);
 		}
-		currentvalue = oldValue;
-		tableData->setCell(ui.tableWidget->rowCount()-(row+2),column-1,currentvalue);
+		else
+		{
+			setSilentValue(row,column,formatNumber(tempValue,m_metaData.zDp));
+			if (tempValue > tableData->maxZAxis())
+			{
+				QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
+				return;
+			}
+			if (tempValue < tableData->minZAxis())
+			{
+				QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
+				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
+				return;
+			}
+			currentvalue = oldValue;
+			tableData->setCell(ui.tableWidget->rowCount()-(row+2),column-1,currentvalue);
+		}
 	}
 	//ui.tableWidget->resizeColumnsToContents();
 	resizeColumnWidths();
 	reColorTable(row,column);
+
 }
 
 void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
@@ -932,9 +978,9 @@ void TableView3D::reColorTable(int rownum,int colnum)
 
 */
 
-		qDebug() << "Loc:" << (tableData->rows()-1)-(rownum) << colnum - 1;
+		//qDebug() << "Loc:" << (tableData->rows()-1)-(rownum) << colnum - 1;
 		double val = tableData->values()[(tableData->rows()-1)-(rownum)][colnum-1];
-		qDebug() << "Value:" << val;
+		//qDebug() << "Value:" << val;
 
 		//ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
 		if (val < tableData->maxZAxis()/4)
