@@ -169,6 +169,7 @@ void TableView3D::setValue(int row, int column,double value)
 		{
 			setSilentValue(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column(),formatNumber(tempValue,m_metaData.zDp));
 			tableData->setCell(ui.tableWidget->rowCount()-(ui.tableWidget->selectedItems()[i]->row()+2),ui.tableWidget->selectedItems()[i]->column()-1,currentvalue);
+			reColorTable(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column());
 		}
 		tableData->setWritesEnabled(true);
 		tableData->writeWholeLocation();
@@ -236,10 +237,11 @@ void TableView3D::setValue(int row, int column,double value)
 			currentvalue = oldValue;
 			tableData->setCell(ui.tableWidget->rowCount()-(row+2),column-1,currentvalue);
 		}
+		reColorTable(row,column);
 	}
 	//ui.tableWidget->resizeColumnsToContents();
 	resizeColumnWidths();
-	reColorTable(row,column);
+
 
 }
 
