@@ -25,6 +25,7 @@
 #include <QSettings>
 #include <tableview2d.h>
 #include <qjson/parser.h>
+#include "freeems/freeemscomms.h"
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	m_offlineMode = false;

@@ -20,7 +20,7 @@
 #include <QDebug>
 #include "freeemspacket.h"
 #define NAK 0x02
-FreeEmsComms::FreeEmsComms(QObject *parent) : QThread(parent)
+FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 {
 	qRegisterMetaType<QList<unsigned short> >("QList<unsigned short>");
 	qRegisterMetaType<QList<FreeEmsComms::LocationIdFlags> >("QList<FreeEmsComms::LocationIdFlags>");
