@@ -39,13 +39,13 @@ void TableView::closeEvent(QCloseEvent *event)
 void TableView::passDecoder(DataPacketDecoder *decoder)
 {
 	dataPacketDecoder = decoder;
-	ui.tableWidget->setRowCount(dataPacketDecoder->m_dataFieldList.size());
-	for (int i=0;i<dataPacketDecoder->m_dataFieldList.size();i++)
+	ui.tableWidget->setRowCount(dataPacketDecoder->fieldSize());
+	for (int i=0;i<dataPacketDecoder->fieldSize();i++)
 	{
-		m_nameToIndexMap[dataPacketDecoder->m_dataFieldList[i].name()] = i;
-		ui.tableWidget->setItem(i,0,new QTableWidgetItem(dataPacketDecoder->m_dataFieldList[i].name()));
+		m_nameToIndexMap[dataPacketDecoder->getField(i).name()] = i;
+		ui.tableWidget->setItem(i,0,new QTableWidgetItem(dataPacketDecoder->getField(i).name()));
 		ui.tableWidget->setItem(i,1,new QTableWidgetItem("0"));
-		ui.tableWidget->setItem(i,2,new QTableWidgetItem(dataPacketDecoder->m_dataFieldList[i].description()));
+		ui.tableWidget->setItem(i,2,new QTableWidgetItem(dataPacketDecoder->getField(i).description()));
 	}
 }
 

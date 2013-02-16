@@ -23,7 +23,7 @@
 #include <QTimer>
 #include <QCloseEvent>
 #include "ui_datatables.h"
-#include "freeems/datapacketdecoder.h"
+#include "datapacketdecoder.h"
 class TableView : public QWidget
 {
     Q_OBJECT

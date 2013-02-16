@@ -15,36 +15,28 @@
 *   You should have received a copy of the GNU General Public License      *
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
-#ifndef GAUGEVIEW_H
-#define GAUGEVIEW_H
+#ifndef FEDATAPACKETDECODER_H
+#define FEDATAPACKETDECODER_H
 
-#include <QWidget>
-#include <QCloseEvent>
-#include "ui_datagauges.h"
-#include "gaugewidget.h"
+#include <QObject>
+#include <QMap>
+#include <QVariantMap>
+#include "datafield.h"
 #include "datapacketdecoder.h"
-class GaugeView : public QWidget
+class FEDataPacketDecoder : public DataPacketDecoder
 {
-	Q_OBJECT
-
+    Q_OBJECT
 public:
-	explicit GaugeView(QWidget *parent = 0);
-	~GaugeView();
-	void passData(QVariantMap data);
-	void passDecoder(DataPacketDecoder *decoder);
-	void setFile(QString file);
+	FEDataPacketDecoder(QObject *parent = 0);
+	void populateDataFields();
+	int fieldSize();
+	DataField getField(int num);
 private:
-	QList<QString> propertiesInUse;
-	QString file;
-	QTimer *guiUpdateTimer;
-	DataPacketDecoder *dataPacketDecoder;
-	QVariantMap m_valueMap;
-	Ui::DataGauges ui;
-	GaugeWidget *widget;
-protected:
-	void closeEvent(QCloseEvent *event);
-private slots:
-	void guiUpdateTimerTick();
+	QList<DataField> m_dataFieldList;
+signals:
+	void payloadDecoded(QVariantMap data);
+public slots:
+	void decodePayload(QByteArray payload);
 };
 
-#endif // GAUGEVIEW_H
+#endif // FEDATAPACKETDECODER_H

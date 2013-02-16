@@ -26,13 +26,14 @@ class DataPacketDecoder : public QObject
 {
     Q_OBJECT
 public:
-	DataPacketDecoder(QObject *parent = 0);
-	void populateDataFields();
-	QList<DataField> m_dataFieldList;
-signals:
-	void payloadDecoded(QVariantMap data);
+	DataPacketDecoder(QObject *parent = 0) : QObject(parent) {}
+	virtual void populateDataFields()=0;
+	virtual int fieldSize()=0;
+	virtual DataField getField(int num)=0;
+//signals:
+	//void payloadDecoded(QVariantMap data);
 public slots:
-	void decodePayload(QByteArray payload);
+	virtual void decodePayload(QByteArray payload)=0;
 };
 
 #endif // DATAPACKETDECODER_H

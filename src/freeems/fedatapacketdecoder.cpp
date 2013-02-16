@@ -15,13 +15,13 @@
 *   You should have received a copy of the GNU General Public License      *
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
-#include "datapacketdecoder.h"
+#include "fedatapacketdecoder.h"
 #include <QDebug>
-DataPacketDecoder::DataPacketDecoder(QObject *parent) : QObject(parent)
+FEDataPacketDecoder::FEDataPacketDecoder(QObject *parent) : DataPacketDecoder(parent)
 {
 	populateDataFields();
 }
-void DataPacketDecoder::decodePayload(QByteArray payload)
+void FEDataPacketDecoder::decodePayload(QByteArray payload)
 {
 	QVariantMap m_valueMap;
 	for (int i=0;i<m_dataFieldList.size();i++)
@@ -42,8 +42,21 @@ void DataPacketDecoder::decodePayload(QByteArray payload)
 	}
 	emit payloadDecoded(m_valueMap);
 }
+int FEDataPacketDecoder::fieldSize()
+{
+	return m_dataFieldList.size();
+}
 
-void DataPacketDecoder::populateDataFields()
+DataField FEDataPacketDecoder::getField(int num)
+{
+	if (num >=0 && num < m_dataFieldList.size())
+	{
+		return m_dataFieldList[num];
+	}
+	return DataField();
+}
+
+void FEDataPacketDecoder::populateDataFields()
 {
 	// CoreVars
 	m_dataFieldList.append(DataField("IAT","Intake Air Temperature",0,2,100,-273.15));
