@@ -26,6 +26,7 @@
 #include <tableview2d.h>
 #include <qjson/parser.h>
 #include "freeems/freeemscomms.h"
+#include "freeems/fedatapacketdecoder.h"
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	m_offlineMode = false;
@@ -214,8 +215,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	dataFlags=0;
 	dataGauges=0;
 
-	dataPacketDecoder = new DataPacketDecoder(this);
-	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
+	dataPacketDecoder = new FEDataPacketDecoder(this);
+	Q_ASSERT(connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap))));
 
 	emsComms = new FreeEmsComms(this);
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");

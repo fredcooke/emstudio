@@ -32,7 +32,7 @@
 #include <QTimer>
 #include <qjson/serializer.h>
 #include "headers.h"
-#include "freeems/datapacketdecoder.h"
+#include "datapacketdecoder.h"
 #include "comsettings.h"
 #include "emsinfoview.h"
 #include "tableview.h"

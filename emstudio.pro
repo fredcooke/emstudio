@@ -83,7 +83,7 @@ SOURCES += src/main.cpp\
     src/tablewidgetdelegate.cpp \
     src/freeems/serialport.cpp \
     src/freeems/freeemscomms.cpp \
-    src/freeems/datapacketdecoder.cpp \
+    src/freeems/fedatapacketdecoder.cpp \
     src/freeems/serialrxthread.cpp \
     src/freeems/fetable2ddata.cpp \
     src/freeems/fetable3ddata.cpp
@@ -128,10 +128,11 @@ HEADERS  += src/mainwindow.h \
     src/memorymetadata.h \
     src/tablewidgetdelegate.h \
     src/emscomms.h \
+    src/datapacketdecoder.h \
     src/freeems/serialport.h \
     src/freeems/serialrxthread.h \
     src/freeems/freeemscomms.h \
-    src/freeems/datapacketdecoder.h \
+    src/freeems/fedatapacketdecoder.h \
     src/freeems/fetable2ddata.h \
     src/freeems/fetable3ddata.h
 
