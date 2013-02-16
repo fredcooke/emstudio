@@ -16,16 +16,15 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
 
-#include "table3ddata.h"
+#include "fetable3ddata.h"
 #include <QDebug>
-Table3DData::Table3DData(unsigned short locationid, bool isflashonly,QByteArray data,Table3DMetaData metadata) : TableData()
+FETable3DData::FETable3DData() : Table3DData()
 {
 	m_writesEnabled = true;
-	m_isFlashOnly = isflashonly;
-	setData(locationid,data,metadata);
 }
-void Table3DData::setData(unsigned short locationid,QByteArray data)
+void FETable3DData::setData(unsigned short locationid,bool isflashonly, QByteArray data)
 {
+	m_isFlashOnly = isflashonly;
 	Q_UNUSED(locationid)
 	m_xAxis.clear();
 	m_yAxis.clear();
@@ -66,41 +65,42 @@ void Table3DData::setData(unsigned short locationid,QByteArray data)
 	}
 }
 
-void Table3DData::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata)
+void FETable3DData::setData(unsigned short locationid,bool isflashonly,QByteArray data,Table3DMetaData metadata)
 {
 	m_locationId = locationid;
 	m_metaData = metadata;
-	setData(locationid,data);
+	m_isFlashOnly = isflashonly;
+	setData(locationid,isflashonly,data);
 }
-double Table3DData::maxXAxis()
+double FETable3DData::maxXAxis()
 {
 	return m_maxXAxis;
 }
 
-double Table3DData::maxYAxis()
+double FETable3DData::maxYAxis()
 {
 	return m_maxYAxis;
 }
 
-double Table3DData::maxZAxis()
+double FETable3DData::maxZAxis()
 {
 	return m_maxZAxis;
 }
-double Table3DData::minXAxis()
+double FETable3DData::minXAxis()
 {
 	return m_minXAxis;
 }
 
-double Table3DData::minYAxis()
+double FETable3DData::minYAxis()
 {
 	return m_minYAxis;
 }
 
-double Table3DData::minZAxis()
+double FETable3DData::minZAxis()
 {
 	return m_minZAxis;
 }
-void Table3DData::setXAxis(int index,double val)
+void FETable3DData::setXAxis(int index,double val)
 {
 	QByteArray data;
 	unsigned short newval = backConvertAxis(val,m_metaData.xAxisCalc);
@@ -115,12 +115,12 @@ void Table3DData::setXAxis(int index,double val)
 		m_xAxis[index] = val;
 	}
 }
-void Table3DData::writeWholeLocation()
+void FETable3DData::writeWholeLocation()
 {
 	emit saveSingleData(m_locationId,data(),0,data().size());
 }
 
-void Table3DData::setYAxis(int index,double val)
+void FETable3DData::setYAxis(int index,double val)
 {
 	QByteArray data;
 	unsigned short newval = backConvertAxis(val,m_metaData.yAxisCalc);
@@ -136,7 +136,7 @@ void Table3DData::setYAxis(int index,double val)
 	}
 }
 
-void Table3DData::setCell(int yIndex, int xIndex,double val)
+void FETable3DData::setCell(int yIndex, int xIndex,double val)
 {
 	QByteArray data;
 	unsigned short newval = backConvertAxis(val,m_metaData.zAxisCalc);
@@ -152,12 +152,12 @@ void Table3DData::setCell(int yIndex, int xIndex,double val)
 		m_values[yIndex][xIndex] = val;
 	}
 }
-void Table3DData::setWritesEnabled(bool enabled)
+void FETable3DData::setWritesEnabled(bool enabled)
 {
 	m_writesEnabled = enabled;
 }
 
-QByteArray Table3DData::data()
+QByteArray FETable3DData::data()
 {
 	QByteArray data;
 
@@ -204,27 +204,27 @@ QByteArray Table3DData::data()
 	return data;
 }
 
-QList<double> Table3DData::yAxis()
+QList<double> FETable3DData::yAxis()
 {
 	return m_yAxis;
 }
 
-QList<double> Table3DData::xAxis()
+QList<double> FETable3DData::xAxis()
 {
 	return m_xAxis;
 }
 
-QList<QList<double> > Table3DData::values()
+QList<QList<double> > FETable3DData::values()
 {
 	return m_values;
 }
 
-int Table3DData::columns()
+int FETable3DData::columns()
 {
 	return m_xAxis.size();
 }
 
-int Table3DData::rows()
+int FETable3DData::rows()
 {
 	return m_yAxis.size();
 }

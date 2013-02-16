@@ -26,43 +26,26 @@ class Table3DData : public TableData
 {
 	Q_OBJECT
 public:
-	Table3DData(unsigned short locationid,bool isflashonly, QByteArray data,Table3DMetaData metadata);
-	void setData(unsigned short locationid,QByteArray payload,Table3DMetaData metadata);
-	void setData(unsigned short locationid,QByteArray payload);
-	QByteArray data();
-	QList<double> xAxis();
-	QList<double> yAxis();
-	QList<QList<double> > values();
-	int columns();
-	int rows();
-	void setCell(int row, int column,double val);
-	void setXAxis(int column,double val);
-	void setYAxis(int row,double val);
-	double maxXAxis();
-	double maxYAxis();
-	double maxZAxis();
-	double minXAxis();
-	double minYAxis();
-	double minZAxis();
-	void setWritesEnabled(bool enabled);
-	void writeWholeLocation();
-private:
-	bool m_writesEnabled;
-	bool m_isFlashOnly;
-	unsigned short m_locationId;
-	QList<double> m_xAxis;
-	QList<double> m_yAxis;
-	QList<QList<double> > m_values;
-	QString xAxisLabel;
-	QString yAxisLabel;
-	QString valuesLabel;
-	double m_maxXAxis;
-	double m_maxYAxis;
-	double m_maxZAxis;
-	double m_minXAxis;
-	double m_minYAxis;
-	double m_minZAxis;
-	Table3DMetaData m_metaData;
+	//Table3DData(unsigned short locationid,bool isflashonly, QByteArray data,Table3DMetaData metadata);
+	virtual void setData(unsigned short locationid,bool isflashonly,QByteArray payload,Table3DMetaData metadata)=0;
+	virtual void setData(unsigned short locationid,bool isflashonly,QByteArray payload)=0;
+	virtual QByteArray data()=0;
+	virtual QList<double> xAxis()=0;
+	virtual QList<double> yAxis()=0;
+	virtual QList<QList<double> > values()=0;
+	virtual int columns()=0;
+	virtual int rows()=0;
+	virtual void setCell(int row, int column,double val)=0;
+	virtual void setXAxis(int column,double val)=0;
+	virtual void setYAxis(int row,double val)=0;
+	virtual double maxXAxis()=0;
+	virtual double maxYAxis()=0;
+	virtual double maxZAxis()=0;
+	virtual double minXAxis()=0;
+	virtual double minYAxis()=0;
+	virtual double minZAxis()=0;
+	virtual void setWritesEnabled(bool enabled)=0;
+	virtual void writeWholeLocation()=0;
 signals:
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
 public slots:

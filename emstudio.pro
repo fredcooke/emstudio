@@ -50,10 +50,8 @@ SOURCES += src/main.cpp\
     src/freeemspacket.cpp \
     src/datafield.cpp \
     src/logloader.cpp \
-    src/freeems/freeemscomms.cpp \
     src/gaugewidget.cpp \
     src/gaugeitem.cpp \
-    src/freeems/datapacketdecoder.cpp \
     src/comsettings.cpp \
     src/rawdatadisplay.cpp \
     src/qhexedit.cpp \
@@ -66,37 +64,37 @@ SOURCES += src/main.cpp\
     src/flagview.cpp \
     src/tableview.cpp \
     src/tableview2d.cpp \
-    src/table2ddata.cpp \
     src/packetstatusview.cpp \
     src/aboutview.cpp \
     src/memorylocation.cpp \
     src/tableview3d.cpp \
     src/interrogateprogressview.cpp \
-    src/table3ddata.cpp \
     src/tabledata.cpp \
     src/readonlyramview.cpp \
     src/overviewprogressitemdelegate.cpp \
     src/dataview.cpp \
     src/emsstatus.cpp \
     src/tablemap3d.cpp \
-    src/freeems/serialrxthread.cpp \
     src/tablewidget.cpp \
     src/serialport.cpp \
     src/configview.cpp \
     src/configblock.cpp \
     src/emsdata.cpp \
     src/memorymetadata.cpp \
-    src/tablewidgetdelegate.cpp
+    src/tablewidgetdelegate.cpp \
+    src/freeems/freeemscomms.cpp \
+    src/freeems/datapacketdecoder.cpp \
+    src/freeems/serialrxthread.cpp \
+    src/freeems/fetable2ddata.cpp \
+    src/freeems/fetable3ddata.cpp
 
 
 HEADERS  += src/mainwindow.h \
     src/freeemspacket.h \
     src/datafield.h \
     src/logloader.h \
-    src/freeems/freeemscomms.h \
     src/gaugewidget.h \
     src/gaugeitem.h \
-    src/freeems/datapacketdecoder.h \
     src/comsettings.h \
     src/rawdatadisplay.h \
     src/qhexedit.h \
@@ -109,13 +107,11 @@ HEADERS  += src/mainwindow.h \
     src/flagview.h \
     src/tableview.h \
     src/tableview2d.h \
-    src/table2ddata.h \
     src/packetstatusview.h \
     src/aboutview.h \
     src/memorylocation.h \
     src/tableview3d.h \
     src/interrogateprogressview.h \
-    src/table3ddata.h \
     src/headers.h \
     src/tabledata.h \
     src/readonlyramview.h \
@@ -123,14 +119,20 @@ HEADERS  += src/mainwindow.h \
     src/dataview.h \
     src/emsstatus.h \
     src/tablemap3d.h \
-    src/freeems/serialrxthread.h \
     src/tablewidget.h \
     src/serialport.h \
     src/configview.h \
     src/configblock.h \
     src/emsdata.h \
+    src/table2ddata.h \
+    src/table3ddata.h \
     src/memorymetadata.h \
-    src/tablewidgetdelegate.h
+    src/tablewidgetdelegate.h \
+    src/freeems/serialrxthread.h \
+    src/freeems/freeemscomms.h \
+    src/freeems/datapacketdecoder.h \
+    src/freeems/fetable2ddata.h \
+    src/freeems/fetable3ddata.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \

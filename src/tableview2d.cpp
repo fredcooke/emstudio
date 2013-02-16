@@ -23,6 +23,7 @@
 #include <qwt_plot_curve.h>
 #include <qjson/serializer.h>
 #include <QFileDialog>
+#include "freeems/fetable2ddata.h"
 TableView2D::TableView2D(bool isram, bool isflash,QWidget *parent)
 {
 	Q_UNUSED(parent)
@@ -536,7 +537,9 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data)
 	{
 		tableData->deleteLater();
 	}
-	tableData = new Table2DData(locationid,m_isFlashOnly,data,m_metaData);
+	//tableData = new Table2DData(locationid,m_isFlashOnly,data,m_metaData);
+	tableData = new FETable2DData();
+	tableData->setData(locationid,m_isFlashOnly,data,m_metaData);
 	connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	qDebug() << "TableView2D::passData" << "0x" + QString::number(locationid,16).toUpper();
 	samples.clear();

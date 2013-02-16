@@ -16,35 +16,49 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
 
-#ifndef TABLE2DDATA_H
-#define TABLE2DDATA_H
+#ifndef FETABLE2DDATA_H
+#define FETABLE2DDATA_H
 #include <QObject>
 #include <QString>
 #include <QList>
 #include <QByteArray>
-#include "tabledata.h"
+#include "table2ddata.h"
 #include "headers.h"
-class Table2DData : public TableData
+class FETable2DData : public Table2DData
 {
 	Q_OBJECT
 public:
-//	virtual Table2DData() = 0;
-//	virtual Table2DData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata) = 0;
-	virtual void setData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata) = 0;
-	virtual QByteArray data() = 0;
-	virtual double maxXAxis() = 0;
-	virtual double maxYAxis() = 0;
-	virtual double minXAxis() = 0;
-	virtual double minYAxis() = 0;
-	virtual QList<double> axis() = 0;
-	virtual QList<double> values() = 0;
-	virtual int columns() = 0;
-	virtual int rows() = 0;
-	virtual void setCell(int row, int column,double newval) = 0;
-	virtual void setWritesEnabled(bool enabled) = 0;
-	virtual void writeWholeLocation() = 0;
+	FETable2DData();
+	//FETable2DData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata);
+	void setData(unsigned short locationid,bool isflashonly, QByteArray payload,Table2DMetaData metadata);
+	QByteArray data();
+	double maxXAxis();
+	double maxYAxis();
+	double minXAxis();
+	double minYAxis();
+	QList<double> axis();
+	QList<double> values();
+	int columns();
+	int rows();
+	void setCell(int row, int column,double newval);
+	void setWritesEnabled(bool enabled);
+	void writeWholeLocation();
+private:
+	bool m_isFlashOnly;
+	bool m_writesEnabled;
+	double m_maxXAxis;
+	double m_maxYAxis;
+	double m_minXAxis;
+	double m_minYAxis;
+
+	Table2DMetaData m_metaData;
+	unsigned short m_locationId;
+	QList<double> m_axis;
+	QList<double> m_values;
+	QString axisLabel;
+	QString valuesLabel;
 signals:
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
 };
 
-#endif // TABLE2DDATA_H
+#endif // FETABLE2DDATA_H
