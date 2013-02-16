@@ -1,4 +1,4 @@
-/***************************************************************************
+	/***************************************************************************
 *   Copyright (C) 2012  Michael Carpenter (malcom2073)                     *
 *                                                                          *
 *   This file is a part of EMStudio                                        *
@@ -16,30 +16,23 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
 
-#include "table2ddata.h"
+#include "fetable2ddata.h"
 #include <QDebug>
-Table2DData::Table2DData() : TableData()
+FETable2DData::FETable2DData() : Table2DData()
 {
 	m_writesEnabled = true;
 }
-
-Table2DData::Table2DData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata) : TableData()
-{
-	m_writesEnabled = true;
-	m_isFlashOnly = isflashonly;
-	setData(locationid,payload,metadata);
-}
-void Table2DData::writeWholeLocation()
+void FETable2DData::writeWholeLocation()
 {
 	emit saveSingleData(m_locationId,data(),0,data().size());
 }
-
-void Table2DData::setWritesEnabled(bool enabled)
+void FETable2DData::setWritesEnabled(bool enabled)
 {
 	m_writesEnabled = enabled;
 }
-void Table2DData::setData(unsigned short locationid, QByteArray payload,Table2DMetaData metadata)
+void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArray payload,Table2DMetaData metadata)
 {
+	m_isFlashOnly = isflashonly;
 	m_metaData = metadata;
 	m_maxXAxis = calcAxis(65535,metadata.xAxisCalc);
 	m_maxYAxis = calcAxis(65535,metadata.yAxisCalc);
@@ -55,46 +48,46 @@ void Table2DData::setData(unsigned short locationid, QByteArray payload,Table2DM
 		m_values.append(calcAxis(y,metadata.yAxisCalc));
 	}
 }
-double Table2DData::maxXAxis()
+double FETable2DData::maxXAxis()
 {
 	return m_maxXAxis;
 }
 
-double Table2DData::maxYAxis()
+double FETable2DData::maxYAxis()
 {
 	return m_maxYAxis;
 }
 
-double Table2DData::minXAxis()
+double FETable2DData::minXAxis()
 {
 	return m_minXAxis;
 }
 
-double Table2DData::minYAxis()
+double FETable2DData::minYAxis()
 {
 	return m_minYAxis;
 }
 
-QList<double> Table2DData::axis()
+QList<double> FETable2DData::axis()
 {
 	return m_axis;
 }
 
-QList<double> Table2DData::values()
+QList<double> FETable2DData::values()
 {
 	return m_values;
 }
-int Table2DData::columns()
+int FETable2DData::columns()
 {
 	return m_axis.size();
 }
 
-int Table2DData::rows()
+int FETable2DData::rows()
 {
 	return 2;
 }
 
-void Table2DData::setCell(int row, int column,double newval)
+void FETable2DData::setCell(int row, int column,double newval)
 {
 	//New value has been accepted. Let's write it.
 	//void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
@@ -131,7 +124,7 @@ void Table2DData::setCell(int row, int column,double newval)
 	}
 }
 
-QByteArray Table2DData::data()
+QByteArray FETable2DData::data()
 {
 	QByteArray data;
 	for (int i=0;i<m_axis.size();i++)

@@ -26,6 +26,7 @@
 #include <QContextMenuEvent>
 #include <QMenu>
 #include <QAction>
+#include <freeems/fetable3ddata.h>
 #include "tablewidgetdelegate.h"
 TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 {
@@ -771,11 +772,13 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data)
 	if (tableData)
 	{
 		//tableData->deleteLater();
-		tableData->setData(locationid,data);
+		tableData->setData(locationid,m_isFlashOnly,data);
 	}
 	else
 	{
-		tableData = new Table3DData(locationid,m_isFlashOnly,data,m_metaData);
+		//tableData = new Table3DData(locationid,m_isFlashOnly,data,m_metaData);
+		tableData = new FETable3DData();
+		tableData->setData(locationid,m_isFlashOnly,data,m_metaData);
 		connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 		if (m_tableMap)
 		{

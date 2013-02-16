@@ -16,35 +16,58 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
 
-#ifndef TABLE2DDATA_H
-#define TABLE2DDATA_H
+#ifndef FETABLE3DDATA_H
+#define FETABLE3DDATA_H
+
 #include <QObject>
-#include <QString>
-#include <QList>
-#include <QByteArray>
-#include "tabledata.h"
 #include "headers.h"
-class Table2DData : public TableData
+#include "table3ddata.h"
+class FETable3DData : public Table3DData
 {
 	Q_OBJECT
 public:
-//	virtual Table2DData() = 0;
-//	virtual Table2DData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata) = 0;
-	virtual void setData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata) = 0;
-	virtual QByteArray data() = 0;
-	virtual double maxXAxis() = 0;
-	virtual double maxYAxis() = 0;
-	virtual double minXAxis() = 0;
-	virtual double minYAxis() = 0;
-	virtual QList<double> axis() = 0;
-	virtual QList<double> values() = 0;
-	virtual int columns() = 0;
-	virtual int rows() = 0;
-	virtual void setCell(int row, int column,double newval) = 0;
-	virtual void setWritesEnabled(bool enabled) = 0;
-	virtual void writeWholeLocation() = 0;
+	FETable3DData();
+	//FETable3DData(unsigned short locationid,bool isflashonly, QByteArray data,Table3DMetaData metadata);
+	void setData(unsigned short locationid,bool isflashonly,QByteArray payload,Table3DMetaData metadata);
+	void setData(unsigned short locationid,bool isflashonly,QByteArray payload);
+	QByteArray data();
+	QList<double> xAxis();
+	QList<double> yAxis();
+	QList<QList<double> > values();
+	int columns();
+	int rows();
+	void setCell(int row, int column,double val);
+	void setXAxis(int column,double val);
+	void setYAxis(int row,double val);
+	double maxXAxis();
+	double maxYAxis();
+	double maxZAxis();
+	double minXAxis();
+	double minYAxis();
+	double minZAxis();
+	void setWritesEnabled(bool enabled);
+	void writeWholeLocation();
+private:
+	bool m_writesEnabled;
+	bool m_isFlashOnly;
+	unsigned short m_locationId;
+	QList<double> m_xAxis;
+	QList<double> m_yAxis;
+	QList<QList<double> > m_values;
+	QString xAxisLabel;
+	QString yAxisLabel;
+	QString valuesLabel;
+	double m_maxXAxis;
+	double m_maxYAxis;
+	double m_maxZAxis;
+	double m_minXAxis;
+	double m_minYAxis;
+	double m_minZAxis;
+	Table3DMetaData m_metaData;
 signals:
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
+public slots:
+	
 };
 
-#endif // TABLE2DDATA_H
+#endif // FETABLE3DDATA_H
