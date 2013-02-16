@@ -930,7 +930,7 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data)
 }
 void TableView3D::reColorTable(int rownum,int colnum)
 {
-	qDebug() << "Recoloring" << rownum << colnum;
+	//qDebug() << "Recoloring" << rownum << colnum;
 	if (rownum == ui.tableWidget->rowCount()-1 || colnum == 0)
 	{
 		return;
@@ -938,6 +938,8 @@ void TableView3D::reColorTable(int rownum,int colnum)
 	if (rownum == -1 && colnum == -1)
 	{
 		//Recolor the whole table
+		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
 		for (int row=0;row<tableData->rows();row++)
 		{
 			for (int col=0;col<tableData->columns();col++)
@@ -962,6 +964,8 @@ void TableView3D::reColorTable(int rownum,int colnum)
 				}
 			}
 		}
+		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	}
 	else
 	{
@@ -981,6 +985,8 @@ void TableView3D::reColorTable(int rownum,int colnum)
 */
 
 		//qDebug() << "Loc:" << (tableData->rows()-1)-(rownum) << colnum - 1;
+		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
 		double val = tableData->values()[(tableData->rows()-1)-(rownum)][colnum-1];
 		//qDebug() << "Value:" << val;
 
@@ -1001,6 +1007,9 @@ void TableView3D::reColorTable(int rownum,int colnum)
 		{
 			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxZAxis()/4.0)*3))/(tableData->maxZAxis()/4.0))),0));
 		}
+		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
+
 	}
 }
 
