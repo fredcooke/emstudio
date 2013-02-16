@@ -61,7 +61,7 @@ void TableMap3D::initializeGL()
 	glPushMatrix();
 	qglClearColor(QColor::fromRgb(0,0,0));
 	glShadeModel(GL_SMOOTH);
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST | GL_LINE_SMOOTH);
 	glEnable(GL_MULTISAMPLE);
 	glViewport((width() - qMin(width(), height())) / 2, (height() - qMin(width(), height())) / 2, qMin(width(), height()), qMin(width(), height()));
 	glMatrixMode(GL_PROJECTION);
@@ -163,7 +163,7 @@ void TableMap3D::paintGL()
 		if (i == 0)
 		{
 			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-			glLineWidth(2);
+			glLineWidth(2.5);
 		}
 		else if (i == 1)
 		{
@@ -220,25 +220,25 @@ void TableMap3D::paintGL()
 			float x0 = ((float)y)/((float)m_tableData->yAxis().size()-1.0);
 			float z0 = (float)m_tableData->values()[y][x] / m_tableData->maxZAxis();
 			glColor4f(r,g,b,1);
-			glVertex3f(x0,maxy-y0,z0 + ((i==0)?0.005:0));
+			glVertex3f(x0+((i==1) ? 0.0025 : 0),(maxy-y0)-((i==1) ? 0.0025 : 0),z0);
 
 			float y1 = ((float)x * maxy)/((float)m_tableData->xAxis().size()-1.0);
 			float x1 = ((float)y+1)/((float)m_tableData->yAxis().size()-1.0);
 			float z1 = (float)m_tableData->values()[y+1][x] / m_tableData->maxZAxis();
 			glColor4f(r,g,b,1);
-			glVertex3f(x1,maxy-y1,z1 + ((i==0)?0.005:0));
+			glVertex3f(x1-((i==1) ? 0.0025 : 0),(maxy-y1)-((i==1) ? 0.0025 : 0),z1);
 
 			float y2 = ((float)((x+1.0) * maxy))/((float)m_tableData->xAxis().size()-1.0);
 			float x2 = ((float)y+1.0)/((float)m_tableData->yAxis().size()-1.0);
 			float z2 = (float)m_tableData->values()[y+1][x+1] / m_tableData->maxZAxis();
 			glColor4f(r,g,b,1);
-			glVertex3f(x2,maxy-y2,z2 + ((i==0)?0.005:0));
+			glVertex3f(x2-((i==1) ? 0.0025 : 0),(maxy-y2)+((i==1) ? 0.0025 : 0),z2);
 
 			float y3 = ((float)(x+1) * maxy)/((float)m_tableData->xAxis().size()-1.0);
 			float x3 = ((float)y)/((float)m_tableData->yAxis().size()-1.0);
 			float z3 = (float)m_tableData->values()[y][x+1]/m_tableData->maxZAxis();
 			glColor4f(r,g,b,1);
-			glVertex3f(x3,maxy-y3,z3 + ((i==0)?0.005:0));
+			glVertex3f(x3+((i==1) ? 0.0025 : 0),(maxy-y3)+((i==1) ? 0.0025 : 0),z3);
 
 		}
 		glEnd();
