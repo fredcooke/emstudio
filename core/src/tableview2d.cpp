@@ -23,7 +23,7 @@
 #include <qwt_plot_curve.h>
 #include <qjson/serializer.h>
 #include <QFileDialog>
-#include "freeems/fetable2ddata.h"
+//#include "freeems/fetable2ddata.h"
 TableView2D::TableView2D(bool isram, bool isflash,QWidget *parent)
 {
 	Q_UNUSED(parent)
@@ -527,7 +527,7 @@ void TableView2D::setSilentValue(int row,int column,QString value)
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 }
-bool TableView2D::setData(unsigned short locationid,QByteArray data)
+bool TableView2D::setData(unsigned short locationid,QByteArray data,TableData *newtableData)
 {
 	if (!metaDataValid)
 	{
@@ -538,7 +538,8 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data)
 		tableData->deleteLater();
 	}
 	//tableData = new Table2DData(locationid,m_isFlashOnly,data,m_metaData);
-	tableData = new FETable2DData();
+	//tableData = new FETable2DData();
+	tableData = (Table2DData*)newtableData;
 	tableData->setData(locationid,m_isFlashOnly,data,m_metaData);
 	connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	qDebug() << "TableView2D::passData" << "0x" + QString::number(locationid,16).toUpper();
@@ -623,12 +624,15 @@ void TableView2D::passDatalog(QVariantMap data)
 {
 	Q_UNUSED(data)
 }
-
-bool TableView2D::setData(unsigned short locationid,QByteArray rawdata,Table2DMetaData metadata)
+bool TableView2D::setData(unsigned short locationid,QByteArray rawdata)
+{
+	return setData(locationid,rawdata,qobject_cast<TableData*>(tableData));
+}
+bool TableView2D::setData(unsigned short locationid,QByteArray rawdata,Table2DMetaData metadata,TableData *newtableData)
 {
 	m_metaData = metadata;
 	metaDataValid = true;
-	return setData(locationid,rawdata);
+	return setData(locationid,rawdata,newtableData);
 }
 
 TableView2D::~TableView2D()

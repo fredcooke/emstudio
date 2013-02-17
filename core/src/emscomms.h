@@ -23,6 +23,10 @@
 #include <QMutex>
 #include <QVariant>
 #include <QDateTime>
+#include <QtPlugin>
+#include "table3ddata.h"
+#include "table2ddata.h"
+#include "datapacketdecoder.h"
 #include "logloader.h"
 #include "headers.h"
 class EmsComms : public QThread
@@ -32,6 +36,9 @@ public:
 	EmsComms(QObject *parent) : QThread(parent) {}
 	virtual void stop()=0;
 	virtual void setLogsEnabled(bool enabled)=0;
+	virtual DataPacketDecoder *getDecoder()=0;
+	virtual Table3DData *getNew3DTableData()=0;
+	virtual Table2DData *getNew2DTableData()=0;
 	virtual void setLogDirectory(QString dir)=0;
 	virtual void setPort(QString portname)=0;
 	virtual void setBaud(int baudrate)=0;
@@ -64,5 +71,5 @@ public:
 	virtual void setInterByteSendDelay(int milliseconds)=0;
 	virtual void setlogsDebugEnabled(bool enabled)=0;
 };
-
+Q_DECLARE_INTERFACE(EmsComms,"EmsComms/1.0")
 #endif // EMSCOMMS_H

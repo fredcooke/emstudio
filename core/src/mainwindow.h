@@ -48,7 +48,7 @@
 #include "emsstatus.h"
 #include "tablemap3d.h"
 //#include "datarawview.h"
-
+#include <QPluginLoader>
 
 class RawDataBlock
 {

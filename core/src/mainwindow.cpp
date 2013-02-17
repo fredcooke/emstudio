@@ -25,8 +25,8 @@
 #include <QSettings>
 #include <tableview2d.h>
 #include <qjson/parser.h>
-#include "freeems/freeemscomms.h"
-#include "freeems/fedatapacketdecoder.h"
+//#include "freeems/freeemscomms.h"
+//#include "freeems/fedatapacketdecoder.h"
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	m_offlineMode = false;
@@ -214,11 +214,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	dataTables=0;
 	dataFlags=0;
 	dataGauges=0;
+	QPluginLoader *loader = new QPluginLoader(this);
+	loader->setFileName("plugins/libfreeemsplugin.so");
+	//loader->setFileName("plugins/libmsplugin.so");
+	loader->load();
 
-	dataPacketDecoder = new FEDataPacketDecoder(this);
+
+	emsComms = qobject_cast<EmsComms*>(loader->instance());
+	if (!emsComms)
+	{
+		qDebug() << "Unable to load plugin!!!";
+		qDebug() << loader->errorString();
+		exit(-1);
+	}
+
+	dataPacketDecoder = emsComms->getDecoder();
 	Q_ASSERT(connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap))));
 
-	emsComms = new FreeEmsComms(this);
+
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
 
@@ -597,7 +610,18 @@ void MainWindow::emsCommsDisconnected()
 	emsComms = 0;
 
 	//Need to reset everything here.
-	emsComms = new FreeEmsComms(this);
+	QPluginLoader *loader = new QPluginLoader(this);
+	loader->setFileName("plugins/libfreeemsplugin.so");
+	loader->load();
+
+
+	emsComms = qobject_cast<EmsComms*>(loader->instance());
+	if (!emsComms)
+	{
+		qDebug() << "Unable to load plugin!!!";
+		exit(-1);
+	}
+
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
 	emsComms->setLogDirectory(m_logDirectory);
@@ -660,7 +684,7 @@ void MainWindow::tableview3d_reloadTableData(unsigned short locationid,bool ram)
 			TableView3D *table = qobject_cast<TableView3D*>(sender());
 			if (table)
 			{
-				table->setData(locationid,emsData->getLocalFlashBlock(locationid));
+				table->setData(locationid,emsData->getLocalFlashBlock(locationid),emsComms->getNew3DTableData());
 				emsData->setLocalRamBlock(locationid,emsData->getLocalFlashBlock(locationid));
 				emsComms->updateBlockInRam(locationid,0,emsData->getLocalFlashBlock(locationid).size(),emsData->getLocalFlashBlock(locationid));
 				emsData->setDeviceRamBlock(locationid,emsData->getLocalFlashBlock(locationid));
@@ -695,7 +719,18 @@ void MainWindow::reloadDataFromDevice(unsigned short locationid,bool isram)
 		}
 		if (emsData->hasLocalRamBlock(locationid))
 		{
-			view->setData(locationid,emsData->getLocalFlashBlock(locationid));
+			if (m_memoryMetaData.has2DMetaData(locationid))
+			{
+				view->setData(locationid,emsData->getLocalFlashBlock(locationid),emsComms->getNew2DTableData());
+			}
+			else if (m_memoryMetaData.has3DMetaData(locationid))
+			{
+				view->setData(locationid,emsData->getLocalFlashBlock(locationid),emsComms->getNew3DTableData());
+			}
+			else
+			{
+				qDebug() << "ERROR! Table location id update requested with no valid 2d/3d meta data";
+			}
 			if (!m_offlineMode)
 			{
 				emsComms->updateBlockInRam(locationid,0,emsData->getLocalFlashBlock(locationid).size(),emsData->getLocalFlashBlock(locationid));
@@ -735,7 +770,7 @@ void MainWindow::tableview2d_reloadTableData(unsigned short locationid,bool isra
 			TableView2D *table = qobject_cast<TableView2D*>(sender());
 			if (table)
 			{
-				table->setData(locationid,emsData->getLocalFlashBlock(locationid));
+				table->setData(locationid,emsData->getLocalFlashBlock(locationid),emsComms->getNew2DTableData());
 				emsComms->updateBlockInRam(locationid,0,emsData->getLocalFlashBlock(locationid).size(),emsData->getLocalFlashBlock(locationid));
 				emsData->setLocalRamBlock(locationid,emsData->getLocalFlashBlock(locationid));
 				emsData->setDeviceRamBlock(locationid,emsData->getLocalFlashBlock(locationid));
@@ -782,7 +817,7 @@ void MainWindow::updateView(unsigned short locid,QObject *view,QByteArray data,D
 {
 	Q_UNUSED(type)
 	DataView *dview = qobject_cast<DataView*>(view);
-	dview->setData(locid,data);
+	dview->setData(locid,data,0);
 	m_rawDataView[locid]->show();
 	m_rawDataView[locid]->raise();
 	QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::Show));
@@ -800,7 +835,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 		Table2DMetaData metadata = m_memoryMetaData.get2DMetaData(locid);
 		if (metadata.valid)
 		{
-			if (!view->setData(locid,data,metadata))
+			if (!view->setData(locid,data,metadata,emsComms->getNew2DTableData()))
 			{
 				view->deleteLater();
 				QMessageBox::information(0,"Error","Table view contains invalid data! Please check your firmware");
@@ -810,7 +845,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 		}
 		else
 		{
-			if (!view->setData(locid,data))
+			if (!view->setData(locid,data,emsComms->getNew2DTableData()))
 			{
 				QMessageBox::information(0,"Error","Table view contains invalid data! Please check your firmware");
 				view->deleteLater();
@@ -839,7 +874,13 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 		Table3DMetaData metadata = m_memoryMetaData.get3DMetaData(locid);
 		if (metadata.valid)
 		{
-			if (!view->setData(locid,data,metadata))
+			Table3DData *new3ddata = emsComms->getNew3DTableData();
+			if (!new3ddata)
+			{
+				qDebug() << "Something wrong here...";
+			}
+			TableData *castdata = new3ddata;
+			if (!view->setData(locid,data,metadata,castdata))
 			{
 				QMessageBox::information(0,"Error","Table view contains invalid data! Please check your firmware");
 				view->deleteLater();
@@ -850,7 +891,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 		}
 		else
 		{
-			if (!view->setData(locid,data))
+			if (!view->setData(locid,data,emsComms->getNew3DTableData()))
 			{
 				QMessageBox::information(0,"Error","Table view contains invalid data! Please check your firmware");
 				view->deleteLater();

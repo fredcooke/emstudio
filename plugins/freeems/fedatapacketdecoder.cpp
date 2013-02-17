@@ -17,7 +17,7 @@
 ****************************************************************************/
 #include "fedatapacketdecoder.h"
 #include <QDebug>
-FEDataPacketDecoder::FEDataPacketDecoder(QObject *parent) : DataPacketDecoder(parent)
+FEDataPacketDecoder::FEDataPacketDecoder() : DataPacketDecoder()
 {
 	populateDataFields();
 }

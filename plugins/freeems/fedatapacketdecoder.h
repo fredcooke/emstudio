@@ -15,37 +15,29 @@
 *   You should have received a copy of the GNU General Public License      *
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
+#ifndef FEDATAPACKETDECODER_H
+#define FEDATAPACKETDECODER_H
 
-#ifndef RAWDATAVIEW_H
-#define RAWDATAVIEW_H
-
-#include <QWidget>
-#include "dataview.h"
-#include "ui_rawdataview.h"
-
-class RawDataView : public DataView
+#include <QObject>
+#include <QMap>
+#include <QVariantMap>
+#include "datafield.h"
+#include "datapacketdecoder.h"
+class FEDataPacketDecoder : public DataPacketDecoder
 {
 	Q_OBJECT
-	
+	//Q_INTERFACES(DataPacketDecoder)
 public:
-	explicit RawDataView(bool isram, bool isflash,QWidget *parent = 0);
-	~RawDataView();
-	bool setData(unsigned short locationid,QByteArray data);
-	//void verifyData(unsigned short locationid,QByteArray data);
-	void passDatalog(QVariantMap data);
+	FEDataPacketDecoder();
+	void populateDataFields();
+	int fieldSize();
+	DataField getField(int num);
 private:
-	bool m_isRam;
-	Ui::RawDataView ui;
-	unsigned short m_locationId;
-
-private slots:
-	void saveFlashButtonClicked();
-	void saveRamButtonClicked();
-	void loadRamButtonClicked();
-	void loadFlashButtonClicked();
+	QList<DataField> m_dataFieldList;
 signals:
-	void saveData(unsigned short locationid,QByteArray data,int physicallocation);
-	void reloadData(unsigned short locationid,bool isram);
+	void payloadDecoded(QVariantMap data);
+public slots:
+	void decodePayload(QByteArray payload);
 };
 
-#endif // RAWDATAVIEW_H
+#endif // FEDATAPACKETDECODER_H

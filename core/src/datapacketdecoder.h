@@ -15,28 +15,24 @@
 *   You should have received a copy of the GNU General Public License      *
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
 ****************************************************************************/
-#ifndef FEDATAPACKETDECODER_H
-#define FEDATAPACKETDECODER_H
+#ifndef DATAPACKETDECODER_H
+#define DATAPACKETDECODER_H
 
 #include <QObject>
 #include <QMap>
 #include <QVariantMap>
 #include "datafield.h"
-#include "datapacketdecoder.h"
-class FEDataPacketDecoder : public DataPacketDecoder
+class DataPacketDecoder : public QObject
 {
     Q_OBJECT
 public:
-	FEDataPacketDecoder(QObject *parent = 0);
-	void populateDataFields();
-	int fieldSize();
-	DataField getField(int num);
-private:
-	QList<DataField> m_dataFieldList;
-signals:
-	void payloadDecoded(QVariantMap data);
+	virtual void populateDataFields()=0;
+	virtual int fieldSize()=0;
+	virtual DataField getField(int num)=0;
+//signals:
+	//void payloadDecoded(QVariantMap data);
 public slots:
-	void decodePayload(QByteArray payload);
+	virtual void decodePayload(QByteArray payload)=0;
 };
 
-#endif // FEDATAPACKETDECODER_H
+#endif // DATAPACKETDECODER_H

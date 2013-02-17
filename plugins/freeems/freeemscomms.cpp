@@ -19,6 +19,8 @@
 #include "freeemscomms.h"
 #include <QDebug>
 #include "freeemspacket.h"
+#include "fetable2ddata.h"
+#include "fetable3ddata.h"
 #define NAK 0x02
 FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 {
@@ -28,8 +30,10 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	serialPort = new SerialPort(this);
 	connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
 	connect(serialPort,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)),Qt::DirectConnection);
-	logLoader = new LogLoader(this);
-	connect(logLoader,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
+	//logLoader = new LogLoader(this);
+	//connect(logLoader,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
+
+	dataPacketDecoder = new FEDataPacketDecoder();
 	m_waitingForResponse = false;
 	m_logsEnabled = false;
 	m_logInFile=0;
@@ -68,6 +72,20 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	m_blockFlagToNameMap[BLOCK_IS_CONFIGURATION] = "Configuration";
 
 }
+DataPacketDecoder *FreeEmsComms::getDecoder()
+{
+	return dataPacketDecoder;
+}
+Table3DData *FreeEmsComms::getNew3DTableData()
+{
+	return new FETable3DData();
+}
+
+Table2DData *FreeEmsComms::getNew2DTableData()
+{
+	return new FETable2DData();
+}
+
 FreeEmsComms::~FreeEmsComms()
 {
 	//rxThread->stop();
@@ -111,12 +129,12 @@ void FreeEmsComms::connectSerial(QString port,int baud)
 
 void FreeEmsComms::loadLog(QString filename)
 {
-	logLoader->loadFile(filename);
+	//logLoader->loadFile(filename);
 }
 
 void FreeEmsComms::playLog()
 {
-	logLoader->start();
+	//logLoader->start();
 }
 void FreeEmsComms::setLogsEnabled(bool enabled)
 {
@@ -1693,3 +1711,4 @@ FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 }
 
 
+Q_EXPORT_PLUGIN2(FreeEmsPlugin, FreeEmsComms)

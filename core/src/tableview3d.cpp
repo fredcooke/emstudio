@@ -26,7 +26,7 @@
 #include <QContextMenuEvent>
 #include <QMenu>
 #include <QAction>
-#include <freeems/fetable3ddata.h>
+//#include <freeems/fetable3ddata.h>
 #include "tablewidgetdelegate.h"
 TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 {
@@ -766,7 +766,7 @@ void TableView3D::loadClicked()
 	}
 
 }
-bool TableView3D::setData(unsigned short locationid,QByteArray data)
+bool TableView3D::setData(unsigned short locationid,QByteArray data,TableData *newtabledata)
 {
 
 	if (tableData)
@@ -777,7 +777,8 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data)
 	else
 	{
 		//tableData = new Table3DData(locationid,m_isFlashOnly,data,m_metaData);
-		tableData = new FETable3DData();
+		//tableData = new FETable3DData();
+		tableData = (Table3DData*)newtabledata;
 		tableData->setData(locationid,m_isFlashOnly,data,m_metaData);
 		connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 		if (m_tableMap)
@@ -1205,12 +1206,15 @@ void TableView3D::passDatalog(QVariantMap data)
 		}
 	}
 }
-bool TableView3D::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata)
+bool TableView3D::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata,TableData *newtabledata)
 {
 	m_metaData = metadata;
 	metaDataValid = true;
-	return setData(locationid,data);
-
+	return setData(locationid,data,newtabledata);
+}
+bool TableView3D::setData(unsigned short locationid,QByteArray rawdata)
+{
+	return setData(locationid,rawdata,tableData);
 }
 QString TableView3D::formatNumber(double num,int prec)
 {

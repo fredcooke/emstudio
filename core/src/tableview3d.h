@@ -34,8 +34,9 @@ class TableView3D : public DataView
 public:
 	explicit TableView3D(bool isram,bool isflash,QWidget *parent = 0);
 	~TableView3D();
-	bool setData(unsigned short locationid,QByteArray data);
-	bool setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata);
+	bool setData(unsigned short locationid,QByteArray data,TableData *newtabledata);
+	bool setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata,TableData *newtabledata);
+	bool setData(unsigned short locationid,QByteArray rawdata);
 	void passDatalog(QVariantMap data);
 private:
 	void reColorTable(int rownum,int colnum);

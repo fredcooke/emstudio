@@ -26,14 +26,19 @@
 #include "serialport.h"
 #include "serialrxthread.h"
 #include "emscomms.h"
-#include "logloader.h"
+//#include "logloader.h"
 #include "headers.h"
+#include "fedatapacketdecoder.h"
 class FreeEmsComms : public EmsComms
 {
 	Q_OBJECT
+	Q_INTERFACES(EmsComms)
 public:
 	FreeEmsComms(QObject *parent = 0);
 	~FreeEmsComms();
+	DataPacketDecoder *getDecoder();
+	Table3DData *getNew3DTableData();
+	Table2DData *getNew2DTableData();
 	void stop() { m_terminateLoop = true; }
 	void setLogsEnabled(bool enabled);
 	void setLogDirectory(QString dir);
@@ -142,6 +147,7 @@ private:
 		int sequencenumber;
 		void addArg(QVariant arg,int size=0) { args.append(arg); argsize.append(size);}
 	};
+	FEDataPacketDecoder *dataPacketDecoder;
 	bool m_debugLogsEnabled;
 	QMap<FreeEmsComms::LocationIdFlags,QString> m_blockFlagToNameMap;
 	bool m_terminateLoop;
@@ -155,7 +161,7 @@ private:
 	QList<RequestClass> m_reqList;
 	QList<RequestClass> m_threadReqList;
 	SerialPort *serialPort;
-	LogLoader *logLoader;
+	//LogLoader *logLoader;
 	bool m_waitingForResponse;
 	bool m_logsEnabled;
 	QString m_logsDirectory;
