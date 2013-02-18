@@ -56,6 +56,8 @@ Section "EMStudio (Required)" ;No components page, name is not important
   File "decodersettings.json"
   SetOutPath "$INSTDIR\dashboards"
   File "src/gauges.qml"
+  SetOutPath "$INSTDIR\plugins"
+  File "plugins/libfreeemsplugin.a"
   
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\EMStudio "Install_Dir" "$INSTDIR"

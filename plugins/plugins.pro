@@ -3,4 +3,4 @@
 ######################################################################
 
 TEMPLATE = subdirs
-SUBDIRS += freeems megasquirt
+SUBDIRS += freeems
