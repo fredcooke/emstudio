@@ -47,15 +47,15 @@ Section "EMStudio (Required)" ;No components page, name is not important
   ;File "/home/michael/code/emstudio/release/emstudio.exe"
   ;File "/home/michael/code/emstudio/src/gauges.qml"
   ;File "/home/michael/code/emstudio/freeems.config.json"
-  File "release/emstudio.exe"
+  File "core/release/emstudio.exe"
   
   
 
   SetOutPath "$INSTDIR\definitions"
-  File "freeems.config.json"
-  File "decodersettings.json"
+  File "core/freeems.config.json"
+  File "core/decodersettings.json"
   SetOutPath "$INSTDIR\dashboards"
-  File "src/gauges.qml"
+  File "core/src/gauges.qml"
   SetOutPath "$INSTDIR\plugins"
   File "plugins/libfreeemsplugin.a"
   
