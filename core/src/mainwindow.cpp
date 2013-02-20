@@ -214,17 +214,34 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	dataTables=0;
 	dataFlags=0;
 	dataGauges=0;
-	QPluginLoader *loader = new QPluginLoader(this);
-	loader->setFileName("plugins/libfreeemsplugin.so");
+	pluginLoader = new QPluginLoader(this);
+	if (QFile::exists("plugins/libfreeemsplugin.so"))
+	{
+		m_pluginFileName = "plugins/libfreeemsplugin.so";
+	}
+	else if (QFile::exists("/usr/share/emstudio/plugins/libfreeemsplugin.so"))
+	{
+		m_pluginFileName = "/usr/share/emstudio/plugins/libfreeemsplugin.so";
+	}
+	else if (QFile::exists("plugins/freeemsplugin.lib"))
+	{
+		m_pluginFileName = "plugins/freeemsplugin.lib";
+	}
+	qDebug() << "Loading plugin from:" << m_pluginFileName;
+	pluginLoader->setFileName(m_pluginFileName);
 	//loader->setFileName("plugins/libmsplugin.so");
-	loader->load();
+	if (!pluginLoader->load())
+	{
+		qDebug() << "Unable to load plugin. error:" << pluginLoader->errorString();
+		exit(-1);
+	}
 
 
-	emsComms = qobject_cast<EmsComms*>(loader->instance());
+	emsComms = qobject_cast<EmsComms*>(pluginLoader->instance());
 	if (!emsComms)
 	{
 		qDebug() << "Unable to load plugin!!!";
-		qDebug() << loader->errorString();
+		qDebug() << pluginLoader->errorString();
 		exit(-1);
 	}
 
@@ -608,19 +625,28 @@ void MainWindow::emsCommsDisconnected()
 	ui.actionConnect->setEnabled(true);
 	ui.actionDisconnect->setEnabled(false);
 	emsComms = 0;
+	qDebug() << "emsCommsDisconnected, resetting and reloading plugin";
 
 	//Need to reset everything here.
-	QPluginLoader *loader = new QPluginLoader(this);
-	loader->setFileName("plugins/libfreeemsplugin.so");
-	loader->load();
+	pluginLoader->unload();
+	pluginLoader->setFileName(m_pluginFileName);
+	if (!pluginLoader->load())
+	{
+		qDebug() << "Unable to load plugin. error:" << pluginLoader->errorString();
+		exit(-1);
+	}
 
 
-	emsComms = qobject_cast<EmsComms*>(loader->instance());
+	emsComms = qobject_cast<EmsComms*>(pluginLoader->instance());
 	if (!emsComms)
 	{
 		qDebug() << "Unable to load plugin!!!";
+		qDebug() << pluginLoader->errorString();
 		exit(-1);
 	}
+
+	dataPacketDecoder = emsComms->getDecoder();
+	Q_ASSERT(connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap))));
 
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
@@ -1160,12 +1186,25 @@ void MainWindow::menu_connectClicked()
 	for (QMap<unsigned short,QWidget*>::const_iterator i= m_rawDataView.constBegin();i != m_rawDataView.constEnd();i++)
 	{
 		QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>((*i)->parent());
-		ui.mdiArea->removeSubWindow(win);
-		delete win;
+		if (win)
+		{
+			ui.mdiArea->removeSubWindow(win);
+			delete win;
+		}
+		else
+		{
+			//Something is wrong here
+			qDebug() << "QWidget pointer found in m_rawDataView that is NOT a QMdiSubWindow!!!";
+		}
+
 		//delete (*i);
 	}
 	m_rawDataView.clear();
-
+	if (!emsComms)
+	{
+		qDebug() << "No EMSCOMMS!!!";
+	}
+	qDebug() << "Starting emsComms:" << emsComms;
 	emsComms->start();
 	emsComms->connectSerial(m_comPort,m_comBaud);
 }

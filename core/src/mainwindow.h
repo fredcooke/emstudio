@@ -137,6 +137,8 @@ private:
 
 	Ui::MainWindow ui;
 	//LogLoader *logLoader;
+	QString m_pluginFileName;
+	QPluginLoader *pluginLoader;
 	EmsComms *emsComms;
 	int pidcount;
 	QTimer *timer;
