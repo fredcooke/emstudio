@@ -4,6 +4,7 @@
 #include <QByteArray>
 #include <qjson/parser.h>
 #include <QMessageBox>
+#include <QVariant>
 MemoryMetaData::MemoryMetaData()
 {
 }

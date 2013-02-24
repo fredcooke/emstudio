@@ -228,6 +228,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 		m_pluginFileName = "plugins/freeemsplugin.lib";
 	}
 	qDebug() << "Loading plugin from:" << m_pluginFileName;
+	//m_pluginFileName = "plugins/libmsplugin.so";
 	pluginLoader->setFileName(m_pluginFileName);
 	//loader->setFileName("plugins/libmsplugin.so");
 	if (!pluginLoader->load())

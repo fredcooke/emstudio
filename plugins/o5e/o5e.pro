@@ -3,25 +3,33 @@
 ######################################################################
 
 TEMPLATE = lib
-TARGET = ../../core/plugins/msplugin
 DEPENDPATH += .
 INCLUDEPATH += . ../../core/src
 CONFIG += plugin
 
 win32-x-g++ {
-	TARGET = ../../../core/plugins/msplugin
+	TARGET = ../../../core/plugins/o5esplugin
 	win32:QMAKE_LFLAGS += -shared
 	message("Building for win32-x-g++")
-	INCLUDEPATH += /home/michael/QtWin/libs/qwt/include /home/michael/QtWin/libs/qjson/include
-	LIBS += -L/home/michael/QtWin/libs/qwt/lib -lqwt -L/home/michael/QtWin/libs/qjson/lib -lqjson0
 	LIBS += -L/home/michael/QtWin/lib
 	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
 }
 unix {
-	TARGET = ../../core/plugins/msplugin
-	target.path = /usr/share/emstudio/plugins
-	INSTALLS += target
+	TARGET = ../../core/plugins/o5eplugin
 }
-
 # Input
+HEADERS += ../../core/src/datapacketdecoder.h \
+	   ../../core/src/table2ddata.h \
+	   ../../core/src/table3ddata.h \
+	   ../../core/src/tabledata.h \
+	   ../../core/src/emscomms.h \
+	   ../../core/src/datafield.h \
+	   o5ecomms.h \
+    o5edatapacketdecoder.h \
+    serialport.h
+SOURCES += o5ecomms.cpp \
+	   ../../core/src/datafield.cpp \
+	   ../../core/src/tabledata.cpp \
+    o5edatapacketdecoder.cpp \
+    serialport.cpp

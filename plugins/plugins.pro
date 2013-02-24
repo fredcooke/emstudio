@@ -3,4 +3,4 @@
 ######################################################################
 
 TEMPLATE = subdirs
-SUBDIRS += freeems
+SUBDIRS += freeems o5e
