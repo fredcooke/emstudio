@@ -35,6 +35,7 @@ public:
 	explicit AboutView(QWidget *parent = 0);
 	~AboutView();
 	void setHash(QString hash);
+	void setVersionLabel(QString version);
 	void setCommit(QString commit);
 protected:
 	void closeEvent(QCloseEvent *event);

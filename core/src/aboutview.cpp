@@ -30,6 +30,10 @@ AboutView::AboutView(QWidget *parent) : QWidget(parent)
 AboutView::~AboutView()
 {
 }
+void AboutView::setVersionLabel(QString version)
+{
+	ui.versionLabel->setText(version);
+}
 
 void AboutView::setHash(QString hash)
 {
