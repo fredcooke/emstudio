@@ -4,7 +4,7 @@
 
 TEMPLATE = lib
 DEPENDPATH += .
-INCLUDEPATH += . ../../core/src
+INCLUDEPATH += .
 CONFIG += plugin
 
 win32-x-g++ {
@@ -19,17 +19,17 @@ unix {
 	TARGET = ../../core/plugins/o5eplugin
 }
 # Input
-HEADERS += ../../core/src/datapacketdecoder.h \
-	   ../../core/src/table2ddata.h \
-	   ../../core/src/table3ddata.h \
-	   ../../core/src/tabledata.h \
-	   ../../core/src/emscomms.h \
-	   ../../core/src/datafield.h \
+HEADERS += datapacketdecoder.h \
+	   table2ddata.h \
+	   table3ddata.h \
+	   tabledata.h \
+	   emscomms.h \
+	   datafield.h \
 	   o5ecomms.h \
     o5edatapacketdecoder.h \
     serialport.h
 SOURCES += o5ecomms.cpp \
-	   ../../core/src/datafield.cpp \
-	   ../../core/src/tabledata.cpp \
+	   datafield.cpp \
+	   tabledata.cpp \
     o5edatapacketdecoder.cpp \
     serialport.cpp
