@@ -17,6 +17,8 @@ win32-x-g++ {
 }
 unix {
 	TARGET = ../../core/plugins/o5eplugin
+	target.path = /usr/share/emstudio/plugins
+	INSTALLS += target
 }
 # Input
 HEADERS += datapacketdecoder.h \
