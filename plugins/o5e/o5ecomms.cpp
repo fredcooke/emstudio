@@ -221,134 +221,119 @@ void O5EComms::packetCounter()
 }
 QByteArray O5EComms::readPacket(SerialPort *port)
 {
-        bool makenextwrite = true;
-        int looptime = 0;
-        unsigned int packetnum = 0;
-
+	bool makenextwrite = true;
+	int looptime = 0;
+	unsigned int packetnum = 0;
 	unsigned char buf[1024];
 	int lenbytesread = 0;
-                int totallenbytesread=0;
-                int lenbyteslefttoread=2;
-                int timeout = 0;
-                QByteArray lenbytes;
-                while (totallenbytesread < 2 && timeout < 500)
-                {
-                        lenbytesread = port->readBytes(buf,lenbyteslefttoread);
-                        totallenbytesread+=lenbytesread;
-                        lenbyteslefttoread-=lenbytesread;
-                        lenbytes.append((const char*)buf,lenbytesread);
-                        timeout++;
-                        usleep(1000);
-                        //qDebug() << "Timeout 2";
-                }
-                //int len = port.readBytes(buf,2);
-                qDebug() << "Read from port:" << lenbytes.size();
-//              qDebug() << len << "Read from port" << buf[0] << buf[1];
-                if (lenbytesread == 0)
-                {
-                        usleep(1000);
-                        looptime++;
-                        if (looptime > 400)
-                        {
-                                looptime = 0;
-                               makenextwrite = true;
-                                port->flush();
-                                qDebug() << "No bytes, breaking out and continuing";
-                        }
-                        qDebug() << "No bytes, breaking out";
-                        //continue;
-			return QByteArray();
-                }
-                looptime = 0;
-                unsigned int newlen = (((unsigned char)lenbytes[0]) << 8) + (unsigned char)lenbytes[1];
-                unsigned int datalenread =0;
-                QByteArray packet;
-                //qDebug() << "Newlen:" << newlen;
-                int timeoutcount = 0;
-                unsigned int datatoberead = newlen;
-                unsigned int currentdataread = 0;
-                while (datalenread != newlen )
-                {
-                        usleep(10000);
-                        currentdataread = port->readBytes(buf,datatoberead);
-                        datalenread += currentdataread;
-                        datatoberead -= datalenread;
-                        packet.append((const char*)buf,currentdataread);
-                        //qDebug() << "Timeout" << datalenread;
-                        timeoutcount++;
-                        if (timeoutcount > 10)
-                        {
-                                break;
-                        }
-                }
-                //Read the data
-                if (datalenread == 0)
-                {
-                        port->readBytes(buf,1); //Read the single code
-                        qDebug() << "Code:" << buf[0];
-                }
-                qDebug() << "Data len:" << datalenread << "Expected:" << newlen;
-                //qDebug() << "Code:" << QString::number((unsigned char)packet[0],16);
-                if (datalenread == newlen && datalenread != 0)
-                {
-                        QByteArray crcbytes;
-                        datalenread = 0;
-                        newlen = 4;
-                        currentdataread = 0;
-                        datatoberead=newlen;
-                        while (datalenread != newlen )
-                        {
-                                usleep(5000);
-                                currentdataread = port->readBytes(buf,datatoberead);
-                                datalenread += currentdataread;
-                                datatoberead -= datalenread;
-                                crcbytes.append((const char*)buf,currentdataread);
-                                //qDebug() << "CRC Timeout" << datalenread;
-                                timeoutcount++;
-                                if (timeoutcount > 20)
-                                {
-                                        break;
-                                }
-                        }
-			qDebug() << "Code:" << QString::number((unsigned char)packet[0],16);
-                        //unsigned int crclen = port.readBytes(buf,4); //CRC
-                        //qDebug() << "CRC read:" << datalenread;
-                        unsigned int newcrc = ((unsigned char)crcbytes[0]) << 24;
-                        newcrc += ((unsigned char)crcbytes[1]) << 16;
-                        newcrc += ((unsigned char)crcbytes[2]) << 8;
-                        newcrc += ((unsigned char)crcbytes[3]);
-                        if (newcrc != Crc32_ComputeBuf(0,packet.data(),packet.size()))
-                        {
-                                qDebug() << "Error, invalid CRC";
-                                qDebug() << "Packet size:" << packet.size();
-                                makenextwrite = true;
-                                port->flush();
-                                //continue;
-				return QByteArray();
-                        }
-                        if (packet[0] == 0x00)
-                        {
-                                qDebug() << "Packet" << packet.size();
-                                currentPacketCount++;
-                                //emit dataLogPayloadReceived(QByteArray(),packet);
-				unsigned int clearlen = port->readBytes(buf,1024); //CRC
-				return packet;
-                        }
-                        if (datalenread == 4)
-                        {
-                                makenextwrite = true;
-                        }
-                }
-                unsigned int clearlen = port->readBytes(buf,1024); //CRC
-                //qDebug() << "Clearlen:" << clearlen;
-                //usleep(10000);
-
-                int stopper = 1;
+	int totallenbytesread=0;
+	int lenbyteslefttoread=2;
+	int timeout = 0;
+	QByteArray lenbytes;
+	while (totallenbytesread < 2 && timeout < 500)
+	{
+		lenbytesread = port->readBytes(buf,lenbyteslefttoread);
+		totallenbytesread+=lenbytesread;
+		lenbyteslefttoread-=lenbytesread;
+		lenbytes.append((const char*)buf,lenbytesread);
+		timeout++;
+		usleep(1000);
+	}
+	if (lenbytesread == 0)
+	{
+		usleep(1000);
+		looptime++;
+		if (looptime > 400)
+		{
+			looptime = 0;
+			makenextwrite = true;
+			port->flush();
+			qDebug() << "No bytes, breaking out and continuing";
+		}
+		qDebug() << "No bytes, breaking out";
 		return QByteArray();
-
-                //usleep(50000);
-
-
+	}
+	looptime = 0;
+	unsigned int newlen = (((unsigned char)lenbytes[0]) << 8) + (unsigned char)lenbytes[1];
+	unsigned int datalenread =0;
+	QByteArray packet;
+	int timeoutcount = 0;
+	unsigned int datatoberead = newlen;
+	unsigned int currentdataread = 0;
+	while (datalenread != newlen )
+	{
+		usleep(10000);
+		currentdataread = port->readBytes(buf,datatoberead);
+		datalenread += currentdataread;
+		datatoberead -= datalenread;
+		packet.append((const char*)buf,currentdataread);
+		//qDebug() << "Timeout" << datalenread;
+		timeoutcount++;
+		if (timeoutcount > 10)
+		{
+			break;
+		}
+	}
+	//Read the data
+	if (datalenread == 0)
+	{
+		port->readBytes(buf,1); //Read the single code
+		qDebug() << "Code:" << buf[0];
+	}
+	//qDebug() << "Code:" << QString::number((unsigned char)packet[0],16);
+	if (datalenread == newlen && datalenread != 0)
+	{
+		QByteArray crcbytes;
+		datalenread = 0;
+		newlen = 4;
+		currentdataread = 0;
+		datatoberead=newlen;
+		while (datalenread != newlen )
+		{
+			usleep(5000);
+			currentdataread = port->readBytes(buf,datatoberead);
+			datalenread += currentdataread;
+			datatoberead -= datalenread;
+			crcbytes.append((const char*)buf,currentdataread);
+			//qDebug() << "CRC Timeout" << datalenread;
+			timeoutcount++;
+			if (timeoutcount > 20)
+			{
+				break;
+			}
+		}
+		//qDebug() << "Code:" << QString::number((unsigned char)packet[0],16);
+		unsigned int newcrc = ((unsigned char)crcbytes[0]) << 24;
+		newcrc += ((unsigned char)crcbytes[1]) << 16;
+		newcrc += ((unsigned char)crcbytes[2]) << 8;
+		newcrc += ((unsigned char)crcbytes[3]);
+		if (newcrc != Crc32_ComputeBuf(0,packet.data(),packet.size()))
+		{
+			qDebug() << "Error, invalid CRC";
+			qDebug() << "Packet size:" << packet.size();
+			makenextwrite = true;
+			port->flush();
+			//continue;
+			return QByteArray();
+		}
+		if (packet[0] == 0x00)
+		{
+			// qDebug() << "Packet" << packet.size();
+			currentPacketCount++;
+			//emit dataLogPayloadReceived(QByteArray(),packet);
+			unsigned int clearlen = port->readBytes(buf,1024); //CRC
+			return packet;
+		}
+		if (datalenread == 4)
+		{
+			makenextwrite = true;
+		}
+	}
+	unsigned int clearlen = port->readBytes(buf,1024); //CRC
+	//qDebug() << "Clearlen:" << clearlen;
+	//usleep(10000);
+	int stopper = 1;
+	return QByteArray();
 }
 void O5EComms::run()
 {
@@ -385,17 +370,16 @@ void O5EComms::run()
 	buf[7] = 0; //Length
 	buf[8] = 0xFF; //Length
 	quint32 crc = Crc32_ComputeBuf(0,buf + 2,7);
-        buf[9] = crc >> 24;
-        buf[10] = crc >> 16;
-        buf[11] = crc >> 8;
-        buf[12] = crc >> 0;
+	buf[9] = crc >> 24;
+	buf[10] = crc >> 16;
+	buf[11] = crc >> 8;
+	buf[12] = crc >> 0;
 	//port.writeBytes(buf,13);
 	//usleep(5000000);
 	//QByteArray response = readPacket(&port);
 	//qDebug() << "Page 1:" << response.size();
 	while (true)
 	{
-
 		if (makenextwrite)
 		{
 			buf[0] = 0;
@@ -417,7 +401,6 @@ void O5EComms::run()
 			emit dataLogPayloadReceived(QByteArray(),reply);
 		}
 		int stopper = 1;
-
 	}
 }
 /*----------------------------------------------------------------------------*\
