@@ -85,6 +85,7 @@ public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
 	void setDevice(QString dev);
+	void setPlugin(QString plugin);
 	void connectToEms();
 private:
 	bool m_checkEmsDataInUse;

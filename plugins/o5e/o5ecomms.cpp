@@ -30,13 +30,110 @@
 #include "serialport.h"
 
 #include <QDebug>
+#include <QMap>
+#include <QStringList>
 
 static quint32 Crc32_ComputeBuf(quint32 inCrc32, const void *buf, quint32 bufLen);
+
+
 O5EComms::O5EComms(QObject *parent) : EmsComms(parent)
 {
- QTimer *timer = new QTimer();
-        connect(timer,SIGNAL(timeout()),this,SLOT(packetCounter()));
-        timer->start(1000);
+	qRegisterMetaType<QList<unsigned short> >("QList<unsigned short>");
+	currentPacketNum=1;
+	QTimer *timer = new QTimer();
+	connect(timer,SIGNAL(timeout()),this,SLOT(packetCounter()));
+	timer->start(1000);
+	QFile inifile("../o5e.ini");
+	inifile.open(QIODevice::ReadOnly);
+	QString inistring = inifile.readAll();
+	inifile.close();
+	QStringList inilist = inistring.split("\n");
+	QVariantMap map;
+	QMap<QString,scalarclass> scalarMap;
+	QString pagenum = "";
+	foreach (QString line,inilist)
+	{
+		if (line.startsWith("page"))
+		{
+			if (pagenum != "")
+			{
+				pageMap[pagenum] = scalarMap;
+			}
+			//New page
+			//Page line
+			pagenum = line.split("=")[1];
+			pagenum = pagenum.mid(0,pagenum.indexOf(";")).trimmed();
+			qDebug() << "Page Num:" << pagenum;
+		}
+		else if (!line.startsWith(";"))
+		{
+			QStringList linesplit = line.split("=");
+			if (linesplit.size() > 1)
+			{
+				QStringList linevalsplit = linesplit[1].split(",");
+				if (linevalsplit.size() > 1)
+				{
+					if (linevalsplit[0].trimmed() == "scalar")
+					{
+						//Scalar
+						scalarclass scalar;
+						//qDebug() << linevalsplit[2].trimmed() << linevalsplit[4].trimmed();
+						scalar.offset = linevalsplit[2].trimmed().toInt();
+						if (linevalsplit[4].trimmed().startsWith("."))
+						{
+							scalar.scale = QString("0").append(linevalsplit[4].trimmed()).toFloat();
+						}
+						else
+						{
+							scalar.scale = linevalsplit[4].trimmed().toFloat();
+						}
+						if (linevalsplit[5].trimmed().startsWith("."))
+						{
+							scalar.translate = QString("0").append(linevalsplit[5].trimmed()).toFloat();
+						}
+						else
+						{
+							scalar.translate = linevalsplit[5].trimmed().toFloat();
+						}
+						scalarMap[linesplit[0].trimmed()] = scalar;
+
+						if (linevalsplit[1].trimmed() == "S16")
+						{
+							scalar.size = 2;
+							scalar.signedval = true;
+						}
+						else if (linevalsplit[1].trimmed() == "U08")
+						{
+							scalar.size = 1;
+							scalar.signedval = false;
+						}
+						else if (linevalsplit[1].trimmed() == "U16")
+						{
+							scalar.size = 2;
+							scalar.signedval = false;
+						}
+						else if (linevalsplit[1].trimmed() == "U32")
+						{
+							scalar.size = 4;
+							scalar.signedval = false;
+						}
+						else if (linevalsplit[1].trimmed() == "S32")
+						{
+							scalar.size = 4;
+							scalar.signedval = true;
+						}
+					}
+				}
+			}
+		}
+	}
+	/*for (QMap<QString,QMap<QString,scalarclass> >::const_iterator i = pageMap.constBegin();i!=pageMap.constEnd();i++)
+	{
+		for (QMap<QString,scalarclass>::const_iterator j = i.value().constBegin();j!=i.value().constEnd();j++)
+		{
+			//qDebug() << "Page:" << i.key() << "Scalar:" << j.key() << j.value().offset << j.value().scale << j.value().translate;
+		}
+	}*/
 }
 
 void O5EComms::stop()
@@ -91,42 +188,84 @@ bool O5EComms::sendPacket(unsigned short payloadid,QList<QVariant> arglist,QList
 
 int O5EComms::getLocationIdInfo(unsigned short locationid)
 {
-	return 0;
+	QMutexLocker locker(&reqListMutex);
+	RequestClass req;
+	req.type = GET_LOCATION_ID_INFO;
+	req.sequencenumber = currentPacketNum++;
+	req.addArg(locationid,2);
+	m_reqList.append(req);
+	return currentPacketNum-1;
 }
 
 int O5EComms::getInterfaceVersion()
 {
-	return 0;
+	qDebug() << "getInterfaceVersion";
+	QMutexLocker locker(&reqListMutex);
+	RequestClass req;
+	req.type = GET_INTERFACE_VERSION;
+	req.sequencenumber = currentPacketNum++;
+	m_reqList.append(req);
+	return currentPacketNum-1;
 }
 
 int O5EComms::getFirmwareVersion()
 {
-	return 0;
+	QMutexLocker locker(&reqListMutex);
+	RequestClass req;
+	req.type = GET_FIRMWARE_VERSION;
+	req.sequencenumber = currentPacketNum++;
+	m_reqList.append(req);
+	return currentPacketNum-1;
 }
 
 int O5EComms::getMaxPacketSize()
 {
-	return 0;
+	QMutexLocker locker(&reqListMutex);
+	RequestClass req;
+	req.type = GET_MAX_PACKET_SIZE;
+	req.sequencenumber = currentPacketNum++;
+	m_reqList.append(req);
+	return currentPacketNum-1;
 }
 
 int O5EComms::getDecoderName()
 {
-	return 0;
+	QMutexLocker locker(&reqListMutex);
+	RequestClass req;
+	req.type = GET_DECODER_NAME;
+	req.sequencenumber = currentPacketNum++;
+	m_reqList.append(req);
+	return currentPacketNum-1;
 }
 
 int O5EComms::getFirmwareBuildDate()
 {
-	return 0;
+	QMutexLocker locker(&reqListMutex);
+	RequestClass req;
+	req.type = GET_FIRMWARE_BUILD_DATE;
+	req.sequencenumber = currentPacketNum++;
+	m_reqList.append(req);
+	return currentPacketNum-1;
 }
 
 int O5EComms::getCompilerVersion()
 {
-	return 0;
+	QMutexLocker locker(&reqListMutex);
+	RequestClass req;
+	req.type = GET_COMPILER_VERSION;
+	req.sequencenumber = currentPacketNum++;
+	m_reqList.append(req);
+	return currentPacketNum-1;
 }
 
 int O5EComms::getOperatingSystem()
 {
-	return 0;
+	QMutexLocker locker(&reqListMutex);
+	RequestClass req;
+	req.type = GET_OPERATING_SYSTEM;
+	req.sequencenumber = currentPacketNum++;
+	m_reqList.append(req);
+	return currentPacketNum-1;
 }
 
 int O5EComms::echoPacket(QByteArray packet)
@@ -136,7 +275,12 @@ int O5EComms::echoPacket(QByteArray packet)
 
 int O5EComms::getLocationIdList(unsigned char listtype, unsigned short listmask)
 {
-	return 0;
+	QMutexLocker locker(&reqListMutex);
+	RequestClass req;
+	req.type = GET_LOCATION_ID_LIST;
+	req.sequencenumber = currentPacketNum++;
+	m_reqList.append(req);
+	return currentPacketNum-1;
 }
 
 int O5EComms::softReset()
@@ -156,7 +300,7 @@ bool O5EComms::sendSimplePacket(unsigned short payload)
 
 void O5EComms::connectSerial(QString port,int baud)
 {
-
+	emit connected();
 }
 
 void O5EComms::disconnectSerial()
@@ -192,12 +336,25 @@ int O5EComms::updateBlockInFlash(unsigned short location,unsigned short offset, 
 
 int O5EComms::retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size)
 {
-	return 0;
+	QMutexLocker locker(&reqListMutex);
+	RequestClass req;
+	req.type = RETRIEVE_BLOCK_IN_RAM;
+	req.sequencenumber = currentPacketNum++;
+	req.addArg(location,2);
+	m_reqList.append(req);
+	return currentPacketNum-1;
+
 }
 
 int O5EComms::retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size)
 {
-	return 0;
+	QMutexLocker locker(&reqListMutex);
+	RequestClass req;
+	req.type = RETRIEVE_BLOCK_IN_FLASH;
+	req.sequencenumber = currentPacketNum++;
+	req.addArg(location,2);
+	m_reqList.append(req);
+	return currentPacketNum-1;
 }
 
 int O5EComms::burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size)
@@ -337,8 +494,111 @@ QByteArray O5EComms::readPacket(SerialPort *port)
 }
 void O5EComms::run()
 {
+	while (true)
+	{
+		//qDebug() << "Loop:" << m_reqList.size();
+		/*	QMutexLocker(reqListMutex);
+	RequestClass req;
+	req.type = GET_INTERFACE_VERSION;
+	req.sequencenumber = currentPacketNum++;
+	m_reqList.append(req);
+	return currentPacketNum;*/
+		reqListMutex.lock();
+		for (int i=0;i<m_reqList.size();i++)
+		{
+			m_privReqList.append(m_reqList[i]);
+		}
+		m_reqList.clear();
+		reqListMutex.unlock();
+		for (int i=0;i<m_privReqList.size();i++)
+		{
+			if (m_privReqList[i].type == GET_INTERFACE_VERSION)
+			{
+				usleep(100000);
+				emit interfaceVersion("O5E Simulator");
+				emit commandSuccessful(m_privReqList[i].sequencenumber);
+			}
+			else if (m_privReqList[i].type == GET_FIRMWARE_VERSION)
+			{
+				usleep(100000);
+				emit firmwareVersion("0.0.1");
+				emit commandSuccessful(m_privReqList[i].sequencenumber);
+			}
+			else if (m_privReqList[i].type == GET_MAX_PACKET_SIZE)
+			{
+				usleep(100000);
+				emit commandSuccessful(m_privReqList[i].sequencenumber);
+			}
+			else if (m_privReqList[i].type == GET_LOCATION_ID_LIST)
+			{
+				usleep(100000);
+				QList<unsigned short> idlists;
+				for (QMap<QString,QMap<QString,scalarclass> >::const_iterator j = pageMap.constBegin();j!=pageMap.constEnd();j++)
+				{
+					idlists.append(j.key().toInt());
+					/*for (QMap<QString,scalarclass>::const_iterator j = i.value().constBegin();j!=i.value().constEnd();j++)
+					{
+						//qDebug() << "Page:" << i.key() << "Scalar:" << j.key() << j.value().offset << j.value().scale << j.value().translate;
+					}*/
+				}
+				emit locationIdList(idlists);
+				emit commandSuccessful(m_privReqList[i].sequencenumber);
+			}
+			else if (m_privReqList[i].type == GET_DECODER_NAME)
+			{
+				usleep(100000);
+				emit commandSuccessful(m_privReqList[i].sequencenumber);
+			}
+			else if (m_privReqList[i].type == GET_FIRMWARE_BUILD_DATE)
+			{
+				usleep(100000);
+				emit commandSuccessful(m_privReqList[i].sequencenumber);
+			}
+			else if (m_privReqList[i].type == GET_COMPILER_VERSION)
+			{
+				usleep(100000);
+				emit commandSuccessful(m_privReqList[i].sequencenumber);
+			}
+			else if (m_privReqList[i].type == GET_OPERATING_SYSTEM)
+			{
+				usleep(100000);
+				emit commandSuccessful(m_privReqList[i].sequencenumber);
+			}
+			else if (m_privReqList[i].type == GET_LOCATION_ID_INFO)
+			{
+				usleep(100000);
+				unsigned short locid = m_privReqList[i].args[0].toInt();
+				//void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);
+				MemoryLocationInfo info;
+				info.isRam = true;
+				info.isFlash = true;
+				info.locationid = locid;
+				info.size = 1024;
+				info.type = DATA_CONFIG;
+				emit locationIdInfo(locid,info);
+				emit commandSuccessful(m_privReqList[i].sequencenumber);
+			}
+			else if (m_privReqList[i].type == RETRIEVE_BLOCK_IN_RAM)
+			{
+				emit commandSuccessful(m_privReqList[i].sequencenumber);
+			}
+			else if (m_privReqList[i].type == RETRIEVE_BLOCK_IN_FLASH)
+			{
+				emit commandSuccessful(m_privReqList[i].sequencenumber);
+			}
+
+		}
+		m_privReqList.clear();
+		usleep(10000); //Sleep to avoid CPU spinning
+	}
+	emit connected();
 	SerialPort port;
-	qDebug() << "Opened:" << port.openPort("/dev/ttyACM0",115200,false);
+	int openerror = port.openPort("/dev/ttyACM0",115200,false);
+	qDebug() << "Opened:" << openerror;
+	if (openerror < 0)
+	{
+		return;
+	}
 
 	unsigned char buf[1024];
 

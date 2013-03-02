@@ -232,6 +232,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	}
 	qDebug() << "Loading plugin from:" << m_pluginFileName;
 	//m_pluginFileName = "plugins/libmsplugin.so";
+	//m_pluginFileName = "plugins/libo5eplugin.so";
+
 	pluginLoader->setFileName(m_pluginFileName);
 	//loader->setFileName("plugins/libmsplugin.so");
 	if (!pluginLoader->load())
@@ -265,7 +267,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
 	connect(emsComms,SIGNAL(compilerVersion(QString)),this,SLOT(emsCompilerVersion(QString)));
 	connect(emsComms,SIGNAL(interfaceVersion(QString)),this,SLOT(interfaceVersion(QString)));
-	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)));
+	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)),Qt::QueuedConnection);
 	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
@@ -666,7 +668,7 @@ void MainWindow::emsCommsDisconnected()
 	connect(emsComms,SIGNAL(compilerVersion(QString)),this,SLOT(emsCompilerVersion(QString)));
 	connect(emsComms,SIGNAL(interfaceVersion(QString)),this,SLOT(interfaceVersion(QString)));
 	connect(emsComms,SIGNAL(operatingSystem(QString)),this,SLOT(emsOperatingSystem(QString)));
-	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)));
+	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)),Qt::QueuedConnection);
 	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));
 	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
@@ -689,6 +691,62 @@ void MainWindow::emsCommsDisconnected()
 
 	ui.actionConnect->setEnabled(true);
 	m_offlineMode = true;
+}
+void MainWindow::setPlugin(QString plugin)
+{
+	m_pluginFileName = plugin;
+	pluginLoader->unload();
+	pluginLoader->setFileName(m_pluginFileName);
+	if (!pluginLoader->load())
+	{
+		qDebug() << "Unable to load plugin. error:" << pluginLoader->errorString();
+		exit(-1);
+	}
+	emsComms = qobject_cast<EmsComms*>(pluginLoader->instance());
+	if (!emsComms)
+	{
+		qDebug() << "Unable to load plugin!!!";
+		qDebug() << pluginLoader->errorString();
+		exit(-1);
+	}
+
+	dataPacketDecoder = emsComms->getDecoder();
+	Q_ASSERT(connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap))));
+
+	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
+	emsComms->setLogFileName(m_logFileName);
+	emsComms->setLogDirectory(m_logDirectory);
+	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
+	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
+	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
+
+	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
+	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
+	connect(emsComms,SIGNAL(decoderName(QString)),this,SLOT(emsDecoderName(QString)));
+	connect(emsComms,SIGNAL(compilerVersion(QString)),this,SLOT(emsCompilerVersion(QString)));
+	connect(emsComms,SIGNAL(interfaceVersion(QString)),this,SLOT(interfaceVersion(QString)));
+	connect(emsComms,SIGNAL(operatingSystem(QString)),this,SLOT(emsOperatingSystem(QString)));
+	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));
+	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
+	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
+	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
+	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
+	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
+	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(ramBlockUpdate(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(flashBlockUpdate(unsigned short,QByteArray,QByteArray)));
+	emsData->setInterrogation(true);
+	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
+	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
+	emsComms->setBaud(m_comBaud);
+	emsComms->setPort(m_comPort);
+	emsComms->setLogsEnabled(m_saveLogs);
+	emsComms->setInterByteSendDelay(m_comInterByte);
+	emsComms->setlogsDebugEnabled(m_debugLogs);
 }
 
 void MainWindow::setDevice(QString dev)
@@ -1383,6 +1441,7 @@ void MainWindow::playLogButtonClicked()
 }
 void MainWindow::locationIdList(QList<unsigned short> idlist)
 {
+	qDebug() << "Location ID List!";
 	for (int i=0;i<idlist.size();i++)
 	{
 		//ui/listWidget->addItem(QString::number(idlist[i]));
@@ -1390,6 +1449,7 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 		loc->locationid = idlist[i];
 		m_tempMemoryList.append(loc);
 		int seq = emsComms->getLocationIdInfo(idlist[i]);
+		qDebug() << "LocationIdInfoReq:" << seq;
 		if (progressView) progressView->setMaximum(progressView->maximum()+1);
 		if (progressView) progressView->addTask("Getting Location ID Info for 0x" + QString::number(idlist[i],16).toUpper(),seq,1);
 		m_locIdMsgList.append(seq);
@@ -1772,6 +1832,7 @@ void MainWindow::commandSuccessful(int sequencenumber)
 }
 void MainWindow::checkMessageCounters(int sequencenumber)
 {
+	qDebug() << "Checking message counters:" << sequencenumber << m_locIdInfoMsgList.size() << m_locIdMsgList.size() << interrogationSequenceList.size();
 	if (m_locIdInfoMsgList.contains(sequencenumber))
 	{
 		m_locIdInfoMsgList.removeOne(sequencenumber);
@@ -1844,6 +1905,10 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 			checkRamFlashSync();
 		}
 	}
+	else
+	{
+		qDebug() << "Not in locidinfo";
+	}
 	if (m_locIdMsgList.contains(sequencenumber))
 	{
 		m_locIdMsgList.removeOne(sequencenumber);
@@ -1871,8 +1936,13 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 			}
 		}
 	}
+	else
+	{
+		qDebug() << "Not in locidmsglist";
+	}
 	if (interrogationSequenceList.contains(sequencenumber))
 	{
+		qDebug() << "GOOD!";
 		if (progressView)
 		{
 			progressView->setProgress(progressView->progress()+1);
@@ -1963,6 +2033,10 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 		{
 			qDebug() << interrogationSequenceList.size() << "messages left to go. First one:" << interrogationSequenceList[0];
 		}
+	}
+	else
+	{
+		qDebug() << "Not in interrogation list";
 	}
 }
 

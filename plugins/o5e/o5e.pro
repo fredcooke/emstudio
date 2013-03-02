@@ -4,7 +4,7 @@
 
 TEMPLATE = lib
 DEPENDPATH += .
-INCLUDEPATH += .
+INCLUDEPATH += . ../../core/src/
 CONFIG += plugin
 
 win32-x-g++ {
@@ -21,17 +21,18 @@ unix {
 	INSTALLS += target
 }
 # Input
-HEADERS += datapacketdecoder.h \
-	   table2ddata.h \
-	   table3ddata.h \
-	   tabledata.h \
-	   emscomms.h \
-	   datafield.h \
+HEADERS += ../../core/src/datapacketdecoder.h \
+	   ../../core/src/table2ddata.h \
+	   ../../core/src/table3ddata.h \
+	   ../../core/src/tabledata.h \
+	   ../../core/src/emscomms.h \
+	   ../../core/src/datafield.h \
 	   o5ecomms.h \
     o5edatapacketdecoder.h \
     serialport.h
 SOURCES += o5ecomms.cpp \
-	   datafield.cpp \
-	   tabledata.cpp \
     o5edatapacketdecoder.cpp \
-    serialport.cpp
+    serialport.cpp \
+../../core/src/datafield.cpp \
+	   ../../core/src/tabledata.cpp
+

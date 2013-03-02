@@ -41,6 +41,20 @@
 #include "serialport.h"
 #include "emscomms.h"
 #include <QTimer>
+
+class scalarclass
+{
+public:
+	QString type;
+	unsigned int offset;
+	unsigned int size;
+	bool signedval;
+	float scale;
+	float translate;
+};
+
+
+
 class O5EComms : public EmsComms
 {
 	Q_OBJECT
@@ -83,8 +97,50 @@ public:
 	void setInterByteSendDelay(int milliseconds);
 	void setlogsDebugEnabled(bool enabled);
 private:
+	enum RequestType
+	{
+		GET_INTERFACE_VERSION=0x0000,
+		GET_FIRMWARE_VERSION=0x0002,
+		GET_MAX_PACKET_SIZE=0x0004,
+		ECHO_PACKET=0x0006,
+		SOFT_RESET=0x0008,
+		HARD_RESET=0x000A,
+		UPDATE_BLOCK_IN_RAM=0x0100,
+		UPDATE_BLOCK_IN_FLASH=0x0102,
+		RETRIEVE_BLOCK_IN_RAM=0x0104,
+		RETRIEVE_BLOCK_IN_FLASH=0x0106,
+		BURN_BLOCK_FROM_RAM_TO_FLASH=0x0108,
+		GET_LOCATION_ID_LIST=0xDA5E,
+		GET_DECODER_NAME=0xEEEE,
+		GET_FIRMWARE_BUILD_DATE=0xEEF0,
+		GET_COMPILER_VERSION=0xEEF2,
+		GET_OPERATING_SYSTEM=0xEEF4,
+		GET_LOCATION_ID_INFO=0xF8E0,
+		SERIAL_CONNECT=0xFFFF01,
+		SERIAL_DISCONNECT=0xFFFF02
+	};
+	class RequestClass
+	{
+	public:
+		RequestClass()
+		{
+			retryCount=0;
+		}
+
+		unsigned char retryCount;
+		RequestType type;
+		QList<QVariant> args;
+		QList<int> argsize;
+		int sequencenumber;
+		void addArg(QVariant arg,int size=0) { args.append(arg); argsize.append(size);}
+	};
+	unsigned long currentPacketNum;
 	unsigned int currentPacketCount;
 	QByteArray readPacket(SerialPort *port);
+	QMap<QString,QMap<QString,scalarclass> > pageMap;
+	QMutex reqListMutex;
+	QList<RequestClass> m_reqList;
+	QList<RequestClass> m_privReqList;
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);
 	void packetAcked(unsigned short locationid,QByteArray header,QByteArray payload);

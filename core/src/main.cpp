@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
 	QApplication a(argc, argv);
 	QString port = "";
 	bool autoconnect = true;
+	QString plugin = "";
 	QList<QPair<QString,QString> > args = getArgs(argc,argv);
 	for (int i=0;i<args.size();i++)
 	{
@@ -98,6 +99,10 @@ int main(int argc, char *argv[])
 				autoconnect = false;
 			}
 		}
+		else if (args[i].first == "--plugin" || args[i].first == "-p")
+		{
+			plugin = args[i].second;
+		}
 		else
 		{
 			qDebug() << "Unknown command" << args[i].first;
@@ -110,6 +115,10 @@ int main(int argc, char *argv[])
 	if (port != "")
 	{
 		w.setDevice(port);
+	}
+	if (plugin != "")
+	{
+		w.setPlugin(plugin);
 	}
 	if (autoconnect)
 	{
