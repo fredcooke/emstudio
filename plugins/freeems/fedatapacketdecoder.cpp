@@ -21,6 +21,8 @@
 
 #include "fedatapacketdecoder.h"
 #include <QDebug>
+#include <QFile>
+#include <qjson/parser.h>
 FEDataPacketDecoder::FEDataPacketDecoder() : DataPacketDecoder()
 {
 	populateDataFields();
@@ -59,8 +61,79 @@ DataField FEDataPacketDecoder::getField(int num)
 	}
 	return DataField();
 }
+void FEDataPacketDecoder::loadDataFieldsFromFile(QString file)
+{
+	QFile datafile(file);
+	datafile.open(QIODevice::ReadOnly);
+	QByteArray databytes = datafile.readAll();
+	datafile.close();
+	QJson::Parser parser;
+	bool ok = false;
+	QVariant json = parser.parse(databytes,&ok);
+	if (!ok)
+	{
+		qDebug() << "Error parsing freeems meta data json!";
+		exit(-1);
+	}
+	QVariantMap jsonmap = json.toMap();
+	QVariantList fieldlist = jsonmap["fields"].toList();
+	int offset = 0;
+	for (int i=0;i<fieldlist.size();i++)
+	{
+		QVariantMap field = fieldlist[i].toMap();
+		qDebug() << "Type:" << field["name"].toString();
+		int size = 0;
+		if (field["type"].toString() == "UINT8")
+		{
+			size = 1;
+			m_dataFieldList.append(DataField(field["name"].toString(),field["description"].toString(),offset,size,field["divBy"].toFloat(),field["addTo"].toFloat()));
+		}
+		else if (field["type"].toString() == "UINT16")
+		{
+			size = 2;
+			m_dataFieldList.append(DataField(field["name"].toString(),field["description"].toString(),offset,size,field["divBy"].toFloat(),field["addTo"].toFloat()));
+		}
+		else if (field["type"].toString() == "SINT16")
+		{
+			size = 2;
+			m_dataFieldList.append(DataField(field["name"].toString(),field["description"].toString(),offset,size,field["divBy"].toFloat(),field["addTo"].toFloat()));
+		}
+		else if (field["type"].toString() == "BITS8")
+		{
+			size = 1;
+			QVariantList bitnames = field["bitFieldNames"].toList();
+			for (int j=0;j<8;j++)
+			{
+				m_dataFieldList.append(DataField(bitnames[j].toString(),"",offset,size,field["divBy"].toFloat(),field["addTo"].toFloat(),0,0,true,j));
+			}
+			/*m_dataFieldList.append(DataField("callsToUISRs","to ensure we aren't accidentally triggering unused ISRs.",62,2,1.0,0,0,0,true,0));
+	m_dataFieldList.append(DataField("lowVoltageConditions","low voltage conditions.",62,2,1.0,0,0,0,true,1));
+	*/
+		}
+		else if (field["type"].toString() == "BITS16")
+		{
+			size = 2;
+			QVariantList bitnames = field["bitFieldNames"].toList();
+			qDebug() << "Bitname size:" << bitnames.size();
+			for (int j=0;j<16;j++)
+			{
+				m_dataFieldList.append(DataField(bitnames[j].toString(),"",offset,size,field["divBy"].toFloat(),field["addTo"].toFloat(),0,0,true,j));
+			}
+		}
+		else
+		{
+			qDebug() << "INVALID FIELD TYPE:" << field["type"].toString();
+		}
+		qDebug() << m_dataFieldList[m_dataFieldList.size()-1].name() << m_dataFieldList[m_dataFieldList.size()-1].offset() << m_dataFieldList[m_dataFieldList.size()-1].size();
+		//BITS8
 
-void FEDataPacketDecoder::populateDataFields()
+		//      "type": "UINT16",
+		//m_dataFieldList.append(DataField())
+		offset += size;
+	}
+	return;
+}
+void FEDataPacketDecoder::loadDataFieldsFromValues()
 {
 	// CoreVars
 	m_dataFieldList.append(DataField("IAT","Intake Air Temperature",0,2,100,-273.15));
@@ -145,5 +218,9 @@ void FEDataPacketDecoder::populateDataFields()
 	m_dataFieldList.append(DataField("clock8thMssInMillis","Clock in 8th milliseconds",94,2,8.0));
 	m_dataFieldList.append(DataField("ignitionLimiterFlags","",96,1,1.0)); // Needs flags
 	m_dataFieldList.append(DataField("injectionLimiterFlags","",97,1,1.0)); // Needs flags
+}
 
+void FEDataPacketDecoder::populateDataFields()
+{
+	loadDataFieldsFromValues();
 }

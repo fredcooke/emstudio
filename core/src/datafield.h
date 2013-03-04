@@ -61,6 +61,8 @@ public:
 	QString name() { return m_name; }
 	bool isFlag() { return m_isFlags; }
 	bool flagValue(QByteArray *payload);
+	int offset() { return m_offset; }
+	int size() { return m_size; }
 private:
 	QString m_name;
 	QString m_description;
