@@ -116,10 +116,22 @@ int main(int argc, char *argv[])
 	{
 		w.setDevice(port);
 	}
-	if (plugin != "")
+	if (plugin == "")
 	{
-		w.setPlugin(plugin);
+		if (QFile::exists("plugins/libfreeemsplugin.so"))
+		{
+			plugin = "plugins/libfreeemsplugin.so";
+		}
+		else if (QFile::exists("/usr/share/emstudio/plugins/libfreeemsplugin.so"))
+		{
+			plugin = "/usr/share/emstudio/plugins/libfreeemsplugin.so";
+		}
+		else if (QFile::exists("plugins/freeemsplugin.lib"))
+		{
+			plugin = "plugins/freeemsplugin.lib";
+		}
 	}
+	w.setPlugin(plugin);
 	if (autoconnect)
 	{
 		w.connectToEms();

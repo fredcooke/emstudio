@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	qDebug() << "EMStudio commit:" << define2string(GIT_COMMIT);
 	qDebug() << "Full hash:" << define2string(GIT_HASH);
 	progressView=0;
+	emsComms=0;
 	m_interrogationInProgress = false;
 	m_debugLogs = false;
 
@@ -234,7 +235,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	//m_pluginFileName = "plugins/libmsplugin.so";
 	//m_pluginFileName = "plugins/libo5eplugin.so";
 
-	pluginLoader->setFileName(m_pluginFileName);
+	/*pluginLoader->setFileName(m_pluginFileName);
 	//loader->setFileName("plugins/libmsplugin.so");
 	if (!pluginLoader->load())
 	{
@@ -255,11 +256,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
 
 
+
+	emsComms->setLogFileName(m_logFileName);*/
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
-	emsComms->setLogFileName(m_logFileName);
 
 	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
-	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
+	/*connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
 	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
@@ -274,10 +276,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
 	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(ramBlockUpdate(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(flashBlockUpdate(unsigned short,QByteArray,QByteArray)));
-	emsData->setInterrogation(true);
+
 	connect(emsComms,SIGNAL(decoderName(QString)),this,SLOT(emsDecoderName(QString)));
 	connect(emsComms,SIGNAL(operatingSystem(QString)),this,SLOT(emsOperatingSystem(QString)));
-	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));
+	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));*/
+	emsData->setInterrogation(true);
 
 
 	emsInfo = new EmsInfoView();
@@ -323,7 +326,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	dataTables = new TableView();
 	//connect(dataTables,SIGNAL(destroyed()),this,SLOT(dataTablesDestroyed()));
-	dataTables->passDecoder(dataPacketDecoder);
+	//dataTables->passDecoder(dataPacketDecoder);
 	tablesMdiWindow = ui.mdiArea->addSubWindow(dataTables);
 	tablesMdiWindow->setGeometry(dataTables->geometry());
 	tablesMdiWindow->hide();
@@ -342,10 +345,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	flagsMdiWindow->setWindowTitle(dataFlags->windowTitle());
 
 	packetStatus = new PacketStatusView();
-	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
+	/*connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
-	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
+	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));*/
 	packetStatusMdiWindow = ui.mdiArea->addSubWindow(packetStatus);
 	packetStatusMdiWindow->setGeometry(packetStatus->geometry());
 	packetStatusMdiWindow->hide();
@@ -366,12 +369,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_debugLogs = settings.value("debuglogs",false).toBool();
 	settings.endGroup();
 
-	emsComms->setBaud(m_comBaud);
+	/*emsComms->setBaud(m_comBaud);
 	emsComms->setPort(m_comPort);
 	emsComms->setLogDirectory(m_logDirectory);
 	emsComms->setLogsEnabled(m_saveLogs);
 	emsComms->setInterByteSendDelay(m_comInterByte);
-	emsComms->setlogsDebugEnabled(m_debugLogs);
+	emsComms->setlogsDebugEnabled(m_debugLogs);*/
 
 	pidcount = 0;
 
@@ -624,7 +627,9 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 
 void MainWindow::emsCommsDisconnected()
 {
+
 	emsComms->stop();
+	emsComms->disconnect();
 	emsComms->terminate();
 	emsComms->wait(250); //Join it, fixes a race condition where the thread deletes before it's finished.
 	emsComms->deleteLater();
@@ -635,6 +640,9 @@ void MainWindow::emsCommsDisconnected()
 
 	//Need to reset everything here.
 	pluginLoader->unload();
+	pluginLoader->deleteLater();
+	pluginLoader = 0;
+	pluginLoader = new QPluginLoader(this);
 	pluginLoader->setFileName(m_pluginFileName);
 	if (!pluginLoader->load())
 	{
@@ -695,7 +703,17 @@ void MainWindow::emsCommsDisconnected()
 void MainWindow::setPlugin(QString plugin)
 {
 	m_pluginFileName = plugin;
+	if (emsComms)
+	{
+	emsComms->stop();
+	emsComms->terminate();
+	emsComms->wait(250); //Join it, fixes a race condition where the thread deletes before it's finished.
+	emsComms->deleteLater();
+	}
 	pluginLoader->unload();
+	pluginLoader->deleteLater();
+	pluginLoader=0;
+	pluginLoader = new QPluginLoader(this);
 	pluginLoader->setFileName(m_pluginFileName);
 	if (!pluginLoader->load())
 	{
@@ -712,7 +730,7 @@ void MainWindow::setPlugin(QString plugin)
 
 	dataPacketDecoder = emsComms->getDecoder();
 	Q_ASSERT(connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap))));
-
+	dataTables->passDecoder(dataPacketDecoder);
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
 	emsComms->setLogDirectory(m_logDirectory);
