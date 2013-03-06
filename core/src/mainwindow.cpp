@@ -1361,6 +1361,10 @@ void MainWindow::locationIdInfo(unsigned short locationid,MemoryLocationInfo inf
 		title = m_memoryMetaData.getRORMetaData(locationid).dataTitle;
 		//m_readOnlyMetaDataMap[locationid]
 	}
+	if (m_memoryMetaData.hasLookupMetaData(locationid))
+	{
+		title = m_memoryMetaData.getLookupMetaData(locationid).title;
+	}
 	//emsInfo->locationIdInfo(locationid,title,rawFlags,flags,parent,rampage,flashpage,ramaddress,flashaddress,size);
 	emsInfo->locationIdInfo(locationid,title,info);
 	emsData->passLocationInfo(locationid,info);

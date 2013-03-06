@@ -76,6 +76,14 @@ public:
 	unsigned char size;
 	QList<QPair<QString,double> > calc;
 };
+class LookupMetaData
+{
+public:
+	QString title;
+	unsigned short locationid;
+	bool editable;
+};
+
 class ReadOnlyRamBlock
 {
 public:

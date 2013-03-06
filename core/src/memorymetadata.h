@@ -45,11 +45,16 @@ public:
 	const QList<ReadOnlyRamData> rORMetaData() { return m_readOnlyMetaData; }
 	const ReadOnlyRamData getRORMetaData(unsigned short locationid);
 
+	bool hasLookupMetaData(unsigned short locationid);
+	const QMap<unsigned short,LookupMetaData> lookupMetaData() { return m_lookupMetaData; }
+	const LookupMetaData getLookupMetaData(unsigned short locationid);
+
 	const QString getErrorString(unsigned short code);
 
 
 
 	QMap<unsigned short,QString> m_errorMap;
+	QMap<unsigned short,LookupMetaData> m_lookupMetaData;
 	QList<ReadOnlyRamData> m_readOnlyMetaData;
 	QMap<unsigned short,ReadOnlyRamBlock> m_readOnlyMetaDataMap;
 	QList<Table3DMetaData> m_table3DMetaData;

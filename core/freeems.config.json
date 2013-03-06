@@ -227,6 +227,18 @@
   ]
  }
 },
+"lookuptables" : {
+ "0x8000" : {
+  "title": "IAT Transfer Table",
+  "size" : "1024",
+  "editable" : "false"
+ },
+ "0x8001" : {
+  "title" : "CHT Transfer Table",
+  "size" : "1024",
+  "editable" : "false"
+ }
+},
 "config" : {
  "0xC003" : {
   "title" : "Scheduler Settings",

@@ -127,6 +127,40 @@ bool MemoryMetaData::parseMetaData(QString json)
 		}*/
 		i++;
 	}
+	/*"lookuptables" : {
+ "0x8000" : {
+  "title": "IAT Transfer Table",
+  "size" : "1024",
+  "editable" : "false"
+ },
+ "0x8001" : {
+  "title" : "CHT Transfer Table",
+  "size" : "1024",
+  "editable" : "false"
+ }
+}*/
+	QVariantMap lookups = topmap["lookuptables"].toMap();
+	i = lookups.begin();
+	while (i != lookups.end())
+	{
+		QVariantMap lookupmap = i.value().toMap();
+		QString keystr = i.key();
+		bool ok = false;
+		unsigned short keyint = keystr.mid(2).toInt(&ok,16);
+		LookupMetaData meta;
+		meta.locationid = keyint;
+		meta.title = lookupmap["title"].toString();
+		if (lookupmap["editable"].toString().toLower() == "true")
+		{
+			meta.editable = true;
+		}
+		else
+		{
+			meta.editable = false;
+		}
+		m_lookupMetaData[keyint] = meta;
+		i++;
+	}
 	qDebug() << m_readOnlyMetaData.size() << "Ram entries found";
 	QVariantMap tables = topmap["tables"].toMap();
 	i = tables.begin();
@@ -306,6 +340,29 @@ bool MemoryMetaData::hasRORMetaData(unsigned short locationid)
 		}
 	}
 	return false;
+}
+bool MemoryMetaData::hasLookupMetaData(unsigned short locationid)
+{
+	for (int i=0;i<m_lookupMetaData.size();i++)
+	{
+		if (m_lookupMetaData[i].locationid == locationid)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+const LookupMetaData MemoryMetaData::getLookupMetaData(unsigned short locationid)
+{
+	for (int i=0;i<m_lookupMetaData.size();i++)
+	{
+		if (m_lookupMetaData[i].locationid == locationid)
+		{
+			return m_lookupMetaData[i];
+		}
+	}
+	return LookupMetaData();
 }
 
 const ReadOnlyRamData MemoryMetaData::getRORMetaData(unsigned short locationid)
