@@ -28,6 +28,7 @@
 #ifndef O5EDATAPACKETDECODER_H
 #define O5EDATAPACKETDECODER_H
 #include "datapacketdecoder.h"
+#include "o5eheaders.h"
 class O5EDataPacketDecoder : public DataPacketDecoder
 {
 	Q_OBJECT
@@ -36,6 +37,9 @@ public:
 	void populateDataFields();
 	int fieldSize();
 	DataField getField(int num);
+	void setDataDefinitions(QList<DataField> datamap);
+private:
+	QList<DataField> m_dataList;
 signals:
 	void payloadDecoded(QVariantMap data);
 public slots:

@@ -38,6 +38,7 @@ static quint32 Crc32_ComputeBuf(quint32 inCrc32, const void *buf, quint32 bufLen
 
 O5EComms::O5EComms(QObject *parent) : EmsComms(parent)
 {
+	m_dataDecoder = new O5EDataPacketDecoder();
 	qRegisterMetaType<QList<unsigned short> >("QList<unsigned short>");
 	currentPacketNum=1;
 	QTimer *timer = new QTimer();
@@ -50,23 +51,34 @@ O5EComms::O5EComms(QObject *parent) : EmsComms(parent)
 	QStringList inilist = inistring.split("\n");
 	QVariantMap map;
 	QMap<QString,scalarclass> scalarMap;
+	QList<DataField> dataLogMap;
 	QString pagenum = "";
+	int section = -1;
 	foreach (QString line,inilist)
 	{
-		if (line.startsWith("page"))
+		if (line.startsWith(";"))
 		{
-			if (pagenum != "")
-			{
-				pageMap[pagenum] = scalarMap;
-			}
-			//New page
-			//Page line
-			pagenum = line.split("=")[1];
-			pagenum = pagenum.mid(0,pagenum.indexOf(";")).trimmed();
-			qDebug() << "Page Num:" << pagenum;
+			continue;
 		}
-		else if (!line.startsWith(";"))
+		if (line.startsWith("[Constants]"))
 		{
+			section = 1;
+		}
+		if (line.startsWith("[BurstMode]"))
+		{
+			section = 2;
+		}
+		if (line.startsWith("[OutputChannels]"))
+		{
+			section = 3;
+		}
+		if (section == 2)
+		{
+			//Get burst mode command here
+		}
+		if (section == 3)
+		{
+			//OutputChannels, Datalog definitions
 			QStringList linesplit = line.split("=");
 			if (linesplit.size() > 1)
 			{
@@ -75,7 +87,6 @@ O5EComms::O5EComms(QObject *parent) : EmsComms(parent)
 				{
 					if (linevalsplit[0].trimmed() == "scalar")
 					{
-						//Scalar
 						scalarclass scalar;
 						//qDebug() << linevalsplit[2].trimmed() << linevalsplit[4].trimmed();
 						scalar.offset = linevalsplit[2].trimmed().toInt();
@@ -122,6 +133,87 @@ O5EComms::O5EComms(QObject *parent) : EmsComms(parent)
 							scalar.size = 4;
 							scalar.signedval = true;
 						}
+						scalar.unit = linevalsplit[3].trimmed().mid(1,linevalsplit[3].trimmed().length()-2);
+						//dataLogList.append(scalar);
+						DataField f(linesplit[0].trimmed(),"",scalar.offset,scalar.size,scalar.scale,scalar.translate);
+						dataLogMap.append(f);
+						//dataLogMap[linesplit[0].trimmed()] = scalar;
+					}
+				}
+			}
+		}
+		if (section == 1)
+		{
+			if (line.startsWith("page"))
+			{
+				if (pagenum != "")
+				{
+					pageMap[pagenum] = scalarMap;
+				}
+				//New page
+				//Page line
+				pagenum = line.split("=")[1];
+				pagenum = pagenum.mid(0,pagenum.indexOf(";")).trimmed();
+				qDebug() << "Page Num:" << pagenum;
+			}
+			else if (!line.startsWith(";"))
+			{
+				QStringList linesplit = line.split("=");
+				if (linesplit.size() > 1)
+				{
+					QStringList linevalsplit = linesplit[1].split(",");
+					if (linevalsplit.size() > 1)
+					{
+						if (linevalsplit[0].trimmed() == "scalar")
+						{
+							//Scalar
+							scalarclass scalar;
+							//qDebug() << linevalsplit[2].trimmed() << linevalsplit[4].trimmed();
+							scalar.offset = linevalsplit[2].trimmed().toInt();
+							if (linevalsplit[4].trimmed().startsWith("."))
+							{
+								scalar.scale = QString("0").append(linevalsplit[4].trimmed()).toFloat();
+							}
+							else
+							{
+								scalar.scale = linevalsplit[4].trimmed().toFloat();
+							}
+							if (linevalsplit[5].trimmed().startsWith("."))
+							{
+								scalar.translate = QString("0").append(linevalsplit[5].trimmed()).toFloat();
+							}
+							else
+							{
+								scalar.translate = linevalsplit[5].trimmed().toFloat();
+							}
+							scalarMap[linesplit[0].trimmed()] = scalar;
+
+							if (linevalsplit[1].trimmed() == "S16")
+							{
+								scalar.size = 2;
+								scalar.signedval = true;
+							}
+							else if (linevalsplit[1].trimmed() == "U08")
+							{
+								scalar.size = 1;
+								scalar.signedval = false;
+							}
+							else if (linevalsplit[1].trimmed() == "U16")
+							{
+								scalar.size = 2;
+								scalar.signedval = false;
+							}
+							else if (linevalsplit[1].trimmed() == "U32")
+							{
+								scalar.size = 4;
+								scalar.signedval = false;
+							}
+							else if (linevalsplit[1].trimmed() == "S32")
+							{
+								scalar.size = 4;
+								scalar.signedval = true;
+							}
+						}
 					}
 				}
 			}
@@ -134,6 +226,8 @@ O5EComms::O5EComms(QObject *parent) : EmsComms(parent)
 			//qDebug() << "Page:" << i.key() << "Scalar:" << j.key() << j.value().offset << j.value().scale << j.value().translate;
 		}
 	}*/
+	//m_dsataDecoder->setDataDefinitions(dataLogMap);
+	m_dataDecoder->setDataDefinitions(dataLogMap);
 }
 
 void O5EComms::stop()
@@ -148,7 +242,7 @@ void O5EComms::setLogsEnabled(bool enabled)
 
 DataPacketDecoder *O5EComms::getDecoder()
 {
-	return new O5EDataPacketDecoder();
+	return m_dataDecoder;
 }
 
 Table3DData *O5EComms::getNew3DTableData()
@@ -168,7 +262,7 @@ void O5EComms::setLogDirectory(QString dir)
 
 void O5EComms::setPort(QString portname)
 {
-
+	m_portName = portname;
 }
 
 void O5EComms::setBaud(int baudrate)
@@ -300,7 +394,12 @@ bool O5EComms::sendSimplePacket(unsigned short payload)
 
 void O5EComms::connectSerial(QString port,int baud)
 {
-	emit connected();
+	QMutexLocker locker(&reqListMutex);
+	RequestClass req;
+	req.type = SERIAL_CONNECT;
+	req.addArg(port);
+	req.addArg(baud);
+	m_reqList.append(req);
 }
 
 void O5EComms::disconnectSerial()
@@ -395,6 +494,7 @@ QByteArray O5EComms::readPacket(SerialPort *port)
 		lenbytes.append((const char*)buf,lenbytesread);
 		timeout++;
 		usleep(1000);
+		//qDebug() << "Test read";
 	}
 	if (lenbytesread == 0)
 	{
@@ -494,15 +594,31 @@ QByteArray O5EComms::readPacket(SerialPort *port)
 }
 void O5EComms::run()
 {
+	unsigned char reqBuf[7];
+	reqBuf[0] = 0;
+	reqBuf[1] = 1;
+	reqBuf[2] = 'A';
+	quint32 crc = Crc32_ComputeBuf(0,reqBuf + 2,1);
+	reqBuf[3] = crc >> 24;
+	reqBuf[4] = crc >> 16;
+	reqBuf[5] = crc >> 8;
+	reqBuf[6] = crc >> 0;
+
+	unsigned int timercounter = 0;
 	while (true)
 	{
-		//qDebug() << "Loop:" << m_reqList.size();
-		/*	QMutexLocker(reqListMutex);
-	RequestClass req;
-	req.type = GET_INTERFACE_VERSION;
-	req.sequencenumber = currentPacketNum++;
-	m_reqList.append(req);
-	return currentPacketNum;*/
+		timercounter++;
+		if (timercounter > 100)
+		{
+			timercounter = 0;
+			//Once per second, send out a random payload.
+			QByteArray payload;
+			for (int i=0;i<250;i++)
+			{
+				payload.append(rand() % 255);
+			}
+			emit dataLogPayloadReceived(QByteArray(),payload);
+		}
 		reqListMutex.lock();
 		for (int i=0;i<m_reqList.size();i++)
 		{
@@ -517,6 +633,21 @@ void O5EComms::run()
 				usleep(100000);
 				emit interfaceVersion("O5E Simulator");
 				emit commandSuccessful(m_privReqList[i].sequencenumber);
+			}
+			else if (m_privReqList[i].type == SERIAL_CONNECT)
+			{
+
+				QString port = m_privReqList[i].args[0].toString();
+				int baud = m_privReqList[i].args[1].toInt();
+				int openerror = m_serialPort.openPort(port,115200,false);
+				qDebug() << "Opened:" << openerror;
+				if (openerror < 0)
+				{
+					emit disconnected();
+					return;
+				}
+				emit connected();
+
 			}
 			else if (m_privReqList[i].type == GET_FIRMWARE_VERSION)
 			{
@@ -589,6 +720,17 @@ void O5EComms::run()
 
 		}
 		m_privReqList.clear();
+		//Before we sleep, lets send and recieve.
+		//qDebug() << "Writing:" << port.writeBytes(buf,7);
+		m_serialPort.writeBytes(reqBuf,7);
+		//usleep(13000);
+		QByteArray reply = readPacket(&m_serialPort);
+		if (reply.size() > 0)
+		{
+			emit dataLogPayloadReceived(QByteArray(),reply);
+		}
+		int stopper = 1;
+
 		usleep(10000); //Sleep to avoid CPU spinning
 	}
 	emit connected();
@@ -629,11 +771,11 @@ void O5EComms::run()
 	buf[6] = 0; //Offset
 	buf[7] = 0; //Length
 	buf[8] = 0xFF; //Length
-	quint32 crc = Crc32_ComputeBuf(0,buf + 2,7);
-	buf[9] = crc >> 24;
+	//quint32 crc = Crc32_ComputeBuf(0,buf + 2,7);
+	/*buf[9] = crc >> 24;
 	buf[10] = crc >> 16;
 	buf[11] = crc >> 8;
-	buf[12] = crc >> 0;
+	buf[12] = crc >> 0;*/
 	//port.writeBytes(buf,13);
 	//usleep(5000000);
 	//QByteArray response = readPacket(&port);

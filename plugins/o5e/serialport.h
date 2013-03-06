@@ -50,7 +50,6 @@ class SerialPort : public QObject
 	Q_OBJECT
 public:
     SerialPort(QObject *parent=0);
-    SerialPortStatus verifyFreeEMS(QString portname);
     void setPort(QString portname);
     void setBaud(int baudrate);
     int openPort(QString portName,int baudrate,bool oddparity = true);

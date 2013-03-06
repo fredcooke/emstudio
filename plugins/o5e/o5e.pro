@@ -29,7 +29,8 @@ HEADERS += ../../core/src/datapacketdecoder.h \
 	   ../../core/src/datafield.h \
 	   o5ecomms.h \
     o5edatapacketdecoder.h \
-    serialport.h
+    serialport.h \
+    o5eheaders.h
 SOURCES += o5ecomms.cpp \
     o5edatapacketdecoder.cpp \
     serialport.cpp \

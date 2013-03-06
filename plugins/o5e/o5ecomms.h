@@ -37,22 +37,12 @@
 #include "table3ddata.h"
 #include "table2ddata.h"
 #include "datapacketdecoder.h"
+#include "o5edatapacketdecoder.h"
 #include "headers.h"
 #include "serialport.h"
 #include "emscomms.h"
+#include "o5eheaders.h"
 #include <QTimer>
-
-class scalarclass
-{
-public:
-	QString type;
-	unsigned int offset;
-	unsigned int size;
-	bool signedval;
-	float scale;
-	float translate;
-};
-
 
 
 class O5EComms : public EmsComms
@@ -141,6 +131,9 @@ private:
 	QMutex reqListMutex;
 	QList<RequestClass> m_reqList;
 	QList<RequestClass> m_privReqList;
+	O5EDataPacketDecoder *m_dataDecoder;
+	QString m_portName;
+	SerialPort m_serialPort;
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);
 	void packetAcked(unsigned short locationid,QByteArray header,QByteArray payload);

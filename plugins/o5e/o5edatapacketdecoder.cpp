@@ -37,23 +37,31 @@ void O5EDataPacketDecoder::populateDataFields()
 
 int O5EDataPacketDecoder::fieldSize()
 {
-	return 0;
+	return m_dataList.size();
 }
 
 DataField O5EDataPacketDecoder::getField(int num)
 {
+	if (num >= 0 && num < m_dataList.size())
+	{
+		return m_dataList[num];
+	}
 	return DataField();
+}
+void O5EDataPacketDecoder::setDataDefinitions(QList<DataField> datalist)
+{
+	m_dataList = datalist;
 }
 
 void O5EDataPacketDecoder::decodePayload(QByteArray payload)
 {
-	QString val = "";
+	/*QString val = "";
 	for (int i=0;i<10;i++)
 	{
 		val += QString::number((unsigned char)payload[i]) + ",";
 	}
 	qDebug() << val;
-	QVariantMap map;
+
 	double rpm = (double)((((unsigned char)payload[1]) << 8) + (unsigned char)payload[2]);
 	if (rpm == 0)
 	{
@@ -62,7 +70,16 @@ void O5EDataPacketDecoder::decodePayload(QByteArray payload)
 	else
 	{
 		map["RPM"] = rpm;
+	}*/
+	QVariantMap map;
+	for (int i=0;i<m_dataList.size();i++)
+	{
+		if (m_dataList[i].size() + m_dataList[i].offset() < payload.size())
+		{
+			double val = m_dataList[i].getValue(&payload);
+			map[m_dataList[i].name()] = val;
+		}
 	}
-	qDebug() << "Decoding RPM:" << map["RPM"];
+	//qDebug() << "Decoding RPM:" << map["RPM"];
 	emit payloadDecoded(map);
 }
