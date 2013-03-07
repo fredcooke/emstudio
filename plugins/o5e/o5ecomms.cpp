@@ -579,7 +579,7 @@ QByteArray O5EComms::readPacket(SerialPort *port)
 			currentPacketCount++;
 			//emit dataLogPayloadReceived(QByteArray(),packet);
 			unsigned int clearlen = port->readBytes(buf,1024); //CRC
-			return packet;
+			return packet.mid(1);
 		}
 		if (datalenread == 4)
 		{
