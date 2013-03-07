@@ -84,7 +84,7 @@ bool DataField::flagValue(QByteArray *payload)
 	return false;
 }
 
-float DataField::getValue(QByteArray *payload)
+float DataField::getValue(QByteArray *payload,bool translatebeforescale)
 {
 	if (payload->size() > m_offset+m_size)
 	{
@@ -93,7 +93,14 @@ float DataField::getValue(QByteArray *payload)
 		{
 			val += ((unsigned char)payload->at(m_offset+i)) << (8*(m_size-(i+1)));
 		}
-		return (val / m_div) + m_addoffset;
+		if (translatebeforescale)
+		{
+			return (val + m_addoffset) * m_div;
+		}
+		else
+		{
+			return (val / m_div) + m_addoffset;
+		}
 	}
 	return 0;
 }

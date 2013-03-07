@@ -76,7 +76,7 @@ void O5EDataPacketDecoder::decodePayload(QByteArray payload)
 	{
 		if (m_dataList[i].size() + m_dataList[i].offset() < payload.size())
 		{
-			double val = m_dataList[i].getValue(&payload);
+			double val = m_dataList[i].getValue(&payload,true);
 			map[m_dataList[i].name()] = val;
 		}
 	}
