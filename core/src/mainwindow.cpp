@@ -770,7 +770,10 @@ void MainWindow::setPlugin(QString plugin)
 void MainWindow::setDevice(QString dev)
 {
 	m_comPort = dev;
-	emsComms->setPort(dev);
+	if (emsComms)
+	{
+		emsComms->setPort(dev);
+	}
 }
 
 void MainWindow::connectToEms()
