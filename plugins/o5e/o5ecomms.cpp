@@ -617,7 +617,7 @@ void O5EComms::run()
 			{
 				payload.append(rand() % 255);
 			}
-			emit dataLogPayloadReceived(QByteArray(),payload);
+			//emit dataLogPayloadReceived(QByteArray(),payload);
 		}
 		reqListMutex.lock();
 		for (int i=0;i<m_reqList.size();i++)
@@ -630,7 +630,7 @@ void O5EComms::run()
 		{
 			if (m_privReqList[i].type == GET_INTERFACE_VERSION)
 			{
-				usleep(100000);
+				usleep(10000);
 				emit interfaceVersion("O5E Simulator");
 				emit commandSuccessful(m_privReqList[i].sequencenumber);
 			}
@@ -651,18 +651,18 @@ void O5EComms::run()
 			}
 			else if (m_privReqList[i].type == GET_FIRMWARE_VERSION)
 			{
-				usleep(100000);
+				usleep(10000);
 				emit firmwareVersion("0.0.1");
 				emit commandSuccessful(m_privReqList[i].sequencenumber);
 			}
 			else if (m_privReqList[i].type == GET_MAX_PACKET_SIZE)
 			{
-				usleep(100000);
+				usleep(10000);
 				emit commandSuccessful(m_privReqList[i].sequencenumber);
 			}
 			else if (m_privReqList[i].type == GET_LOCATION_ID_LIST)
 			{
-				usleep(100000);
+				usleep(10000);
 				QList<unsigned short> idlists;
 				for (QMap<QString,QMap<QString,scalarclass> >::const_iterator j = pageMap.constBegin();j!=pageMap.constEnd();j++)
 				{
@@ -677,27 +677,27 @@ void O5EComms::run()
 			}
 			else if (m_privReqList[i].type == GET_DECODER_NAME)
 			{
-				usleep(100000);
+				usleep(10000);
 				emit commandSuccessful(m_privReqList[i].sequencenumber);
 			}
 			else if (m_privReqList[i].type == GET_FIRMWARE_BUILD_DATE)
 			{
-				usleep(100000);
+				usleep(10000);
 				emit commandSuccessful(m_privReqList[i].sequencenumber);
 			}
 			else if (m_privReqList[i].type == GET_COMPILER_VERSION)
 			{
-				usleep(100000);
+				usleep(10000);
 				emit commandSuccessful(m_privReqList[i].sequencenumber);
 			}
 			else if (m_privReqList[i].type == GET_OPERATING_SYSTEM)
 			{
-				usleep(100000);
+				usleep(10000);
 				emit commandSuccessful(m_privReqList[i].sequencenumber);
 			}
 			else if (m_privReqList[i].type == GET_LOCATION_ID_INFO)
 			{
-				usleep(100000);
+				usleep(10000);
 				unsigned short locid = m_privReqList[i].args[0].toInt();
 				//void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);
 				MemoryLocationInfo info;
@@ -731,7 +731,7 @@ void O5EComms::run()
 		}
 		int stopper = 1;
 
-		usleep(10000); //Sleep to avoid CPU spinning
+		usleep(5000); //Sleep to avoid CPU spinning
 	}
 	emit connected();
 	SerialPort port;
