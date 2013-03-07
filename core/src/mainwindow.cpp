@@ -246,7 +246,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	}
 
 	dataPacketDecoder = emsComms->getDecoder();
-	Q_ASSERT(connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap))));
+	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
 
 
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
@@ -646,7 +646,7 @@ void MainWindow::emsCommsDisconnected()
 	}
 
 	dataPacketDecoder = emsComms->getDecoder();
-	Q_ASSERT(connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap))));
+	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
 
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
