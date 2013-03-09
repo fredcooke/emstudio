@@ -729,7 +729,7 @@ void MainWindow::setPlugin(QString plugin)
 	}
 
 	dataPacketDecoder = emsComms->getDecoder();
-	Q_ASSERT(connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap))));
+	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
 	dataTables->passDecoder(dataPacketDecoder);
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
