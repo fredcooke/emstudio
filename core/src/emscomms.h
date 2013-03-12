@@ -60,6 +60,7 @@
 #include "table3ddata.h"
 #include "table2ddata.h"
 #include "datapacketdecoder.h"
+#include "memorymetadata.h"
 //#include "logloader.h"
 #include "headers.h"
 class EmsComms : public QThread
@@ -70,6 +71,7 @@ public:
 	virtual void stop()=0;
 	virtual void setLogsEnabled(bool enabled)=0;
 	virtual DataPacketDecoder *getDecoder()=0;
+	virtual MemoryMetaData *getMetaParser()=0;
 	virtual Table3DData *getNew3DTableData()=0;
 	virtual Table2DData *getNew2DTableData()=0;
 	virtual void setLogDirectory(QString dir)=0;

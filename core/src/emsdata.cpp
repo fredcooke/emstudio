@@ -663,9 +663,9 @@ void EmsData::flashBlockUpdate(unsigned short locationid, QByteArray header, QBy
 bool EmsData::verifyMemoryBlock(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
-	if (m_memoryMetaData.has2DMetaData(locationid))
+	if (m_memoryMetaData->has2DMetaData(locationid))
 	{
-		if ((unsigned int)payload.size() != m_memoryMetaData.get2DMetaData(locationid).size)
+		if ((unsigned int)payload.size() != m_memoryMetaData->get2DMetaData(locationid).size)
 		{
 			return false;
 		}
@@ -674,9 +674,9 @@ bool EmsData::verifyMemoryBlock(unsigned short locationid,QByteArray header,QByt
 			return true;
 		}
 	}
-	if (m_memoryMetaData.has3DMetaData(locationid))
+	if (m_memoryMetaData->has3DMetaData(locationid))
 	{
-		if ((unsigned int)payload.size() != m_memoryMetaData.get3DMetaData(locationid).size)
+		if ((unsigned int)payload.size() != m_memoryMetaData->get3DMetaData(locationid).size)
 		{
 			return false;
 		}

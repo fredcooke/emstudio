@@ -97,25 +97,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	}
 
 	//Settings, then defaults, then fallback to local
-	QString filestr = "";
-	if (QFile::exists(m_settingsDir + "/" + "definitions/freeems.config.json"))
-	{
-		filestr = m_settingsDir + "/" + "definitions/freeems.config.json";
-	}
-	else if (QFile::exists(m_defaultsDir + "/definitions/freeems.config.json"))
-	{
-		filestr = m_defaultsDir + "/definitions/freeems.config.json";
-	}
-	else if (QFile::exists("freeems.config.json"))
-	{
-		filestr = "freeems.config.json";
-	}
-	else
-	{
-		QMessageBox::information(0,"Error","Error: No freeems.config.json file found!");
-	}
-	m_memoryMetaData.loadMetaDataFromFile(filestr);
-	emsData->setMetaData(m_memoryMetaData);
 
 	QString decoderfilestr = "";
 	if (QFile::exists(m_settingsDir + "/" + "definitions/decodersettings.json"))
@@ -186,9 +167,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 		}
 	}
 
-	qDebug() << m_memoryMetaData.errorMap().keys().size() << "Error Keys Loaded";
-	qDebug() << m_memoryMetaData.table3DMetaData().size() << "3D Tables Loaded";
-	qDebug() << m_memoryMetaData.table2DMetaData().size() << "2D Tables Loaded";
 	//return;
 	m_currentRamLocationId=0;
 	//populateDataFields();
@@ -664,6 +642,30 @@ void MainWindow::emsCommsDisconnected()
 
 	dataPacketDecoder = emsComms->getDecoder();
 	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
+	QString filestr = "";
+	if (QFile::exists(m_settingsDir + "/" + "definitions/freeems.config.json"))
+	{
+		filestr = m_settingsDir + "/" + "definitions/freeems.config.json";
+	}
+	else if (QFile::exists(m_defaultsDir + "/definitions/freeems.config.json"))
+	{
+		filestr = m_defaultsDir + "/definitions/freeems.config.json";
+	}
+	else if (QFile::exists("freeems.config.json"))
+	{
+		filestr = "freeems.config.json";
+	}
+	else
+	{
+		QMessageBox::information(0,"Error","Error: No freeems.config.json file found!");
+	}
+	m_memoryMetaData = emsComms->getMetaParser();
+	m_memoryMetaData->loadMetaDataFromFile(filestr);
+	emsData->setMetaData(m_memoryMetaData);
+	qDebug() << m_memoryMetaData->errorMap().keys().size() << "Error Keys Loaded";
+	qDebug() << m_memoryMetaData->table3DMetaData().size() << "3D Tables Loaded";
+	qDebug() << m_memoryMetaData->table2DMetaData().size() << "2D Tables Loaded";
+
 
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
@@ -730,7 +732,29 @@ void MainWindow::setPlugin(QString plugin)
 		qDebug() << pluginLoader->errorString();
 		exit(-1);
 	}
-
+	QString filestr = "";
+	if (QFile::exists(m_settingsDir + "/" + "definitions/freeems.config.json"))
+	{
+		filestr = m_settingsDir + "/" + "definitions/freeems.config.json";
+	}
+	else if (QFile::exists(m_defaultsDir + "/definitions/freeems.config.json"))
+	{
+		filestr = m_defaultsDir + "/definitions/freeems.config.json";
+	}
+	else if (QFile::exists("freeems.config.json"))
+	{
+		filestr = "freeems.config.json";
+	}
+	else
+	{
+		QMessageBox::information(0,"Error","Error: No freeems.config.json file found!");
+	}
+	m_memoryMetaData = emsComms->getMetaParser();
+	m_memoryMetaData->loadMetaDataFromFile(filestr);
+	emsData->setMetaData(m_memoryMetaData);
+	qDebug() << m_memoryMetaData->errorMap().keys().size() << "Error Keys Loaded";
+	qDebug() << m_memoryMetaData->table3DMetaData().size() << "3D Tables Loaded";
+	qDebug() << m_memoryMetaData->table2DMetaData().size() << "2D Tables Loaded";
 	dataPacketDecoder = emsComms->getDecoder();
 	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
 	dataTables->passDecoder(dataPacketDecoder);
@@ -831,11 +855,11 @@ void MainWindow::reloadDataFromDevice(unsigned short locationid,bool isram)
 		}
 		if (emsData->hasLocalRamBlock(locationid))
 		{
-			if (m_memoryMetaData.has2DMetaData(locationid))
+			if (m_memoryMetaData->has2DMetaData(locationid))
 			{
 				view->setData(locationid,emsData->getLocalFlashBlock(locationid),emsComms->getNew2DTableData());
 			}
-			else if (m_memoryMetaData.has3DMetaData(locationid))
+			else if (m_memoryMetaData->has3DMetaData(locationid))
 			{
 				view->setData(locationid,emsData->getLocalFlashBlock(locationid),emsComms->getNew3DTableData());
 			}
@@ -944,7 +968,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 		qDebug() << "Creating new table view for location: 0x" << QString::number(locid,16).toUpper();
 		TableView2D *view = new TableView2D(isram,isflash);
 		QString title;
-		Table2DMetaData metadata = m_memoryMetaData.get2DMetaData(locid);
+		Table2DMetaData metadata = m_memoryMetaData->get2DMetaData(locid);
 		if (metadata.valid)
 		{
 			if (!view->setData(locid,data,metadata,emsComms->getNew2DTableData()))
@@ -983,7 +1007,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 		TableView3D *view = new TableView3D(isram,isflash);
 		connect(view,SIGNAL(show3DTable(unsigned short,Table3DData*)),this,SLOT(tableview3d_show3DTable(unsigned short,Table3DData*)));
 		QString title;
-		Table3DMetaData metadata = m_memoryMetaData.get3DMetaData(locid);
+		Table3DMetaData metadata = m_memoryMetaData->get3DMetaData(locid);
 		if (metadata.valid)
 		{
 			Table3DData *new3ddata = emsComms->getNew3DTableData();
@@ -1387,32 +1411,32 @@ void MainWindow::locationIdInfo(unsigned short locationid,MemoryLocationInfo inf
 	}
 	m_memoryInfoMap[locationid] = info;
 	QString title = "";
-	if (m_memoryMetaData.has2DMetaData(locationid))
+	if (m_memoryMetaData->has2DMetaData(locationid))
 	{
-		title = m_memoryMetaData.get2DMetaData(locationid).tableTitle;
-		if (m_memoryMetaData.get2DMetaData(locationid).size != info.size)
+		title = m_memoryMetaData->get2DMetaData(locationid).tableTitle;
+		if (m_memoryMetaData->get2DMetaData(locationid).size != info.size)
 		{
 			interrogateProgressViewCancelClicked();
-			QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(info.size) + " expected: " + QString::number(m_memoryMetaData.get2DMetaData(locationid).size));
+			QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(info.size) + " expected: " + QString::number(m_memoryMetaData->get2DMetaData(locationid).size));
 		}
 	}
-	if (m_memoryMetaData.has3DMetaData(locationid))
+	if (m_memoryMetaData->has3DMetaData(locationid))
 	{
-		title = m_memoryMetaData.get3DMetaData(locationid).tableTitle;
-		if (m_memoryMetaData.get3DMetaData(locationid).size != info.size)
+		title = m_memoryMetaData->get3DMetaData(locationid).tableTitle;
+		if (m_memoryMetaData->get3DMetaData(locationid).size != info.size)
 		{
 			interrogateProgressViewCancelClicked();
-			QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(info.size) + " expected: " + QString::number(m_memoryMetaData.get3DMetaData(locationid).size));
+			QMessageBox::information(0,"Interrogate Error","Error: Meta data for table location 0x" + QString::number(locationid,16).toUpper() + " is not valid for actual table. Size: " + QString::number(info.size) + " expected: " + QString::number(m_memoryMetaData->get3DMetaData(locationid).size));
 		}
 	}
-	if (m_memoryMetaData.hasRORMetaData(locationid))
+	if (m_memoryMetaData->hasRORMetaData(locationid))
 	{
-		title = m_memoryMetaData.getRORMetaData(locationid).dataTitle;
+		title = m_memoryMetaData->getRORMetaData(locationid).dataTitle;
 		//m_readOnlyMetaDataMap[locationid]
 	}
-	if (m_memoryMetaData.hasLookupMetaData(locationid))
+	if (m_memoryMetaData->hasLookupMetaData(locationid))
 	{
-		title = m_memoryMetaData.getLookupMetaData(locationid).title;
+		title = m_memoryMetaData->getLookupMetaData(locationid).title;
 	}
 	//emsInfo->locationIdInfo(locationid,title,rawFlags,flags,parent,rampage,flashpage,ramaddress,flashaddress,size);
 	emsInfo->locationIdInfo(locationid,title,info);
@@ -2165,7 +2189,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	qDebug() << "Command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
 	if (!m_interrogationInProgress)
 	{
-		QMessageBox::information(0,"Command Failed","Command failed with error: " + m_memoryMetaData.getErrorString(errornum));
+		QMessageBox::information(0,"Command Failed","Command failed with error: " + m_memoryMetaData->getErrorString(errornum));
 	}
 	else
 	{

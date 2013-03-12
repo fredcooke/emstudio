@@ -37,6 +37,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	//connect(logLoader,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
 
 	dataPacketDecoder = new FEDataPacketDecoder();
+	m_metaDataParser = new FEMemoryMetaData();
 	m_waitingForResponse = false;
 	m_logsEnabled = false;
 	m_logInFile=0;
@@ -75,6 +76,11 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	m_blockFlagToNameMap[BLOCK_IS_CONFIGURATION] = "Configuration";
 
 }
+MemoryMetaData *FreeEmsComms::getMetaParser()
+{
+	return m_metaDataParser;
+}
+
 DataPacketDecoder *FreeEmsComms::getDecoder()
 {
 	return dataPacketDecoder;

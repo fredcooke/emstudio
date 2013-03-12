@@ -72,14 +72,14 @@ public:
 
 	void clearAllMemory();
 
-	void setMetaData(MemoryMetaData data) { m_memoryMetaData = data; }
+	void setMetaData(MemoryMetaData *data) { m_memoryMetaData = data; }
 
 	void setInterrogation(bool inprogress) { m_interrogationInProgress = inprogress; }
 
 private:
 	bool m_checkEmsDataInUse;
 	bool m_interrogationInProgress;
-	MemoryMetaData m_memoryMetaData;
+	MemoryMetaData *m_memoryMetaData;
 	QMap<unsigned short,QList<ConfigBlock> > m_configBlockMap;
 	QMap<unsigned short,ReadOnlyRamBlock> m_readOnlyMetaDataMap;
 	QList<MemoryLocation*> m_ramMemoryList;

@@ -19,18 +19,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA   *
  ************************************************************************************/
 
-#include "memorymetadata.h"
+#include "fememorymetadata.h"
 #include <QDebug>
 #include <QFile>
 #include <QByteArray>
 #include <qjson/parser.h>
-#include <QMessageBox>
+//#include <QMessageBox>
 #include <QVariant>
-/*
-MemoryMetaData::MemoryMetaData()
+
+FEMemoryMetaData::FEMemoryMetaData()
 {
 }
-bool MemoryMetaData::parseMetaData(QString json)
+bool FEMemoryMetaData::parseMetaData(QString json)
 {
 	QJson::Parser parser;
 	QVariant top = parser.parse(json.toStdString().c_str());
@@ -82,8 +82,64 @@ bool MemoryMetaData::parseMetaData(QString json)
 			//m_readOnlyMetaDataMap[locid].append(rdata);
 
 		}
+		/*QVariantMap::iterator j = locidmap.begin();
+		while (j != locidmap.end())
+		{
+			if (j.key() == "title")
+			{
+				QString title = j.value().toString();
+				qDebug() << "Location title:" << title;
+			}
+			else
+			{
+				qDebug() << j.key();
+				QVariantMap valuemap = j.value().toMap();
+				if (valuemap.contains("type"))
+				{
+					ConfigData cdata;
+					cdata.configDescription = valuemap["title"].toString();
+					cdata.configTitle = j.key();
+					cdata.elementSize = valuemap["size"].toInt();
+					cdata.locationId = locid;
+					cdata.offset = valuemap["offset"].toInt();
+					cdata.type = valuemap["type"].toString();
+					QVariantMap calcmap = valuemap["calc"].toMap();
+					QList<QPair<QString,double> > calclist;
+					QVariantMap::iterator k = calcmap.begin();
+					while (k != calcmap.end())
+					{
+						calclist.append(QPair<QString,double>(k.key(),k.value().toDouble()));
+						k++;
+					}
+					cdata.elementCalc = calclist;
+					if (valuemap["type"] == "value")
+					{
+
+					}
+					else if (valuemap["type"] == "array")
+					{
+						cdata.arraySize = valuemap["arraysize"].toInt();
+					}
+					m_configMetaData.append(cdata);
+				}
+
+			}
+			j++;
+		}*/
 		i++;
 	}
+	/*"lookuptables" : {
+ "0x8000" : {
+  "title": "IAT Transfer Table",
+  "size" : "1024",
+  "editable" : "false"
+ },
+ "0x8001" : {
+  "title" : "CHT Transfer Table",
+  "size" : "1024",
+  "editable" : "false"
+ }
+}*/
 	QVariantMap lookups = topmap["lookuptables"].toMap();
 	i = lookups.begin();
 	while (i != lookups.end())
@@ -212,13 +268,13 @@ bool MemoryMetaData::parseMetaData(QString json)
 	return true;
 }
 
-bool MemoryMetaData::loadMetaDataFromFile(QString filestr)
+bool FEMemoryMetaData::loadMetaDataFromFile(QString filestr)
 {
 	qDebug() << "Loading config file from:" << filestr;
 	QFile file(filestr);
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		QMessageBox::information(0,"Error","Error opening config file: " + file.errorString());
+		//QMessageBox::information(0,"Error","Error opening config file: " + file.errorString());
 		return false;
 		//Can't open the file.
 	}
@@ -228,7 +284,7 @@ bool MemoryMetaData::loadMetaDataFromFile(QString filestr)
 	return parseMetaData(filebytes);
 }
 
-const Table3DMetaData MemoryMetaData::get3DMetaData(unsigned short locationid)
+const Table3DMetaData FEMemoryMetaData::get3DMetaData(unsigned short locationid)
 {
 	for (int i=0;i<m_table3DMetaData.size();i++)
 	{
@@ -241,7 +297,7 @@ const Table3DMetaData MemoryMetaData::get3DMetaData(unsigned short locationid)
 }
 
 
-const Table2DMetaData MemoryMetaData::get2DMetaData(unsigned short locationid)
+const Table2DMetaData FEMemoryMetaData::get2DMetaData(unsigned short locationid)
 {
 	for (int i=0;i<m_table2DMetaData.size();i++)
 	{
@@ -252,7 +308,7 @@ const Table2DMetaData MemoryMetaData::get2DMetaData(unsigned short locationid)
 	}
 	return Table2DMetaData();
 }
-bool MemoryMetaData::has3DMetaData(unsigned short locationid)
+bool FEMemoryMetaData::has3DMetaData(unsigned short locationid)
 {
 	for (int i=0;i<m_table3DMetaData.size();i++)
 	{
@@ -264,7 +320,7 @@ bool MemoryMetaData::has3DMetaData(unsigned short locationid)
 	return false;
 }
 
-bool MemoryMetaData::has2DMetaData(unsigned short locationid)
+bool FEMemoryMetaData::has2DMetaData(unsigned short locationid)
 {
 	for (int i=0;i<m_table2DMetaData.size();i++)
 	{
@@ -275,7 +331,7 @@ bool MemoryMetaData::has2DMetaData(unsigned short locationid)
 	}
 	return false;
 }
-bool MemoryMetaData::hasRORMetaData(unsigned short locationid)
+bool FEMemoryMetaData::hasRORMetaData(unsigned short locationid)
 {
 	for (int i=0;i<m_readOnlyMetaData.size();i++)
 	{
@@ -286,7 +342,7 @@ bool MemoryMetaData::hasRORMetaData(unsigned short locationid)
 	}
 	return false;
 }
-bool MemoryMetaData::hasLookupMetaData(unsigned short locationid)
+bool FEMemoryMetaData::hasLookupMetaData(unsigned short locationid)
 {
 	for (int i=0;i<m_lookupMetaData.size();i++)
 	{
@@ -298,7 +354,7 @@ bool MemoryMetaData::hasLookupMetaData(unsigned short locationid)
 	return false;
 }
 
-const LookupMetaData MemoryMetaData::getLookupMetaData(unsigned short locationid)
+const LookupMetaData FEMemoryMetaData::getLookupMetaData(unsigned short locationid)
 {
 	for (int i=0;i<m_lookupMetaData.size();i++)
 	{
@@ -310,7 +366,7 @@ const LookupMetaData MemoryMetaData::getLookupMetaData(unsigned short locationid
 	return LookupMetaData();
 }
 
-const ReadOnlyRamData MemoryMetaData::getRORMetaData(unsigned short locationid)
+const ReadOnlyRamData FEMemoryMetaData::getRORMetaData(unsigned short locationid)
 {
 	for (int i=0;i<m_readOnlyMetaData.size();i++)
 	{
@@ -322,7 +378,7 @@ const ReadOnlyRamData MemoryMetaData::getRORMetaData(unsigned short locationid)
 	return ReadOnlyRamData();
 }
 
-const QString MemoryMetaData::getErrorString(unsigned short code)
+const QString FEMemoryMetaData::getErrorString(unsigned short code)
 {
 	if (m_errorMap.contains(code))
 	{
@@ -330,4 +386,3 @@ const QString MemoryMetaData::getErrorString(unsigned short code)
 	}
 	return "0x" + QString::number(code,16).toUpper();
 }
-*/

@@ -33,10 +33,12 @@ HEADERS += ../../core/src/datapacketdecoder.h \
 	   ../../core/src/tabledata.h \
 	   ../../core/src/emscomms.h \
 	   ../../core/src/datafield.h \
+	   ../../core/src/memorymetadata.h \
            fetable3ddata.h \
            freeemscomms.h \
            serialport.h \
-           serialrxthread.h
+           serialrxthread.h \
+    fememorymetadata.h
 SOURCES += fedatapacketdecoder.cpp \
            fetable2ddata.cpp \
            fetable3ddata.cpp \
@@ -44,4 +46,5 @@ SOURCES += fedatapacketdecoder.cpp \
            serialport.cpp \
 	   ../../core/src/datafield.cpp \
 	   ../../core/src/tabledata.cpp \
-           serialrxthread.cpp
+           serialrxthread.cpp \
+    fememorymetadata.cpp

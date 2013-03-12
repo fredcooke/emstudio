@@ -110,7 +110,7 @@ private:
 	QList<ConfigData> m_configMetaData;
 	//QMap<unsigned short,QList<ReadOnlyRamData> > m_readOnlyMetaDataMap;
 	//RawDataView *rawData;
-	MemoryMetaData m_memoryMetaData;
+	MemoryMetaData *m_memoryMetaData;
 	TableView *dataTables;
 	GaugeView *dataGauges;
 	EmsInfoView *emsInfo;

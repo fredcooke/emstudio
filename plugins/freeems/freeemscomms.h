@@ -33,6 +33,7 @@
 //#include "logloader.h"
 #include "headers.h"
 #include "fedatapacketdecoder.h"
+#include "fememorymetadata.h"
 class FreeEmsComms : public EmsComms
 {
 	Q_OBJECT
@@ -41,6 +42,7 @@ public:
 	FreeEmsComms(QObject *parent = 0);
 	~FreeEmsComms();
 	DataPacketDecoder *getDecoder();
+	MemoryMetaData *getMetaParser();
 	Table3DData *getNew3DTableData();
 	Table2DData *getNew2DTableData();
 	void stop() { m_terminateLoop = true; }
@@ -152,6 +154,7 @@ private:
 		void addArg(QVariant arg,int size=0) { args.append(arg); argsize.append(size);}
 	};
 	FEDataPacketDecoder *dataPacketDecoder;
+	FEMemoryMetaData *m_metaDataParser;
 	bool m_debugLogsEnabled;
 	QMap<FreeEmsComms::LocationIdFlags,QString> m_blockFlagToNameMap;
 	bool m_terminateLoop;
