@@ -246,19 +246,22 @@
    "size" : "2",
    "title" : "The effective TDC angle of the event in question.",
    "type" : "array",
-   "arraysize" : "24"
+   "arraysize" : "24",
+   "sizeoverride" : "numberOfConfiguredOutputEvents"
   },
   "outputEventPinNumbers" : {
     "size" : "1",
     "title" : "Which of the 6 pins should be associated with this event.",
     "type" : "array",
-    "arraysize" : "24"
+    "arraysize" : "24",
+    "sizeoverride" : "numberOfConfiguredOutputEvents"
   },
-  "schedulingConfigurationBits " : {
+  "schedulingConfigurationBits" : {
    "size" : "1",
    "title" : "0 = ignition, 1 = injection",
    "type" : "array",
-   "arraysize" : "24"
+   "arraysize" : "24",
+   "sizeoverride" : "numberOfConfiguredOutputEvents"
   },
   "decoderEngineOffset" : {
    "calc" : { "div" : "50.0" },

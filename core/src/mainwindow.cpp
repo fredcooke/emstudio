@@ -164,11 +164,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 			{
 				QVariantMap tmpmap = decodervalueslist[i].toMap();
 				ConfigBlock block;
+				block.setLocationId(locid);
 				block.setName(tmpmap["name"].toString());
 				block.setType(tmpmap["type"].toString());
 				block.setElementSize(tmpmap["sizeofelement"].toInt());
 				block.setSize(tmpmap["size"].toInt());
 				block.setOffset(tmpmap["offset"].toInt());
+				block.setSizeOverride(tmpmap["sizeoverride"].toString());
+				block.setSizeOverrideMult(tmpmap["sizeoverridemult"].toDouble());
 				QList<QPair<QString, double> > calclist;
 				QVariantList calcliststr = tmpmap["calc"].toList();
 				for (int j=0;j<calcliststr.size();j++)
@@ -1053,6 +1056,22 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 		}
 		else
 		{*/
+		if (m_configBlockMap.contains(locid))
+		{
+			ConfigView *view = new ConfigView();
+			view->passConfig(m_configBlockMap[locid],data);
+			connect(view,SIGNAL(saveData(unsigned short,QByteArray)),this,SLOT(configViewSaveData(unsigned short,QByteArray)));
+			connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+			QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+			win->setWindowTitle("Config location: 0x" + QString::number(locid,16).toUpper());
+			win->setGeometry(view->geometry());
+			m_configDataView[locid] = view;
+			win->show();
+			QApplication::postEvent(win, new QEvent(QEvent::Show));
+			QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+		}
+		else
+		{
 			RawDataView *view = new RawDataView(isram,isflash);
 			view->setData(locid,data);
 			connect(view,SIGNAL(saveData(unsigned short,QByteArray,int)),this,SLOT(rawViewSaveData(unsigned short,QByteArray,int)));
@@ -1065,6 +1084,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 			win->show();
 			QApplication::postEvent(win, new QEvent(QEvent::Show));
 			QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+		}
 		//}
 	}
 }
@@ -1108,6 +1128,32 @@ void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,DataType type)
 		}
 	}
 }
+void MainWindow::configViewSaveData(unsigned short locationid,QByteArray data)
+{
+	qDebug() << "config view save data";
+	if (emsData->hasLocalFlashBlock(locationid))
+	{
+		if (emsData->getLocalFlashBlock(locationid) == data)
+		{
+			qDebug() << "Data in application memory unchanged, no reason to send write";
+			return;
+		}
+		emsData->setLocalFlashBlock(locationid,data);
+		if (!m_offlineMode)
+		{
+			qDebug() << "Writing to ECU";
+			m_currentFlashLocationId = locationid;
+			m_waitingForFlashWriteConfirmation = true;
+			emsComms->updateBlockInFlash(locationid,0,data.size(),data);
+			emsComms->retrieveBlockFromFlash(locationid,0,0);
+		}
+	}
+	else
+	{
+		qDebug() << "No local flash block... 0x" << QString::number(locationid).toUpper();
+	}
+}
+
 void MainWindow::rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation)
 {
 	Q_UNUSED(physicallocation)
@@ -2096,6 +2142,10 @@ void MainWindow::updateDataWindows(unsigned short locationid)
 			}
 			return;
 		}
+	}
+	else if (m_configDataView.contains(locationid))
+	{
+		m_configDataView[locationid]->passConfig(m_configBlockMap[locationid],emsData->getLocalFlashBlock(locationid));
 	}
 	else
 	{

@@ -8,7 +8,8 @@
     "sizeofelement":"2",
     "size" : "48",
     "offset" : "0",
-    "calc" : [{ "type":"div","value" : "50.0" }]
+    "calc" : [{ "type":"div","value" : "50.0" }],
+    "sizeoverride" : "numberOfConfiguredOutputEvents"
     },
     {
     "name" : "outputEventPinNumbers",
@@ -16,7 +17,8 @@
     "sizeofelement":"1",
     "size" : "24",
     "offset" : "48",
-    "calc" : []
+    "calc" : [],
+    "sizeoverride" : "numberOfConfiguredOutputEvents"
     },
     {
     "name" : "schedulingConfigurationBits",
@@ -24,7 +26,8 @@
     "sizeofelement":"1",
     "size" : "24",
     "offset" : "72",
-    "calc" : []
+    "calc" : [],
+    "sizeoverride" : "numberOfConfiguredOutputEvents"
     },
     {
     "name" : "decoderEngineOffset",

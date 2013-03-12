@@ -122,6 +122,7 @@ private:
 	InterrogateProgressView *progressView;
 	QList<int> interrogationSequenceList;
 	QMap<unsigned short,QWidget*> m_rawDataView;
+	QMap<unsigned short,ConfigView*> m_configDataView;
 	QMdiSubWindow *tablesMdiWindow;
 	QMdiSubWindow *interrogateProgressMdiWindow;
 	QMdiSubWindow *emsMdiWindow;
@@ -191,6 +192,7 @@ private slots:
 	void emsCompilerVersion(QString version);
 	void checkSyncRequest();
 	void rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation);
+	void configViewSaveData(unsigned short locationid,QByteArray data);
 	void rawDataViewDestroyed(QObject *object);
 	void emsInfoDisplayLocationId(int locid,bool isram,DataType type);
 	void dataViewSaveLocation(unsigned short locationid,QByteArray data,int phyiscallocation);

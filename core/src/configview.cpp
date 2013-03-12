@@ -56,28 +56,41 @@ void ConfigView::treeItemChanged(QTreeWidgetItem* item,int column)
 	qDebug() << "Item changed:" << item->text(0);
 	for (int i=0;i<ui.treeWidget->topLevelItemCount();i++)
 	{
-		if (ui.treeWidget->topLevelItem(i) == item)
+		if (ui.treeWidget->topLevelItem(i) == item->parent())
 		{
 			int index = ui.treeWidget->topLevelItem(i)->indexOfChild(item);
 			int totaloffset = m_configList[i].offset() + index * m_configList[i].elementSize();
 			unsigned short newval = backConvertAxis(item->text(0).toDouble(),m_configList[i].calc());
 			QByteArray retval;
-			retval.append((char)((newval >> 8) & 0xFF));
-			retval.append(newval & 0xFF);
+			if (m_configList[i].elementSize() == 2)
+			{
+				retval.append((char)((newval >> 8) & 0xFF));
+				retval.append(newval & 0xFF);
+			}
+			else if (m_configList[i].elementSize() == 1)
+			{
+				retval.append(newval & 0xFF);
+			}
+			qDebug() << newval << totaloffset << m_configList[i].elementSize();
 			m_rawData.replace(totaloffset,m_configList[i].elementSize(),retval);
 			emit saveData(m_configList[i].locationId(),m_rawData);
 		}
+		qDebug() << ui.treeWidget->topLevelItem(i)->text(0) << item->text(0);
 	}
+	qDebug() << "No item found";
 }
 void ConfigView::passConfig(QList<ConfigBlock> config,QByteArray data)
 {
+	ui.treeWidget->clear();
 	m_configList = config;
 	m_rawData = data;
 	for (int i=0;i<config.size();i++)
 	{
 		//ui.tableWidget->setRowCount(ui.tableWidget->rowCount()+1);
 		//ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,0,new QTableWidgetItem(config[i].name()));
-		ui.treeWidget->addTopLevelItem(new QTreeWidgetItem(QStringList() << config[i].name()));
+		QTreeWidgetItem *item = new QTreeWidgetItem(QStringList() << config[i].name());
+		ui.treeWidget->addTopLevelItem(item);
+		ui.treeWidget->setItemExpanded(item,true);
 
 		if (config[i].type() == "value")
 		{
@@ -87,6 +100,7 @@ void ConfigView::passConfig(QList<ConfigBlock> config,QByteArray data)
 				val += ((unsigned char)data[config[i].offset() + j]) << (8 * (config[i].size() - (j+1)));
 				qDebug() << j << (8 * (config[i].size() - (j+1))) << QString::number(data[config[i].offset() + j]);
 			}
+			qDebug() << "Item:" << config[i].name() << val;
 			ui.treeWidget->topLevelItem(ui.treeWidget->topLevelItemCount()-1)->addChild(new QTreeWidgetItem(QStringList() << QString::number(calcAxis(val,config[i].calc()))));
 			//int count = ui.treeWidget->topLevelItemCount()-1;
 			//ui.treeWidget->topLevelItem(count)->child(ui.treeWidget->topLevelItem(count)->childCount()-1)->setFlags(ui.treeWidget->topLevelItem(count)->child(ui.treeWidget->topLevelItem(count)->childCount()-1)->flags() & Qt::ItemIsEditable);
@@ -96,17 +110,46 @@ void ConfigView::passConfig(QList<ConfigBlock> config,QByteArray data)
 		else if (config[i].type() == "array")
 		{
 			//QString text = "";
-			for (int j=0;j<config[i].size();j++)
+			int max = 0;
+			if (config[i].sizeOverride() != "")
+			{
+				qDebug() << "We have a size override for" << config[i].name();
+				for (int j=0;j<config.size();j++)
+				{
+					if (config[j].name() == config[i].sizeOverride())
+					{
+						qDebug() << "Found config override";
+						unsigned short val = 0;
+						for (int k=0;k<config[j].size();k++)
+						{
+							val += ((unsigned char)data[config[j].offset() + k]) << (8 * (config[j].size() - (k+1)));
+							//val += data[config[i].offset() + j+1] << 8;
+						}
+						if (config[i].sizeOverrideMult() != 0)
+						{
+							val *= config[i].sizeOverrideMult();
+						}
+						max = val;
+
+					}
+				}
+			}
+			else
+			{
+				max = config[i].size();
+			}
+			qDebug() << "Max array size:" << max;
+			for (int j=0;j<max;j++)
 			{
 				unsigned short val = 0;
 				for (int k=0;k<config[i].elementSize();k++)
 				{
-					val += ((unsigned char)data[config[i].offset() + j + k]) << (8 * (config[i].elementSize() - (k+1)));
+					val += ((unsigned char)data[config[i].offset() + (j * config[i].elementSize()) + k]) << (8 * (config[i].elementSize() - (k+1)));
 					//val += data[config[i].offset() + j+1] << 8;
 				}
 				ui.treeWidget->topLevelItem(ui.treeWidget->topLevelItemCount()-1)->addChild(new QTreeWidgetItem(QStringList() << QString::number(calcAxis(val,config[i].calc()))));
 				//text += "{" + QString::number(calcAxis(val,config[i].calc())) + "} ";
-				j+=config[i].elementSize()-1;
+				//j+=config[i].elementSize()-1;
 			}
 			//ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,1,new QTableWidgetItem(text));
 			//ui.treeWidget->topLevelItem(ui.treeWidget->topLevelItemCount()-1)->addChild(new QTreeWidgetItem(QStringList() << text));

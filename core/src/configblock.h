@@ -28,9 +28,11 @@ class ConfigBlock
 {
 public:
 	ConfigBlock();
-	ConfigBlock(QString name,QString type, unsigned short locationid, unsigned short size,unsigned short elementsize,unsigned short offset, QList<QPair<QString,double> > calc);
+	ConfigBlock(QString name,QString type, QString override,unsigned short locationid, unsigned short size,unsigned short elementsize,unsigned short offset, QList<QPair<QString,double> > calc);
 	void setName(QString name) { m_name = name; }
 	void setType(QString type) { m_type = type; }
+	void setSizeOverride(QString override) { m_sizeOverride = override; }
+	void setSizeOverrideMult(double mult) { m_sizeOverrideMult = mult; }
 	void setLocationId(unsigned short locationid) { m_locationId = locationid; }
 	void setSize(unsigned short size) { m_size = size; }
 	void setElementSize(unsigned short size) { m_elementSize = size; }
@@ -38,6 +40,8 @@ public:
 	void setCalc(QList<QPair<QString,double> > calc) { m_calc = calc; }
 	QString name() { return m_name; }
 	QString type() { return m_type; }
+	QString sizeOverride() { return m_sizeOverride; }
+	double sizeOverrideMult() { return m_sizeOverrideMult; }
 	unsigned short locationId() { return m_locationId; }
 	unsigned short offset() { return m_offset; }
 	unsigned short size() { return m_size; }
@@ -46,6 +50,8 @@ public:
 private:
 	QString m_name;
 	QString m_type;
+	QString m_sizeOverride;
+	double m_sizeOverrideMult;
 	unsigned short m_locationId;
 	unsigned short m_size;
 	unsigned short m_elementSize;
