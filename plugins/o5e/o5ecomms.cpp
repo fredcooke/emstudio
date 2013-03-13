@@ -39,6 +39,7 @@ static quint32 Crc32_ComputeBuf(quint32 inCrc32, const void *buf, quint32 bufLen
 O5EComms::O5EComms(QObject *parent) : EmsComms(parent)
 {
 	m_dataDecoder = new O5EDataPacketDecoder();
+	m_memoryMetaData = new O5EMemoryMetaData();
 	qRegisterMetaType<QList<unsigned short> >("QList<unsigned short>");
 	currentPacketNum=1;
 	QTimer *timer = new QTimer();
@@ -238,6 +239,10 @@ void O5EComms::stop()
 void O5EComms::setLogsEnabled(bool enabled)
 {
 
+}
+MemoryMetaData *O5EComms::getMetaParser()
+{
+	return m_memoryMetaData;
 }
 
 DataPacketDecoder *O5EComms::getDecoder()

@@ -32,11 +32,11 @@ HEADERS += ../../core/src/datapacketdecoder.h \
     o5edatapacketdecoder.h \
     serialport.h \
     o5eheaders.h \
-    ../../core/src/o5ememorymetadata.h
+    o5ememorymetadata.h
 SOURCES += o5ecomms.cpp \
     o5edatapacketdecoder.cpp \
     serialport.cpp \
 ../../core/src/datafield.cpp \
 	   ../../core/src/tabledata.cpp \
-    ../../core/src/o5ememorymetadata.cpp
+    o5ememorymetadata.cpp
 

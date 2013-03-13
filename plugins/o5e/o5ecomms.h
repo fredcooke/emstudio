@@ -38,6 +38,7 @@
 #include "table2ddata.h"
 #include "datapacketdecoder.h"
 #include "o5edatapacketdecoder.h"
+#include "o5ememorymetadata.h"
 #include "headers.h"
 #include "serialport.h"
 #include "emscomms.h"
@@ -54,6 +55,7 @@ public:
 	void stop();
 	void setLogsEnabled(bool enabled);
 	DataPacketDecoder *getDecoder();
+	MemoryMetaData *getMetaParser();
 	Table3DData *getNew3DTableData();
 	Table2DData *getNew2DTableData();
 	void setLogDirectory(QString dir);
@@ -134,6 +136,7 @@ private:
 	O5EDataPacketDecoder *m_dataDecoder;
 	QString m_portName;
 	SerialPort m_serialPort;
+	O5EMemoryMetaData *m_memoryMetaData;
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);
 	void packetAcked(unsigned short locationid,QByteArray header,QByteArray payload);
