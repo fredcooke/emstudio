@@ -1724,6 +1724,7 @@ void MainWindow::tableview3d_show3DTable(unsigned short locationid,Table3DData *
 
 	TableMap3D *m_tableMap = new TableMap3D();
 
+	m_table3DMapViewWidgetMap[locationid] = m_tableMap;
 	m_tableMap->passData(data);
 	QMdiSubWindow *win = ui.mdiArea->addSubWindow(m_tableMap);
 	connect(win,SIGNAL(destroyed(QObject*)),this,SLOT(tableMap3DDestroyed(QObject*)));
@@ -1742,6 +1743,7 @@ void MainWindow::tableMap3DDestroyed(QObject *object)
 	{
 		if (i.value() == sender())
 		{
+			m_table3DMapViewWidgetMap.remove(i.key());
 			m_table3DMapViewMap.remove(i.key());
 			return;
 		}
@@ -2164,10 +2166,16 @@ void MainWindow::updateDataWindows(unsigned short locationid)
 			{
 				qDebug() << "updateDataWindows called for location id" << "0x" + QString::number(locationid,16).toUpper() << "but no local ram or flash block exists!";
 			}
-			return;
+			//return;
 		}
 	}
-	else if (m_configDataView.contains(locationid))
+	if (m_table3DMapViewWidgetMap.contains(locationid))
+	{
+		qDebug() << "Updating...";
+		m_table3DMapViewWidgetMap[locationid]->update();
+		m_table3DMapViewWidgetMap[locationid]->updateGL();
+	}
+	if (m_configDataView.contains(locationid))
 	{
 		m_configDataView[locationid]->passConfig(m_configBlockMap[locationid],emsData->getLocalFlashBlock(locationid));
 	}
@@ -2358,6 +2366,10 @@ void MainWindow::saveSingleData(unsigned short locationid,QByteArray data, unsig
 	else
 	{
 		qDebug() << "Attempted to save data for single value at location id:" << "0x" + QString::number(locationid,16) << "but no valid location found in Ram list.";
+	}
+	if (m_offlineMode)
+	{
+		updateDataWindows(locationid); //This is required to update all windows during an offline edit.
 	}
 	qDebug() << "Requesting to update single value at ram location:" << "0x" + QString::number(locationid,16).toUpper() << "data size:" << data.size();
 	qDebug() << "Offset:" << offset << "Size:" << size  <<  "Data:" << data;

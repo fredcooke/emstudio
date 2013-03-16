@@ -107,6 +107,7 @@ private:
 	QList<MemoryLocation*> m_tempMemoryList;
 	QMap<unsigned short,QList<ConfigBlock> > m_configBlockMap;
 	QMap<unsigned short,QMdiSubWindow*> m_table3DMapViewMap;
+	QMap<unsigned short,TableMap3D*> m_table3DMapViewWidgetMap;
 	QList<ConfigData> m_configMetaData;
 	//QMap<unsigned short,QList<ReadOnlyRamData> > m_readOnlyMetaDataMap;
 	//RawDataView *rawData;
