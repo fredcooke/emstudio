@@ -42,6 +42,8 @@ void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArr
 	m_minXAxis = calcAxis(0,metadata.xAxisCalc);
 	m_minYAxis = calcAxis(0,metadata.yAxisCalc);
 	m_locationId = locationid;
+	m_axis.clear();
+	m_values.clear();
 
 	for (int i=0;i<payload.size()/2;i+=2)
 	{

@@ -536,7 +536,7 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data,TableData *n
 	{
 		m_metaData = Table2DMetaData();
 	}
-	if (tableData)
+	if (tableData && newtableData && (tableData != newtableData))
 	{
 		tableData->deleteLater();
 	}
@@ -629,7 +629,7 @@ void TableView2D::passDatalog(QVariantMap data)
 }
 bool TableView2D::setData(unsigned short locationid,QByteArray rawdata)
 {
-	return setData(locationid,rawdata,(TableData*)(tableData));
+	return setData(locationid,rawdata,(Table2DData*)(tableData));
 }
 bool TableView2D::setData(unsigned short locationid,QByteArray rawdata,Table2DMetaData metadata,TableData *newtableData)
 {
