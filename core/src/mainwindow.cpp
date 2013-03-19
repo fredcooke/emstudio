@@ -621,13 +621,14 @@ void MainWindow::emsCommsDisconnected()
 
 	//Need to reset everything here.
 	pluginLoader->unload();
-	pluginLoader->deleteLater();
+	//pluginLoader->deleteLater();
+	delete pluginLoader;
 	pluginLoader = 0;
 	pluginLoader = new QPluginLoader(this);
 	pluginLoader->setFileName(m_pluginFileName);
 	if (!pluginLoader->load())
 	{
-		qDebug() << "Unable to load plugin. error:" << pluginLoader->errorString();
+		qDebug() << "Unable to load plugin. " << m_pluginFileName << "error:" << pluginLoader->errorString();
 		exit(-1);
 	}
 
@@ -635,7 +636,7 @@ void MainWindow::emsCommsDisconnected()
 	emsComms = qobject_cast<EmsComms*>(pluginLoader->instance());
 	if (!emsComms)
 	{
-		qDebug() << "Unable to load plugin!!!";
+		qDebug() << "Unable to instantiate plugin:" << m_pluginFileName << pluginLoader->instance();
 		qDebug() << pluginLoader->errorString();
 		exit(-1);
 	}
