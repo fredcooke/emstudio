@@ -629,7 +629,7 @@ void TableView2D::passDatalog(QVariantMap data)
 }
 bool TableView2D::setData(unsigned short locationid,QByteArray rawdata)
 {
-	return setData(locationid,rawdata,qobject_cast<TableData*>(tableData));
+	return setData(locationid,rawdata,(TableData*)(tableData));
 }
 bool TableView2D::setData(unsigned short locationid,QByteArray rawdata,Table2DMetaData metadata,TableData *newtableData)
 {
