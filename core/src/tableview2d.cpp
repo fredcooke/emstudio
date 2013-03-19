@@ -26,6 +26,7 @@
 #include <qwt_plot_curve.h>
 #include <qjson/serializer.h>
 #include <QFileDialog>
+#include <tablewidgetdelegate.h>
 //#include "freeems/fetable2ddata.h"
 TableView2D::TableView2D(bool isram, bool isflash,QWidget *parent)
 {
@@ -50,6 +51,7 @@ TableView2D::TableView2D(bool isram, bool isflash,QWidget *parent)
 	ui.tableWidget->addHotkey(Qt::Key_Minus,Qt::NoModifier);
 	ui.tableWidget->addHotkey(Qt::Key_Underscore,Qt::ShiftModifier);
 	ui.tableWidget->addHotkey(Qt::Key_Equal,Qt::NoModifier);
+	ui.tableWidget->setItemDelegate(new TableWidgetDelegate());
 
 	QPalette pal = ui.plot->palette();
 	pal.setColor(QPalette::Background,QColor::fromRgb(0,0,0));
@@ -78,7 +80,7 @@ TableView2D::TableView2D(bool isram, bool isflash,QWidget *parent)
 	{
 		//Is both ram and flash
 	}
-
+	connect(ui.tracingCheckBox,SIGNAL(stateChanged(int)),this,SLOT(tracingCheckBoxStateChanged(int)));
 }
 void TableView2D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
 {
@@ -623,10 +625,144 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data,TableData *n
 	resizeColumnWidths();
 	return true;
 }
+void TableView2D::tracingCheckBoxStateChanged(int newstate)
+{
+	if (newstate == Qt::Checked)
+	{
+		m_tracingEnabled = true;
+	}
+	else
+	{
+		m_tracingEnabled = false;
+		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+		for (int i=0;i<m_highlightItemList.size();i++)
+		{
+			ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setTextColor(QColor::fromRgb(0,0,0));
+			ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setData(Qt::UserRole+1,false);
+		}
+		m_highlightItemList.clear();
+		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
+	}
+}
 void TableView2D::passDatalog(QVariantMap data)
 {
-	Q_UNUSED(data)
+	if (!m_tracingEnabled)
+	{
+		return;
+	}
+	if (data.contains(m_metaData.xHighlight))
+	{
+		double xval = data[m_metaData.xHighlight].toDouble();
+		int xloc = 1;
+		double lowercolumnratio = 0;
+		double uppercolumnratio = 0;
+		int lowercolumn = 0;
+		int highercolumn = 1;
+		for (int x=1;x<ui.tableWidget->columnCount();x++)
+		{
+			double testval = ui.tableWidget->item(0,x)->text().toDouble();
+			double prevtestval;
+			double nexttestval;
+			if (x == 1)
+			{
+				prevtestval = 0;
+			}
+			else
+			{
+				prevtestval = ui.tableWidget->item(0,x-1)->text().toDouble();
+			}
+			if (x == ui.tableWidget->columnCount()-1)
+			{
+				nexttestval = testval + 1;
+			}
+			else
+			{
+				nexttestval = ui.tableWidget->item(0,x+1)->text().toDouble();
+			}
+			double lowerlimit = testval - ((testval - prevtestval) / 2.0);
+			double upperlimit = testval + ((nexttestval - testval) / 2.0);
+			if (xval > lowerlimit && xval < upperlimit)
+			{
+				xloc = x;
+				lowercolumn = x-1;
+				highercolumn = x+1;
+				lowercolumnratio = (xval - lowerlimit) / (upperlimit - lowerlimit);
+				uppercolumnratio = (upperlimit - xval) / (upperlimit - lowerlimit);
+				if (xval > testval)
+				{
+					lowercolumn = x+1;
+					highercolumn = x+2;
+					lowercolumnratio = (xval - testval) / (nexttestval - testval);
+					uppercolumnratio = (nexttestval - xval) / (nexttestval - testval);
+				}
+				else
+				{
+					lowercolumn = x;
+					highercolumn = x+1;
+					lowercolumnratio = (xval - prevtestval) / (testval - prevtestval);
+					uppercolumnratio = (testval - xval) / (testval - prevtestval);
+				}
+				//0 500 1000
+				//Val is at 750.
+				//lowerrowratio should be 50%, and upper should be 50%
+				//(xval - lowerlimit) / (upperlimit - lowerlimit) //0-1.0
+				//(upperlimit - xval) / (upperlimit - lowerlimit) //0-1.0
+
+
+				break;
+			}
+		}
+
+		if (xloc != -1)
+		{
+			if (xloc == m_oldXLoc)
+			{
+				//No change, no reason to continue;
+				//return;
+			}
+			ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+			ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+			for (int i=0;i<m_highlightItemList.size();i++)
+			{
+				ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setTextColor(QColor::fromRgb(0,0,0));
+				ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setData(Qt::UserRole+1,false);
+			}
+			m_highlightItemList.clear();
+			m_oldXLoc = xloc;
+
+			if (highercolumn < ui.tableWidget->columnCount())
+			{
+				m_highlightItemList.append(QPair<int,int>(1,lowercolumn));
+				ui.tableWidget->item(1,lowercolumn)->setData(Qt::UserRole+1,true);
+				ui.tableWidget->item(1,lowercolumn)->setData(Qt::UserRole+2,lowercolumnratio);
+
+				m_highlightItemList.append(QPair<int,int>(1,highercolumn));
+				ui.tableWidget->item(1,highercolumn)->setData(Qt::UserRole+1,true);
+				ui.tableWidget->item(1,highercolumn)->setData(Qt::UserRole+2,uppercolumnratio);
+			}
+			else
+			{
+				m_highlightItemList.append(QPair<int,int>(1,lowercolumn));
+				ui.tableWidget->item(1,lowercolumn)->setData(Qt::UserRole+1,true);
+				ui.tableWidget->item(1,lowercolumn)->setData(Qt::UserRole+2,lowercolumnratio);
+			}
+			/*if (ui.tableWidget->item(m_oldYLoc,m_oldXLoc))
+			{
+				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setTextColor(QColor::fromRgb(255,255,255));
+				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setData(Qt::UserRole+1,true);
+			}*/
+			connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+			connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
+		}
+		else
+		{
+			qDebug() << "Error parsing datalog, xloc and yloc aren't != -1";
+		}
+	}
 }
+
 bool TableView2D::setData(unsigned short locationid,QByteArray rawdata)
 {
 	return setData(locationid,rawdata,(Table2DData*)(tableData));

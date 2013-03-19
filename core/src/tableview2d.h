@@ -46,6 +46,7 @@ public:
 	void passDatalog(QVariantMap data);
 private:
 	bool m_isFlashOnly;
+	bool m_tracingEnabled;
 	bool metaDataValid;
 	Table2DData *tableData;
 	void setSilentValue(int row,int column,QString value);
@@ -62,10 +63,13 @@ private:
 	void exportJson(QString filename);
 	void setValue(int row, int column,double value);
 	void writeTable(bool ram);
+	QList<QPair<int,int> > m_highlightItemList;
+	int m_oldXLoc;
 protected:
 	void resizeEvent(QResizeEvent *evt);
 	void keyPressEvent(QKeyEvent *event);
 private slots:
+	void tracingCheckBoxStateChanged(int newstate);
 	void exportClicked();
 	void saveClicked();
 	void loadFlashClicked();

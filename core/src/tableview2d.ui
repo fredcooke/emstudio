@@ -72,6 +72,13 @@
         </spacer>
        </item>
        <item>
+        <widget class="QCheckBox" name="tracingCheckBox">
+         <property name="text">
+          <string>Enable Data Tracing</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="exportPushButton">
          <property name="text">
           <string>Export</string>
