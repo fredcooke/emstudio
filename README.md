@@ -16,7 +16,7 @@ I maintain Windows and Linux 32bit binaries of both the master and dev branches 
 
 A few packages are needed to compile EMStudio. In Ubuntu:
 $ sudo apt-get update
-$ sudo apt-get install build-essential libqt4-dev libqt4-opengl-dev libqt4-opengl-dev qt4-qmake libqwt-dev libqt4-declarative libqjson-dev
+$ sudo apt-get install build-essential libqt4-dev libqt4-opengl-dev libqt4-opengl-dev qt4-qmake libqwt-dev libqt4-declarative libqjson-dev freeglut3-dev
 
 Once this has completed (or the equivalant packages on your own distro), you can then clone the repository and build it. 
 
