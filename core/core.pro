@@ -33,9 +33,9 @@ win32-g++ {
 unix {
 	QMAKE_CXXFLAGS += -Werror
 	target.path = /usr/bin
-	dashboard.path = /usr/share/emstudio/dashboards
+	dashboard.path = /usr/share/EMStudio/dashboards
 	dashboard.files += src/gauges.qml
-	config.path = /usr/share/emstudio/definitions
+	config.path = /usr/share/EMStudio/definitions
 	config.files += freeems.config.json
 	INSTALLS += target config dashboard
 	LIBS += -lqwt -lqjson -lGL -lGLU -lglut
