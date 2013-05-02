@@ -492,6 +492,99 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 	QVariantMap metaMap = top["meta"].toMap();
 	QVariantMap::const_iterator i = metaMap.constBegin();
 
+    if (m_memoryInfoMap.keys().size() > 0)
+    {
+        //We already have memory in place! Likely loading ontop of an already loaded set of data.
+        //Verify that meta data is equal.
+        while (i != metaMap.constEnd())
+        {
+            unsigned short locationid = i.key().toInt(&ok,16);
+            bool hasParent = i.value().toMap()["hasparent"].toBool();
+            bool isFlash = i.value().toMap()["isflash"].toBool();
+            bool isRam = i.value().toMap()["isram"].toBool();
+            //m_tempMemoryList.append(loc);
+            //unsigned short flags =i.value().toMap()["flags"].toString().toInt(&ok,16);
+            unsigned char rampage = i.value().toMap()["rampage"].toString().toInt(&ok,16);
+            unsigned short ramaddress = i.value().toMap()["ramaddress"].toString().toInt(&ok,16);
+            unsigned char flashpage = i.value().toMap()["flashpage"].toString().toInt(&ok,16);
+            unsigned short flashaddress = i.value().toMap()["flags"].toString().toInt(&ok,16);
+            unsigned short parent = i.value().toMap()["parent"].toString().toInt(&ok,16);
+            unsigned short size = i.value().toMap()["size"].toString().toInt(&ok,16);
+            //unsigned short id = i.key().toInt(&ok,16);
+            QString type = i.value().toMap()["type"].toString();
+            if (m_memoryInfoMap.contains(locationid))
+            {
+                if (m_memoryInfoMap[locationid].size != size)
+                {
+                    QMessageBox::information(0,"Error","Error loading JSON. Location ID 0x" + QString::number(locationid,16).toUpper() + " size in tuner is " +
+                                             QString::number(m_memoryInfoMap[locationid].size) + " but json has size of " +  QString::number(size) +
+                                             ". Unable to finish loading JSON file. Please check your JSON file to ensure it is not corrupt");
+                    return;
+                }
+                if (isFlash == m_memoryInfoMap[locationid].isFlash && isFlash)
+                {
+                    if (flashaddress != m_memoryInfoMap[locationid].flashaddress)
+                    {
+                        QMessageBox::information(0,"Error","Error loading JSON. Location ID 0x" + QString::number(locationid,16).toUpper() + " flash address mismatch. Tuner flash address is 0x" +
+                                                 QString::number(m_memoryInfoMap[locationid].flashaddress,16).toUpper() + " but json has flash address of 0x" + QString::number(flashaddress,16).toUpper() +
+                                                 ". Unable to finish loading JSON file. Please check your JSON file to ensure it is not corrupt");
+                        return;
+                    }
+                    if (flashpage != m_memoryInfoMap[locationid].flashpage)
+                    {
+                        QMessageBox::information(0,"Error","Error loading JSON. Location ID 0x" + QString::number(locationid,16).toUpper() + " flash page mismatch. Tuner flash page is 0x" +
+                                                 QString::number(m_memoryInfoMap[locationid].flashpage,16).toUpper() + " but json has flash page of 0x" + QString::number(flashpage,16).toUpper() +
+                                                 ". Unable to finish loading JSON file. Please check your JSON file to ensure it is not corrupt");
+                        return;
+                    }
+                }
+                else
+                {
+                    QMessageBox::information(0,"Error","Error loading JSON. Location ID 0x" + QString::number(locationid,16).toUpper() + " flash mismatch. Tuner isFlash value is " +
+                                             (m_memoryInfoMap[locationid].isFlash ? "true" : "false") + " but json has isFlash value of " + (isFlash ? "true" : "false") +
+                                             ". Unable to finish loading JSON file. Please check your JSON file to ensure it is not corrupt");
+                    return;
+                }
+                if (isRam == m_memoryInfoMap[locationid].isRam && isRam)
+                {
+                    if (ramaddress != m_memoryInfoMap[locationid].ramaddress)
+                    {
+                        QMessageBox::information(0,"Error","Error loading JSON. Location ID 0x" + QString::number(locationid,16).toUpper() + " ram address mismatch. Tuner ram address is 0x" +
+                                                 QString::number(m_memoryInfoMap[locationid].ramaddress,16).toUpper() + " but json has ram address of 0x" + QString::number(ramaddress,16).toUpper() +
+                                                 ". Unable to finish loading JSON file. Please check your JSON file to ensure it is not corrupt");
+                        return;
+                    }
+                    if (rampage != m_memoryInfoMap[locationid].rampage)
+                    {
+                        QMessageBox::information(0,"Error","Error loading JSON. Location ID 0x" + QString::number(locationid,16).toUpper() + " ram page mismatch. Tuner ram page is 0x" +
+                                                 QString::number(m_memoryInfoMap[locationid].rampage,16).toUpper() + " but json has ram page of 0x" + QString::number(rampage,16).toUpper() +
+                                                 ". Unable to finish loading JSON file. Please check your JSON file to ensure it is not corrupt");
+                        return;
+                    }
+                }
+                else
+                {
+                    QMessageBox::information(0,"Error","Error loading JSON. Location ID 0x" + QString::number(locationid,16).toUpper() + " ram mismatch. Tuner isRam value is " +
+                                             (m_memoryInfoMap[locationid].isRam ? "true" : "false") + " but json has isRam value of " + (isRam ? "true" : "false") +
+                                             ". Unable to finish loading JSON file. Please check your JSON file to ensure it is not corrupt");
+                    return;
+                }
+                if (hasParent == m_memoryInfoMap[locationid].hasParent)
+                {
+                    if (parent != m_memoryInfoMap[locationid].parent)
+                    {
+                        QMessageBox::information(0,"Error","Error loading JSON. Location ID 0x" + QString::number(locationid,16).toUpper() + " parent mismatch. Tuner parent is 0x" +
+                                                 QString::number(m_memoryInfoMap[locationid].parent,16).toUpper() + " but json has parent of 0x" + QString::number(parent,16).toUpper() +
+                                                 ". Unable to finish loading JSON file. Please check your JSON file to ensure it is not corrupt");
+                        return;
+                    }
+                }
+            }
+            i++;
+        }
+
+    }
+    i = metaMap.constBegin();
 	while (i != metaMap.constEnd())
 	{
 
