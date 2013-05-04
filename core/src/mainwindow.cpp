@@ -584,7 +584,10 @@ void MainWindow::menu_file_loadOfflineDataClicked()
             i++;
         }
         //If we get to here, then the metadata all matches and is happy.
-        QMessageBox::question(0,"Question","You are about to totally wipe out your FLASH data and replace it with the data in this JSON file. Are you sure you want to do this?");
+        if (QMessageBox::question(0,"Question","You are about to totally wipe out your FLASH data and replace it with the data in this JSON file. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) != QMessageBox::Yes)
+        {
+            return;
+        }
         i = flashMap.constBegin();
         while (i != flashMap.constEnd())
         {
@@ -597,14 +600,14 @@ void MainWindow::menu_file_loadOfflineDataClicked()
             {
                 bytes.append(valsplit[j].toInt(&ok,16));
             }
-            if (m_memoryInfoMap[i.key().toInt(&ok,16)].isRam)
-            {
-                //interrogateRamBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
-                emsData->ramBlockUpdate(i.key().toInt(&ok,16),QByteArray(),bytes);
-            }
             //interrogateFlashBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
             emsData->flashBlockUpdate(i.key().toInt(&ok,16),QByteArray(),bytes);
+            emsComms->updateBlockInFlash(i.key(),0,0,bytes);
             i++;
+        }
+        if (QMessageBox::question(0,"Question","Flash memory has been replaced. Would you like to reset your ECU now to apply the changes to ram?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::yes)
+        {
+            emsComms->hardReset();
         }
         return;
     }
@@ -1657,7 +1660,7 @@ void MainWindow::locationIdList(QList<unsigned short> idlist)
 	qDebug() << "Location ID List!";
 	for (int i=0;i<idlist.size();i++)
 	{
-		//ui/listWidget->addItem(QString::number(idlist[i]));
+        //ui/listWidget->addItem(QString::number(idlist[i]));0000000000000000000000000000000000000000
 		MemoryLocation *loc = new MemoryLocation();
 		loc->locationid = idlist[i];
 		m_tempMemoryList.append(loc);
