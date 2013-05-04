@@ -34,6 +34,7 @@
 #include "headers.h"
 #include "fedatapacketdecoder.h"
 #include "fememorymetadata.h"
+#include <QTimer>
 class FreeEmsComms : public EmsComms
 {
 	Q_OBJECT
@@ -153,6 +154,10 @@ private:
 		int sequencenumber;
 		void addArg(QVariant arg,int size=0) { args.append(arg); argsize.append(size);}
 	};
+    bool m_isSilent;
+    quint64 m_lastDatalogTime;
+    QTimer *m_lastdatalogTimer;
+    bool m_lastDatalogUpdateEnabled;
 	FEDataPacketDecoder *dataPacketDecoder;
 	FEMemoryMetaData *m_metaDataParser;
 	bool m_debugLogsEnabled;
@@ -209,8 +214,11 @@ signals:
 	void commandTimedOut(int sequencenumber);
 	//void updateBlockInRamFailed(int location,int offset,int size,QByteArray data);
 	//void updateBlockInRamSucceeded();
+	void emsSilenceStarted();
+	void emsSilenceBroken();
 public slots:
 private slots:
+    void datalogTimerTimeout();
 	void dataLogWrite(QByteArray buffer);
 	void dataLogRead(QByteArray buffer);
 	void parseEverything(QByteArray buffer);

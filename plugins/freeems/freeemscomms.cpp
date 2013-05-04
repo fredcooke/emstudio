@@ -38,8 +38,14 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 
 	dataPacketDecoder = new FEDataPacketDecoder();
 	m_metaDataParser = new FEMemoryMetaData();
+
+    m_lastdatalogTimer = new QTimer(this);
+    connect(m_lastdatalogTimer,SIGNAL(timeout()),this,SLOT(datalogTimerTimeout()));
+    m_lastdatalogTimer->start(500); //Every half second, check to see if we've timed out on datalogs.
+
 	m_waitingForResponse = false;
 	m_logsEnabled = false;
+    m_lastDatalogUpdateEnabled = false;
 	m_logInFile=0;
 	m_logOutFile=0;
 	m_logInOutFile=0;
@@ -1137,11 +1143,16 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 		payloadid += (unsigned char)packetpair.first[2];*/
 		unsigned short payloadid = parsedPacket.payloadid;
 		//qDebug() << "Incoming packet. Payload:" << payloadid;
-
+		if (m_isSilent)
+		{
+			emit emsSilenceBroken();
+			m_isSilent = false;
+		}
 		if (payloadid == 0x0191)
 		{
 			//qDebug() << "Incoming packet:" << "0x" + QString::number(payloadid,16).toUpper();
-
+			m_lastDatalogUpdateEnabled = true;
+			m_lastDatalogTime = QDateTime::currentMSecsSinceEpoch();
 		}
 		else
 		{
@@ -1574,6 +1585,22 @@ void FreeEmsComms::setLogFileName(QString filename)
 	m_logsFilename = filename;
 	//serialThread->setLogFileName(filename);
 }
+void FreeEmsComms::datalogTimerTimeout()
+{
+	if (!m_lastDatalogUpdateEnabled)
+	{
+		return;
+	}
+	quint64 current = QDateTime::currentMSecsSinceEpoch() - m_lastDatalogTime;
+	if (current > 5000)
+	{
+		//It's been 5 seconds since our last datalog. We've likely either reset, or stopped responding.
+		m_isSilent = true;
+		m_lastDatalogUpdateEnabled = false;
+		emit emsSilenceStarted();
+	}
+}
+
 void FreeEmsComms::dataLogWrite(QByteArray buffer)
 {
 	if (m_logsEnabled)
