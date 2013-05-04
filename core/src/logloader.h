@@ -33,11 +33,11 @@ public:
 private:
 	QString m_filename;
 	QList<DataField> *m_dataFieldList;
-
+    void parseBuffer(QByteArray buffer);
 protected:
 	void run();
 signals:
-	void parseBuffer(QByteArray buffer);
+
 	void payloadReceived(QByteArray header,QByteArray payload);
 	void logProgress(qlonglong current,qlonglong total);
 	void endOfLog();

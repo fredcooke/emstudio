@@ -70,7 +70,7 @@ void LogLoader::run()
 				int num = (unsigned char)currPacket[i];
 				output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
 			}
-			//qDebug() << "Full packet:";
+            qDebug() << "Full packet:";
 			//qDebug() << output;
 
 			parseBuffer(currPacket);
@@ -120,7 +120,7 @@ void LogLoader::run()
 
 	}*/
 }
-/*void LogLoader::parseBuffer(QByteArray buffer)
+void LogLoader::parseBuffer(QByteArray buffer)
 {
 	if (buffer.size() <= 3)
 	{
@@ -233,4 +233,4 @@ void LogLoader::run()
 		//qDebug() << QString::number(rpm);
 		//qDebug() << QString::number(((unsigned short)payload[8] << 8) + (unsigned short)payload[9]);
 	}
-}*/
+}

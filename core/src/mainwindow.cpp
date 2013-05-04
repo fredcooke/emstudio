@@ -28,6 +28,7 @@
 #include <QSettings>
 #include <tableview2d.h>
 #include <qjson/parser.h>
+#include "logloader.h"
 //#include "freeems/freeemscomms.h"
 //#include "freeems/fedatapacketdecoder.h"
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -571,7 +572,7 @@ void MainWindow::menu_file_loadOfflineDataClicked()
                 }
                 if (hasParent == m_memoryInfoMap[locationid].hasParent)
                 {
-                    if (parent != m_memoryInfoMap[locationid].parent)
+                     if (parent != m_memoryInfoMap[locationid].parent)
                     {
                         QMessageBox::information(0,"Error","Error loading JSON. Location ID 0x" + QString::number(locationid,16).toUpper() + " parent mismatch. Tuner parent is 0x" +
                                                  QString::number(m_memoryInfoMap[locationid].parent,16).toUpper() + " but json has parent of 0x" + QString::number(parent,16).toUpper() +
@@ -582,7 +583,30 @@ void MainWindow::menu_file_loadOfflineDataClicked()
             }
             i++;
         }
-
+        //If we get to here, then the metadata all matches and is happy.
+        QMessageBox::question(0,"Question","You are about to totally wipe out your FLASH data and replace it with the data in this JSON file. Are you sure you want to do this?");
+        i = flashMap.constBegin();
+        while (i != flashMap.constEnd())
+        {
+            bool ok = false;
+            //qDebug() << "Flash location" << i.key().toInt(&ok,16);
+            QString val = i.value().toString();
+            QStringList valsplit = val.split(",");
+            QByteArray bytes;
+            for (int j=0;j<valsplit.size();j++)
+            {
+                bytes.append(valsplit[j].toInt(&ok,16));
+            }
+            if (m_memoryInfoMap[i.key().toInt(&ok,16)].isRam)
+            {
+                //interrogateRamBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
+                emsData->ramBlockUpdate(i.key().toInt(&ok,16),QByteArray(),bytes);
+            }
+            //interrogateFlashBlockRetrieved(i.key().toInt(&ok,16),QByteArray(),bytes);
+            emsData->flashBlockUpdate(i.key().toInt(&ok,16),QByteArray(),bytes);
+            i++;
+        }
+        return;
     }
     i = metaMap.constBegin();
 	while (i != metaMap.constEnd())
@@ -1655,6 +1679,8 @@ void MainWindow::dataLogPayloadReceived(QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
 	Q_UNUSED(payload)
+    dataPacketDecoder->decodePayload(payload);
+
 }
 void MainWindow::interfaceVersion(QString version)
 {
@@ -1801,6 +1827,12 @@ void MainWindow::emsCommsConnected()
 
 	progressView->setMaximum(8);
 	//progressView->setMax(progressView->max()+1);
+
+    //LogLoader *loader = new LogLoader();
+    //connect(loader,SIGNAL(payloadReceived(QByteArray,QByteArray)),this,SLOT(dataLogPayloadReceived(QByteArray,QByteArray)));
+    //loader->loadFile("/home/michael/Downloads/2013.05.01-19.50.30.bin");
+    //loader->start();
+
 }
 void MainWindow::checkSyncRequest()
 {
@@ -2522,7 +2554,6 @@ void MainWindow::dataLogDecoded(QVariantMap data)
 		}
 	}
 }
-
 void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
@@ -2533,7 +2564,8 @@ void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 		//We should do something here or something...
 		//return;
 	}
-	dataPacketDecoder->decodePayload(payload);
+    //If we are logging, disable this:
+    dataPacketDecoder->decodePayload(payload);
 	//guiUpdateTimerTick();
 
 }
