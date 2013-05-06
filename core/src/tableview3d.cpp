@@ -144,11 +144,15 @@ void TableView3D::setValue(int row, int column,double value)
 			if (ui.tableWidget->selectedItems()[i]->row() == ui.tableWidget->rowCount()-1)
 			{
 				qDebug() << "XAxis edit attempted with multiple cells selected. This is not allowed";
+				QMessageBox::information(0,"Error","Editing of multiple AXIS cells at once is not allowed. Please select a single axis cell to edit at a time");
+				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
 				return;
 			}
 			if (ui.tableWidget->selectedItems()[i]->column() == 0)
 			{
 				qDebug() << "YAxis edit attempted with multiple cells selected. This is not allowed";
+				QMessageBox::information(0,"Error","Editing of multiple AXIS cells at once is not allowed. Please select a single axis cell to edit at a time");
+				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
 				return;
 			}
 		}
