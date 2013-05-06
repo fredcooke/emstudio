@@ -344,24 +344,14 @@ bool FEMemoryMetaData::hasRORMetaData(unsigned short locationid)
 }
 bool FEMemoryMetaData::hasLookupMetaData(unsigned short locationid)
 {
-	for (int i=0;i<m_lookupMetaData.size();i++)
-	{
-		if (m_lookupMetaData[i].locationid == locationid)
-		{
-			return true;
-		}
-	}
-	return false;
+	return (m_lookupMetaData.contains(locationid));
 }
 
 const LookupMetaData FEMemoryMetaData::getLookupMetaData(unsigned short locationid)
 {
-	for (int i=0;i<m_lookupMetaData.size();i++)
+	if (m_lookupMetaData.contains(locationid))
 	{
-		if (m_lookupMetaData[i].locationid == locationid)
-		{
-			return m_lookupMetaData[i];
-		}
+		return m_lookupMetaData[locationid];
 	}
 	return LookupMetaData();
 }
