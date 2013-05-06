@@ -137,35 +137,21 @@ void TableView3D::setValue(int row, int column,double value)
 	//New value has been accepted. Let's write it.
 
 	//If the value is an axis, and there are multiple cells selected, cancel the edit!
-	for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
-	{
-		if (ui.tableWidget->selectedItems()[i]->row() == ui.tableWidget->rowCount()-1)
-		{
-			qDebug() << "XAxis edit attempted with multiple cells selected. This is not allowed";
-			return;
-		}
-		if (ui.tableWidget->selectedItems()[i]->column() == 0)
-		{
-			qDebug() << "YAxis edit attempted with multiple cells selected. This is not allowed";
-			return;
-		}
-	}
-	if (tempValue > tableData->maxZAxis())
-	{
-		QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-		setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
-		return;
-	}
-	if (tempValue < tableData->minZAxis())
-	{
-		QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
-		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-		setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
-		return;
-	}
 	if (ui.tableWidget->selectedItems().size() > 1)
 	{
+		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
+		{
+			if (ui.tableWidget->selectedItems()[i]->row() == ui.tableWidget->rowCount()-1)
+			{
+				qDebug() << "XAxis edit attempted with multiple cells selected. This is not allowed";
+				return;
+			}
+			if (ui.tableWidget->selectedItems()[i]->column() == 0)
+			{
+				qDebug() << "YAxis edit attempted with multiple cells selected. This is not allowed";
+				return;
+			}
+		}
 		currentvalue = oldValue;
 		qDebug() << "Setting all cells to" << currentvalue << "for" << row << column;
 		tableData->setWritesEnabled(false);
