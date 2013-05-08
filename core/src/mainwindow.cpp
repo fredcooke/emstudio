@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	m_offlineMode = false;
 	m_checkEmsDataInUse = false;
+	m_currentEcuClock = -1;
 	qRegisterMetaType<MemoryLocationInfo>("MemoryLocationInfo");
 	qRegisterMetaType<DataType>("DataType");
 	qRegisterMetaType<SerialPortStatus>("SerialPortStatus");
@@ -725,6 +726,17 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 
 	emsData->setInterrogation(false);
 }
+void MainWindow::emsCommsSilence()
+{
+	//This is called when the ems has been silent for 5 seconds, when it was previously talking.
+	qDebug() << "EMS HAS GONE SILENT";
+}
+
+void MainWindow::emsCommsSilenceBroken()
+{
+	//This is called when ems had previously been talking, gone silent, then started talking again.
+	qDebug() << "EMS HAS GONE NOISEY";
+}
 
 void MainWindow::emsCommsDisconnected()
 {
@@ -792,6 +804,8 @@ void MainWindow::emsCommsDisconnected()
 	emsComms->setLogFileName(m_logFileName);
 	emsComms->setLogDirectory(m_logDirectory);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
+	connect(emsComms,SIGNAL(emsSilenceStarted()),this,SLOT(emsCommsSilence()));
+	connect(emsComms,SIGNAL(emsSilenceBroken()),this,SLOT(emsCommsSilenceBroken()));
 	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
 	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
 
@@ -883,6 +897,8 @@ void MainWindow::setPlugin(QString plugin)
 	emsComms->setLogFileName(m_logFileName);
 	emsComms->setLogDirectory(m_logDirectory);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
+	connect(emsComms,SIGNAL(emsSilenceStarted()),this,SLOT(emsCommsSilence()));
+	connect(emsComms,SIGNAL(emsSilenceBroken()),this,SLOT(emsCommsSilenceBroken()));
 	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
 	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
 
@@ -2554,6 +2570,57 @@ void MainWindow::dataLogDecoded(QVariantMap data)
 		if (dview)
 		{
 			dview->passDatalog(data);
+		}
+	}
+	if (data.contains("tempClock"))
+	{
+		int newval = data["tempClock"].toInt();
+		if (m_currentEcuClock == -1)
+		{
+			m_currentEcuClock = newval;
+		}
+		else
+		{
+			if (newval == 0 && m_currentEcuClock != 255)
+			{
+				//We probably had a chip reset here. Ask, and verify.
+				if (QMessageBox::question(0,"Warning","It seems that the ECU has reset. This means any un-flashed RAM changes may be lost. Would you like to re-send any RAM data in the tuner to ensure no changes are lost?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+				{
+					QList<unsigned short> loclist = emsData->getTopLevelDeviceRamLocations();
+					for (int i=0;i<loclist.size();i++)
+					{
+						emsComms->updateBlockInRam(loclist[i],0,emsData->getDeviceRamBlock(loclist[i]).size(),emsData->getDeviceRamBlock(loclist[i]));
+					}
+				}
+
+			}
+			if (m_currentEcuClock == 255)
+			{
+				if (newval == 0)
+				{
+					//All is good
+				}
+				else
+				{
+					qDebug() << "A: Packets lost! At least:" << newval << "packets";
+				}
+			}
+			else
+			{
+				if (m_currentEcuClock + 1 != newval)
+				{
+					if (m_currentEcuClock > newval)
+					{
+						qDebug() << "B: Packets lost! At least:" << (255 - m_currentEcuClock) + newval << "packets";
+					}
+					else
+					{
+						qDebug() << "C: Packets lost! At least:" << newval - m_currentEcuClock << "packets";
+					}
+
+				}
+			}
+			m_currentEcuClock = newval;
 		}
 	}
 }

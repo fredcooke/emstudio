@@ -178,7 +178,10 @@ private:
 	bool m_interrogationInProgress;
 	EmsData *emsData;
 	EmsData *checkEmsData;
+	int m_currentEcuClock;
 private slots:
+	void emsCommsSilence();
+	void emsCommsSilenceBroken();
 	void updateDataWindows(unsigned short locationid);
 	void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);
 	void tableview3d_show3DTable(unsigned short locationid,Table3DData *data);

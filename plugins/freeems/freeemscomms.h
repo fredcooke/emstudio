@@ -79,6 +79,7 @@ public:
 	int burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size);
 	void setInterByteSendDelay(int milliseconds);
 	void setlogsDebugEnabled(bool enabled);
+	void verifyRamFromDevice(quint64 checksum);
 protected:
 	void run();
 private:
@@ -184,6 +185,7 @@ private:
 	QFile *m_logOutFile;
 	QFile *m_logInOutFile;
 	void openLogs();
+
 	//void parseBuffer(QByteArray buffer);
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);

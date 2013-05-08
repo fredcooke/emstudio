@@ -1153,6 +1153,8 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 			//qDebug() << "Incoming packet:" << "0x" + QString::number(payloadid,16).toUpper();
 			m_lastDatalogUpdateEnabled = true;
 			m_lastDatalogTime = QDateTime::currentMSecsSinceEpoch();
+
+			//Need to pull sequence number out of here
 		}
 		else
 		{
