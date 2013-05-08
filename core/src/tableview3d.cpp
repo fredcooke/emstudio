@@ -45,6 +45,7 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 	connect(ui.loadFlashPushButton,SIGNAL(clicked()),this,SLOT(loadClicked()));
 	connect(ui.loadRamPushButton,SIGNAL(clicked()),this,SLOT(loadRamClicked()));
 	connect(ui.exportPushButton,SIGNAL(clicked()),this,SLOT(exportClicked()));
+	connect(ui.importPushButton,SIGNAL(clicked()),this,SLOT(importClicked()));
 	connect(ui.tableWidget,SIGNAL(hotKeyPressed(int,Qt::KeyboardModifiers)),this,SLOT(hotKeyPressed(int,Qt::KeyboardModifiers)));
 	connect(ui.tracingCheckBox,SIGNAL(stateChanged(int)),this,SLOT(tracingCheckBoxStateChanged(int)));
 	ui.tableWidget->addHotkey(Qt::Key_Plus,Qt::ShiftModifier);
@@ -76,7 +77,7 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 	{
 		//Is both ram and flash
 	}
-	ui.importPushButton->setVisible(false);
+	//ui.importPushButton->setVisible(false);
 	connect(ui.showMapPushButton,SIGNAL(clicked()),this,SLOT(showMapClicked()));
 }
 void TableView3D::tracingCheckBoxStateChanged(int newstate)
@@ -662,7 +663,7 @@ void TableView3D::importClicked()
 
 	//TODO: Open a message box and allow the user to select where they want to save the file.
 	QFile file(filename);
-	if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
+	if (!file.open(QIODevice::ReadOnly))
 	{
 		qDebug() << "Unable to open file to output JSON!";
 		return;
@@ -688,6 +689,7 @@ void TableView3D::importClicked()
 	QString type = topmap["type"].toString();
 	QString title = topmap["title"].toString();
 	QString description = topmap["description"].toString();
+
 	/*m_metaData.tableTitle = title;
 	m_metaData.tableTitle = description;
 	m_metaData.xAxisTitle = x["unit"].toString();
@@ -697,31 +699,51 @@ void TableView3D::importClicked()
 	m_metaData.zAxisTitle = z["unit"].toString();
 	m_metaData.zAxisTitle = z["label"].toString();*/
 
+	if (xlist.size() != ui.tableWidget->columnCount()-1)
+	{
+		//Error here, wrong number of columns
+		QMessageBox::information(0,"Error","Unable to load JSON file. File had " + QString::number(xlist.size()) + " columns of axis data, but table has " + QString::number(ui.tableWidget->columnCount()-1) + " columns of axis data");
+		return;
+	}
+	if (ylist.size() != ui.tableWidget->rowCount()-1)
+	{
+		//Error here, wrong number of rows!
+		QMessageBox::information(0,"Error","Unable to load JSON file. File had " + QString::number(ylist.size()) + " rows of axis data, but table has " + QString::number(ui.tableWidget->rowCount()-1) + " rows of axis data");
+		return;
+	}
+	if (zlist.size() != ui.tableWidget->rowCount()-1)
+	{
+		QMessageBox::information(0,"Error","Unable to load JSON file. File had " + QString::number(zlist.size()) + " rows of data, but table has " + QString::number(ui.tableWidget->rowCount()-1) + " rows of data");
+		return;
+	}
+	for (int i=0;i<zlist.size();i++)
+	{
+		if (zlist[i].toList().size() != ui.tableWidget->columnCount()-1)
+		{
+			QMessageBox::information(0,"Error","Unable to load JSON file. File had " + QString::number(zlist[i].toList().size()) + " columns of data, but table has " + QString::number(ui.tableWidget->columnCount()-1) + " columns of data");
+			return;
+		}
+
+	}
+
 	for (int i=1;i<ui.tableWidget->columnCount();i++)
 	{
-		//Reformat the number to be XXXX.XX to make Fred happy.
-		double val = ui.tableWidget->item(ui.tableWidget->rowCount()-1,i)->text().toDouble();
-		xlist.append(QString::number(val,'f',2));
+		setSilentValue(ui.tableWidget->rowCount()-1,i,xlist[i-1].toString());
 	}
 	for (int i=0;i<ui.tableWidget->rowCount()-1;i++)
 	{
-		//Reformat the number to be XXXX.XX to make Fred happy.
-		double val = ui.tableWidget->item(i,0)->text().toDouble();
-		ylist.append(QString::number(val,'f',2));
+		setSilentValue(i,0,ylist[i].toString());
 	}
 	for (int j=0;j<ui.tableWidget->rowCount()-1;j++)
 	{
-		QVariantList zrow;
+		QVariantList zrow = zlist[j].toList();
 		for (int i=1;i<ui.tableWidget->columnCount();i++)
 		{
-			zrow.append(ui.tableWidget->item(j,i)->text());
+			//zrow.append(ui.tableWidget->item(j,i)->text());
+			setSilentValue(j,i,zrow[i-1].toString());
 		}
-		zlist.append((QVariant)zrow);
 	}
-
-
-
-
+	writeTable(true);
 }
 
 void TableView3D::exportClicked()
