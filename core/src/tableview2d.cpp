@@ -485,14 +485,14 @@ void TableView2D::importClicked()
 	if (xlist.size() != ui.tableWidget->columnCount())
 	{
 		//Error here, wrong number of columns
-		QMessageBox::information(0,"Error","Unable to load JSON file. File had " + QString::number(xlist.size()) + " columns of axis data, but table has " + QString::number(ui.tableWidget->columnCount()-1) + " columns of axis data");
+		QMessageBox::information(0,"Error","Unable to load JSON file. File had " + QString::number(xlist.size()) + " columns of axis data, but table has " + QString::number(ui.tableWidget->columnCount()) + " columns of axis data");
 		return;
 	}
 
 	if (ylist.size() != ui.tableWidget->columnCount())
 	{
 		//Error here, wrong number of data!
-		QMessageBox::information(0,"Error","Unable to load JSON file. File had " + QString::number(ylist.size()) + " columns of data, but table has " + QString::number(ui.tableWidget->columnCount()-1) + " columns of data");
+		QMessageBox::information(0,"Error","Unable to load JSON file. File had " + QString::number(ylist.size()) + " columns of data, but table has " + QString::number(ui.tableWidget->columnCount()) + " columns of data");
 		return;
 	}
 
