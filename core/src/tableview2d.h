@@ -71,6 +71,7 @@ protected:
 private slots:
 	void tracingCheckBoxStateChanged(int newstate);
 	void exportClicked();
+	void importClicked();
 	void saveClicked();
 	void loadFlashClicked();
 	void loadRamClicked();

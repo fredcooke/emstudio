@@ -25,6 +25,7 @@
 #include <qwt_plot_grid.h>
 #include <qwt_plot_curve.h>
 #include <qjson/serializer.h>
+#include <qjson/parser.h>
 #include <QFileDialog>
 #include <tablewidgetdelegate.h>
 //#include "freeems/fetable2ddata.h"
@@ -46,6 +47,7 @@ TableView2D::TableView2D(bool isram, bool isflash,QWidget *parent)
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	connect(ui.exportPushButton,SIGNAL(clicked()),this,SLOT(exportClicked()));
+	connect(ui.importPushButton,SIGNAL(clicked()),this,SLOT(importClicked()));
 	connect(ui.tableWidget,SIGNAL(hotKeyPressed(int,Qt::KeyboardModifiers)),this,SLOT(hotKeyPressed(int,Qt::KeyboardModifiers)));
 	ui.tableWidget->addHotkey(Qt::Key_Plus,Qt::ShiftModifier);
 	ui.tableWidget->addHotkey(Qt::Key_Minus,Qt::NoModifier);
@@ -404,7 +406,7 @@ void TableView2D::exportJson(QString filename)
 	y["unit"] = m_metaData.yAxisTitle;
 	y["label"] = m_metaData.yAxisTitle;
 
-	for (int i=1;i<ui.tableWidget->columnCount();i++)
+	for (int i=0;i<ui.tableWidget->columnCount();i++)
 	{
 		//Reformat the number to be XXXX.XX to make Fred happy.
 		double val = ui.tableWidget->item(0,i)->text().toDouble();
@@ -440,6 +442,68 @@ void TableView2D::exportClicked()
 	}
 	exportJson(filename);
 }
+void TableView2D::importClicked()
+{
+	QString filename = QFileDialog::getOpenFileName(this,"Load Json File",".","Json Files (*.json)");
+	if (filename == "")
+	{
+		return;
+	}
+	//Create a JSON file similar to MTX's yaml format.
+
+	//QByteArray serialized = serializer.serialize(topmap);
+
+	//TODO: Open a message box and allow the user to select where they want to save the file.
+	QFile file(filename);
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		qDebug() << "Unable to open file to output JSON!";
+		QMessageBox::information(0,"Error","Unable to open JSON file:" + file.errorString());
+		return;
+	}
+	QByteArray toparsebytes = file.readAll();
+	file.close();
+	QJson::Parser parser;
+	bool ok = false;
+	QVariant topvar = parser.parse(toparsebytes,&ok);
+	if (!ok)
+	{
+		qDebug() << "Unable to parse import json";
+		QMessageBox::information(0,"Error","Unable to parse JSON. Error: " +  parser.errorString());
+		return;
+	}
+
+	QVariantMap topmap = topvar.toMap();
+	QVariantMap x = topmap["X"].toMap();
+	QVariantMap y = topmap["Y"].toMap();
+	QVariantList xlist = x["values"].toList();
+	QVariantList ylist = y["values"].toList();
+	QString type = topmap["type"].toString();
+	QString title = topmap["title"].toString();
+	QString description = topmap["description"].toString();
+
+	if (xlist.size() != ui.tableWidget->columnCount())
+	{
+		//Error here, wrong number of columns
+		QMessageBox::information(0,"Error","Unable to load JSON file. File had " + QString::number(xlist.size()) + " columns of axis data, but table has " + QString::number(ui.tableWidget->columnCount()-1) + " columns of axis data");
+		return;
+	}
+
+	if (ylist.size() != ui.tableWidget->columnCount())
+	{
+		//Error here, wrong number of data!
+		QMessageBox::information(0,"Error","Unable to load JSON file. File had " + QString::number(ylist.size()) + " columns of data, but table has " + QString::number(ui.tableWidget->columnCount()-1) + " columns of data");
+		return;
+	}
+
+	for (int i=0;i<ui.tableWidget->columnCount();i++)
+	{
+		setSilentValue(0,i,xlist[i].toString());
+		setSilentValue(1,i,ylist[i].toString());
+	}
+	writeTable(true);
+}
+
 void TableView2D::tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn)
 {
 	Q_UNUSED(prevrow)

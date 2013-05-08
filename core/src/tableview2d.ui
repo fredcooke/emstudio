@@ -79,6 +79,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="importPushButton">
+         <property name="text">
+          <string>Import</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="exportPushButton">
          <property name="text">
           <string>Export</string>
