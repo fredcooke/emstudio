@@ -208,7 +208,7 @@ signals:
 	void debugVerbose(QString msg);
 	void unknownPacket(QByteArray header,QByteArray payload);
 	void debug(QString msg);
-	//void error(QString msg);
+	void error(QString msg);
 	//void error(QString msg);
 	void error(SerialPortStatus error,QString msg = QString());
 	void commandSuccessful(int sequencenumber);

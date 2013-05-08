@@ -806,7 +806,7 @@ void MainWindow::emsCommsDisconnected()
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(emsSilenceStarted()),this,SLOT(emsCommsSilence()));
 	connect(emsComms,SIGNAL(emsSilenceBroken()),this,SLOT(emsCommsSilenceBroken()));
-	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
+	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
 	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
 
 	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
@@ -899,7 +899,7 @@ void MainWindow::setPlugin(QString plugin)
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
 	connect(emsComms,SIGNAL(emsSilenceStarted()),this,SLOT(emsCommsSilence()));
 	connect(emsComms,SIGNAL(emsSilenceBroken()),this,SLOT(emsCommsSilenceBroken()));
-	//connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
+	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
 	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
 
 	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));

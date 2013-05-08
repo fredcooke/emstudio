@@ -125,7 +125,10 @@ void FreeEmsComms::openLogs()
 	if (!QDir(m_logsDirectory).exists())
 	{
 		QDir dir(QCoreApplication::instance()->applicationDirPath());
-		dir.mkpath(m_logsDirectory);
+		if (!dir.mkpath(m_logsDirectory))
+		{
+			emit error("Unable to create log directory. Data will NOT be logged until this is fixed!");
+		}
 	}
 	m_logInFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".bin");
 	m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
@@ -191,7 +194,10 @@ void FreeEmsComms::setlogsDebugEnabled(bool enabled)
 		if (!QDir(m_logsDirectory).exists())
 		{
 			QDir dir(QCoreApplication::instance()->applicationDirPath());
-			dir.mkpath(m_logsDirectory);
+			if (!dir.mkpath(m_logsDirectory))
+			{
+				emit error("Unable to create log directory. Data will NOT be logged until this is fixed!");
+			}
 		}
 		m_logInOutFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".both.bin");
 		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
