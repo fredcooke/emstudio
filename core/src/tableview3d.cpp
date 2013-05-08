@@ -666,6 +666,7 @@ void TableView3D::importClicked()
 	if (!file.open(QIODevice::ReadOnly))
 	{
 		qDebug() << "Unable to open file to output JSON!";
+		QMessageBox::information(0,"Error","Unable to open JSON file:" + file.errorString());
 		return;
 	}
 	QByteArray toparsebytes = file.readAll();
@@ -676,6 +677,7 @@ void TableView3D::importClicked()
 	if (!ok)
 	{
 		qDebug() << "Unable to parse import json";
+		QMessageBox::information(0,"Error","Unable to parse JSON. Error: " +  parser.errorString());
 		return;
 	}
 
