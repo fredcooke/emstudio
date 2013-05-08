@@ -21,6 +21,8 @@
 
 #include "freeemscomms.h"
 #include <QDebug>
+#include <QDir>
+#include <QCoreApplication>
 #include "freeemspacket.h"
 #include "fetable2ddata.h"
 #include "fetable3ddata.h"
@@ -120,6 +122,11 @@ void FreeEmsComms::disconnectSerial()
 void FreeEmsComms::openLogs()
 {
 	qDebug() << "Open logs:" << m_logsDirectory + "/" + m_logsFilename + ".bin";
+	if (!QDir(m_logsDirectory).exists())
+	{
+		QDir dir(QCoreApplication::instance()->applicationDirPath());
+		dir.mkpath(m_logsDirectory);
+	}
 	m_logInFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".bin");
 	m_logInFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 	if (m_debugLogsEnabled)
@@ -181,6 +188,11 @@ void FreeEmsComms::setlogsDebugEnabled(bool enabled)
 {
 	if (m_logsEnabled && enabled && !m_debugLogsEnabled)
 	{
+		if (!QDir(m_logsDirectory).exists())
+		{
+			QDir dir(QCoreApplication::instance()->applicationDirPath());
+			dir.mkpath(m_logsDirectory);
+		}
 		m_logInOutFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".both.bin");
 		m_logInOutFile->open(QIODevice::ReadWrite | QIODevice::Truncate);
 		m_logOutFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".toecu.bin");
