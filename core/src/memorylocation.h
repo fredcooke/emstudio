@@ -31,6 +31,7 @@ public:
 	bool isFlash;
 	bool isRam;
 	bool hasParent;
+	bool isReadOnly;
 	int type;
 	unsigned short parent;
 	unsigned short ramPage;

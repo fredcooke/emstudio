@@ -138,6 +138,7 @@ public:
 	bool isRam;
 	bool isFlash;
 	bool hasParent;
+	bool isReadOnly;
 	DataType type;
 	unsigned short parent;
 	unsigned char rampage;

@@ -406,6 +406,7 @@ void EmsData::passLocationInfo(unsigned short locationid,MemoryLocationInfo info
 		loc->ramPage = info.rampage;
 		loc->flashAddress = info.flashaddress;
 		loc->flashPage = info.flashpage;
+		loc->isReadOnly = info.isReadOnly;
 		if (info.hasParent)
 		{
 			loc->parent = info.parent;
@@ -438,6 +439,7 @@ void EmsData::passLocationInfo(unsigned short locationid,MemoryLocationInfo info
 		loc->size = info.size;
 		loc->flashAddress = info.flashaddress;
 		loc->flashPage = info.flashpage;
+		loc->isReadOnly = info.isReadOnly;
 		if (info.hasParent)
 		{
 			loc->parent = info.parent;
@@ -466,6 +468,7 @@ void EmsData::passLocationInfo(unsigned short locationid,MemoryLocationInfo info
 		loc->size = info.size;
 		loc->ramAddress = info.ramaddress;
 		loc->ramPage = info.rampage;
+		loc->isReadOnly = info.isReadOnly;
 		if (info.hasParent)
 		{
 			loc->parent = info.parent;

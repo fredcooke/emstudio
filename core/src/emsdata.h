@@ -76,6 +76,25 @@ public:
 
 	void setInterrogation(bool inprogress) { m_interrogationInProgress = inprogress; }
 
+	bool isReadOnlyRamBlock(unsigned short locationid)
+	{
+		for (int i=0;i<m_deviceRamMemoryList.size();i++)
+		{
+			if (m_deviceRamMemoryList[i]->locationid == locationid)
+			{
+				if (m_deviceRamMemoryList[i]->isReadOnly)
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		}
+		return false;
+	}
+
 private:
 	bool m_checkEmsDataInUse;
 	bool m_interrogationInProgress;

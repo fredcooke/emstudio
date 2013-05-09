@@ -1389,6 +1389,11 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					{
 						info.hasParent = false;
 					}
+					if (flaglist.contains(BLOCK_IS_READ_ONLY))
+					{
+						//info.propertymap.append(QPair<QString,QString>("Is Read Only","true"));
+						info.isReadOnly = true;
+					}
 					if (flaglist.contains(FreeEmsComms::BLOCK_IS_2D_TABLE))
 					{
 						info.type = DATA_TABLE_2D;

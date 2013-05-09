@@ -2589,7 +2589,10 @@ void MainWindow::dataLogDecoded(QVariantMap data)
 					QList<unsigned short> loclist = emsData->getTopLevelDeviceRamLocations();
 					for (int i=0;i<loclist.size();i++)
 					{
-						emsComms->updateBlockInRam(loclist[i],0,emsData->getDeviceRamBlock(loclist[i]).size(),emsData->getDeviceRamBlock(loclist[i]));
+						if (!emsData->isReadOnlyRamBlock(loclist[i]))
+						{
+							emsComms->updateBlockInRam(loclist[i],0,emsData->getDeviceRamBlock(loclist[i]).size(),emsData->getDeviceRamBlock(loclist[i]));
+						}
 					}
 				}
 
