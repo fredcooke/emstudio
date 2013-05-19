@@ -80,6 +80,8 @@ public:
 	void setInterByteSendDelay(int milliseconds);
 	void setlogsDebugEnabled(bool enabled);
 	void verifyRamFromDevice(quint64 checksum);
+	int enableDatalogStream();
+	int disableDatalogStream();
 protected:
 	void run();
 private:

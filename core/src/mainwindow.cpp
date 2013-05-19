@@ -195,6 +195,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionExit_3,SIGNAL(triggered()),this,SLOT(close()));
 	connect(ui.actionPacket_Status,SIGNAL(triggered()),this,SLOT(menu_windows_PacketStatusClicked()));
 	connect(ui.actionAbout,SIGNAL(triggered()),this,SLOT(menu_aboutClicked()));
+	connect(ui.actionEnable_Datalogs,SIGNAL(triggered()),this,SLOT(menu_enableDatalogsClicked()));
+	connect(ui.actionDisable_Datalog_Stream,SIGNAL(triggered()),this,SLOT(menu_disableDatalogsClicked()));
 	ui.actionInterrogation_Progress->setEnabled(false);
 
 	emsInfo=0;
@@ -929,6 +931,21 @@ void MainWindow::setPlugin(QString plugin)
 	emsComms->setLogsEnabled(m_saveLogs);
 	emsComms->setInterByteSendDelay(m_comInterByte);
 	emsComms->setlogsDebugEnabled(m_debugLogs);
+}
+void MainWindow::menu_enableDatalogsClicked()
+{
+	if (emsComms)
+	{
+		emsComms->enableDatalogStream();
+	}
+}
+
+void MainWindow::menu_disableDatalogsClicked()
+{
+	if (emsComms)
+	{
+		emsComms->disableDatalogStream();
+	}
 }
 
 void MainWindow::setDevice(QString dev)

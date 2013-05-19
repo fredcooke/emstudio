@@ -105,6 +105,8 @@ public:
 	virtual int burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size)=0;
 	virtual void setInterByteSendDelay(int milliseconds)=0;
 	virtual void setlogsDebugEnabled(bool enabled)=0;
+	virtual int enableDatalogStream()=0;
+	virtual int disableDatalogStream()=0;
 };
 Q_DECLARE_INTERFACE(EmsComms,"EmsComms/1.0")
 #endif // EMSCOMMS_H

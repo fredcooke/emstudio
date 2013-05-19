@@ -245,6 +245,37 @@ int FreeEmsComms::burnBlockFromRamToFlash(unsigned short location,unsigned short
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
+int FreeEmsComms::enableDatalogStream()
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = UPDATE_BLOCK_IN_RAM;
+	req.addArg(0x9000,2);
+	req.addArg(0,2);
+	req.addArg(1,2);
+	req.addArg(QByteArray().append((char)0x01));
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+
+int FreeEmsComms::disableDatalogStream()
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = UPDATE_BLOCK_IN_RAM;
+	req.addArg(0x9000,2);
+	req.addArg(0,2);
+	req.addArg(1,2);
+	req.addArg(QByteArray().append((char)0x00));
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
 
 int FreeEmsComms::updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)
 {

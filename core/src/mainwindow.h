@@ -212,6 +212,8 @@ private slots:
 	void menu_settingsClicked();
 	void menu_connectClicked();
 	void menu_aboutClicked();
+	void menu_enableDatalogsClicked();
+	void menu_disableDatalogsClicked();
 	void interrogateProgressViewCancelClicked();
 	void ui_saveDataButtonClicked();
 	void menu_disconnectClicked();

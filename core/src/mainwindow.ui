@@ -44,7 +44,7 @@
      <x>0</x>
      <y>0</y>
      <width>1525</width>
-     <height>21</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -64,6 +64,8 @@
      <string>&amp;Edit</string>
     </property>
     <addaction name="actionSettings"/>
+    <addaction name="actionEnable_Datalogs"/>
+    <addaction name="actionDisable_Datalog_Stream"/>
    </widget>
    <widget class="QMenu" name="menuWindows">
     <property name="title">
@@ -180,6 +182,16 @@
   <action name="actionInterrogation_Progress">
    <property name="text">
     <string>Interrogation Progress</string>
+   </property>
+  </action>
+  <action name="actionEnable_Datalogs">
+   <property name="text">
+    <string>Enable Datalog Stream</string>
+   </property>
+  </action>
+  <action name="actionDisable_Datalog_Stream">
+   <property name="text">
+    <string>Disable Datalog Stream</string>
    </property>
   </action>
  </widget>
