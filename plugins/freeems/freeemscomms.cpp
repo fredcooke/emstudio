@@ -1198,44 +1198,6 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 			m_isSilent = false;
 		}
 		if (payloadid == 0x0191)
-		{
-			//qDebug() << "Incoming packet:" << "0x" + QString::number(payloadid,16).toUpper();
-			m_lastDatalogUpdateEnabled = true;
-			m_lastDatalogTime = QDateTime::currentMSecsSinceEpoch();
-
-			//Need to pull sequence number out of here
-		}
-		else
-		{
-			if (m_waitingForResponse)
-			{
-				if (payloadid == m_payloadWaitingForResponse+1)
-				{
-					qDebug() << "Recieved Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
-					qDebug() << "Currently waiting for:" << QString::number(m_currentWaitingRequest.type,16).toUpper();
-					if (parsedPacket.isNAK)
-					{
-						//NAK to our packet
-						unsigned short errornum = parsedPacket.payload[0] << 8;
-						errornum += parsedPacket.payload[1];
-						emit commandFailed(m_currentWaitingRequest.sequencenumber,errornum);
-						emit packetNaked(m_currentWaitingRequest.type,parsedPacket.header,parsedPacket.payload,errornum);
-					}
-					else
-					{
-						//Packet is good.
-						emit commandSuccessful(m_currentWaitingRequest.sequencenumber);
-						emit packetAcked(m_currentWaitingRequest.type,parsedPacket.header,parsedPacket.payload);
-					}
-					m_waitingForResponse = false;
-				}
-				else
-				{
-					qDebug() << "ERROR! Invalid packet:" << "0x" + QString::number(payloadid,16).toUpper();
-				}
-			}
-		}
-		if (payloadid == 0x0191)
 		{	//Datalog packet
 
 			if (parsedPacket.isNAK)
@@ -1598,6 +1560,45 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 		else
 		{
 			emit unknownPacket(parsedPacket.header,parsedPacket.payload);
+		}
+		if (payloadid == 0x0191)
+		{
+			//qDebug() << "Incoming packet:" << "0x" + QString::number(payloadid,16).toUpper();
+			m_lastDatalogUpdateEnabled = true;
+			m_lastDatalogTime = QDateTime::currentMSecsSinceEpoch();
+
+			//Need to pull sequence number out of here
+		}
+		else
+		{
+			if (m_waitingForResponse)
+			{
+				if (payloadid == m_payloadWaitingForResponse+1)
+				{
+					qDebug() << "Recieved Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
+					qDebug() << "Currently waiting for:" << QString::number(m_currentWaitingRequest.type,16).toUpper();
+					if (parsedPacket.isNAK)
+					{
+						//NAK to our packet
+						unsigned short errornum = parsedPacket.payload[0] << 8;
+						errornum += parsedPacket.payload[1];
+						emit commandFailed(m_currentWaitingRequest.sequencenumber,errornum);
+						emit packetNaked(m_currentWaitingRequest.type,parsedPacket.header,parsedPacket.payload,errornum);
+					}
+					else
+					{
+						//Packet is good.
+						emit commandSuccessful(m_currentWaitingRequest.sequencenumber);
+						emit packetAcked(m_currentWaitingRequest.type,parsedPacket.header,parsedPacket.payload);
+					}
+					m_waitingForResponse = false;
+				}
+				else
+				{
+					qDebug() << "ERROR! Invalid packet:" << "0x" + QString::number(payloadid,16).toUpper();
+				}
+			}
+
 		}
 	}
 	else
