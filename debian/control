@@ -2,7 +2,7 @@ Source: emstudio
 Section: unknown
 Priority: extra
 Maintainer: Michael Carpenter <malcom2073@gmail.com>
-Build-Depends: debhelper (>= 8.0.0), libqt4-dev (>= 4.8.0), libqwt-dev (>=6.0.0), libqt4-opengl-dev (>=4.8.0), libqjson-dev (>=0.7.1)
+Build-Depends: debhelper (>= 8.0.0), libqt4-dev (>= 4.8.0), libqwt-dev (>=6.0.0), libqt4-opengl-dev (>=4.8.0), libqjson-dev (>=0.7.1), cdbs (>=0.4.0)
 Standards-Version: 3.9.2
 Homepage: http://emstune.com
 #Vcs-Git: git://git.debian.org/collab-maint/emstudio.git
