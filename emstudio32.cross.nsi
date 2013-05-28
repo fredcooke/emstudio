@@ -57,7 +57,7 @@ Section "EMStudio (Required)" ;No components page, name is not important
   SetOutPath "$INSTDIR\dashboards"
   File "core/src/gauges.qml"
   SetOutPath "$INSTDIR\plugins"
-  File "core/plugins/freeemsplugin.lib"
+  File "core/plugins/libfreeemsplugin.a"
   
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\EMStudio "Install_Dir" "$INSTDIR"
@@ -74,21 +74,21 @@ Section "Qt Components"
 
   SetOutPath $INSTDIR
 
-  File /usr/lib/qt4win32/QtCore4.dll
-  File /usr/lib/qt4win32/QtGui4.dll
-  File /usr/lib/qt4win32/QtOpenGL4.dll
-  File /usr/lib/qt4win32/QtSvg4.dll
-  File /usr/lib/qt4win32/QtDeclarative4.dll
-  File /usr/lib/qt4win32/QtGui4.dll
-  File /usr/lib/qt4win32/QtNetwork4.dll
-  File /usr/lib/qt4win32/QtScript4.dll
-  File /usr/lib/qt4win32/QtSql4.dll
-  File /usr/lib/qt4win32/QtXml4.dll
-  File /usr/lib/qt4win32/QtXmlPatterns4.dll
-  File /home/michael/QtWin/libs/qwt/bin/qwt.dll
-  File /home/michael/QtWin/libs/qjson/bin/qjson0.dll
-  File /usr/share/doc/mingw32-runtime/mingwm10.dll
-  File /home/michael/QtWin/lib/libgcc_s_dw2-1.dll
+  File /home/michael/QtWin32/lib/QtCore4.dll
+  File /home/michael/QtWin32/lib/QtGui4.dll
+  File /home/michael/QtWin32/lib/QtOpenGL4.dll
+  File /home/michael/QtWin32/lib/QtSvg4.dll
+  File /home/michael/QtWin32/lib/QtDeclarative4.dll
+  File /home/michael/QtWin32/lib/QtGui4.dll
+  File /home/michael/QtWin32/lib/QtNetwork4.dll
+  File /home/michael/QtWin32/lib/QtScript4.dll
+  File /home/michael/QtWin32/lib/QtSql4.dll
+  File /home/michael/QtWin32/lib/QtXml4.dll
+  File /home/michael/QtWin32/lib/QtXmlPatterns4.dll
+  File /home/michael/QtWin32/libs/qwt/bin/qwt.dll
+  File /home/michael/QtWin32/libs/qjson/bin/qjson0.dll
+  File /home/michael/QtWin32/lib/mingwm10.dll
+  File /home/michael/QtWin32/lib/libgcc_s_dw2-1.dll
 
 SectionEnd
 
