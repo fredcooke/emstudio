@@ -19,6 +19,17 @@ win32-x-g++ {
 	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
 }
+win64-x-g++ {
+        TARGET = ../../../core/plugins/freeemsplugin
+        win32:QMAKE_LFLAGS += -shared
+        message("Building for win64-x-g++")
+        INCLUDEPATH += /home/michael/QtWin/libs/qwt/include /home/michael/QtWin/libs/qjson/include
+        LIBS += -L/home/michael/QtWin/libs/qwt/lib -lqwt -L/home/michael/QtWin/libs/qjson/lib -lqjson0
+        LIBS += -L/home/michael/QtWin/lib
+        DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
+        DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+}
+
 unix {
 	TARGET = ../../core/plugins/freeemsplugin
 	target.path = /usr/share/emstudio/plugins
