@@ -1803,7 +1803,10 @@ void MainWindow::emsOperatingSystem(QString os)
 void MainWindow::emsCommsConnected()
 {
 	//New log and settings file here.
-	//m_offlineMode = false;
+	if (m_memoryInfoMap.size() == 0)
+	{
+		m_offlineMode = false;
+	}
 	if (progressView)
 	{
 		progressView->reset();
