@@ -161,6 +161,7 @@ private:
     quint64 m_lastDatalogTime;
     QTimer *m_lastdatalogTimer;
     bool m_lastDatalogUpdateEnabled;
+	bool m_isConnected;
 	FEDataPacketDecoder *dataPacketDecoder;
 	FEMemoryMetaData *m_metaDataParser;
 	bool m_debugLogsEnabled;

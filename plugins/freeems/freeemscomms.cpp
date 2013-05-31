@@ -37,6 +37,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	connect(serialPort,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)),Qt::DirectConnection);
 	//logLoader = new LogLoader(this);
 	//connect(logLoader,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
+	m_isConnected = false;
 
 	dataPacketDecoder = new FEDataPacketDecoder();
 	m_metaDataParser = new FEMemoryMetaData();
@@ -182,7 +183,11 @@ void FreeEmsComms::setLogsEnabled(bool enabled)
 	}
 	else if (!m_logsEnabled && enabled)
 	{
-		openLogs();
+		if (m_isConnected)
+		{
+			//If we're connected, open logs. Otherwise, don't as they will be open next time we connect.
+			openLogs();
+		}
 	}
 	m_logsEnabled = enabled;
 	//serialThread->setLogsEnabled(enabled);
@@ -763,6 +768,8 @@ void FreeEmsComms::run()
 
 				serialconnected = true;
 				emit debug("Connected to serial port");
+				m_isConnected = true;
+				openLogs();
 				emit connected();
 				m_threadReqList.removeAt(i);
 				i--;
