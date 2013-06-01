@@ -1,12 +1,12 @@
 { "tables" : {
- "VE Table" : {
+ "SD VE Table" : {
   "locationid" : "0x0000",
   "type" : "3D",
-  "xtitle" : "rpm",
+  "xtitle" : "RPM",
   "xcalc" : [{"type" : "div", "value" : "2.0"}],
   "xdp" : "0",
   "xhighlight" : "RPM",
-  "ytitle" : "load",
+  "ytitle" : "MAP",
   "ycalc" : [{"type" : "div", "value" : "100.0"}],
   "ydp" : "0",
   "yhighlight" : "MAP",
@@ -15,10 +15,26 @@
   "zdp" : "1",
   "size" : "1024"
  },
+ "AN AF Table" : {
+  "locationid" : "0x0004",
+  "type" : "3D",
+  "xtitle" : "RPM",
+  "xcalc" : [{"type" : "div", "value" : "2.0"}],
+  "xdp" : "0",
+  "xhighlight" : "RPM",
+  "ytitle" : "TPS %",
+  "ycalc" : [{"type" : "div", "value" : "640.0"}],
+  "ydp" : "0",
+  "yhighlight" : "TPS",
+  "ztitle" : "AirFlow %",
+  "zcalc" : [{"type" : "div","value" : "640.0"}],
+  "zdp" : "2",
+  "size" : "1024"
+ },
  "Lambda Table" : {
   "locationid" : "0x0006",
   "type" : "3D",
-  "xtitle" : "rpm",
+  "xtitle" : "RPM",
   "xcalc" : [{ "type":"div","value" : "2.0" }],
   "xdp" : "0",
   "xhighlight" : "RPM",
@@ -34,7 +50,7 @@
  "Timing Table" : {
   "locationid" : "0x0008",
   "type" : "3D",
-  "xtitle" : "rpm",
+  "xtitle" : "RPM",
   "xcalc" : [{ "type":"div","value" : "2.0"}],
   "xdp" : "0",
   "xhighlight" : "RPM",
