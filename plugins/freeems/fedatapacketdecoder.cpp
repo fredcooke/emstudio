@@ -157,7 +157,7 @@ void FEDataPacketDecoder::loadDataFieldsFromValues()
 	m_dataFieldList.append(DataField("LoadMain","Configurable Unit of Load",32,2,512.0));
 	m_dataFieldList.append(DataField("VEMain","Volumentric Efficiency",34,2,512.0));
 	m_dataFieldList.append(DataField("Lambda","Integral Lambda",36,2,32768.0));
-	m_dataFieldList.append(DataField("AirFlow","Raw Intermediate",38,2,1.0));
+	m_dataFieldList.append(DataField("AirFlow","AirFlow for Alpha-N",38,2,640.0));
 	m_dataFieldList.append(DataField("densityAndFuel","raw Intermediate",40,2,1.0));
 	m_dataFieldList.append(DataField("BasePW","Raw PW Before corrections",42,2,1250));
 	m_dataFieldList.append(DataField("ETE","Engine Temp Enrichment Percentage",44,2,16384.0/100.0));
