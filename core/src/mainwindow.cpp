@@ -1554,6 +1554,12 @@ void MainWindow::settingsSaveClicked()
 	QMdiSubWindow *subwin = qobject_cast<QMdiSubWindow*>(comSettingsWidget->parent());
 	ui.mdiArea->removeSubWindow(subwin);
 	comSettingsWidget->deleteLater();
+    if (emsComms)
+    {
+        emsComms->setInterByteSendDelay(m_comInterByte);
+        emsComms->setlogsDebugEnabled(m_debugLogs);
+        emsComms->setLogDirectory(m_logDirectory);
+    }
 
 }
 void MainWindow::locationIdInfo(unsigned short locationid,MemoryLocationInfo info)
