@@ -122,6 +122,18 @@
   "ycalc" : [{ "type":"div","value" : "1250.0"}],
   "ydp" : "2",
   "size" : "64"
+ },
+ "RPM VS AN/SD Blend Table" : {
+  "locationid" : "0x010E",
+  "type" : "2D",
+  "xtitle" : "RPM",
+  "xcalc" : [{ "type":"div","value" : "2.0"}],
+  "xdp" : "0",
+  "xhighlight" : "RPM",
+  "ytitle" : "Blend % AN",
+  "ycalc" : [{ "type":"div","value" : "655.35"}],
+  "ydp" : "1",
+  "size" : "64"
  }
 },
 "ramvars" : {
