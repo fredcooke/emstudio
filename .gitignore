@@ -2,8 +2,10 @@
 *.o
 *.exe
 moc_*.h
+moc_*.cpp
 obj/
 emstudio
+core/plugins/
 
 # Other project stuff
 Makefile
