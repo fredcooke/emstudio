@@ -1054,7 +1054,7 @@ void TableView3D::passDatalog(QVariantMap data)
 		int higherrow = 0;
 		int lowercolumn = 0;
 		int highercolumn = 1;
-		for (int x=1;x<ui.tableWidget->columnCount();x++)
+		for (int x=1;x<ui.tableWidget->columnCount()-1;x++)
 		{
 			double testval = ui.tableWidget->item(ui.tableWidget->rowCount()-1,x)->text().toDouble();
 			double prevtestval;
@@ -1108,7 +1108,7 @@ void TableView3D::passDatalog(QVariantMap data)
 				break;
 			}
 		}
-		for (int y=ui.tableWidget->rowCount()-2;y>=0;y--)
+		for (int y=ui.tableWidget->rowCount()-2;y>=1;y--)
 		{
 			if (ui.tableWidget->item(y,0))
 			{
