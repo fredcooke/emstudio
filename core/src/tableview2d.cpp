@@ -29,9 +29,10 @@
 #include <QFileDialog>
 #include <tablewidgetdelegate.h>
 //#include "freeems/fetable2ddata.h"
-TableView2D::TableView2D(bool isram, bool isflash,QWidget *parent)
+TableView2D::TableView2D(bool isram, bool isflash,bool isSigned,QWidget *parent)
 {
 	Q_UNUSED(parent)
+	m_isSignedData = isSigned;
 	m_isFlashOnly = false;
 	ui.setupUi(this);
 	metaDataValid = false;
@@ -609,7 +610,7 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data,TableData *n
 	//tableData = new Table2DData(locationid,m_isFlashOnly,data,m_metaData);
 	//tableData = new FETable2DData();
 	tableData = (Table2DData*)newtableData;
-	tableData->setData(locationid,m_isFlashOnly,data,m_metaData);
+	tableData->setData(locationid,m_isFlashOnly,data,m_metaData,m_isSignedData);
 	connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	qDebug() << "TableView2D::passData" << "0x" + QString::number(locationid,16).toUpper();
 	samples.clear();
@@ -663,21 +664,21 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data,TableData *n
 		ui.tableWidget->setItem(0,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->axis()[i],'f',m_metaData.xDp)));
 		ui.tableWidget->setItem(1,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->values()[i],'f',m_metaData.yDp)));
 
-		if (tableData->values()[i] < tableData->maxXAxis()/4)
+		if ((tableData->values()[i] - tableData->minYAxis()) < (tableData->maxYAxis() - tableData->minYAxis())/4)
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,(255*((tableData->values()[i])/(tableData->maxXAxis()/4.0))),255));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,(255*(((tableData->values()[i] - tableData->minYAxis()))/((tableData->maxYAxis() - tableData->minYAxis())/4.0))),255));
 		}
-		else if (tableData->values()[i] < ((tableData->maxXAxis()/4)*2))
+		else if ((tableData->values()[i] - tableData->minYAxis()) < (((tableData->maxYAxis()-tableData->minYAxis())/4)*2))
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((tableData->values()[i]-((tableData->maxXAxis()/4.0)))/(tableData->maxXAxis()/4.0)))));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*(((tableData->values()[i] - tableData->minYAxis())-(((tableData->maxYAxis() - tableData->minYAxis())/4.0)))/((tableData->maxYAxis() - tableData->minYAxis())/4.0)))));
 		}
-		else if (tableData->values()[i] < ((tableData->maxXAxis()/4)*3))
+		else if ((tableData->values()[i] - tableData->minYAxis()) < (((tableData->maxYAxis() - tableData->minYAxis())/4)*3))
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb((255*((tableData->values()[i]-((tableData->maxXAxis()/4.0)*2))/(tableData->maxXAxis()/4.0))),255,0));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb((255*(((tableData->values()[i] - tableData->minYAxis())-(((tableData->maxYAxis() - tableData->minYAxis())/4.0)*2))/((tableData->maxYAxis() - tableData->minYAxis())/4.0))),255,0));
 		}
 		else
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((tableData->values()[i]-((tableData->maxXAxis()/4.0)*3))/(tableData->maxXAxis()/4.0))),0));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(255,255-(255*(((tableData->values()[i] - tableData->minYAxis())-(((tableData->maxYAxis() - tableData->minYAxis())/4.0)*3))/((tableData->maxYAxis() - tableData->minYAxis())/4.0))),0));
 		}
 		samples.append(QPointF(tableData->axis()[i],tableData->values()[i]));
 	}

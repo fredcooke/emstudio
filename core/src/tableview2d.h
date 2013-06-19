@@ -37,7 +37,7 @@ class TableView2D : public DataView
 	Q_OBJECT
 	
 public:
-	explicit TableView2D(bool isram, bool isflash,QWidget *parent = 0);
+	explicit TableView2D(bool isram, bool isflash,bool isSigned = false,QWidget *parent = 0);
 	~TableView2D();
 	bool setData(unsigned short locationid,QByteArray data,TableData *newtableData=0);
 	bool setData(unsigned short locationid,QByteArray data,Table2DMetaData metadata,TableData *newtableData);
@@ -45,6 +45,7 @@ public:
 	//void passData(unsigned short locationid,Table2DData data);
 	void passDatalog(QVariantMap data);
 private:
+	bool m_isSignedData;
 	bool m_isFlashOnly;
 	bool m_tracingEnabled;
 	bool metaDataValid;

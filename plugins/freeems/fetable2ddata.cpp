@@ -33,14 +33,20 @@ void FETable2DData::setWritesEnabled(bool enabled)
 {
 	m_writesEnabled = enabled;
 }
-void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArray payload,Table2DMetaData metadata)
+void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArray payload,Table2DMetaData metadata,bool signedData)
 {
 	m_isFlashOnly = isflashonly;
 	m_metaData = metadata;
-	m_maxXAxis = calcAxis(65535,metadata.xAxisCalc);
+	/*m_maxXAxis = calcAxis(65535,metadata.xAxisCalc);
 	m_maxYAxis = calcAxis(65535,metadata.yAxisCalc);
 	m_minXAxis = calcAxis(0,metadata.xAxisCalc);
-	m_minYAxis = calcAxis(0,metadata.yAxisCalc);
+	m_minYAxis = calcAxis(0,metadata.yAxisCalc);*/
+
+	//Reverse the min and max, so we can figure them out based on real data
+	m_minXAxis = calcAxis(65535,metadata.xAxisCalc);
+	m_minYAxis = calcAxis(65535,metadata.yAxisCalc);
+	m_maxXAxis = calcAxis(-65535,metadata.xAxisCalc);
+	m_maxYAxis = calcAxis(-65535,metadata.yAxisCalc);
 	m_locationId = locationid;
 	m_axis.clear();
 	m_values.clear();
@@ -49,10 +55,40 @@ void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArr
 	{
 		unsigned short x = (((unsigned char)payload[i]) << 8) + ((unsigned char)payload[i+1]);
 		unsigned short y = (((unsigned char)payload[(payload.size()/2)+ i]) << 8) + ((unsigned char)payload[(payload.size()/2) + i+1]);
-		m_axis.append(calcAxis(x,metadata.xAxisCalc));
-		m_values.append(calcAxis(y,metadata.yAxisCalc));
+		double xdouble = 0;
+		double ydouble = 0;
+		if (signedData)
+		{
+			xdouble = calcAxis((short)x,metadata.xAxisCalc);
+			ydouble = calcAxis((short)y,metadata.yAxisCalc);
+		}
+		else
+		{
+			xdouble = calcAxis(x,metadata.xAxisCalc);
+			ydouble = calcAxis(y,metadata.yAxisCalc);
+		}
+		if (xdouble > m_maxXAxis)
+		{
+			m_maxXAxis = xdouble;
+		}
+		if (xdouble < m_minXAxis)
+		{
+			m_minXAxis = xdouble;
+		}
+
+		if (ydouble > m_maxYAxis)
+		{
+			m_maxYAxis = ydouble;
+		}
+		if (ydouble < m_minYAxis)
+		{
+			m_minYAxis = ydouble;
+		}
+
+		m_axis.append(xdouble);
+		m_values.append(ydouble);
 	}
-}
+	}
 double FETable2DData::maxXAxis()
 {
 	return m_maxXAxis;

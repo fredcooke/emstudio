@@ -65,7 +65,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	m_blockFlagList.append(BLOCK_SPARE_8);
 	m_blockFlagList.append(BLOCK_SPARE_9);
 	m_blockFlagList.append(BLOCK_SPARE_10);
-	m_blockFlagList.append(BLOCK_SPARE_11);
+	m_blockFlagList.append(BLOCK_IS_2D_SIGNED_TABLE);
 	m_blockFlagList.append(BLOCK_IS_2D_TABLE);
 	m_blockFlagList.append(BLOCK_IS_MAIN_TABLE);
 	m_blockFlagList.append(BLOCK_IS_LOOKUP_DATA);
@@ -80,6 +80,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	m_blockFlagToNameMap[BLOCK_FOR_BACKUP_RESTORE] = "For Backup";
 	m_blockFlagToNameMap[BLOCK_GETS_VERIFIED] = "Is Verified";
 	m_blockFlagToNameMap[BLOCK_IS_2D_TABLE] = "2D Table";
+	m_blockFlagToNameMap[BLOCK_IS_2D_SIGNED_TABLE] = "2D Signed Table";
 	m_blockFlagToNameMap[BLOCK_IS_MAIN_TABLE] = "3D Table";
 	m_blockFlagToNameMap[BLOCK_IS_LOOKUP_DATA] = "Lookup Table";
 	m_blockFlagToNameMap[BLOCK_IS_CONFIGURATION] = "Configuration";
@@ -1397,6 +1398,10 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					if (flaglist.contains(FreeEmsComms::BLOCK_IS_2D_TABLE))
 					{
 						info.type = DATA_TABLE_2D;
+					}
+					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_2D_SIGNED_TABLE))
+					{
+						info.type = DATA_TABLE_2D_SIGNED;
 					}
 					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_MAIN_TABLE))
 					{

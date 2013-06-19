@@ -62,7 +62,7 @@ class Table2DData : public TableData
 public:
 //	virtual Table2DData() = 0;
 //	virtual Table2DData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata) = 0;
-	virtual void setData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata) = 0;
+	virtual void setData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata,bool signedData) = 0;
 	virtual QByteArray data() = 0;
 	virtual double maxXAxis() = 0;
 	virtual double maxYAxis() = 0;

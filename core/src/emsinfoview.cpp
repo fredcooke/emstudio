@@ -152,6 +152,10 @@ void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 	{
 		type = DATA_TABLE_2D;
 	}
+	else if (ui.locationIdInfoTableWidget->item(row,2)->text() == "2D Signed Table")
+	{
+		type = DATA_TABLE_2D_SIGNED;
+	}
 	else if (ui.locationIdInfoTableWidget->item(row,2)->text() == "3D Table")
 	{
 		type = DATA_TABLE_3D;
@@ -252,6 +256,10 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,QString title,MemoryL
 	if (info.type == DATA_TABLE_2D)
 	{
 		ui.locationIdInfoTableWidget->setItem(foundi,2,new QTableWidgetItem("2D Table"));
+	}
+	else if (info.type == DATA_TABLE_2D_SIGNED)
+	{
+		ui.locationIdInfoTableWidget->setItem(foundi,2,new QTableWidgetItem("2D Signed Table"));
 	}
 	else if (info.type == DATA_TABLE_3D)
 	{

@@ -53,7 +53,7 @@
 TableData::TableData()
 {
 }
-double TableData::calcAxis(unsigned short val,QList<QPair<QString,double> > metadata)
+double TableData::calcAxis(int val,QList<QPair<QString,double> > metadata)
 {
 	if (metadata.size() == 0)
 	{
@@ -81,7 +81,7 @@ double TableData::calcAxis(unsigned short val,QList<QPair<QString,double> > meta
 	}
 	return newval;
 }
-unsigned short TableData::backConvertAxis(double val,QList<QPair<QString,double> > metadata)
+int TableData::backConvertAxis(double val,QList<QPair<QString,double> > metadata)
 {
 	if (metadata.size() == 0)
 	{

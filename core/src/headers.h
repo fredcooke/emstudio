@@ -38,7 +38,8 @@ enum DataType
 	DATA_TABLE_2D=2,
 	DATA_TABLE_3D=3,
 	DATA_TABLE_LOOKUP=4,
-	DATA_CONFIG=5
+	DATA_CONFIG=5,
+	DATA_TABLE_2D_SIGNED=6
 };
 enum SerialPortStatus
 {
@@ -120,6 +121,7 @@ public:
 	bool valid;
 	unsigned int size;
 	unsigned short locationId;
+	bool signedData;
 	QString xAxisTitle;
 	QString yAxisTitle;
 	QString xHighlight;

@@ -649,6 +649,10 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 		{
 			info.type = DATA_TABLE_2D;
 		}
+		else if (type == "DATA_TABLE_2D_SIGNED")
+		{
+			info.type = DATA_TABLE_2D_SIGNED;
+		}
 		else if (type == "DATA_TABLE_3D")
 		{
 			info.type = DATA_TABLE_3D;
@@ -1117,10 +1121,18 @@ void MainWindow::updateView(unsigned short locid,QObject *view,QByteArray data,D
 void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,bool isram, bool isflash)
 {
 	qDebug() << "Table Type:" << type;
-	if (type == DATA_TABLE_2D)
+	if (type == DATA_TABLE_2D || type == DATA_TABLE_2D_SIGNED)
 	{
 		qDebug() << "Creating new table view for location: 0x" << QString::number(locid,16).toUpper();
-		TableView2D *view = new TableView2D(isram,isflash);
+		TableView2D *view = 0;
+		if (type == DATA_TABLE_2D)
+		{
+			view = new TableView2D(isram,isflash,false);
+		}
+		else if (type == DATA_TABLE_2D_SIGNED)
+		{
+			view = new TableView2D(isram,isflash,true);
+		}
 		QString title;
 		Table2DMetaData metadata = m_memoryMetaData->get2DMetaData(locid);
 		if (metadata.valid)
@@ -1155,6 +1167,9 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 		win->show();
 		QApplication::postEvent(win, new QEvent(QEvent::Show));
 		QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+	}
+	else if (type == DATA_TABLE_2D_SIGNED)
+	{
 	}
 	else if (type == DATA_TABLE_3D)
 	{
