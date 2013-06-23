@@ -47,6 +47,8 @@ public:
 	void setWritesEnabled(bool enabled);
 	void writeWholeLocation();
 private:
+	unsigned short m_dataSize;
+	bool m_isSignedData;
 	bool m_isFlashOnly;
 	bool m_writesEnabled;
 	double m_maxXAxis;

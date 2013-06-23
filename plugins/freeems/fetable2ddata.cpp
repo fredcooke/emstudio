@@ -35,6 +35,8 @@ void FETable2DData::setWritesEnabled(bool enabled)
 }
 void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArray payload,Table2DMetaData metadata,bool signedData)
 {
+	m_dataSize = payload.size();
+	m_isSignedData = signedData;
 	m_isFlashOnly = isflashonly;
 	m_metaData = metadata;
 	/*m_maxXAxis = calcAxis(65535,metadata.xAxisCalc);
@@ -135,7 +137,7 @@ void FETable2DData::setCell(int row, int column,double newval)
 	//Data is 64
 	//offset = column + (row * 32), size == 2
 	qDebug() << "Update:" << row << column << newval;
-	unsigned short val = 0;
+	short val = 0;
 	if (row == 0)
 	{
 		val = backConvertAxis(newval,m_metaData.xAxisCalc);
@@ -147,9 +149,28 @@ void FETable2DData::setCell(int row, int column,double newval)
 		val = backConvertAxis(newval,m_metaData.yAxisCalc);
 		m_values.replace(column,newval);
 	}
+	/*		if (signedData)
+		{
+			xdouble = calcAxis((short)x,metadata.xAxisCalc);
+			ydouble = calcAxis((short)y,metadata.yAxisCalc);
+		}
+		else
+		{
+			xdouble = calcAxis(x,metadata.xAxisCalc);
+			ydouble = calcAxis(y,metadata.yAxisCalc);
+		}
+*/
 	QByteArray data;
-	data.append((char)((val >> 8) & 0xFF));
-	data.append((char)(val & 0xFF));
+	if (m_isSignedData)
+	{
+		data.append((char)((val >> 8) & 0xFF));
+		data.append((char)(val & 0xFF));
+	}
+	else
+	{
+		data.append((char)((((unsigned short)val) >> 8) & 0xFF));
+		data.append((char)(((unsigned short)val) & 0xFF));
+	}
 	//qDebug() << "Attempting to save data at:" << yIndex << xIndex;
 	//emit saveSingleData(m_locationId,data,100+(xIndex*2)+(yIndex * (m_xAxis.size()*2)),2);
 
@@ -160,7 +181,14 @@ void FETable2DData::setCell(int row, int column,double newval)
 	{
 		if (m_writesEnabled)
 		{
-			emit saveSingleData(m_locationId,data,(column*2)+(row * (m_metaData.size / 2.0)),2);
+			if (m_metaData.valid)
+			{
+				emit saveSingleData(m_locationId,data,(column*2)+(row * (m_metaData.size / 2.0)),2);
+			}
+			else
+			{
+				emit saveSingleData(m_locationId,data,(column*2)+(row * (m_dataSize / 2.0)),2);
+			}
 		}
 	}
 }
