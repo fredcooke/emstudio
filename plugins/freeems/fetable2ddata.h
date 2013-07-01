@@ -35,10 +35,15 @@ public:
 	//FETable2DData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata);
 	void setData(unsigned short locationid,bool isflashonly, QByteArray payload,Table2DMetaData metadata,bool signedData);
 	QByteArray data();
-	double maxXAxis();
-	double maxYAxis();
-	double minXAxis();
-	double minYAxis();
+	double maxActualXAxis();
+	double maxActualYAxis();
+	double minActualXAxis();
+	double minActualYAxis();
+	double maxCalcedXAxis();
+	double maxCalcedYAxis();
+	double minCalcedXAxis();
+	double minCalcedYAxis();
+
 	QList<double> axis();
 	QList<double> values();
 	int columns();
@@ -51,10 +56,14 @@ private:
 	bool m_isSignedData;
 	bool m_isFlashOnly;
 	bool m_writesEnabled;
-	double m_maxXAxis;
-	double m_maxYAxis;
-	double m_minXAxis;
-	double m_minYAxis;
+	double m_maxActualXAxis;
+	double m_maxActualYAxis;
+	double m_minActualXAxis;
+	double m_minActualYAxis;
+	double m_maxCalcedXAxis;
+	double m_maxCalcedYAxis;
+	double m_minCalcedXAxis;
+	double m_minCalcedYAxis;
 
 	Table2DMetaData m_metaData;
 	unsigned short m_locationId;

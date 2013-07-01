@@ -39,16 +39,16 @@ void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArr
 	m_isSignedData = signedData;
 	m_isFlashOnly = isflashonly;
 	m_metaData = metadata;
-	/*m_maxXAxis = calcAxis(65535,metadata.xAxisCalc);
-	m_maxYAxis = calcAxis(65535,metadata.yAxisCalc);
-	m_minXAxis = calcAxis(0,metadata.xAxisCalc);
-	m_minYAxis = calcAxis(0,metadata.yAxisCalc);*/
+	m_maxCalcedXAxis = calcAxis(65535,metadata.xAxisCalc);
+	m_maxCalcedYAxis = calcAxis(65535,metadata.yAxisCalc);
+	m_minCalcedXAxis = calcAxis(0,metadata.xAxisCalc);
+	m_minCalcedYAxis = calcAxis(0,metadata.yAxisCalc);
 
 	//Reverse the min and max, so we can figure them out based on real data
-	m_minXAxis = calcAxis(65535,metadata.xAxisCalc);
-	m_minYAxis = calcAxis(65535,metadata.yAxisCalc);
-	m_maxXAxis = calcAxis(-65535,metadata.xAxisCalc);
-	m_maxYAxis = calcAxis(-65535,metadata.yAxisCalc);
+	m_minActualXAxis = calcAxis(65535,metadata.xAxisCalc);
+	m_minActualYAxis = calcAxis(65535,metadata.yAxisCalc);
+	m_maxActualXAxis = calcAxis(-65535,metadata.xAxisCalc);
+	m_maxActualYAxis = calcAxis(-65535,metadata.yAxisCalc);
 	m_locationId = locationid;
 	m_axis.clear();
 	m_values.clear();
@@ -69,46 +69,65 @@ void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArr
 			xdouble = calcAxis(x,metadata.xAxisCalc);
 			ydouble = calcAxis(y,metadata.yAxisCalc);
 		}
-		if (xdouble > m_maxXAxis)
+		if (xdouble > m_maxActualXAxis)
 		{
-			m_maxXAxis = xdouble;
+			m_maxActualXAxis = xdouble;
 		}
-		if (xdouble < m_minXAxis)
+		if (xdouble < m_minActualXAxis)
 		{
-			m_minXAxis = xdouble;
+			m_minActualXAxis = xdouble;
 		}
 
-		if (ydouble > m_maxYAxis)
+		if (ydouble > m_maxActualYAxis)
 		{
-			m_maxYAxis = ydouble;
+			m_maxActualYAxis = ydouble;
 		}
-		if (ydouble < m_minYAxis)
+		if (ydouble < m_minActualYAxis)
 		{
-			m_minYAxis = ydouble;
+			m_minActualYAxis = ydouble;
 		}
 
 		m_axis.append(xdouble);
 		m_values.append(ydouble);
 	}
 	}
-double FETable2DData::maxXAxis()
+double FETable2DData::maxActualXAxis()
 {
-	return m_maxXAxis;
+	return m_maxActualXAxis;
 }
 
-double FETable2DData::maxYAxis()
+double FETable2DData::maxActualYAxis()
 {
-	return m_maxYAxis;
+	return m_maxActualYAxis;
 }
 
-double FETable2DData::minXAxis()
+double FETable2DData::minActualXAxis()
 {
-	return m_minXAxis;
+	return m_minActualXAxis;
 }
 
-double FETable2DData::minYAxis()
+double FETable2DData::minActualYAxis()
 {
-	return m_minYAxis;
+	return m_minActualYAxis;
+}
+double FETable2DData::maxCalcedXAxis()
+{
+	return m_maxCalcedXAxis;
+}
+
+double FETable2DData::maxCalcedYAxis()
+{
+	return m_maxCalcedYAxis;
+}
+
+double FETable2DData::minCalcedXAxis()
+{
+	return m_minCalcedXAxis;
+}
+
+double FETable2DData::minCalcedYAxis()
+{
+	return m_minCalcedYAxis;
 }
 
 QList<double> FETable2DData::axis()
