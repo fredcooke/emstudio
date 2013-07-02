@@ -41,8 +41,8 @@ void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArr
 	m_metaData = metadata;
 	m_maxCalcedXAxis = calcAxis(65535,metadata.xAxisCalc);
 	m_maxCalcedYAxis = calcAxis(65535,metadata.yAxisCalc);
-	m_minCalcedXAxis = calcAxis(0,metadata.xAxisCalc);
-	m_minCalcedYAxis = calcAxis(0,metadata.yAxisCalc);
+	m_minCalcedXAxis = calcAxis(-65535,metadata.xAxisCalc);
+	m_minCalcedYAxis = calcAxis(-65535,metadata.yAxisCalc);
 
 	//Reverse the min and max, so we can figure them out based on real data
 	m_minActualXAxis = calcAxis(65535,metadata.xAxisCalc);
