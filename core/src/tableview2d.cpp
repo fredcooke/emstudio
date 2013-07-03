@@ -605,7 +605,12 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data,TableData *n
 	}
 	if (tableData && newtableData && (tableData != newtableData))
 	{
+		disconnect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 		tableData->deleteLater();
+	}
+	else if (tableData == newtableData && tableData)
+	{
+		disconnect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	}
 	//tableData = new Table2DData(locationid,m_isFlashOnly,data,m_metaData);
 	//tableData = new FETable2DData();
