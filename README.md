@@ -29,6 +29,7 @@ $ cd emstudio
 $ git checkout origin/BRANCHTOBUILD (typically dev or master)
 $ qmake
 $ make
+$ cd core
 $ ./emstudio
 
 
