@@ -6,6 +6,7 @@ moc_*.cpp
 obj/
 emstudio
 core/plugins/
+plugins/freeems/moc_*
 
 # Other project stuff
 Makefile
