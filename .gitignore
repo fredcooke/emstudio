@@ -12,6 +12,7 @@ plugins/freeems/moc_*
 Makefile
 Makefile.Debug
 Makefile.Release
+tags
 
 # Temp files
 *~
