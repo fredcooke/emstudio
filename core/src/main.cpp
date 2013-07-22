@@ -19,9 +19,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA   *
  ************************************************************************************/
 
+#include <cassert>
 #include <QtGui/QApplication>
 #include "mainwindow.h"
 #include <QString>
+#include "core.h"
 
 QList<QPair<QString,QString> > getArgs(int argc, char **argv)
 {
@@ -110,6 +112,9 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 	}
+
+    Core *c = new Core;
+    assert( c );
 
 	MainWindow w;
 	if (port != "")
