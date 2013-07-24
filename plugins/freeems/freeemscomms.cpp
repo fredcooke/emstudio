@@ -156,6 +156,7 @@ void FreeEmsComms::connectSerial(QString port,int baud)
 
 void FreeEmsComms::loadLog(QString filename)
 {
+	Q_UNUSED(filename);
 	//logLoader->loadFile(filename);
 }
 
