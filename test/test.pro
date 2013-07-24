@@ -1,3 +1,4 @@
 TEMPLATE  = subdirs
-SUBDIRS  += lib/core/ET_Core \
-            plugin/freeems/ET_FEDataPacketDecoder
+SUBDIRS  += plugin/freeems/ET_FEDataPacketDecoder \
+            lib/core/ET_DataField                 \
+            lib/core/ET_TableData

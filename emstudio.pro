@@ -5,6 +5,7 @@ SUBDIRS  += lib     \
             test    \
             core
 
-core.depends += lib
-test.depends += lib     \
-                plugins
+core.depends   += lib
+plugins.depend += lib
+test.depends   += lib     \
+                  plugins

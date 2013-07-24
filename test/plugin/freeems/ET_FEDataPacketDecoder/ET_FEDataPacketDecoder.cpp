@@ -29,7 +29,9 @@ void ET_FEDataPacketDecoder::cleanupTestCase()
 
 void ET_FEDataPacketDecoder::default_ctorNoThrow()
 {
-    FEDataPacketDecoder dpd;
+    FEDataPacketDecoder *const dpd = new FEDataPacketDecoder();
+    QVERIFY( dpd );
+    delete dpd;
 }
 
 QTEST_APPLESS_MAIN(ET_FEDataPacketDecoder)

@@ -71,7 +71,6 @@ mac {
 SOURCES += src/main.cpp\
 	src/mainwindow.cpp \
     src/freeemspacket.cpp \
-    src/datafield.cpp \
     src/logloader.cpp \
     src/gaugewidget.cpp \
     src/gaugeitem.cpp \
@@ -92,7 +91,6 @@ SOURCES += src/main.cpp\
     src/memorylocation.cpp \
     src/tableview3d.cpp \
     src/interrogateprogressview.cpp \
-    src/tabledata.cpp \
     src/readonlyramview.cpp \
     src/overviewprogressitemdelegate.cpp \
     src/dataview.cpp \
@@ -108,7 +106,6 @@ SOURCES += src/main.cpp\
 
 HEADERS  += src/mainwindow.h \
     src/freeemspacket.h \
-    src/datafield.h \
     src/logloader.h \
     src/gaugewidget.h \
     src/gaugeitem.h \
@@ -130,7 +127,8 @@ HEADERS  += src/mainwindow.h \
     src/tableview3d.h \
     src/interrogateprogressview.h \
     src/headers.h \
-    src/tabledata.h \
+    tabledata.h \
+    datafield.h \
     src/readonlyramview.h \
     src/overviewprogressitemdelegate.h \
     src/dataview.h \
@@ -140,12 +138,12 @@ HEADERS  += src/mainwindow.h \
     src/configview.h \
     src/configblock.h \
     src/emsdata.h \
-    src/table2ddata.h \
-    src/table3ddata.h \
-    src/memorymetadata.h \
+    table2ddata.h \
+    table3ddata.h \
+    memorymetadata.h \
     src/tablewidgetdelegate.h \
-    src/emscomms.h \
-    src/datapacketdecoder.h
+    emscomms.h \
+    datapacketdecoder.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \

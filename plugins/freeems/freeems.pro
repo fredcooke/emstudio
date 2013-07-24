@@ -9,6 +9,17 @@ INCLUDEPATH += . ../../core/src
 CONFIG += plugin
 QT -= gui
 
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/core/release/ -lcore
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/core/debug/ -lcore
+else:unix: LIBS += -L$$OUT_PWD/../../lib/core/ -lcore
+
+INCLUDEPATH += $$PWD/../../lib/core
+DEPENDPATH += $$PWD/../../lib/core
+
+win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/release/core.lib
+else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/debug/core.lib
+else:unix: PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/libcore.a
+
 win32-x-g++ {
 	TARGET = ../../../core/plugins/freeemsplugin
 	win32:QMAKE_LFLAGS += -shared
@@ -36,26 +47,25 @@ unix {
 	INSTALLS += target
 }
 # Input
-HEADERS += ../../core/src/datapacketdecoder.h \
+HEADERS += datapacketdecoder.h \
+           table2ddata.h \
+           table3ddata.h \
+           emscomms.h \
+           memorymetadata.h \
 	   fedatapacketdecoder.h \
            fetable2ddata.h \
-	   ../../core/src/table2ddata.h \
-	   ../../core/src/table3ddata.h \
-	   ../../core/src/tabledata.h \
-	   ../../core/src/emscomms.h \
-	   ../../core/src/datafield.h \
-	   ../../core/src/memorymetadata.h \
+           tabledata.h \
+           datafield.h \
            fetable3ddata.h \
            freeemscomms.h \
            serialport.h \
            serialrxthread.h \
-    fememorymetadata.h
+           fememorymetadata.h
+
 SOURCES += fedatapacketdecoder.cpp \
            fetable2ddata.cpp \
            fetable3ddata.cpp \
            freeemscomms.cpp \
            serialport.cpp \
-	   ../../core/src/datafield.cpp \
-	   ../../core/src/tabledata.cpp \
            serialrxthread.cpp \
-    fememorymetadata.cpp
+           fememorymetadata.cpp

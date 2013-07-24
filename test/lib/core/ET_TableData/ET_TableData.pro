@@ -1,19 +1,18 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2013-07-22T12:46:52
+# Project created by QtCreator 2013-07-23T21:56:21
 #
 #-------------------------------------------------
 
 QT       += testlib
+
 QT       -= gui
 
-TARGET = ET_Core
+TARGET = ET_TableData
 CONFIG   += console
-CONFIG   -= app_bundle1
+CONFIG   -= app_bundle
 
 TEMPLATE = app
-
-DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../../lib/core/release/ -lcore
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../../../lib/core/debug/ -lcore
@@ -26,4 +25,5 @@ win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../../../li
 else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../../../lib/core/debug/core.lib
 else:unix: PRE_TARGETDEPS += $$OUT_PWD/../../../../lib/core/libcore.a
 
-SOURCES += ET_Core.cpp
+SOURCES += ET_TableData.cpp
+DEFINES += SRCDIR=\\\"$$PWD/\\\"
