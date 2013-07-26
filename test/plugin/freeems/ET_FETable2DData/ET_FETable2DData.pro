@@ -15,7 +15,7 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../../../core/plugins/ -lfreeemsplugin
-else:unix: LIBS += -L$$OUT_PWD/../../../../core/plugins/ -lfreeemsplugin -lqjson
+else:unix: LIBS += -L$$OUT_PWD/../../../../core/plugins/ -lfreeemsplugin
 
 INCLUDEPATH += $$PWD/../../../../plugins/freeems \
                $$PWD/../../../../lib/core
