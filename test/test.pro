@@ -5,4 +5,5 @@ SUBDIRS  += plugin/freeems/ET_FEDataPacketDecoder \
             plugin/freeems/ET_FEMemoryMetaData    \
             plugin/freeems/ET_FETable2DData       \
             plugin/freeems/ET_FETable3DData \
-    plugin/freeems/ET_FreeEmsComms
+    plugin/freeems/ET_FreeEmsComms \
+    plugin/freeems/ET_SerialPort
