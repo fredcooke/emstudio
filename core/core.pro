@@ -70,7 +70,6 @@ mac {
 }
 SOURCES += src/main.cpp\
 	src/mainwindow.cpp \
-    src/freeemspacket.cpp \
     src/logloader.cpp \
     src/gaugewidget.cpp \
     src/gaugeitem.cpp \
@@ -105,7 +104,6 @@ SOURCES += src/main.cpp\
 
 
 HEADERS  += src/mainwindow.h \
-    src/freeemspacket.h \
     src/logloader.h \
     src/gaugewidget.h \
     src/gaugeitem.h \

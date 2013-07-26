@@ -23,7 +23,6 @@
 #include <QDebug>
 #include <QDir>
 #include <QCoreApplication>
-#include "freeemspacket.h"
 #include "fetable2ddata.h"
 #include "fetable3ddata.h"
 #define NAK 0x02
