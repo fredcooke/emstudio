@@ -78,6 +78,7 @@ public:
 	virtual const LookupMetaData getLookupMetaData(unsigned short locationid)=0;
 
 	virtual const QString getErrorString(unsigned short code)=0;
+    virtual ~MemoryMetaData() {};
 };
 
 #endif // MEMORYMETADATA_H

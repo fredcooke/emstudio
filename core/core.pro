@@ -99,7 +99,6 @@ SOURCES += src/main.cpp\
     src/configview.cpp \
     src/configblock.cpp \
     src/emsdata.cpp \
-    src/memorymetadata.cpp \
     src/tablewidgetdelegate.cpp
 
 
