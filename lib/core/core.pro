@@ -10,5 +10,6 @@ HEADERS  += datafield.h         \
             memorymetadata.h    \
             datapacketdecoder.h \
             table2ddata.h       \
-            table3ddata.h
+            table3ddata.h       \
+            headers.h
 

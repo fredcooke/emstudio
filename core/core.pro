@@ -126,7 +126,7 @@ HEADERS  += src/mainwindow.h \
     src/memorylocation.h \
     src/tableview3d.h \
     src/interrogateprogressview.h \
-    src/headers.h \
+    headers.h \
     tabledata.h \
     datafield.h \
     src/readonlyramview.h \

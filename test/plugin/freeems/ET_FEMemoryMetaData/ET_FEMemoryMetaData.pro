@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2013-07-22T22:51:42
+# Project created by QtCreator 2013-07-25T22:57:40
 #
 #-------------------------------------------------
 
@@ -8,7 +8,7 @@ QT       += testlib
 
 QT       -= gui
 
-TARGET = ET_FEDataPacketDecoder
+TARGET = ET_FEMemoryMetaData
 CONFIG   += console
 CONFIG   -= app_bundle
 
@@ -24,5 +24,5 @@ DEPENDPATH  += $$PWD/../../../../plugins/freeems
 win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../../../core/plugins/freeemsplugin.dll
 else:unix: PRE_TARGETDEPS += $$OUT_PWD/../../../../core/plugins/libfreeemsplugin.so
 
-SOURCES += ET_FEDataPacketDecoder.cpp
+SOURCES += ET_FEMemoryMetaData.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
