@@ -30,7 +30,6 @@
 class FEDataPacketDecoder : public DataPacketDecoder
 {
 	Q_OBJECT
-	//Q_INTERFACES(DataPacketDecoder)
 public:
 	FEDataPacketDecoder();
 	void populateDataFields();
