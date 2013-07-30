@@ -29,8 +29,10 @@
 #include <tableview2d.h>
 #include <qjson/parser.h>
 #include "logloader.h"
-//#include "freeems/freeemscomms.h"
-//#include "freeems/fedatapacketdecoder.h"
+
+#define define2string_p(x) #x
+#define define2string(x) define2string_p(x)
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	m_offlineMode = false;
