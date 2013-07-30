@@ -59,11 +59,8 @@ class DataPacketDecoder : public QObject
 {
     Q_OBJECT
 public:
-	virtual void populateDataFields()=0;
 	virtual int fieldSize()=0;
 	virtual DataField getField(int num)=0;
-//signals:
-	//void payloadDecoded(QVariantMap data);
 public slots:
 	virtual void decodePayload(QByteArray payload)=0;
 };

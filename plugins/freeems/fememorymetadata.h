@@ -30,7 +30,6 @@ class FEMemoryMetaData : public MemoryMetaData
 public:
 	FEMemoryMetaData();
 	bool loadMetaDataFromFile(QString filestr);
-	bool parseMetaData(QString json);
 	const QMap<unsigned short,QString> errorMap() { return m_errorMap; }
 
 
@@ -43,17 +42,16 @@ public:
 	const Table3DMetaData get3DMetaData(unsigned short locationid);
 
 	bool hasRORMetaData(unsigned short locationid);
-	const QList<ReadOnlyRamData> rORMetaData() { return m_readOnlyMetaData; }
 	const ReadOnlyRamData getRORMetaData(unsigned short locationid);
 
 	bool hasLookupMetaData(unsigned short locationid);
-	const QMap<unsigned short,LookupMetaData> lookupMetaData() { return m_lookupMetaData; }
 	const LookupMetaData getLookupMetaData(unsigned short locationid);
 
 	const QString getErrorString(unsigned short code);
 
 private:
 
+	bool parseMetaData(QString json);
 	QMap<unsigned short,QString> m_errorMap;
 	QMap<unsigned short,LookupMetaData> m_lookupMetaData;
 	QList<ReadOnlyRamData> m_readOnlyMetaData;

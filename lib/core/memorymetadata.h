@@ -70,11 +70,9 @@ public:
 	virtual const Table3DMetaData get3DMetaData(unsigned short locationid)=0;
 
 	virtual bool hasRORMetaData(unsigned short locationid)=0;
-	virtual const QList<ReadOnlyRamData> rORMetaData()=0;
 	virtual const ReadOnlyRamData getRORMetaData(unsigned short locationid)=0;
 
 	virtual bool hasLookupMetaData(unsigned short locationid)=0;
-	virtual const QMap<unsigned short,LookupMetaData> lookupMetaData()=0;
 	virtual const LookupMetaData getLookupMetaData(unsigned short locationid)=0;
 
 	virtual const QString getErrorString(unsigned short code)=0;

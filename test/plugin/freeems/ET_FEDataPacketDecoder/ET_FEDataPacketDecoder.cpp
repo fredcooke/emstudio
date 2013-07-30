@@ -18,7 +18,6 @@ private Q_SLOTS:
     void default_hasFieldSize();
     void default_allowsNegFieldIndex();
     void default_getAField();
-    void default_allowsMultiplePopulates();
     void default_badPayloadDecoded();
 };
 
@@ -64,18 +63,6 @@ void ET_FEDataPacketDecoder::default_getAField()
      */
     DataField f = d->getField(0);
     /* not much more I can do here */
-}
-
-void ET_FEDataPacketDecoder::default_allowsMultiplePopulates()
-{
-    /* this is a nasty one - I know the behavior is undesired, but
-     * it exists. let this test serve as a catch for when we do
-     * correct it in the future.
-     */
-    int orig_size = d->fieldSize();
-    d->populateDataFields();
-    int new_size = d->fieldSize();
-    QVERIFY( new_size == (2*orig_size) );
 }
 
 void ET_FEDataPacketDecoder::default_badPayloadDecoded()

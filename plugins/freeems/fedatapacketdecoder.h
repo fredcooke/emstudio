@@ -32,12 +32,10 @@ class FEDataPacketDecoder : public DataPacketDecoder
 	Q_OBJECT
 public:
 	FEDataPacketDecoder();
-	void populateDataFields();
 	int fieldSize();
 	DataField getField(int num);
 private:
 	void loadDataFieldsFromValues();
-	void loadDataFieldsFromFile(QString file);
 	QList<DataField> m_dataFieldList;
 signals:
 	void payloadDecoded(QVariantMap data);

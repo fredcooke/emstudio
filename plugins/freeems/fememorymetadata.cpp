@@ -29,6 +29,7 @@
 FEMemoryMetaData::FEMemoryMetaData()
 {
 }
+
 bool FEMemoryMetaData::parseMetaData(QString json)
 {
 	QJson::Parser parser;
