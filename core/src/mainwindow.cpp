@@ -1735,7 +1735,6 @@ void MainWindow::blockRetrieved(int sequencenumber,QByteArray header,QByteArray 
 void MainWindow::dataLogPayloadReceived(QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
-	Q_UNUSED(payload)
     dataPacketDecoder->decodePayload(payload);
 
 }

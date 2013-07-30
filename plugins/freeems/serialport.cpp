@@ -106,12 +106,6 @@ void SerialPort::setInterByteSendDelay(int milliseconds)
 {
 	m_interByteSendDelay = milliseconds;
 }
-int SerialPort::writeBytes(unsigned char *buf,int len)
-{
-	Q_UNUSED(buf)
-	Q_UNUSED(len)
-	return -1;
-}
 
 int SerialPort::readBytes(unsigned char *buf,int maxlen)
 {
@@ -154,7 +148,7 @@ int SerialPort::readBytes(unsigned char *buf,int maxlen)
 	return readlen;
 }
 
-int SerialPort::writePacket(QByteArray packet)
+int SerialPort::writeBytes(QByteArray packet)
 {
 	QMutexLocker locker(m_serialLockMutex);
 #ifdef Q_OS_WIN32

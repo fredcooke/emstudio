@@ -539,7 +539,7 @@ bool FreeEmsComms::sendPacket(unsigned short payloadid,QList<QVariant> arglist,Q
 		header.append((char)((payloadid) & 0xFF));
 	}
 	qDebug() << "About to send packet";
-	if (serialPort->writePacket(generatePacket(header,payload)) < 0)
+    if (serialPort->writeBytes(generatePacket(header,payload)) < 0)
 	{
 		return false;
 	}
@@ -1087,7 +1087,7 @@ void FreeEmsComms::run()
 			}
 			else if (false)
 			{
-				serialPort->writePacket(QByteArray());
+                serialPort->writeBytes(QByteArray());
 				break;
 			}
 		}
@@ -1455,7 +1455,7 @@ bool FreeEmsComms::sendSimplePacket(unsigned short payloadid)
 	header.append((char)((payloadid << 8) & 0xFF));
 	header.append((char)(payloadid & 0xFF));
 	m_payloadWaitingForResponse = payloadid;
-	if (serialPort->writePacket(generatePacket(header,payload)) < 0)
+    if (serialPort->writeBytes(generatePacket(header,payload)) < 0)
 	{
 		qDebug() << "Error writing packet. Quitting thread";
 		return false;

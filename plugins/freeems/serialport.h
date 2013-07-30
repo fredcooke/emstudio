@@ -49,8 +49,7 @@ public:
     void setBaud(int baudrate);
     int openPort(QString portName,int baudrate,bool oddparity = true);
     void closePort();
-    int writePacket(QByteArray packet);
-    int writeBytes(unsigned char *buf,int len);
+    int writeBytes(QByteArray bytes);
     int readBytes(unsigned char *buf,int maxlen);
     int bufferSize() { return m_queuedMessages.size(); }
     void setInterByteSendDelay(int milliseconds);
@@ -70,9 +69,6 @@ private:
     int m_baud;
     HANDLE m_portHandle;
 
-
-protected:
-    void run();
 signals:
     void parseBuffer(QByteArray buffer);
     void dataWritten(QByteArray data);
