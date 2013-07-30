@@ -24,9 +24,10 @@
 
 #include <QWidget>
 #include <QCloseEvent>
+#include "memorylocationinfo.h"
+#include "datatype.h"
 #include "ui_emsinfo.h"
-#include "headers.h"
-//#include "freeemscomms.h"
+
 class EmsInfoView : public QWidget
 {
     Q_OBJECT

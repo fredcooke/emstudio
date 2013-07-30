@@ -26,7 +26,10 @@
 #include <QDebug>
 #include <QMutex>
 #include <qglobal.h>
-#include "headers.h"
+#include <vector>
+#include "serialportstatus.h"
+#include "memorylocationinfo.h"
+
 #ifdef Q_OS_WIN32
 #include <windows.h>
 #else
@@ -38,7 +41,7 @@
 #include <termios.h>
 #include <unistd.h>
 #endif
-#include <vector>
+
 class SerialPort : public QObject
 {
 	Q_OBJECT

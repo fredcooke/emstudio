@@ -52,8 +52,9 @@
 #define TABLE3DDATA_H
 
 #include <QObject>
-#include "headers.h"
 #include "tabledata.h"
+#include "table3dmetadata.h"
+
 class Table3DData : public TableData
 {
 	Q_OBJECT

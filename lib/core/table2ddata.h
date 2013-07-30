@@ -55,13 +55,12 @@
 #include <QList>
 #include <QByteArray>
 #include "tabledata.h"
-#include "headers.h"
+#include "table2dmetadata.h"
+
 class Table2DData : public TableData
 {
 	Q_OBJECT
 public:
-//	virtual Table2DData() = 0;
-//	virtual Table2DData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata) = 0;
 	virtual void setData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata,bool signedData) = 0;
 	virtual QByteArray data() = 0;
 	virtual double maxActualXAxis() = 0;

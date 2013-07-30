@@ -24,8 +24,9 @@
 
 #include <QWidget>
 #include <QTimer>
+#include "readonlyramdata.h"
 #include "ui_readonlyramview.h"
-#include "headers.h"
+
 class ReadOnlyRamView : public QWidget
 {
 	Q_OBJECT

@@ -11,7 +11,6 @@ HEADERS  += datafield.h          \
             datapacketdecoder.h  \
             table2ddata.h        \
             table3ddata.h        \
-            headers.h            \
             configdata.h         \
             readonlyramdata.h    \
             lookupmetadata.h     \

@@ -52,14 +52,17 @@
 #define MEMORYMETADATA_H
 #include <QString>
 #include <QMap>
-#include "headers.h"
+#include "table2dmetadata.h"
+#include "table3dmetadata.h"
+#include "readonlyramdata.h"
+#include "lookupmetadata.h"
+
 class MemoryMetaData
 {
 public:
 	virtual bool loadMetaDataFromFile(QString filestr)=0;
 	virtual bool parseMetaData(QString json)=0;
 	virtual const QMap<unsigned short,QString> errorMap()=0;
-
 
 	virtual bool has2DMetaData(unsigned short locationid)=0;
 	virtual const QList<Table2DMetaData> table2DMetaData()=0;

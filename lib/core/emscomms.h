@@ -61,8 +61,7 @@
 #include "table2ddata.h"
 #include "datapacketdecoder.h"
 #include "memorymetadata.h"
-//#include "logloader.h"
-#include "headers.h"
+
 class EmsComms : public QThread
 {
 	Q_OBJECT

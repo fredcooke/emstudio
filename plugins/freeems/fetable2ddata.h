@@ -26,7 +26,8 @@
 #include <QList>
 #include <QByteArray>
 #include "table2ddata.h"
-#include "headers.h"
+#include "table2dmetadata.h"
+
 class FETable2DData : public Table2DData
 {
 	Q_OBJECT

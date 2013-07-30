@@ -23,8 +23,9 @@
 #define FETABLE3DDATA_H
 
 #include <QObject>
-#include "headers.h"
 #include "table3ddata.h"
+#include "table3dmetadata.h"
+
 class FETable3DData : public Table3DData
 {
 	Q_OBJECT

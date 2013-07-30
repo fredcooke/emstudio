@@ -29,12 +29,10 @@
 #include "configview.h"
 #include "emsdata.h"
 #include "memorymetadata.h"
-//#include "logloader.h"
 #include "emscomms.h"
 #include "configblock.h"
 #include <QTimer>
 #include <qjson/serializer.h>
-#include "headers.h"
 #include "datapacketdecoder.h"
 #include "comsettings.h"
 #include "emsinfoview.h"
@@ -50,7 +48,7 @@
 #include "readonlyramview.h"
 #include "emsstatus.h"
 #include "tablemap3d.h"
-//#include "datarawview.h"
+#include "serialportstatus.h"
 #include <QPluginLoader>
 
 class RawDataBlock

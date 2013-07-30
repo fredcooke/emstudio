@@ -27,13 +27,15 @@
 #include <QMutex>
 #include <QVariant>
 #include <QDateTime>
+#include <QTimer>
 #include "serialport.h"
 #include "serialrxthread.h"
 #include "emscomms.h"
-#include "headers.h"
 #include "fedatapacketdecoder.h"
 #include "fememorymetadata.h"
-#include <QTimer>
+#include "table3ddata.h"
+#include "table2ddata.h"
+
 class FreeEmsComms : public EmsComms
 {
 	Q_OBJECT

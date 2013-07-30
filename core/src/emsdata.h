@@ -24,9 +24,12 @@
 #include <QMap>
 #include <QList>
 #include "configblock.h"
-#include "headers.h"
 #include "memorylocation.h"
 #include "memorymetadata.h"
+#include "memorylocationinfo.h"
+#include "readonlyramblock.h"
+#include "configdata.h"
+
 class EmsData : public QObject
 {
 	Q_OBJECT

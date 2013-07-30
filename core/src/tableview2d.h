@@ -30,7 +30,6 @@
 #include "ui_tableview2d.h"
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
-#include "headers.h"
 #include "dataview.h"
 class TableView2D : public DataView
 {

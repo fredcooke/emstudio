@@ -24,7 +24,12 @@
 #include <QMap>
 #include <QString>
 #include "memorymetadata.h"
-#include "headers.h"
+#include "table2dmetadata.h"
+#include "table3dmetadata.h"
+#include "readonlyramdata.h"
+#include "lookupmetadata.h"
+#include "readonlyramblock.h"
+
 class FEMemoryMetaData : public MemoryMetaData
 {
 public:
