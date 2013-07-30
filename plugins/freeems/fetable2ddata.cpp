@@ -152,8 +152,6 @@ int FETable2DData::rows()
 void FETable2DData::setCell(int row, int column,double newval)
 {
 	//New value has been accepted. Let's write it.
-	//void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
-	//Data is 64
 	//offset = column + (row * 32), size == 2
 	qDebug() << "Update:" << row << column << newval;
 	short val = 0;
@@ -190,12 +188,6 @@ void FETable2DData::setCell(int row, int column,double newval)
 		data.append((char)((((unsigned short)val) >> 8) & 0xFF));
 		data.append((char)(((unsigned short)val) & 0xFF));
 	}
-	//qDebug() << "Attempting to save data at:" << yIndex << xIndex;
-	//emit saveSingleData(m_locationId,data,100+(xIndex*2)+(yIndex * (m_xAxis.size()*2)),2);
-
-	//QByteArray data;
-	//data.append((char)((newval >> 8) & 0xFF));
-	//data.append((char)(newval & 0xFF));
 	if (!m_isFlashOnly)
 	{
 		if (m_writesEnabled)

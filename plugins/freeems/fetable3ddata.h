@@ -30,7 +30,6 @@ class FETable3DData : public Table3DData
 	Q_OBJECT
 public:
 	FETable3DData();
-	//FETable3DData(unsigned short locationid,bool isflashonly, QByteArray data,Table3DMetaData metadata);
 	void setData(unsigned short locationid,bool isflashonly,QByteArray payload,Table3DMetaData metadata);
 	void setData(unsigned short locationid,bool isflashonly,QByteArray payload);
 	QByteArray data();

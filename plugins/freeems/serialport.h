@@ -48,12 +48,10 @@ public:
     void setPort(QString portname);
     void setBaud(int baudrate);
     int openPort(QString portName,int baudrate,bool oddparity = true);
-    //HANDLE portHandle() { return m_portHandle; }
     void closePort();
     int writePacket(QByteArray packet);
     int writeBytes(unsigned char *buf,int len);
     int readBytes(unsigned char *buf,int maxlen);
-    //void sendMessageForResponse(QByteArray header,QByteArray payload);
     int bufferSize() { return m_queuedMessages.size(); }
     void setInterByteSendDelay(int milliseconds);
 private:
@@ -67,9 +65,6 @@ private:
     int m_interByteSendDelay;
     QList<QByteArray> m_queuedMessages;
     QByteArray m_buffer;
-    //QFile *m_logInFile;
-    //QFile *m_logOutFile;
-    //QFile *m_logInOutFile;
     QString m_logFileName;
     QString m_portName;
     int m_baud;

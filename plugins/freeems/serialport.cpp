@@ -67,7 +67,6 @@ SerialPortStatus SerialPort::verifyFreeEMS(QString portname)
 #else
 	usleep(100000);
 #endif
-	//msleep(100);
 	int count = 0;
 #ifdef Q_OS_WIN32
 	::ReadFile(m_portHandle,(LPVOID)buf,3,(LPDWORD)&count,NULL);
@@ -193,7 +192,6 @@ int SerialPort::writePacket(QByteArray packet)
 				qDebug() << "Serial write error";
 				return -1;
 			}
-			//msleep(m_interByteSendDelay);
 			usleep(m_interByteSendDelay * 1000);
 		}
 	}
@@ -279,8 +277,6 @@ int SerialPort::openPort(QString portName,int baudrate,bool oddparity)
 	m_portHandle = open(portName.toAscii(),O_RDWR | O_NOCTTY | O_NDELAY); //Should open the port non blocking
 	if (m_portHandle < 0)
 	{
-		//printf("Error opening Com: %s\n",portName);
-		//debug(obdLib::DEBUG_ERROR,"Error opening com port %s",portName);
 		perror("Error opening COM port Low Level");
 		qDebug() << "Port:" << portName;
 		return -1;
@@ -291,12 +287,7 @@ int SerialPort::openPort(QString portName,int baudrate,bool oddparity)
 		qDebug() << "This port is likely open in another process";
 		return -2;
 	}
-	//printf("Com Port Opened %i\n",portHandle);
-	//debug(obdLib::DEBUG_VERBOSE,"Com Port Opened %i",portHandle);
-	//fcntl(m_portHandle, F_SETFL, FASYNC); //Set it to blocking. This is required? Wtf?
-	//struct termios oldtio;
 	struct termios newtio;
-	//bzero(&newtio,sizeof(newtio));
 	tcgetattr(m_portHandle,&newtio);
 	long BAUD = B115200;
 	switch (baudrate)
@@ -322,8 +313,6 @@ int SerialPort::openPort(QString portName,int baudrate,bool oddparity)
 	}  //end of switch baud_rate
 	if (strspn("/dev/pts",portName.toAscii()) >= 8)
 	{
-		//debug(obdLib::DEBUG_WARN,"PTS Detected... disabling baud rate selection on: %s",portName);
-		//printf("PTS detected... disabling baud rate selection: %s\n",portName);
 		baudrate = -1;
 	}
 	else
@@ -351,14 +340,11 @@ int SerialPort::openPort(QString portName,int baudrate,bool oddparity)
 	{
 		if(cfsetispeed(&newtio, BAUD))
 		{
-			//perror("cfsetispeed");
 		}
 
 		if(cfsetospeed(&newtio, BAUD))
 		{
-			//perror("cfsetospeed");
 		}
-		//debug(obdLib::DEBUG_VERBOSE,"Setting baud rate to %i on port %s\n",baudrate,portName);
 	}
 	fcntl(m_portHandle, F_SETFL, 0); //Set to blocking
 	tcsetattr(m_portHandle,TCSANOW,&newtio);

@@ -145,7 +145,6 @@ void FETable3DData::setCell(int yIndex, int xIndex,double val)
 	unsigned short newval = backConvertAxis(val,m_metaData.zAxisCalc);
 	data.append((char)((newval >> 8) & 0xFF));
 	data.append((char)(newval & 0xFF));
-	//qDebug() << "Attempting to save data at:" << yIndex << xIndex << val;
 	if (!m_isFlashOnly)
 	{
 		if (m_writesEnabled)

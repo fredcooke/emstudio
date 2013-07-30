@@ -24,7 +24,6 @@
 #include <QFile>
 #include <QByteArray>
 #include <qjson/parser.h>
-//#include <QMessageBox>
 #include <QVariant>
 
 FEMemoryMetaData::FEMemoryMetaData()
@@ -37,7 +36,6 @@ bool FEMemoryMetaData::parseMetaData(QString json)
 	if (!top.isValid())
 	{
 		QString errormsg = QString("Error parsing JSON from config file on line number: ") + QString::number(parser.errorLine()) + " error text: " + parser.errorString();
-		//QMessageBox::information(0,"Error",errormsg);
 		qDebug() << "Error parsing JSON";
 		qDebug() << "Line number:" << parser.errorLine() << "error text:" << parser.errorString();
 		qDebug() << "Start Json";
@@ -79,67 +77,10 @@ bool FEMemoryMetaData::parseMetaData(QString json)
 			offset += rdata.size;
 			m_readOnlyMetaDataMap[locid].m_ramData.append(rdata);
 			m_readOnlyMetaData.append(rdata);
-			//m_readOnlyMetaDataMap[locid].append(rdata);
-
 		}
-		/*QVariantMap::iterator j = locidmap.begin();
-		while (j != locidmap.end())
-		{
-			if (j.key() == "title")
-			{
-				QString title = j.value().toString();
-				qDebug() << "Location title:" << title;
-			}
-			else
-			{
-				qDebug() << j.key();
-				QVariantMap valuemap = j.value().toMap();
-				if (valuemap.contains("type"))
-				{
-					ConfigData cdata;
-					cdata.configDescription = valuemap["title"].toString();
-					cdata.configTitle = j.key();
-					cdata.elementSize = valuemap["size"].toInt();
-					cdata.locationId = locid;
-					cdata.offset = valuemap["offset"].toInt();
-					cdata.type = valuemap["type"].toString();
-					QVariantMap calcmap = valuemap["calc"].toMap();
-					QList<QPair<QString,double> > calclist;
-					QVariantMap::iterator k = calcmap.begin();
-					while (k != calcmap.end())
-					{
-						calclist.append(QPair<QString,double>(k.key(),k.value().toDouble()));
-						k++;
-					}
-					cdata.elementCalc = calclist;
-					if (valuemap["type"] == "value")
-					{
-
-					}
-					else if (valuemap["type"] == "array")
-					{
-						cdata.arraySize = valuemap["arraysize"].toInt();
-					}
-					m_configMetaData.append(cdata);
-				}
-
-			}
-			j++;
-		}*/
 		i++;
 	}
-	/*"lookuptables" : {
- "0x8000" : {
-  "title": "IAT Transfer Table",
-  "size" : "1024",
-  "editable" : "false"
- },
- "0x8001" : {
-  "title" : "CHT Transfer Table",
-  "size" : "1024",
-  "editable" : "false"
- }
-}*/
+
 	QVariantMap lookups = topmap["lookuptables"].toMap();
 	i = lookups.begin();
 	while (i != lookups.end())
@@ -188,7 +129,6 @@ bool FEMemoryMetaData::parseMetaData(QString json)
 			QString xhighlight = tabledata["xhighlight"].toString();
 			QString yhighlight = tabledata["yhighlight"].toString();
 
-			//QVariantMap::iterator calci = xcalc.begin();
 			QList<QPair<QString,double> > xcalclist;
 			QList<QPair<QString,double> > ycalclist;
 			QList<QPair<QString,double> > zcalclist;
@@ -292,7 +232,6 @@ bool FEMemoryMetaData::loadMetaDataFromFile(QString filestr)
 	QFile file(filestr);
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		//QMessageBox::information(0,"Error","Error opening config file: " + file.errorString());
 		return false;
 		//Can't open the file.
 	}

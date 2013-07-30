@@ -34,8 +34,6 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	serialPort = new SerialPort(this);
 	connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
 	connect(serialPort,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)),Qt::DirectConnection);
-	//logLoader = new LogLoader(this);
-	//connect(logLoader,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)));
 	m_isConnected = false;
 
 	dataPacketDecoder = new FEDataPacketDecoder();
@@ -106,10 +104,6 @@ Table2DData *FreeEmsComms::getNew2DTableData()
 
 FreeEmsComms::~FreeEmsComms()
 {
-	//rxThread->stop();
-	//rxThread->wait(500);
-	//rxThread->terminate();
-	//delete rxThread;
 }
 
 void FreeEmsComms::disconnectSerial()
@@ -156,12 +150,10 @@ void FreeEmsComms::connectSerial(QString port,int baud)
 void FreeEmsComms::loadLog(QString filename)
 {
 	Q_UNUSED(filename);
-	//logLoader->loadFile(filename);
 }
 
 void FreeEmsComms::playLog()
 {
-	//logLoader->start();
 }
 void FreeEmsComms::setLogsEnabled(bool enabled)
 {
@@ -191,7 +183,6 @@ void FreeEmsComms::setLogsEnabled(bool enabled)
 		}
 	}
 	m_logsEnabled = enabled;
-	//serialThread->setLogsEnabled(enabled);
 }
 void FreeEmsComms::setlogsDebugEnabled(bool enabled)
 {
@@ -225,7 +216,6 @@ void FreeEmsComms::setlogsDebugEnabled(bool enabled)
 void FreeEmsComms::setLogDirectory(QString dir)
 {
 	m_logsDirectory = dir;
-	//serialThread->setLogDirectory(dir);
 }
 
 void FreeEmsComms::setPort(QString portname)
@@ -616,8 +606,6 @@ QByteArray FreeEmsComms::generatePacket(QByteArray header,QByteArray payload)
 			packet.append(payload[j]);
 		}
 	}
-	//packet.append(header);
-	//packet.append(payload);
 	packet.append((char)0xCC);
 	return packet;
 }
@@ -633,8 +621,6 @@ void FreeEmsComms::run()
 	connect(rxThread,SIGNAL(dataRead(QByteArray)),this,SLOT(dataLogRead(QByteArray)));
 	m_terminateLoop = false;
 	bool serialconnected = false;
-	//bool waitingforresponse=false;
-	//int waitingpayloadid=0;
 
 	while (!m_terminateLoop)
 	{
@@ -646,7 +632,6 @@ void FreeEmsComms::run()
 		{
 			if (m_threadReqList[i].type == SERIAL_CONNECT)
 			{
-				//qDebug() << "SERIAL_CONNECT";
 				SerialPortStatus errortype = serialPort->verifyFreeEMS(m_threadReqList[i].args[0].toString());
 				if (errortype != NONE)
 				{
@@ -679,17 +664,6 @@ void FreeEmsComms::run()
 					i--;
 					continue;
 				}
-				/*if (!serialPort->verifyFreeEMS(m_threadReqList[i].args[0].toString()))
-				{
-					qDebug() << "FreeEMS is either in Serial Monitor mode, or EMStudio is connected to the wrong port";
-					emit error("FreeEMS is either in Serial Monitor mode, or EMStudio is connected to the wrong port");
-					serialconnected = false;
-					serialPort->closePort();
-					emit disconnected();
-					m_threadReqList.removeAt(i);
-					i--;
-					continue;
-				}*/
 				emit debugVerbose("SERIAL_CONNECT");
 				int errornum = 0;
 				if ((errornum = serialPort->openPort(m_threadReqList[i].args[0].toString(),m_threadReqList[i].args[1].toInt())))
@@ -698,15 +672,12 @@ void FreeEmsComms::run()
 					{
 						emit error(UNABLE_TO_CONNECT,"Unable to open serial port " + m_threadReqList[i].args[0].toString() + " Please ensure no other application has the port open and that the port exists!");
 						qDebug() << "Unable to connect to COM port";
-						//emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()));
 					}
 					else if (errornum == -2)
 					{
 						emit error(UNABLE_TO_LOCK,"Unable to open serial port " + m_threadReqList[i].args[0].toString() + " due to another freeems application locking the port. Please close all other freeems related applications and try again.");
 						qDebug() << "Unable to connect to COM port due to process lock";
-						//emit error("Unable to connect to com port " + m_threadReqList[i].args[0].toString() + " at baud " + QString::number(m_threadReqList[i].args[1].toInt()) + " due to another process holding lock on the port");
 					}
-					//return;
 					m_threadReqList.removeAt(i);
 					i--;
 					emit disconnected();
@@ -898,7 +869,6 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0108;
-					//qDebug() << "Requesting location ID Info for:" << QString::number(locationid,16);
 					if (!sendPacket(m_threadReqList[i],false))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -918,8 +888,6 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0xF8E0;
-					//qDebug() << "Requesting location ID Info for:" << QString::number(locationid,16);
-					//if (!sendPacket(GET_LOCATION_ID_INFO,m_threadReqList[i].args,m_threadReqList[i].argsize,false))
 					if (!sendPacket(m_threadReqList[i],false))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -1105,9 +1073,7 @@ void FreeEmsComms::run()
 				m_waitingInfoMutex.lock();
 				if (!m_waitingForResponse)
 				{
-					//m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					//m_payloadWaitingForResponse = 0x0010;
 					if (!sendPacket(HARD_RESET))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -1122,43 +1088,10 @@ void FreeEmsComms::run()
 			else if (false)
 			{
 				serialPort->writePacket(QByteArray());
-				//waitingforresponse = true;
-				//waitingpayloadid = 0x0101;
 				break;
 			}
 		}
 
-		//General packet reading
-		//if (serialconnected)
-		//{
-			/*
-			//qDebug() << "Attempting to read:";
-			int result = serialThread->readSerial(20);
-			if (result > 20)
-			{
-				//1000 errors with no good packets.
-				qDebug() << "Packet read error!";
-				emit debugVerbose("SERIAL_DISCONNECT");
-				serialThread->closePort();
-				serialconnected = false;
-				emit disconnected();
-			}
-			else if (result < 0)
-			{
-				//Error here.
-				qDebug() << "Error on reading serial. error number:" << result;
-				serialThread->closePort();
-				serialconnected = false;
-				emit debugVerbose("SERIAL_ERROR");
-				emit disconnected();
-				return;
-			}
-			//qDebug() << "finished attempting to read";*/
-		//}
-		//else
-		//{
-			msleep(20);
-		//}
 		m_waitingInfoMutex.lock();
 		if (QDateTime::currentDateTime().currentMSecsSinceEpoch() - m_timeoutMsecs > 500 && m_waitingForResponse)
 		{
@@ -1167,7 +1100,6 @@ void FreeEmsComms::run()
 			if (m_currentWaitingRequest.retryCount >= 2)
 			{
 				qDebug() << "No retries left!";
-				//emit commandFailed(m_currentWaitingRequest.sequencenumber,0);
 				emit commandTimedOut(m_currentWaitingRequest.sequencenumber);
 				m_waitingForResponse = false;
 			}
@@ -1181,12 +1113,6 @@ void FreeEmsComms::run()
 			//TODO: Requeue the command for retry.
 		}
 		m_waitingInfoMutex.unlock();
-		/*while (serialThread->bufferSize() != 0)
-		{
-			QByteArray packet = serialThread->readPacket();
-			Packet parsedPacket = parseBuffer(packet);
-			parsePacket(parsedPacket);
-		}*/
 	}
 	rxThread->stop();
 	rxThread->wait(500);
@@ -1196,10 +1122,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 	if (parsedPacket.isValid)
 	{
 		QMutexLocker locker(&m_waitingInfoMutex);
-		/*unsigned short payloadid = (unsigned short)packetpair.first[1] << 8;
-		payloadid += (unsigned char)packetpair.first[2];*/
 		unsigned short payloadid = parsedPacket.payloadid;
-		//qDebug() << "Incoming packet. Payload:" << payloadid;
 		if (m_isSilent)
 		{
 			emit emsSilenceBroken();
@@ -1211,8 +1134,6 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 			if (parsedPacket.isNAK)
 			{
 				//NAK
-
-				//emit commandFailed(int sequencenumber,int errornum);
 			}
 			else
 			{
@@ -1264,14 +1185,12 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 				QString details = "Details: {";
 				for (int j=0;j<parsedPacket.payload.size();j++)
 				{
-					//details += ((packetpair.second[j] == 0) ? "0x0" : "0x");
 					details += "0x";
 					details += (((unsigned char)parsedPacket.payload[j] < 0xF) ? "0" : "");
 					details += QString::number(parsedPacket.payload[j],16);
 					details += ",";
 				}
 				details += "}";
-				//qDebug() << details;
 				QList<unsigned short> idlist;
 				for (int j=0;j<parsedPacket.payload.size();j+=2)
 				{
@@ -1293,7 +1212,6 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 				QString details = "Details: {";
 				for (int j=0;j<parsedPacket.payload.size();j++)
 				{
-					//details += ((packetpair.second[j] == 0) ? "0x0" : "0x");
 					details += "0x";
 					details += (((unsigned char)parsedPacket.payload[j] < 0xF) ? "0" : "");
 					details += QString::number(parsedPacket.payload[j],16);
@@ -1306,13 +1224,9 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					qDebug() << "ERROR! Current waiting packet's arg size is zero1!!";
 					qDebug() << "0x" + QString::number(m_currentWaitingRequest.type,16).toUpper();
 					qDebug() << "0x" + QString::number(payloadid,16).toUpper();
-					//return;
 				}
 				unsigned short locationid = m_currentWaitingRequest.args[0].toInt();
-				//qDebug() << "Payload:" << QString::number(locationid,16);
-				//qDebug() << details;
 				//TODO double check to make sure that there aren't an odd number of items here...
-				//QList<unsigned short> idlist;
 				QList<LocationIdFlags> flaglist;
 				if (parsedPacket.payload.size() >= 2)
 				{
@@ -1325,7 +1239,6 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					unsigned short flashaddress;
 					unsigned short size;
 					test += parsedPacket.payload[1];
-					//qDebug() << "Location ID Info for location:" << QString::number(locationid,16) << "Flags:" << QString::number(test,16);
 
 					for (int j=0;j<m_blockFlagList.size();j++)
 					{
@@ -1355,8 +1268,6 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					flashaddress += (unsigned char)parsedPacket.payload[9];
 					size = ((unsigned char)parsedPacket.payload[10]) << 8;
 					size += (unsigned char)parsedPacket.payload[11];
-					//emit locationIdInfo(locationid,test,flaglist,parent,rampage,flashpage,ramaddress,flashaddress,size);
-					//void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);
 
 					info.locationid = locationid;
 					info.parent = parent;
@@ -1392,7 +1303,6 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					}
 					if (flaglist.contains(BLOCK_IS_READ_ONLY))
 					{
-						//info.propertymap.append(QPair<QString,QString>("Is Read Only","true"));
 						info.isReadOnly = true;
 					}
 					if (flaglist.contains(FreeEmsComms::BLOCK_IS_2D_TABLE))
@@ -1419,106 +1329,11 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					{
 						info.type = DATA_UNDEFINED;
 					}
-					/*
-					if (flaglist.contains(FreeEmsComms::BLOCK_HAS_PARENT))
-					{
-						info.propertymap.append(QPair<QString,QString>("Parent","true"));
-					}
-					else
-					{
-						info.propertymap.append(QPair<QString,QString>("Paernt","false"));
-					}
-					if (flaglist.contains(FreeEmsComms::BLOCK_IS_RAM))
-					{
-						info.propertymap.append(QPair<QString,QString>("RamPage","0x" + QString::number(rampage,16).toUpper()));
-						info.propertymap.append(QPair<QString,QString>("RamAddress","0x" + QString::number(ramaddress,16).toUpper()));
-						info.propertymap.append(QPair<QString,QString>("Is Ram","true"));
-					}
-					else
-					{
-						info.propertymap.append(QPair<QString,QString>("Is Ram","false"));
-						info.propertymap.append(QPair<QString,QString>("RamPage",""));
-						info.propertymap.append(QPair<QString,QString>("RamAddress",""));
-					}
-					if (flaglist.contains(FreeEmsComms::BLOCK_IS_FLASH))
-					{
-						info.propertymap.append(QPair<QString,QString>("Is Flash","true"));
-						info.propertymap.append(QPair<QString,QString>("FlashPage","0x" + QString::number(flashpage,16).toUpper()));
-						info.propertymap.append(QPair<QString,QString>("FlashAddress","0x" + QString::number(flashaddress,16).toUpper()));
-					}
-					else
-					{
-						info.propertymap.append(QPair<QString,QString>("Is Flash","false"));
-						info.propertymap.append(QPair<QString,QString>("FlashPage",""));
-						info.propertymap.append(QPair<QString,QString>("FlashAddress",""));
-					}
-					info.propertymap.append(QPair<QString,QString>("Size",QString::number(size)));
-					if (flaglist.contains(BLOCK_IS_INDEXABLE))
-					{
-						info.propertymap.append(QPair<QString,QString>("indexable","true"));
-					}
-					else
-					{
-						info.propertymap.append(QPair<QString,QString>("indexable","false"));
-					}
-					if (flaglist.contains(FreeEmsComms::BLOCK_IS_READ_ONLY))
-					{
-						info.propertymap.append(QPair<QString,QString>("Is Read Only","true"));
-					}
-					else
-					{
-						info.propertymap.append(QPair<QString,QString>("Is Read Only","false"));
-					}
-					if (flaglist.contains(FreeEmsComms::BLOCK_GETS_VERIFIED))
-					{
-					}
-					else
-					{
-					}
-					if (flaglist.contains(FreeEmsComms::BLOCK_FOR_BACKUP_RESTORE))
-					{
-					}
-					else
-					{
-					}
-					if (flaglist.contains(FreeEmsComms::BLOCK_IS_2D_TABLE))
-					{
-					}
-					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_MAIN_TABLE))
-					{
-					}
-					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_CONFIGURATION))
-					{
-					}
-					else
-					{
-					}*/
-					/*ui.locationIdInfoTableWidget->setColumnCount(17);
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Table Name"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("Flags"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(3,new QTableWidgetItem("Parent"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(4,new QTableWidgetItem("RamPage"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(5,new QTableWidgetItem("FlashPage"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(6,new QTableWidgetItem("RamAddress"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(7,new QTableWidgetItem("FlashAddress"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(8,new QTableWidgetItem("Size"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(9,new QTableWidgetItem("Has Parent"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(10,new QTableWidgetItem("Is Ram"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(11,new QTableWidgetItem("Is Flash"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(12,new QTableWidgetItem("Is Index"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(13,new QTableWidgetItem("Is Read Only"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(14,new QTableWidgetItem("Is Verified"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(15,new QTableWidgetItem("For Backup"));
-					ui.locationIdInfoTableWidget->setHorizontalHeaderItem(16,new QTableWidgetItem("Table Type"));
-				*/
-					//propertymap
 					emit locationIdInfo(locationid,info);
 
 				}
 
 
-				//emit locationIdList(idlist);
 			}
 		}
 		else if (payloadid == 0x0001) //Interface version response
@@ -1575,7 +1390,6 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 		}
 		if (payloadid == 0x0191)
 		{
-			//qDebug() << "Incoming packet:" << "0x" + QString::number(payloadid,16).toUpper();
 			m_lastDatalogUpdateEnabled = true;
 			m_lastDatalogTime = QDateTime::currentMSecsSinceEpoch();
 
@@ -1652,7 +1466,6 @@ bool FreeEmsComms::sendSimplePacket(unsigned short payloadid)
 void FreeEmsComms::setLogFileName(QString filename)
 {
 	m_logsFilename = filename;
-	//serialThread->setLogFileName(filename);
 }
 void FreeEmsComms::datalogTimerTimeout()
 {
@@ -1712,10 +1525,8 @@ FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 	}
 
 
-	//qDebug() << "Packet:" << QString::number(buffer[1],16) << QString::number(buffer[buffer.length()-2],16);
 	Packet retval;
 	QByteArray header;
-	//currPacket.clear();
 	//Parse the packet here
 	int headersize = 3;
 	int iloc = 0;
@@ -1725,14 +1536,12 @@ FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 	{
 		//Has header
 		seq = true;
-		//qDebug() << "Has seq";
 		headersize += 1;
 	}
 	if (buffer[iloc] & 0x1)
 	{
 		//Has length
 		len = true;
-		//qDebug() << "Has length";
 		headersize += 2;
 	}
 	header = buffer.mid(0,headersize);
@@ -1744,7 +1553,6 @@ FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 	iloc += 2;
 	if (seq)
 	{
-		//qDebug() << "Sequence number" << QString::number(currPacket[iloc]);
 		iloc += 1;
 		retval.hasseq = true;
 	}
@@ -1756,13 +1564,10 @@ FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 	if (len)
 	{
 		retval.haslength = true;
-		//qDebug() << "Length found, buffer size:" << buffer.length() << "iloc:" << QString::number(iloc);
 		unsigned int length = buffer[iloc] << 8;
 		length += (unsigned char)buffer[iloc+1];
 		retval.length = length;
-		//qDebug() << "Length:" << length;
 		iloc += 2;
-		//curr += length;
 		if ((unsigned int)buffer.length() > (unsigned int)(length + iloc))
 		{
 			qDebug() << "Packet length should be:" << length + iloc << "But it is" << buffer.length();
@@ -1774,26 +1579,20 @@ FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 	else
 	{
 		retval.haslength = false;
-		//qDebug() << "Buffer length:" << buffer.length();
-		//qDebug() << "Attempted cut:" << buffer.length() - iloc;
 		payload.append(buffer.mid(iloc),(buffer.length()-iloc));
 	}
-	//qDebug() << "Payload";
 	QString output;
 	for (int i=0;i<payload.size();i++)
 	{
 		int num = (unsigned char)payload[i];
 		output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
 	}
-	//qDebug() << output;
 	output.clear();
-	//qDebug() << "Header";
 	for (int i=0;i<header.size();i++)
 	{
 		int num = (unsigned char)header[i];
 		output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
 	}
-	//qDebug() << output;
 	//Last byte of currPacket should be out checksum.
 	retval.header = header;
 	retval.payload = payload;
@@ -1814,6 +1613,5 @@ FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 		return Packet(false);
 	}
 }
-
 
 Q_EXPORT_PLUGIN2(FreeEmsPlugin, FreeEmsComms)

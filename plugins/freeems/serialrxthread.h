@@ -35,7 +35,7 @@ class SerialRXThread : public QThread
 {
 	Q_OBJECT
 public:
-	explicit SerialRXThread(QObject *parent = 0);	
+	explicit SerialRXThread(QObject *parent = 0);
 	QByteArray readSinglePacket(SerialPort *port);
 	~SerialRXThread();
 	void start(SerialPort *serialport);

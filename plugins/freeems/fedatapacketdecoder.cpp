@@ -35,16 +35,13 @@ void FEDataPacketDecoder::decodePayload(QByteArray payload)
 		if (m_dataFieldList[i].isFlag())
 		{
 			bool value = m_dataFieldList[i].flagValue(&payload);
-			//qDebug() << "Decoding flag:" << m_dataFieldList[i].name() << "Value:" << value;
 			m_valueMap[m_dataFieldList[i].name()] = value;
 		}
 		else
 		{
 			double value = m_dataFieldList[i].getValue(&payload);
-			//qDebug() << "Decoding value:" << m_dataFieldList[i].name() << "Value:" << value;
 			m_valueMap[m_dataFieldList[i].name()] = value;
 		}
-		//ui.tableWidget->item(i,1)->setText(QString::number(value));
 	}
 	emit payloadDecoded(m_valueMap);
 }
@@ -106,9 +103,6 @@ void FEDataPacketDecoder::loadDataFieldsFromFile(QString file)
 			{
 				m_dataFieldList.append(DataField(bitnames[j].toString(),"",offset,size,field["divBy"].toFloat(),field["addTo"].toFloat(),0,0,true,j));
 			}
-			/*m_dataFieldList.append(DataField("callsToUISRs","to ensure we aren't accidentally triggering unused ISRs.",62,2,1.0,0,0,0,true,0));
-	m_dataFieldList.append(DataField("lowVoltageConditions","low voltage conditions.",62,2,1.0,0,0,0,true,1));
-	*/
 		}
 		else if (field["type"].toString() == "BITS16")
 		{
@@ -125,10 +119,6 @@ void FEDataPacketDecoder::loadDataFieldsFromFile(QString file)
 			qDebug() << "INVALID FIELD TYPE:" << field["type"].toString();
 		}
 		qDebug() << m_dataFieldList[m_dataFieldList.size()-1].name() << m_dataFieldList[m_dataFieldList.size()-1].offset() << m_dataFieldList[m_dataFieldList.size()-1].size();
-		//BITS8
-
-		//      "type": "UINT16",
-		//m_dataFieldList.append(DataField())
 		offset += size;
 	}
 	return;
@@ -176,7 +166,6 @@ void FEDataPacketDecoder::loadDataFieldsFromValues()
 	m_dataFieldList.append(DataField("coreStatusA","Duplicate",60,1,1.0,0,true)); // Needs flags
 	m_dataFieldList.append(DataField("decoderFlags","Various decoder state flags",61,1,1.0,0,true)); // Needs flags
 
-	//m_dataFieldList.append(DataField("flaggableFlags","Flags to go with flaggables",62,2,1.0,0,true)); Listed below per bit:
 	// Flaggable flags
 	m_dataFieldList.append(DataField("callsToUISRs","to ensure we aren't accidentally triggering unused ISRs.",62,2,1.0,0,0,0,true,0));
 	m_dataFieldList.append(DataField("lowVoltageConditions","low voltage conditions.",62,2,1.0,0,0,0,true,1));

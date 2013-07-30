@@ -57,9 +57,6 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 		{
 			//This should be an error
 			qDebug() << "Nothing to read:" << attempts;
-			//perror("Error:");
-			//printf("\n");
-			//return; //Disable this, now that we are using timeouts.
 			msleep(10); //Need a sleep now, due to select timeout.
 			attempts++;
 			continue;
@@ -73,7 +70,6 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 					//Start byte in the middle of a packet
 					//Clear out the buffer and start fresh
 					m_inescape = false;
-					//emit dataRead(bufToEmit);
 					qbuffer.clear();
 					qDebug() << "Buffer error";
 				}
@@ -137,10 +133,6 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 					}
 					m_inescape = false;
 				}
-				else
-				{
-					//qDebug() << "Byte out of a packet:" << QString::number(buffer[i],16);
-				}
 			}
 		}
 	}
@@ -149,7 +141,6 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 
 void SerialRXThread::run()
 {
-	//qint64 currms = QDateTime::currentMSecsSinceEpoch();
 	QString byteoutofpacket;
 	QByteArray qbuffer;
 	unsigned char buffer[10240];
@@ -164,25 +155,10 @@ void SerialRXThread::run()
 		{
 			//Nothing on the port
 			qDebug() << "Timeout";
-			//msleep(10);
-		}
-		else
-		{
-			//emit dataRead(QByteArray((const char*)buffer,readlen));
-			/*if (m_logsEnabled)
-			{
-				m_logInFile->write((const char*)buffer,readlen);
-				m_logInFile->flush();
-			}*/
-			//emit dataRead(QByteArray((const char*)buffer,readlen));
 		}
 		if (readlen == 0)
 		{
 			//This should be an error
-			//qDebug() << "Nothing to read";
-			//perror("Error:");
-			//printf("\n");
-			//return; //Disable this, now that we are using timeouts.
 			msleep(10); //Need a sleep now, due to select timeout.
 			continue;
 		}
@@ -208,21 +184,13 @@ void SerialRXThread::run()
 					qDebug() << "Buffer error";
 					m_packetErrorCount++;
 				}
-				//qbuffer.append(buffer[i]);
-				//qDebug() << "Start of packet";
 				//Start of packet
 				m_inpacket = true;
 			}
 			else if (buffer[i] == 0xCC && m_inpacket)
 			{
-				//qDebug() << "End of packet. Size:" << qbuffer.size();
 				//End of packet
 				m_inpacket = false;
-				//qbuffer.append(buffer[i]);
-
-				//m_logFile->flush();
-				//emit parseBuffer(qbuffer);
-
 
 				//New Location of checksum
 				unsigned char sum = 0;
@@ -239,31 +207,14 @@ void SerialRXThread::run()
 				bufToEmit.append(nbuffer);
 				bufToEmit.append(0xCC);
 				emit dataRead(bufToEmit);
-				/*if (m_logsEnabled)
-				{
-					m_logWriteMutex->lock();
-					m_logInOutFile->write(QByteArray().append(0xAA));
-					QByteArray nbuffer(qbuffer);
-					nbuffer.replace(0xBB,QByteArray().append(0xBB).append(0x44));
-					nbuffer.replace(0xAA,QByteArray().append(0xBB).append(0x55));
-					nbuffer.replace(0xCC,QByteArray().append(0xBB).append(0x33));
-					m_logInOutFile->write((const char*)nbuffer.data(),nbuffer.size());
-					m_logInOutFile->write(QByteArray().append(0xCC));
-					m_logInOutFile->flush();
-					m_logWriteMutex->unlock();
-				}*/
-				//qDebug() << "Payload sum:" << QString::number(sum);
-				//qDebug() << "Checksum sum:" << QString::number((unsigned char)currPacket[currPacket.length()-1]);
 				if (sum != (unsigned char)qbuffer[qbuffer.size()-1])
 				{
 					qDebug() << "BAD CHECKSUM!";
 					m_packetErrorCount++;
-					//return QPair<QByteArray,QByteArray>();
 				}
 				else
 				{
 					m_packetErrorCount=0;
-					//m_queuedMessages.append(qbuffer.mid(0,qbuffer.length()-1));
 					emit incomingPacket(qbuffer.mid(0,qbuffer.length()-1));
 				}
 				//return qbuffer;
@@ -273,8 +224,6 @@ void SerialRXThread::run()
 					int num = (unsigned char)qbuffer[i];
 					output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
 				}
-				//qDebug() << "Full packet:";
-				//qDebug() << output;
 				qbuffer.clear();
 			}
 			else
@@ -284,7 +233,6 @@ void SerialRXThread::run()
 					if (buffer[i] == 0xBB)
 					{
 						//Need to escape the next byte
-						//retval = logfile.read(1);
 						m_inescape = true;
 					}
 					else
@@ -316,19 +264,10 @@ void SerialRXThread::run()
 				}
 				else
 				{
-					//qDebug() << "Byte out of a packet:" << QString::number(buffer[i],16);
 					byteoutofpacket += QString::number(buffer[i],16) + " ";
 				}
 			}
 		}
-		//qDebug() << "Bytes out of a packet:" << byteoutofpacket;
 	}
-	//m_buffer.append(qbuffer);
-	if (readlen > 0)
-	{
-	//m_buffer.write(buffer,readlen);
-	//	m_buffer.append((const char*)buffer,readlen);
-	}
-	//return m_packetErrorCount;
 	return;
 }

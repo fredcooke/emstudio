@@ -32,7 +32,6 @@ class FETable2DData : public Table2DData
 	Q_OBJECT
 public:
 	FETable2DData();
-	//FETable2DData(unsigned short locationid,bool isflashonly,QByteArray payload,Table2DMetaData metadata);
 	void setData(unsigned short locationid,bool isflashonly, QByteArray payload,Table2DMetaData metadata,bool signedData);
 	QByteArray data();
 	double maxActualXAxis();

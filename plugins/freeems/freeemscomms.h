@@ -30,7 +30,6 @@
 #include "serialport.h"
 #include "serialrxthread.h"
 #include "emscomms.h"
-//#include "logloader.h"
 #include "headers.h"
 #include "fedatapacketdecoder.h"
 #include "fememorymetadata.h"
@@ -70,7 +69,6 @@ public:
 	void disconnectSerial();
 	void loadLog(QString filename);
 	void playLog();
-	//void populateDataFields();
 	QByteArray generatePacket(QByteArray header,QByteArray payload);
 	int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
 	int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
@@ -177,7 +175,6 @@ private:
 	QList<RequestClass> m_reqList;
 	QList<RequestClass> m_threadReqList;
 	SerialPort *serialPort;
-	//LogLoader *logLoader;
 	bool m_waitingForResponse;
 	bool m_logsEnabled;
 	QString m_logsDirectory;
@@ -189,7 +186,6 @@ private:
 	QFile *m_logInOutFile;
 	void openLogs();
 
-	//void parseBuffer(QByteArray buffer);
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);
 	void packetAcked(unsigned short locationid,QByteArray header,QByteArray payload);
@@ -212,13 +208,10 @@ signals:
 	void unknownPacket(QByteArray header,QByteArray payload);
 	void debug(QString msg);
 	void error(QString msg);
-	//void error(QString msg);
 	void error(SerialPortStatus error,QString msg = QString());
 	void commandSuccessful(int sequencenumber);
 	void commandFailed(int sequencenumber,unsigned short errornum);
 	void commandTimedOut(int sequencenumber);
-	//void updateBlockInRamFailed(int location,int offset,int size,QByteArray data);
-	//void updateBlockInRamSucceeded();
 	void emsSilenceStarted();
 	void emsSilenceBroken();
 public slots:
