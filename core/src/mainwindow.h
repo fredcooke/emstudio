@@ -94,21 +94,11 @@ private:
 	bool m_waitingForRamWriteConfirmation;
 	unsigned short m_currentFlashLocationId;
 	bool m_waitingForFlashWriteConfirmation;
-	//QList<RawDataBlock*> m_ramRawBlockList;
-	//QList<RawDataBlock*> m_flashRawBlockList;
-	//QList<RawDataBlock*> m_deviceRamRawBlockList;
-	//QList<RawDataBlock*> m_deviceFlashRawBlockList;
-	/*QList<MemoryLocation*> m_ramMemoryList;
-	QList<MemoryLocation*> m_flashMemoryList;
-	QList<MemoryLocation*> m_deviceFlashMemoryList;
-	QList<MemoryLocation*> m_deviceRamMemoryList;*/
 	QList<MemoryLocation*> m_tempMemoryList;
 	QMap<unsigned short,QList<ConfigBlock> > m_configBlockMap;
 	QMap<unsigned short,QMdiSubWindow*> m_table3DMapViewMap;
 	QMap<unsigned short,TableMap3D*> m_table3DMapViewWidgetMap;
 	QList<ConfigData> m_configMetaData;
-	//QMap<unsigned short,QList<ReadOnlyRamData> > m_readOnlyMetaDataMap;
-	//RawDataView *rawData;
 	MemoryMetaData *m_memoryMetaData;
 	TableView *dataTables;
 	GaugeView *dataGauges;
@@ -130,17 +120,13 @@ private:
 	QMdiSubWindow *packetStatusMdiWindow;
 	QMdiSubWindow *aboutMdiWindow;
 	QMdiSubWindow *emsStatusMdiWindow;
-	//QFile *settingsFile;
 	void checkMessageCounters(int sequencenumber);
-	//QMdiSubWindow *rawMdiWindow;
-	//ComSettings *comSettings;
 	void populateParentLists();
 	DataPacketDecoder *dataPacketDecoder;
 	void populateDataFields();
 	void updateRamLocation(unsigned short locationid);
 
 	Ui::MainWindow ui;
-	//LogLoader *logLoader;
 	QString m_pluginFileName;
 	QPluginLoader *pluginLoader;
 	EmsComms *emsComms;
@@ -236,7 +222,6 @@ private slots:
 	void emsCommsConnected();
 	void unknownPacket(QByteArray header,QByteArray payload);
 	void locationIdList(QList<unsigned short> idlist);
-	//void locationIdInfo(unsigned short locationid,unsigned short rawFlags,QList<FreeEmsComms::LocationIdFlags> flags,unsigned short parent, unsigned char rampage,unsigned char flashpage,unsigned short ramaddress,unsigned short flashaddress,unsigned short size);
 	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QString version);
