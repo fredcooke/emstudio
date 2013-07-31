@@ -656,7 +656,6 @@ void FreeEmsComms::run()
 					}
 					emit error(errortype,errorstr);
 					serialconnected = false;
-					serialPort->closePort();
 					emit disconnected();
 					//On a disconnect, we are going to be deleting this thread, so go ahead and quit out;
 					return;
