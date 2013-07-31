@@ -1773,7 +1773,7 @@ void MainWindow::error(SerialPortStatus error,QString msg)
 		break;
 	case 1:		//Retry
 		//Delay of 2 seconds to allow for this function to return, and the emscomms loop to be destroyed
-		if (error == LOADER_MODE)
+		if (error == SM_MODE)
 		{
 			//We need to send a SM reset, this is not supported yet.
 		}

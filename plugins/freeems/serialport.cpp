@@ -22,6 +22,8 @@
 #include "serialport.h"
 #include <QDateTime>
 #include <QMutexLocker>
+#include <cassert>
+
 SerialPort::SerialPort(QObject *parent) : QObject(parent)
 {
 	m_serialLockMutex = new QMutex();
@@ -38,7 +40,8 @@ void SerialPort::setBaud(int baudrate)
 {
 	m_baud = baudrate;
 }
-SerialPortStatus SerialPort::verifyFreeEMS(QString portname)
+
+SerialPortStatus SerialPort::isSerialMonitor(QString portname)
 {
 	int errornum = openPort(portname,115200,false);
 	if (errornum == -2)
@@ -49,57 +52,40 @@ SerialPortStatus SerialPort::verifyFreeEMS(QString portname)
 	{
 		return UNABLE_TO_CONNECT;
 	}
-	unsigned char ret = 0x0D;
-	int writei =0;
-#ifdef Q_OS_WIN32
-	::WriteFile(m_portHandle, (void*)&ret, (DWORD)1, (LPDWORD)&writei, NULL);
-#else
-	writei = write(m_portHandle,&ret,1);
-#endif
-	if (writei <= 0)
+
+	int const writei = writeBytes( QByteArray("\x0d") );
+	if (writei < 0)
 	{
 		qDebug() << "Error writing to verify FreeEMS";
+	closePort();
 		return UNABLE_TO_WRITE;
 	}
-	unsigned char buf[3];
+
 #ifdef Q_OS_WIN32
 	Sleep(100);
 #else
 	usleep(100000);
 #endif
-	int count = 0;
-#ifdef Q_OS_WIN32
-	::ReadFile(m_portHandle,(LPVOID)buf,3,(LPDWORD)&count,NULL);
-#else
-	count = read(m_portHandle,buf,3);
-#endif
-	if (count > 0)
+
+	unsigned char buf[3];
+	int const count = readBytes( buf, sizeof(buf) );
+
+	assert( count >= 0 );               /**< fatally catch read errs (temp) */
+	SerialPortStatus status = NONE;     /**< default: assume !SM            */
+	qDebug() << "Verify count: " << QString::number( count );
+	if (count >= 2)
 	{
 		qDebug() << "Verify:" << QString::number(buf[0],16);
 		qDebug() << "Verify:" << QString::number(buf[1],16);
-		if (buf[0] == 0xE0 || buf[0] == 0xE1)
+		if ( (count >= 3) && (buf[0] == 0xE0 || buf[0] == 0xE1) )
 		{
-			if (count > 1)
-			{
-				qDebug() << "Verify:" << QString::number(buf[2],16);
-				if (buf[2] == 0x3E)
-				{
-					//Serial monitor running
-					closePort();
-					return LOADER_MODE;
-				}
-				else
-				{
-					//Probably not;
-					closePort();
-					return NONE;
-				}
-			}
+			qDebug() << "Verify:" << QString::number(buf[2],16);
+			if (buf[2] == 0x3E)
+				status = SM_MODE;   // Serial monitor IS running
 		}
 	}
-	//nothing on the port here either.
 	closePort();
-	return NONE;
+	return status;
 }
 
 void SerialPort::setInterByteSendDelay(int milliseconds)

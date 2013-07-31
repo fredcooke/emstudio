@@ -632,11 +632,11 @@ void FreeEmsComms::run()
 		{
 			if (m_threadReqList[i].type == SERIAL_CONNECT)
 			{
-				SerialPortStatus errortype = serialPort->verifyFreeEMS(m_threadReqList[i].args[0].toString());
+				SerialPortStatus errortype = serialPort->isSerialMonitor(m_threadReqList[i].args[0].toString());
 				if (errortype != NONE)
 				{
 					qDebug() << "Unable to verify ECU";
-					QString errorstr = "";
+					QString errorstr = "UNKNOWN ERROR";
 					if (errortype == UNABLE_TO_CONNECT)
 					{
 						errorstr = "Unable to open serial port " + m_threadReqList[i].args[0].toString() + " Please ensure no other application has the port open and that the port exists!";
@@ -649,7 +649,7 @@ void FreeEmsComms::run()
 					{
 						errorstr = "Unable to open serial port " + m_threadReqList[i].args[0].toString() + " Please ensure no other application has the port open and that the port exists!";
 					}
-					else if (errortype == LOADER_MODE)
+					else if (errortype == SM_MODE)
 					{
 						//TODO Fix this when we have the ability to reset SM mode
 						errorstr = "Unable to connect to ECU. SerialMonitor mode detected! Please remove SM jumper, reset the ECU and click retry!";
