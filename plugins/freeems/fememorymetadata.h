@@ -29,6 +29,7 @@
 #include "readonlyramdata.h"
 #include "lookupmetadata.h"
 #include "readonlyramblock.h"
+#include "menusetup.h"
 
 class FEMemoryMetaData : public MemoryMetaData
 {
@@ -52,10 +53,17 @@ public:
 	bool hasLookupMetaData(unsigned short locationid);
 	const LookupMetaData getLookupMetaData(unsigned short locationid);
 
+	bool hasConfigMetaData(QString name);
+	const QMap<QString,QList<ConfigBlock> > configMetaData();
+	const QList<ConfigBlock> getConfigMetaData(QString name);
+
+	const MenuSetup menuMetaData() { return m_menuSetup; }
+
 	const QString getErrorString(unsigned short code);
 
 private:
-
+	MenuSetup m_menuSetup;
+	QMap<QString,QList<ConfigBlock> > m_configMetaData;
 	bool parseMetaData(QString json);
 	QMap<unsigned short,QString> m_errorMap;
 	QMap<unsigned short,LookupMetaData> m_lookupMetaData;

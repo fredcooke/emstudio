@@ -334,3 +334,24 @@ const QString FEMemoryMetaData::getErrorString(unsigned short code)
 	}
 	return "0x" + QString::number(code,16).toUpper();
 }
+bool FEMemoryMetaData::hasConfigMetaData(QString name)
+{
+	return m_configMetaData.contains(name);
+}
+
+const QMap<QString,QList<ConfigBlock> > FEMemoryMetaData::configMetaData()
+{
+	return m_configMetaData;
+}
+
+const QList<ConfigBlock> FEMemoryMetaData::getConfigMetaData(QString name)
+{
+	if (m_configMetaData.contains(name))
+	{
+		return m_configMetaData[name];
+	}
+	else
+	{
+		return QList<ConfigBlock>();
+	}
+}

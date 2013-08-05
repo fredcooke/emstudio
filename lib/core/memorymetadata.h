@@ -56,7 +56,8 @@
 #include "table3dmetadata.h"
 #include "readonlyramdata.h"
 #include "lookupmetadata.h"
-
+#include "configblock.h"
+#include "menusetup.h"
 class MemoryMetaData
 {
 public:
@@ -78,8 +79,15 @@ public:
 	virtual bool hasLookupMetaData(unsigned short locationid)=0;
 	virtual const LookupMetaData getLookupMetaData(unsigned short locationid)=0;
 
+	virtual bool hasConfigMetaData(QString name)=0;
+	virtual const QMap<QString,QList<ConfigBlock> > configMetaData()=0;
+	virtual const QList<ConfigBlock> getConfigMetaData(QString name)=0;
+	virtual const MenuSetup menuMetaData()=0;
+
+
+
 	virtual const QString getErrorString(unsigned short code)=0;
-    virtual ~MemoryMetaData() {};
+	virtual ~MemoryMetaData() {};
 };
 
 #endif // MEMORYMETADATA_H
