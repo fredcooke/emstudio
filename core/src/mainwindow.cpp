@@ -2307,7 +2307,10 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 			//top["memory"] = memorylocations;
 			if (m_saveLogs)
 			{
-				QFile *settingsFile = new QFile(m_localHomeDir + "/logs/" + m_logFileName + ".meta.json");
+				//emsComms->setLogFileName(m_logFileName);
+				//QFile *settingsFile = new QFile(m_localHomeDir + "/logs/" + m_logFileName + ".meta.json");
+				QFile *settingsFile = new QFile(m_logDirectory + "/" + m_logFileName + ".meta.json");
+
 				settingsFile->open(QIODevice::ReadWrite);
 				settingsFile->write(jsonSerializer.serialize(top));
 				settingsFile->close();
