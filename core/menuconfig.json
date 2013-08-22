@@ -1,0 +1,90 @@
+{
+  "dialogs" :
+  [
+    {
+      "title" : "Decoder Settings",
+      "variable" : "decoder_settings",
+      "fieldlist" :
+      [
+        {
+          "title" : "Angles of TDC",
+          "variable" : "anglesOfTDC",
+          "condition" : "cond"
+        }
+      ]
+    }
+  ],
+  "menu" :
+  [
+    {
+      "title" : "Engine",
+      "subitems" : 
+      [
+        {
+          "title" : "Decoder Settings",
+          "variable" : "decoder_settings"
+        }
+      ]
+    }
+  ],
+  "config" :
+  [
+    {
+      "name" : "anglesOfTDC",
+      "type" : "array",
+      "sizeofelement":"2",
+      "size" : "48",
+      "offset" : "0",
+      "calc" : [{ "type":"div","value" : "50.0" }],
+      "sizeoverride" : "numberOfConfiguredOutputEvents",
+      "locationid" : "0xC003"
+    },
+    {
+      "name" : "outputEventPinNumbers",
+      "type" : "array",
+      "sizeofelement":"1",
+      "size" : "24",
+      "offset" : "48",
+      "calc" : [],
+      "sizeoverride" : "numberOfConfiguredOutputEvents",
+      "locationid" : "0xC003"
+    },
+    {
+      "name" : "schedulingConfigurationBits",
+      "type" : "array",
+      "sizeofelement":"1",
+      "size" : "24",
+      "offset" : "72",
+      "calc" : [],
+      "sizeoverride" : "numberOfConfiguredOutputEvents",
+      "locationid" : "0xC003"
+    },
+    {
+      "name" : "decoderEngineOffset",
+      "type" : "value",
+      "sizeofelement":"2",
+      "size" : "2",
+      "offset" : "96",
+      "calc" : [{ "type":"div","value" : "50.0" }],
+      "locationid" : "0xC003"
+    },
+    {
+      "name" : "numberOfConfiguredOutputEvents",
+      "type" : "value",
+      "sizeofelement":"1",
+      "size" : "1",
+      "offset" : "98",
+      "calc" : [ ],
+      "locationid" : "0xC003"
+    },
+    {
+      "name" : "numberOfInjectionsPerEngineCycle",
+      "type" : "value",
+      "sizeofelement":"1",
+      "size" : "1",
+      "offset" : "99",
+      "calc" : [ ],
+      "locationid" : "0xC003"
+    }
+  ]
+}

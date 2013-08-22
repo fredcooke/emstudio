@@ -23,6 +23,8 @@
 #include <QDebug>
 #include <QDir>
 #include <QCoreApplication>
+#include <QXmlStreamReader>
+#include <qjson/parser.h>
 #include "fetable2ddata.h"
 #include "fetable3ddata.h"
 #define NAK 0x02
@@ -94,6 +96,86 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	connect(&emsData,SIGNAL(ramBlockUpdateRequest(unsigned short,unsigned short,unsigned short,QByteArray)),this,SLOT(updateBlockInRam(unsigned short,unsigned short,unsigned short,QByteArray)));
 	connect(&emsData,SIGNAL(flashBlockUpdateRequest(unsigned short,unsigned short,unsigned short,QByteArray)),this,SLOT(updateBlockInFlash(unsigned short,unsigned short,unsigned short,QByteArray)));
 	connect(&emsData,SIGNAL(updateRequired(unsigned short)),this,SLOT(locationIdUpdate(unsigned short)));
+
+
+	QFile dialogFile("menuconfig.json");
+	if (!dialogFile.open(QIODevice::ReadOnly))
+	{
+		return;
+	}
+	QByteArray dialogfiledata = dialogFile.readAll();
+	dialogFile.close();
+	QJson::Parser parser;
+	bool ok = false;
+	QVariant resultvariant = parser.parse(dialogfiledata,&ok);
+
+	QVariantMap topmap = resultvariant.toMap();
+	QVariantList dialogslist = topmap["dialogs"].toList();
+	MenuSetup menu;
+	for (int i=0;i<dialogslist.size();i++)
+	{
+		QVariantMap dialogitemmap = dialogslist[i].toMap();
+
+		QVariantList fieldlist = dialogitemmap["fieldlist"].toList();
+		DialogItem item;
+		item.variable = dialogitemmap["variable"].toString();
+		item.title = dialogitemmap["title"].toString();
+		for (int j=0;j<fieldlist.size();j++)
+		{
+			QVariantMap fieldmap = fieldlist[j].toMap();
+			DialogField field;
+			field.title = fieldmap["title"].toString();
+			field.variable = fieldmap["variable"].toString();
+			field.condition = fieldmap["condition"].toString();
+			item.fieldList.append(field);
+		}
+		menu.dialoglist.append(item);
+	}
+
+	QVariantList menulist = topmap["menu"].toList();
+	for (int i=0;i<menulist.size();i++)
+	{
+		QVariantMap menuitemmap = menulist[i].toMap();
+		MenuItem menuitem;
+		menuitem.title = menuitemmap["title"].toString();
+		QVariantList submenuitemlist = menuitemmap["subitems"].toList();
+		for (int j=0;j<submenuitemlist.size();j++)
+		{
+			QVariantMap submenuitemmap = submenuitemlist[j].toMap();
+			SubMenuItem submenuitem;
+			submenuitem.title = submenuitemmap["title"].toString();
+			submenuitem.variable = submenuitemmap["variable"].toString();
+			menuitem.subMenuList.append(submenuitem);
+		}
+		menu.menulist.append(menuitem);
+	}
+
+	QVariantList configlist = topmap["config"].toList();
+	QMap<QString,QList<ConfigBlock> > configmap;
+	for (int i=0;i<configlist.size();i++)
+	{
+		QVariantMap configitemmap = configlist[i].toMap();
+		ConfigBlock block;
+		block.setName(configitemmap["name"].toString());
+		block.setType(configitemmap["type"].toString());
+		block.setElementSize(configitemmap["sizeofelement"].toInt());
+		block.setSize(configitemmap["size"].toInt());
+		block.setOffset(configitemmap["offset"].toInt());
+		//configitemmap["calc"];
+		block.setSizeOverride(configitemmap["sizeoverride"].toString());
+		bool ok = false;
+		block.setLocationId(configitemmap["locationid"].toString().toInt(&ok,16));
+		QString locid = configitemmap["locationid"].toString();
+		if (!configmap.contains(locid.mid(2)))
+		{
+			configmap[locid.mid(2)] = QList<ConfigBlock>();
+		}
+		configmap[locid.mid(2)].append(block);
+	}
+
+	m_metaDataParser->passConfigData(configmap);
+	m_metaDataParser->setMenuMetaData(menu);
+
 
 }
 MemoryMetaData *FreeEmsComms::getMetaParser()

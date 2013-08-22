@@ -11,23 +11,19 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Parameter View</string>
   </property>
-  <widget class="QTreeWidget" name="parameterTreeWidget">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>371</width>
-     <height>551</height>
-    </rect>
-   </property>
-   <column>
-    <property name="text">
-     <string notr="true">1</string>
-    </property>
-   </column>
-  </widget>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTreeWidget" name="parameterTreeWidget">
+     <column>
+      <property name="text">
+       <string notr="true">1</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

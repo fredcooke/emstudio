@@ -185,6 +185,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionAbout,SIGNAL(triggered()),this,SLOT(menu_aboutClicked()));
 	connect(ui.actionEnable_Datalogs,SIGNAL(triggered()),this,SLOT(menu_enableDatalogsClicked()));
 	connect(ui.actionDisable_Datalog_Stream,SIGNAL(triggered()),this,SLOT(menu_disableDatalogsClicked()));
+	connect(ui.actionParameter_View,SIGNAL(triggered()),this,SLOT(menu_windows_ParameterViewClicked()));
 	ui.actionInterrogation_Progress->setEnabled(false);
 
 	emsInfo=0;
@@ -317,6 +318,12 @@ void MainWindow::menu_windows_interrogateProgressViewClicked()
 	interrogateProgressMdiWindow->show();
 	QApplication::postEvent(interrogateProgressMdiWindow, new QEvent(QEvent::Show));
 	QApplication::postEvent(interrogateProgressMdiWindow, new QEvent(QEvent::WindowActivate));
+}
+void MainWindow::menu_windows_ParameterViewClicked()
+{
+	parameterMdiWindow->show();
+	QApplication::postEvent(parameterMdiWindow, new QEvent(QEvent::Show));
+	QApplication::postEvent(parameterMdiWindow, new QEvent(QEvent::WindowActivate));
 }
 
 void MainWindow::menu_file_saveOfflineDataClicked()

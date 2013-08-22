@@ -78,6 +78,7 @@
     <addaction name="actionPacket_Status"/>
     <addaction name="actionEMS_Status"/>
     <addaction name="actionInterrogation_Progress"/>
+    <addaction name="actionParameter_View"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -192,6 +193,11 @@
   <action name="actionDisable_Datalog_Stream">
    <property name="text">
     <string>Disable Datalog Stream</string>
+   </property>
+  </action>
+  <action name="actionParameter_View">
+   <property name="text">
+    <string>Parameter View</string>
    </property>
   </action>
  </widget>

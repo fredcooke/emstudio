@@ -37,6 +37,8 @@ public:
 	FEMemoryMetaData();
 	bool loadMetaDataFromFile(QString filestr);
 	const QMap<unsigned short,QString> errorMap() { return m_errorMap; }
+	void setMenuMetaData(MenuSetup menu) { m_menuMetaData = menu; }
+	void passConfigData(QMap<QString,QList<ConfigBlock> > block) { m_configMetaData = block; }
 
 
 	bool has2DMetaData(unsigned short locationid);
@@ -57,12 +59,12 @@ public:
 	const QMap<QString,QList<ConfigBlock> > configMetaData();
 	const QList<ConfigBlock> getConfigMetaData(QString name);
 
-	const MenuSetup menuMetaData() { return m_menuSetup; }
+	const MenuSetup menuMetaData() { return m_menuMetaData; }
 
 	const QString getErrorString(unsigned short code);
 
 private:
-	MenuSetup m_menuSetup;
+	MenuSetup m_menuMetaData;
 	QMap<QString,QList<ConfigBlock> > m_configMetaData;
 	bool parseMetaData(QString json);
 	QMap<unsigned short,QString> m_errorMap;
