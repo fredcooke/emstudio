@@ -755,6 +755,10 @@ void TableView3D::exportClicked()
 	{
 		return;
 	}
+	if (!filename.toLower().endsWith(".json"))
+	{
+		filename = filename + ".json";
+	}
 	exportJson(filename);
 }
 void TableView3D::loadRamClicked()

@@ -441,6 +441,10 @@ void TableView2D::exportClicked()
 	{
 		return;
 	}
+	if (!filename.toLower().endsWith(".json"))
+	{
+		filename = filename + ".json";
+	}
 	exportJson(filename);
 }
 void TableView2D::importClicked()
