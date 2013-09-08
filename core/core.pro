@@ -13,7 +13,7 @@ OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
 CONFIG += console
-#QMAKE_LFLAGS += -static-libgcc
+QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/core/release/ -lcore
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/core/debug/ -lcore

@@ -8,7 +8,7 @@ DEPENDPATH += .
 INCLUDEPATH += . ../../core/src
 CONFIG += plugin
 QT -= gui
-
+QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/core/release/ -lcore
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/core/debug/ -lcore
 else:unix: LIBS += -L$$OUT_PWD/../../lib/core/ -lcore -lqjson
