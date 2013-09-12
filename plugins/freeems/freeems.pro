@@ -16,13 +16,13 @@ else:unix: LIBS += -L$$OUT_PWD/../../lib/core/ -lcore -lqjson
 INCLUDEPATH += $$PWD/../../lib/core
 DEPENDPATH += $$PWD/../../lib/core
 
-win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/release/core.lib
-else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/debug/core.lib
+win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/release/libcore.a
+else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/debug/libcore.a
 else:unix: PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/libcore.a
 
 win32-x-g++ {
 	TARGET = ../../../core/plugins/freeemsplugin
-	win32:QMAKE_LFLAGS += -shared
+#	win32:QMAKE_LFLAGS += -shared
 	message("Building for win32-x-g++")
 	INCLUDEPATH += /home/michael/QtWin32/libs/qwt/include /home/michael/QtWin32/libs/qjson/include
 	LIBS += -L/home/michael/QtWin32/libs/qwt/lib -lqwt -L/home/michael/QtWin32/libs/qjson/lib -lqjson
@@ -32,7 +32,7 @@ win32-x-g++ {
 }
 win64-x-g++ {
         TARGET = ../../../core/plugins/freeemsplugin
-        win32:QMAKE_LFLAGS += -shared
+#        win32:QMAKE_LFLAGS += -shared
         message("Building for win64-x-g++")
         INCLUDEPATH += /home/michael/QtWin64/libs/qwt/include /home/michael/QtWin64/libs/qjson/include
         LIBS += -L/home/michael/QtWin64/libs/qwt/lib -lqwt -L/home/michael/QtWin64/libs/qjson/lib -lqjson

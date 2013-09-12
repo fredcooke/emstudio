@@ -719,7 +719,7 @@ void FreeEmsComms::run()
 					if (nodata)
 					{
 						errorstr = "Unable to communicate with ECU, Serial port is unresponsive. Please verify your FreeEMS Board is plugged in, powered up, and all serial settings are properly set.";
-						errortype = (SerialPortStatus)NO_DATA;
+						errortype = (SerialPortStatus)NO_DAT;
 					}
 					else
 					{

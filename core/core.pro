@@ -22,9 +22,9 @@ else:unix: LIBS += -L$$OUT_PWD/../lib/core/ -lcore
 INCLUDEPATH += $$PWD/../lib/core
 DEPENDPATH += $$PWD/../lib/core
 
-win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../lib/core/release/core.lib
-else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../lib/core/debug/core.lib
-else:unix: PRE_TARGETDEPS += $$OUT_PWD/../lib/core/libcore.a
+#win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../lib/core/release/libcore.a
+#else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../lib/core/debug/libcore.a
+#else:unix: PRE_TARGETDEPS += $$OUT_PWD/../lib/core/libcore.a
 
 win32-x-g++ {
         message("Building for win32-x-g++")
