@@ -97,7 +97,8 @@ SOURCES += src/main.cpp\
     src/configview.cpp \
     src/tablewidgetdelegate.cpp \
     src/parameterview.cpp \
-    src/parameterwidget.cpp
+    src/parameterwidget.cpp \
+    src/wizardview.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -138,7 +139,8 @@ HEADERS  += src/mainwindow.h \
     emscomms.h \
     datapacketdecoder.h \
     src/parameterview.h \
-    src/parameterwidget.h
+    src/parameterwidget.h \
+    src/wizardview.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
@@ -159,4 +161,5 @@ FORMS    += src/mainwindow.ui \
     src/parameterview.ui
 SUBDIRS += plugins
 OTHER_FILES += \
-    README.md
+    README.md \
+    wizard.qml
