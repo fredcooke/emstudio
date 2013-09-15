@@ -8,7 +8,6 @@ DEPENDPATH += .
 INCLUDEPATH += . ../../core/src
 CONFIG += plugin
 QT -= gui
-QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 INCLUDEPATH += $$PWD/../../lib/core
 DEPENDPATH += $$PWD/../../lib/core
 win32-x-g++ { #Linux based crossplatform 32bit build
@@ -20,6 +19,7 @@ win32-x-g++ { #Linux based crossplatform 32bit build
 	LIBS += -L/home/michael/QtWin32/lib
 	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+        QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 } else:win64-x-g++ { #Linux based crossplatform 64bit build
 	TARGET = ../../../core/plugins/freeemsplugin
 	win32:QMAKE_LFLAGS += -shared
@@ -29,6 +29,7 @@ win32-x-g++ { #Linux based crossplatform 32bit build
 	LIBS += -L/home/michael/QtWin64/lib
 	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+        QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 } else:win32 { #Windows based mingw build
 	TARGET = ../../../core/plugins/freeemsplugin
 	win32:QMAKE_LFLAGS += -shared
@@ -37,6 +38,7 @@ win32-x-g++ { #Linux based crossplatform 32bit build
 	LIBS += -LC:/libs/qwt/lib -lqwt -LC:/libs/qjson/lib -lqjson0
 	DEFINES += GIT_COMMIT=$$system(\"c:/program files (x86)/git/bin/git.exe\" describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(\"c:/program files (x86)/git/bin/git.exe\" log -n 1 --pretty=format:%H)
+        QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 }
 unix {
 	TARGET = ../../core/plugins/freeemsplugin

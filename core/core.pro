@@ -13,7 +13,6 @@ OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
 CONFIG += console
-QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 
 INCLUDEPATH += $$PWD/../lib/core
 DEPENDPATH += $$PWD/../lib/core
@@ -25,6 +24,7 @@ win32-x-g++ { #Linux based crossplatform 32bit build
 	LIBS += -L/home/michael/QtWin32/lib
         DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+        QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 } else:win64-x-g++ { #Linux based crossplatform 64bit build
         message("Building for win64-x-g++")
         INCLUDEPATH += /home/michael/QtWin64/libs/qwt/include /home/michael/QtWin64/libs/qjson/include
@@ -32,12 +32,14 @@ win32-x-g++ { #Linux based crossplatform 32bit build
         LIBS += -L/home/michael/QtWin64/lib
         DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+        QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 } else:win32 { #Windows based mingw build
 	message("Building for win32")
 	INCLUDEPATH += C:/libs/qwt/include C:/libs/qjson/include
 	LIBS += -LC:/libs/qwt/lib -lqwt -LC:/libs/qjson/lib -lqjson0
 	DEFINES += GIT_COMMIT=$$system(\"c:/program files (x86)/git/bin/git.exe\" describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(\"c:/program files (x86)/git/bin/git.exe\" log -n 1 --pretty=format:%H)
+        QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 }
 
 unix {
