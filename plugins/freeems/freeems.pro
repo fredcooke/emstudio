@@ -9,17 +9,25 @@ INCLUDEPATH += . ../../core/src
 CONFIG += plugin
 QT -= gui
 QMAKE_LFLAGS += -static-libgcc -static-libstdc++
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/core/release/ -lcore
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/core/debug/ -lcore
-else:unix: LIBS += -L$$OUT_PWD/../../lib/core/ -lcore -lqjson
+#win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/core/release/ -lcore
+#else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/core/debug/ -lcore
+#else:unix: LIBS += -L$$OUT_PWD/../../lib/core/ -lcore -lqjson
 
 INCLUDEPATH += $$PWD/../../lib/core
 DEPENDPATH += $$PWD/../../lib/core
 
-win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/release/libcore.a
-else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/debug/libcore.a
-else:unix: PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/libcore.a
+#win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/release/libcore.a
+#else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/debug/libcore.a
+#else:unix: PRE_TARGETDEPS += $$OUT_PWD/../../lib/core/libcore.a
 
+win32 {
+TARGET = ../../../core/plugins/freeemsplugin
+	message("Building for win32-g++")
+	INCLUDEPATH += C:/libs/qwt/include C:/libs/qjson/include
+	LIBS += -LC:/libs/qwt/lib -lqwt -LC:/libs/qjson/lib -lqjson0
+	DEFINES += GIT_COMMIT=$$system(\"c:/program files/git/bin/git.exe\" describe --dirty=-DEV --always)
+	DEFINES += GIT_HASH=$$system(\"c:/program files/git/bin/git.exe\" log -n 1 --pretty=format:%H)
+}
 win32-x-g++ {
 	TARGET = ../../../core/plugins/freeemsplugin
 #	win32:QMAKE_LFLAGS += -shared
@@ -54,13 +62,13 @@ HEADERS += datapacketdecoder.h \
            memorymetadata.h \
 	   fedatapacketdecoder.h \
            fetable2ddata.h \
-           tabledata.h \
            datafield.h \
            fetable3ddata.h \
            freeemscomms.h \
            serialport.h \
            serialrxthread.h \
-           fememorymetadata.h
+	   fememorymetadata.h \
+	   datafield.h
 
 SOURCES += fedatapacketdecoder.cpp \
            fetable2ddata.cpp \
@@ -68,4 +76,5 @@ SOURCES += fedatapacketdecoder.cpp \
            freeemscomms.cpp \
            serialport.cpp \
            serialrxthread.cpp \
-           fememorymetadata.cpp
+	   fememorymetadata.cpp \
+	   datafield.cpp

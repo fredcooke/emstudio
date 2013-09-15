@@ -23,7 +23,7 @@
 #define LOGLOADER_H
 
 #include <QThread>
-#include "datafield.h"
+//#include "datafield.h"
 class LogLoader : public QThread
 {
 	Q_OBJECT
@@ -32,7 +32,7 @@ public:
 	void loadFile(QString filename);
 private:
 	QString m_filename;
-	QList<DataField> *m_dataFieldList;
+//	QList<DataField> *m_dataFieldList;
     void parseBuffer(QByteArray buffer);
 protected:
 	void run();

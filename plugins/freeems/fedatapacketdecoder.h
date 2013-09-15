@@ -33,7 +33,9 @@ class FEDataPacketDecoder : public DataPacketDecoder
 public:
 	FEDataPacketDecoder();
 	int fieldSize();
-	DataField getField(int num);
+    //DataField getField(int num);
+    QString getFieldName(int num);
+    QString getFieldDescription(int num);
 private:
 	void loadDataFieldsFromValues();
 	QList<DataField> m_dataFieldList;

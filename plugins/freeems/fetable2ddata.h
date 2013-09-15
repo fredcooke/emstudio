@@ -51,6 +51,8 @@ public:
 	void setCell(int row, int column,double newval);
 	void setWritesEnabled(bool enabled);
 	void writeWholeLocation();
+    double calcAxis(int val,QList<QPair<QString,double> > metadata);
+    int backConvertAxis(double val,QList<QPair<QString,double> > metadata);
 private:
 	unsigned short m_dataSize;
 	bool m_isSignedData;

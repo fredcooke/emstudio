@@ -54,13 +54,15 @@
 #include <QObject>
 #include <QMap>
 #include <QVariantMap>
-#include "datafield.h"
+//#include "datafield.h"
 class DataPacketDecoder : public QObject
 {
     Q_OBJECT
 public:
 	virtual int fieldSize()=0;
-	virtual DataField getField(int num)=0;
+    //virtual DataField getField(int num)=0;
+    virtual QString getFieldName(int num)=0;
+    virtual QString getFieldDescription(int num)=0;
 public slots:
 	virtual void decodePayload(QByteArray payload)=0;
 };

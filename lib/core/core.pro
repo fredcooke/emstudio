@@ -11,7 +11,6 @@ LIBS += -L/home/michael/QtWin64/lib
 QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 # Input
 HEADERS += configdata.h \
-           datafield.h \
            datapacketdecoder.h \
            datatype.h \
            emscomms.h \
@@ -24,6 +23,5 @@ HEADERS += configdata.h \
            table2ddata.h \
            table2dmetadata.h \
            table3ddata.h \
-           table3dmetadata.h \
-           tabledata.h
-SOURCES += datafield.cpp tabledata.cpp
+	   table3dmetadata.h \
+    tabledata.h

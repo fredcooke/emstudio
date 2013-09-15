@@ -126,11 +126,19 @@ int main(int argc, char *argv[])
 		else if (QFile::exists("/usr/share/emstudio/plugins/libfreeemsplugin.so"))
 		{
 			plugin = "/usr/share/emstudio/plugins/libfreeemsplugin.so";
-		}
-		else if (QFile::exists("plugins/freeemsplugin.lib"))
-		{
-			plugin = "plugins/freeemsplugin.lib";
-		}
+        }
+        else if (QFile::exists("plugins/freeemsplugin.lib"))
+        {
+            plugin = "plugins/freeemsplugin.lib";
+        }
+        else if (QFile::exists("plugins/libfreeemsplugin.a"))
+        {
+            plugin = "plugins/libfreeemsplugin.a";
+        }
+        else if (QFile::exists("plugins/freeemsplugin.dll"))
+        {
+            plugin = "plugins/freeemsplugin.dll";
+        }
 	}
 	w.setPlugin(plugin);
 	if (autoconnect)

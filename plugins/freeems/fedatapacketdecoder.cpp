@@ -51,13 +51,30 @@ int FEDataPacketDecoder::fieldSize()
 	return m_dataFieldList.size();
 }
 
-DataField FEDataPacketDecoder::getField(int num)
+/*DataField FEDataPacketDecoder::getField(int num)
 {
 	if (num >=0 && num < m_dataFieldList.size())
 	{
 		return m_dataFieldList[num];
 	}
 	return DataField();
+}*/
+QString FEDataPacketDecoder::getFieldName(int num)
+{
+    if (num >=0 && num < m_dataFieldList.size())
+    {
+        return m_dataFieldList[num].name();
+    }
+    return "";
+}
+
+QString FEDataPacketDecoder::getFieldDescription(int num)
+{
+    if (num >=0 && num < m_dataFieldList.size())
+    {
+        return m_dataFieldList[num].description();
+    }
+    return "";
 }
 
 void FEDataPacketDecoder::loadDataFieldsFromValues()

@@ -45,10 +45,10 @@ void TableView::passDecoder(DataPacketDecoder *decoder)
 	ui.tableWidget->setRowCount(dataPacketDecoder->fieldSize());
 	for (int i=0;i<dataPacketDecoder->fieldSize();i++)
 	{
-		m_nameToIndexMap[dataPacketDecoder->getField(i).name()] = i;
-		ui.tableWidget->setItem(i,0,new QTableWidgetItem(dataPacketDecoder->getField(i).name()));
+        m_nameToIndexMap[dataPacketDecoder->getFieldName(i)] = i;
+        ui.tableWidget->setItem(i,0,new QTableWidgetItem(dataPacketDecoder->getFieldName(i)));
 		ui.tableWidget->setItem(i,1,new QTableWidgetItem("0"));
-		ui.tableWidget->setItem(i,2,new QTableWidgetItem(dataPacketDecoder->getField(i).description()));
+        ui.tableWidget->setItem(i,2,new QTableWidgetItem(dataPacketDecoder->getFieldDescription(i)));
 	}
 }
 

@@ -15,9 +15,9 @@ UI_DIR = obj
 CONFIG += console
 QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/core/release/ -lcore
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/core/debug/ -lcore
-else:unix: LIBS += -L$$OUT_PWD/../lib/core/ -lcore
+#win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../lib/core/release/ -lcore
+#else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../lib/core/debug/ -lcore
+#else:unix: LIBS += -L$$OUT_PWD/../lib/core/ -lcore
 
 INCLUDEPATH += $$PWD/../lib/core
 DEPENDPATH += $$PWD/../lib/core

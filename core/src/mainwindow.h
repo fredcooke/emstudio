@@ -25,7 +25,7 @@
 #include <QMainWindow>
 #include "ui_mainwindow.h"
 #include <QFile>
-#include "datafield.h"
+//#include "datafield.h"
 #include "configview.h"
 #include "emsdata.h"
 #include "memorymetadata.h"

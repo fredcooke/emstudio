@@ -22,7 +22,7 @@
 #include "mainwindow.h"
 #include <QDebug>
 #include <QFileDialog>
-#include "datafield.h"
+//#include "datafield.h"
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QSettings>
@@ -863,8 +863,10 @@ void MainWindow::setPlugin(QString plugin)
 	pluginLoader=0;
 	pluginLoader = new QPluginLoader(this);
 	pluginLoader->setFileName(m_pluginFileName);
+    qDebug() << "Attempting to load plugin:" << m_pluginFileName;
 	if (!pluginLoader->load())
 	{
+
 		qDebug() << "Unable to load plugin. error:" << pluginLoader->errorString();
 		exit(-1);
 	}

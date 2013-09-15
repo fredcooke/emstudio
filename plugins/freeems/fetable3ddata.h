@@ -50,6 +50,8 @@ public:
 	double minZAxis();
 	void setWritesEnabled(bool enabled);
 	void writeWholeLocation();
+    double calcAxis(int val,QList<QPair<QString,double> > metadata);
+    int backConvertAxis(double val,QList<QPair<QString,double> > metadata);
 private:
 	bool m_writesEnabled;
 	bool m_isFlashOnly;
