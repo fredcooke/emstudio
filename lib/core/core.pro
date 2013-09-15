@@ -23,5 +23,4 @@ HEADERS += configdata.h \
            table2ddata.h \
            table2dmetadata.h \
            table3ddata.h \
-	   table3dmetadata.h \
-    tabledata.h
+	   table3dmetadata.h

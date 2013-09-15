@@ -21,7 +21,7 @@
 
 #include "qhexedit_p.h"
 #include "commands.h"
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
 #ifndef Q_CC_MINGW
 #define and &&
 #define or ||

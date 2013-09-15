@@ -25,10 +25,10 @@
 #include <QThread>
 #include <QMutex>
 #include "serialport.h"
-#ifndef Q_OS_WIN32
+#ifndef Q_OS_WIN
 #define HANDLE int
 #endif
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
 #include <windows.h>
 #endif
 class SerialRXThread : public QThread

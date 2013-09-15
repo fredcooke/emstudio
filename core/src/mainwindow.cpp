@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	m_settingsFile = "settings.ini";
 	//TODO: Figure out proper directory names
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
 	QString appDataDir = getenv("%AppData%");
 	appDataDir = appDataDir.replace("\\","/");
 	if (!QDir(appDataDir).exists("EMStudio"))

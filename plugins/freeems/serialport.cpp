@@ -61,7 +61,7 @@ SerialPortStatus SerialPort::isSerialMonitor(QString portname)
 		return UNABLE_TO_WRITE;
 	}
 
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
 	Sleep(100);
 #else
 	usleep(100000);
@@ -97,7 +97,7 @@ int SerialPort::readBytes(unsigned char *buf,int maxlen)
 {
 	int readlen=0;
 	QMutexLocker locker(m_serialLockMutex);	
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
 	DWORD evt;
 	if (!WaitCommEvent(m_portHandle,&evt,NULL))
 	{
@@ -130,14 +130,14 @@ int SerialPort::readBytes(unsigned char *buf,int maxlen)
 		return 0;
 	}
 
-#endif //Q_OS_WIN32
+#endif //Q_OS_WIN
 	return readlen;
 }
 
 int SerialPort::writeBytes(QByteArray packet)
 {
 	QMutexLocker locker(m_serialLockMutex);
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
 	int len=0;
 	if (m_interByteSendDelay > 0)
 	{
@@ -184,14 +184,14 @@ int SerialPort::writeBytes(QByteArray packet)
 		}
 	}
 
-#endif //Q_OS_WIN32
+#endif //Q_OS_WIN
 	emit dataWritten(packet);
 	return 0;
 }
 
 void SerialPort::closePort()
 {
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
 	CloseHandle(m_portHandle);
 #else
 	flock(m_portHandle,LOCK_UN);
@@ -201,7 +201,7 @@ void SerialPort::closePort()
 
 int SerialPort::openPort(QString portName,int baudrate,bool oddparity)
 {
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
 	m_portHandle=CreateFileA(portName.toAscii(), GENERIC_READ|GENERIC_WRITE,0, NULL, OPEN_EXISTING, 0, NULL);
 	if (m_portHandle == INVALID_HANDLE_VALUE)
 	{
@@ -329,5 +329,5 @@ int SerialPort::openPort(QString portName,int baudrate,bool oddparity)
 	fcntl(m_portHandle, F_SETFL, 0); //Set to blocking
 	tcsetattr(m_portHandle,TCSANOW,&newtio);
 	return 0;
-#endif //Q_OS_WIN32
+#endif //Q_OS_WIN
 }
