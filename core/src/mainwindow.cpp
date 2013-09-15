@@ -86,21 +86,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	{
 		QDir(m_localHomeDir).mkpath(m_localHomeDir + "/logs");
 	}
-	//Settings, then defaults, then fallback to local
-	if (QFile::exists(m_settingsDir + "/EMStudio-config.ini"))
-	{
-		m_settingsFile = m_settingsDir + "/EMStudio-config.ini";
-	}
-	else if (QFile::exists(m_defaultsDir + "/EMStudio-config.ini"))
-	{
-		m_settingsFile = m_defaultsDir + "/EMStudio-config.ini";
-	}
-	else if (QFile::exists("EMStudio-config.ini"))
-	{
-		m_settingsFile = "EMStudio-config.ini";
-	}
-
-	//Settings, then defaults, then fallback to local
+    //Settings file should ALWAYS be the one in the settings dir. No reason to have it anywhere else.
+    m_settingsFile = m_settingsDir + "/EMStudio-config.ini";
 
 	QString decoderfilestr = "";
 	if (QFile::exists(m_settingsDir + "/" + "definitions/decodersettings.json"))
@@ -113,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	}
 	else if (QFile::exists("decodersettings.json"))
 	{
-		decoderfilestr = "decodersettings.json";
+        //decoderfilestr = "decodersettings.json";
 	}
 	else
 	{
