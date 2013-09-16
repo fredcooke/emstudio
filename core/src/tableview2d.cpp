@@ -798,29 +798,46 @@ void TableView2D::passDatalog(QVariantMap data)
 			}
 			ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 			ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+			QList<QPair<int,int> > undonelist;
 			for (int i=0;i<m_highlightItemList.size();i++)
 			{
-				ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setTextColor(QColor::fromRgb(0,0,0));
-				ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setData(Qt::UserRole+1,false);
+				if (!ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->isSelected())
+				{
+					ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setTextColor(QColor::fromRgb(0,0,0));
+					ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setData(Qt::UserRole+1,false);
+				}
+				else
+				{
+					undonelist.append(QPair<int,int>(m_highlightItemList[i].first,m_highlightItemList[i].second));
+				}
 			}
 			m_highlightItemList.clear();
+			m_highlightItemList.append(undonelist);
 			m_oldXLoc = xloc;
 
 			if (highercolumn < ui.tableWidget->columnCount())
 			{
-				m_highlightItemList.append(QPair<int,int>(1,lowercolumn));
-				ui.tableWidget->item(1,lowercolumn)->setData(Qt::UserRole+1,true);
-				ui.tableWidget->item(1,lowercolumn)->setData(Qt::UserRole+2,lowercolumnratio);
-
-				m_highlightItemList.append(QPair<int,int>(1,highercolumn));
-				ui.tableWidget->item(1,highercolumn)->setData(Qt::UserRole+1,true);
-				ui.tableWidget->item(1,highercolumn)->setData(Qt::UserRole+2,uppercolumnratio);
+				if (!ui.tableWidget->item(1,lowercolumn)->isSelected())
+				{
+					m_highlightItemList.append(QPair<int,int>(1,lowercolumn));
+					ui.tableWidget->item(1,lowercolumn)->setData(Qt::UserRole+1,true);
+					ui.tableWidget->item(1,lowercolumn)->setData(Qt::UserRole+2,lowercolumnratio);
+				}
+				if (!ui.tableWidget->item(1,highercolumn)->isSelected())
+				{
+					m_highlightItemList.append(QPair<int,int>(1,highercolumn));
+					ui.tableWidget->item(1,highercolumn)->setData(Qt::UserRole+1,true);
+					ui.tableWidget->item(1,highercolumn)->setData(Qt::UserRole+2,uppercolumnratio);
+				}
 			}
 			else
 			{
-				m_highlightItemList.append(QPair<int,int>(1,lowercolumn));
-				ui.tableWidget->item(1,lowercolumn)->setData(Qt::UserRole+1,true);
-				ui.tableWidget->item(1,lowercolumn)->setData(Qt::UserRole+2,lowercolumnratio);
+				if (!ui.tableWidget->item(1,lowercolumn)->isSelected())
+				{
+					m_highlightItemList.append(QPair<int,int>(1,lowercolumn));
+					ui.tableWidget->item(1,lowercolumn)->setData(Qt::UserRole+1,true);
+					ui.tableWidget->item(1,lowercolumn)->setData(Qt::UserRole+2,lowercolumnratio);
+				}
 			}
 			/*if (ui.tableWidget->item(m_oldYLoc,m_oldXLoc))
 			{
