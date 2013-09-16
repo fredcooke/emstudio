@@ -60,7 +60,8 @@ private:
 	void resizeColumnWidths();
 	int m_currRow;
 	int m_currCol;
-	void setValue(int row, int column,double value);
+	void setValue(int row, int column,double value,bool ignoreselection = true);
+	void setRange(QList<QPair<QPair<int,int>,double> > data);
 	bool m_tracingEnabled;
 	void writeTable(bool ram);
 	QString verifyValue(int row,int column,QString item);

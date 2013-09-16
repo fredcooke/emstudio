@@ -1959,7 +1959,10 @@ void MainWindow::updateRamLocation(unsigned short locationid)
 	if (emsData->getParentOfLocalRamLocation(locationid).size() > 0)
 	{
 		tempRamParentId = emsData->getParentOfLocalRamLocation(locationid)[0];
-		hasparent = true;
+		if (tempRamParentId != locationid)
+		{
+			hasparent = true;
+		}
 	}
 	emsData->setDeviceRamBlock(locationid,emsData->getLocalRamBlock(locationid));
 	//Find all windows that use that location id

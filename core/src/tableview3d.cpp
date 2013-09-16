@@ -102,7 +102,7 @@ void TableView3D::tracingCheckBoxStateChanged(int newstate)
 	}
 }
 
-void TableView3D::setValue(int row, int column,double value)
+void TableView3D::setValue(int row, int column,double value,bool ignoreselection)
 {
 	if (row == -1 || column == -1)
 	{
@@ -138,7 +138,7 @@ void TableView3D::setValue(int row, int column,double value)
 	//New value has been accepted. Let's write it.
 
 	//If the value is an axis, and there are multiple cells selected, cancel the edit!
-	if (ui.tableWidget->selectedItems().size() > 1)
+	if (ui.tableWidget->selectedItems().size() > 1 && !ignoreselection)
 	{
 		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
 		{
@@ -248,39 +248,49 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
 		{
 			return;
 		}
-		QString text = ui.tableWidget->selectedItems()[0]->text();
-		double textd = text.toDouble();
-		double maxval = 0;
-		if (ui.tableWidget->selectedItems()[0]->row() == ui.tableWidget->rowCount()-1)
+		QList<QPair<QPair<int,int>,double> > vallist;
+		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
 		{
-			maxval = tableData->maxXAxis();
-		}
-		else if (ui.tableWidget->selectedItems()[0]->column() == 0)
-		{
-			maxval = tableData->maxYAxis();
-		}
-		else
-		{
-			maxval = tableData->maxZAxis();
-		}
-		if (modifier & Qt::ShiftModifier)
-		{
-			textd += maxval / 10;
-		}
-		else
-		{
-			textd += maxval / 100;
-		}
+			QString text = ui.tableWidget->selectedItems()[i]->text();
+			double textd = text.toDouble();
+			double maxval = 0;
+			if (ui.tableWidget->selectedItems()[i]->row() == ui.tableWidget->rowCount()-1)
+			{
+				maxval = tableData->maxXAxis();
+			}
+			else if (ui.tableWidget->selectedItems()[i]->column() == 0)
+			{
+				maxval = tableData->maxYAxis();
+			}
+			else
+			{
+				maxval = tableData->maxZAxis();
+			}
+			if (modifier & Qt::ShiftModifier)
+			{
+				textd += maxval / 10;
+			}
+			else
+			{
+				textd += maxval / 100;
+			}
 
-		if (textd > maxval)
-		{
-			textd = maxval;
-		}
-		//else if (column == 0) Y
-		//else Z
+			if (textd > maxval)
+			{
+				textd = maxval;
+			}
+			QPair<QPair<int,int>,double> val;
+			val.first = QPair<int,int>(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column());
+			val.second = textd;
+			vallist.append(val);
+			//else if (column == 0) Y
+			//else Z
 
-		//ui.tableWidget->selectedItems()[0]->setText(formatNumber(textd,m_metaData.zDp));
-		setValue(ui.tableWidget->selectedItems()[0]->row(),ui.tableWidget->selectedItems()[0]->column(),textd);
+			//ui.tableWidget->selectedItems()[0]->setText(formatNumber(textd,m_metaData.zDp));
+			//setValue(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column(),textd);
+
+		}
+		setRange(vallist);
 	}
 	else if (key == Qt::Key_Minus || key == Qt::Key_Underscore)
 	{
@@ -288,39 +298,49 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
 		{
 			return;
 		}
-		QString text = ui.tableWidget->selectedItems()[0]->text();
-		double textd = text.toDouble();
-		double minval = 0;
-		double maxval = 0;
-		if (ui.tableWidget->selectedItems()[0]->row() == ui.tableWidget->rowCount()-1)
+		QList<QPair<QPair<int,int>,double> > vallist;
+		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
 		{
-			maxval = tableData->maxXAxis();
-			minval = tableData->minXAxis();
+			QString text = ui.tableWidget->selectedItems()[i]->text();
+			double textd = text.toDouble();
+			double minval = 0;
+			double maxval = 0;
+			if (ui.tableWidget->selectedItems()[i]->row() == ui.tableWidget->rowCount()-1)
+			{
+				maxval = tableData->maxXAxis();
+				minval = tableData->minXAxis();
+			}
+			else if (ui.tableWidget->selectedItems()[i]->column() == 0)
+			{
+				maxval = tableData->maxYAxis();
+				minval = tableData->minYAxis();
+			}
+			else
+			{
+				maxval = tableData->maxZAxis();
+				minval = tableData->minZAxis();
+			}
+			if (modifier & Qt::ShiftModifier)
+			{
+				textd -= maxval / 10;
+			}
+			else
+			{
+				textd -= maxval / 100;
+			}
+			if (textd < minval)
+			{
+				textd = minval;
+			}
+			QPair<QPair<int,int>,double> val;
+			val.first = QPair<int,int>(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column());
+			val.second = textd;
+			vallist.append(val);
+
+			//ui.tableWidget->selectedItems()[0]->setText(formatNumber(textd,m_metaData.zDp));
+			//setValue(ui.tableWidget->selectedItems()[0]->row(),ui.tableWidget->selectedItems()[0]->column(),textd);
 		}
-		else if (ui.tableWidget->selectedItems()[0]->column() == 0)
-		{
-			maxval = tableData->maxYAxis();
-			minval = tableData->minYAxis();
-		}
-		else
-		{
-			maxval = tableData->maxZAxis();
-			minval = tableData->minZAxis();
-		}
-		if (modifier & Qt::ShiftModifier)
-		{
-			textd -= maxval / 10;
-		}
-		else
-		{
-			textd -= maxval / 100;
-		}
-		if (textd < minval)
-		{
-			textd = minval;
-		}
-		//ui.tableWidget->selectedItems()[0]->setText(formatNumber(textd,m_metaData.zDp));
-		setValue(ui.tableWidget->selectedItems()[0]->row(),ui.tableWidget->selectedItems()[0]->column(),textd);
+		setRange(vallist);
 	}
 }
 
@@ -416,9 +436,11 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 		//Disable signals, so we can write the table all at once
 		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
-		bool valid = true;
+		//bool valid = true;
 		QMap<int,QMap<int,QString> > tmpvaluemap;
 		QStringList invalidreasons;
+		QList<QPair<QPair<int,int>,double> > valuelist;
+		//setRange
 		foreach(QString line,datastringsplit)
 		{
 			QStringList linesplit = line.split("\t");
@@ -430,20 +452,28 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 					{
 						tmpvaluemap[rowindex+newrow] = QMap<int,QString>();
 					}
+					//newvallist.append(item.toDouble());
+					QPair<QPair<int,int>,double> val;
+					val.first = QPair<int,int>(rowindex+newrow,columnindex+newcolumn);
+					val.second = item.toDouble();
+					valuelist.append(val);
+
 					tmpvaluemap[rowindex+newrow][columnindex+newcolumn] = ui.tableWidget->item(rowindex+newrow,columnindex+newcolumn)->text();
 					QString verifystr = verifyValue(rowindex+newrow,columnindex+newcolumn,item);
 					if (verifystr != "GOOD")
 					{
 						invalidreasons.append(verifystr);
-						valid = false;
+						//valid = false;
 					}
-					ui.tableWidget->item(rowindex+newrow,columnindex+newcolumn)->setText(item);
+					//ui.tableWidget->item(rowindex+newrow,columnindex+newcolumn)->setText(item);
 				}
 				newcolumn++;
 			}
 			newcolumn=0;
 			newrow++;
 		}
+		setRange(valuelist);
+		/*
 		//Write the values, and re-enable the signals.
 		if (valid)
 		{
@@ -465,7 +495,7 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 			}
 
 			QMessageBox::information(0,"Error",errorstr);
-		}
+		}*/
 		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	}
@@ -513,6 +543,55 @@ QString TableView3D::verifyValue(int row,int column,QString item)
 		}
 	}
 	return "GOOD";
+}
+//Data is arranged as a
+void TableView3D::setRange(QList<QPair<QPair<int,int>,double> > data)
+{
+	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+	ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+	QMap<int,QMap<int,QString> > tmpvaluemap;
+	bool valid = true;
+	QList<QString> invalidreasons;
+	for (int i=0;i<data.size();i++)
+	{
+
+		if (!tmpvaluemap.contains(data[i].first.first))
+		{
+			tmpvaluemap[data[i].first.first] = QMap<int,QString>();
+		}
+		tmpvaluemap[data[i].first.first][data[i].first.second] = ui.tableWidget->item(data[i].first.first,data[i].first.second)->text();
+		QString formatstr = formatNumber(data[i].second,m_metaData.zDp);
+		QString verifystr = verifyValue(data[i].first.first,data[i].first.second,formatstr);
+		if (verifystr != "GOOD")
+		{
+			invalidreasons.append(verifystr);
+			valid = false;
+		}
+		ui.tableWidget->item(data[i].first.first,data[i].first.second)->setText(formatstr);
+	}
+	//Write the values, and re-enable the signals.
+	if (valid)
+	{
+		writeTable(true);
+	}
+	else
+	{
+		for (QMap<int,QMap<int,QString> >::const_iterator i=tmpvaluemap.constBegin();i!=tmpvaluemap.constEnd();i++)
+		{
+			for (QMap<int,QString>::const_iterator j=i.value().constBegin();j!=i.value().constEnd();j++)
+			{
+				ui.tableWidget->item(i.key(),j.key())->setText(j.value());
+			}
+		}
+		QString errorstr = "";
+		foreach(QString reason,invalidreasons)
+		{
+			errorstr += reason + ",";
+		}
+		QMessageBox::information(0,"Error",errorstr);
+	}
+	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 }
 
 void TableView3D::writeTable(bool ram)
@@ -942,11 +1021,12 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data,TableData *n
 	resizeColumnWidths();
 	ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,0,new QTableWidgetItem());
 	ui.tableWidget->item(ui.tableWidget->rowCount()-1,0)->setFlags(ui.tableWidget->item(ui.tableWidget->rowCount()-1,0)->flags() & ~Qt::ItemIsEditable);
+	ui.tableWidget->setCurrentCell(m_currRow,m_currCol);
 	for (int i=0;i<selectedlist.size();i++)
 	{
 		ui.tableWidget->item(selectedlist[i].first,selectedlist[i].second)->setSelected(true);
 	}
-	ui.tableWidget->setCurrentCell(m_currRow,m_currCol);
+
 	selectedlist.clear();
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
@@ -1286,7 +1366,7 @@ void TableView3D::tableCellChanged(int row,int column)
 		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 		return;
 	}
-	setValue(row,column,tempValue);
+	setValue(row,column,tempValue,false); //Don't ignore selection, so ALL highlighted cells get changed
 }
 void TableView3D::setSilentValue(int row,int column,QString value)
 {
