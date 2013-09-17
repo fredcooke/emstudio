@@ -1240,7 +1240,7 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 		}
 		else
 		{*/
-		if (m_configBlockMap.contains(locid))
+        /*if (m_configBlockMap.contains(locid))
 		{
 			ConfigView *view = new ConfigView();
 			view->passConfig(m_configBlockMap[locid],data);
@@ -1253,8 +1253,8 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 			win->show();
 			QApplication::postEvent(win, new QEvent(QEvent::Show));
 			QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
-		}
-		else
+        }*/
+        //else
 		{
 			RawDataView *view = new RawDataView(isram,isflash);
 			view->setData(locid,data);
