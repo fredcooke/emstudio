@@ -149,7 +149,43 @@ Item {
                     x:5
                     y:3
                     width:80
-                    height:13                }
+                    height:13
+                }
+            }
+        }
+        Rectangle {
+            x:10
+            y:230
+            width:200
+            height:30
+            radius:5
+            color:"white"
+            Rectangle {
+                x:5
+                y:5
+                width:190
+                height:20
+                radius:5
+                color: "blue"
+                Text {
+                    anchors.fill: parent
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    text: "Write Values"
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            console.log("Capture Clicked");
+                            var min = parseFloat(tpsMinText.text);
+                            var max = parseFloat(tpsMaxText.text);
+                            var minADC = (min / 100.0) * 1024.0;
+                            var maxADC = (max / 100.0) * 1024.0;
+                            var memory = [((minADC << 8) & 0xFF),(minADC & 0xFF),((maxADC << 8) & 0xFF),(maxADC & 0xFF)];
+                            decoder.setMemory(49186,16,4,memory);
+
+                        }
+                    }
+                }
             }
         }
     }
