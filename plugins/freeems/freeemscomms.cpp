@@ -1090,6 +1090,10 @@ void FreeEmsComms::run()
 				break;
 			}
 		}
+		if (m_threadReqList.size() == 0)
+		{
+			msleep(10);
+		}
 
 		m_waitingInfoMutex.lock();
 		if (QDateTime::currentDateTime().currentMSecsSinceEpoch() - m_timeoutMsecs > 500 && m_waitingForResponse)
