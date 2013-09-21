@@ -35,7 +35,7 @@
 #include "fememorymetadata.h"
 #include "table3ddata.h"
 #include "table2ddata.h"
-
+#include "emsdata.h"
 class FreeEmsComms : public EmsComms
 {
 	Q_OBJECT
@@ -71,17 +71,15 @@ public:
 	void disconnectSerial();
 	void loadLog(QString filename);
 	void playLog();
+	void startInterrogation();
 	QByteArray generatePacket(QByteArray header,QByteArray payload);
-	int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
-	int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
-	int retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size);
-	int retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size);
-	int burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size);
 	void setInterByteSendDelay(int milliseconds);
 	void setlogsDebugEnabled(bool enabled);
 	void verifyRamFromDevice(quint64 checksum);
 	int enableDatalogStream();
 	int disableDatalogStream();
+	Table2DData* get2DTableData(unsigned short locationid);
+	Table3DData* get3DTableData(unsigned short locationid);
 protected:
 	void run();
 private:
@@ -187,6 +185,18 @@ private:
 	QFile *m_logOutFile;
 	QFile *m_logInOutFile;
 	void openLogs();
+	bool m_interrogateInProgress;
+	bool m_interrogateIdListComplete;
+	bool m_interrogateIdInfoComplete;
+	bool m_interogateComplete;
+	bool m_waitingForRamWrite;
+	bool m_waitingForFlashWrite;
+	QList<int> m_interrogatePacketList;
+	int m_interrogateTotalCount;
+	QList<unsigned short> m_locationIdList;
+	EmsData emsData;
+	QMap<unsigned short,Table2DData*> m_2dTableMap;
+	QMap<unsigned short,Table3DData*> m_3dTableMap;
 
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);
@@ -216,7 +226,18 @@ signals:
 	void commandTimedOut(int sequencenumber);
 	void emsSilenceStarted();
 	void emsSilenceBroken();
+	void interrogateTaskStart(QString task, int sequence);
+	void interrogateTaskSucceed(int sequence);
+	void interrogateTaskFail(int sequence);
+	void interrogationProgress(int current, int total);
+	void interrogationComplete();
+	void deviceDataUpdated(unsigned short locationid);
 public slots:
+	int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
+	int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
+	int retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size);
+	int retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size);
+	int burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size);
 private slots:
     void datalogTimerTimeout();
 	void dataLogWrite(QByteArray buffer);
@@ -224,6 +245,9 @@ private slots:
 	void parseEverything(QByteArray buffer);
 	Packet parseBuffer(QByteArray buffer);
 	void parsePacket(Packet parsedPacket);
+	void locationIdUpdate(unsigned short locationid);
+	void copyFlashToRam(unsigned short locationid);
+	void copyRamToFlash(unsigned short locationid);
 
 };
 

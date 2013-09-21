@@ -95,6 +95,9 @@ public:
 	virtual void disconnectSerial()=0;
 	virtual void loadLog(QString filename)=0;
 	virtual void playLog()=0;
+	virtual void startInterrogation()=0;
+	virtual Table2DData* get2DTableData(unsigned short locationid)=0;
+	virtual Table3DData* get3DTableData(unsigned short locationid)=0;
 	//virtual void populateDataFields()=0;
 	virtual QByteArray generatePacket(QByteArray header,QByteArray payload)=0;
 	virtual int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)=0;

@@ -57,7 +57,7 @@
 #include "tabledata.h"
 #include "table2dmetadata.h"
 
-class Table2DData : public TableData
+class Table2DData : public DataBlock
 {
 	Q_OBJECT
 public:

@@ -350,6 +350,27 @@ void EmsData::populateLocalRamAndFlash()
 		}
 	}
 }
+QList<unsigned short> EmsData::getTopLevelUniqueLocationIdList()
+{
+	QList<unsigned short> retval;
+	for (int i=0;i<m_deviceRamMemoryList.size();i++)
+	{
+		if (!m_deviceRamMemoryList[i]->hasParent)
+		{
+			retval.append(m_deviceRamMemoryList[i]->locationid);
+		}
+	}
+	for (int i=0;i<m_deviceFlashMemoryList.size();i++)
+	{
+		if (!m_deviceFlashMemoryList[i]->hasParent && !retval.contains(m_deviceFlashMemoryList[i]->locationid))
+		{
+			retval.append(m_deviceFlashMemoryList[i]->locationid);
+		}
+	}
+	return retval;
+
+
+}
 
 QList<unsigned short> EmsData::getTopLevelDeviceRamLocations()
 {
@@ -581,6 +602,7 @@ void EmsData::ramBlockUpdate(unsigned short locationid, QByteArray header, QByte
 			//This should not happen
 			qDebug() << "Ram block on device while ram block on tuner is empty! This should not happen" << "0x" + QString::number(locationid,16).toUpper();
 			qDebug() << "Current block size:" << getDeviceRamBlock(locationid).size();
+			setLocalRamBlock(locationid,payload);
 			setDeviceRamBlock(locationid,payload);
 		}
 		else
@@ -605,6 +627,10 @@ void EmsData::ramBlockUpdate(unsigned short locationid, QByteArray header, QByte
 					qDebug() << "Ram block on device does not match ram block on tuner! This should ONLY happen during a manual update!";
 					qDebug() << "Tuner ram size:" << getDeviceRamBlock(locationid).size();
 					setDeviceRamBlock(locationid,payload);
+				}
+				if (payload != getLocalRamBlock(locationid))
+				{
+					//We need to prompt the user, local ram is out of date.
 					setLocalRamBlock(locationid,payload);
 				}
 			}
@@ -629,6 +655,7 @@ void EmsData::flashBlockUpdate(unsigned short locationid, QByteArray header, QBy
 	{
 			if (getDeviceFlashBlock(locationid).isEmpty())
 			{
+				setLocalFlashBlock(locationid,payload);
 				setDeviceFlashBlock(locationid,payload);
 				return;
 			}
@@ -656,6 +683,10 @@ void EmsData::flashBlockUpdate(unsigned short locationid, QByteArray header, QBy
 						qDebug() << "Flash ID:" << "0x" + QString::number(locationid,16).toUpper();
 						setDeviceFlashBlock(locationid,payload);
 					}
+					if (getLocalFlashBlock(locationid) != payload)
+					{
+						setLocalFlashBlock(locationid,payload);
+					}
 				}
 			}
 	}
@@ -663,6 +694,37 @@ void EmsData::flashBlockUpdate(unsigned short locationid, QByteArray header, QBy
 	//updateDataWindows(locationid);
 	return;
 }
+void EmsData::ramBytesLocalUpdate(unsigned short locationid,unsigned short offset,unsigned short size,QByteArray data)
+{
+	if (!hasLocalRamBlock(locationid))
+	{
+		qDebug() << "Write requested when there is no local ram block!";
+		return;
+	}
+	if (getLocalRamBlock(locationid).mid(offset,size) == data)
+	{
+		qDebug() << "Data in application memory unchanged, no reason to send write for single value";
+		return;
+	}
+	setLocalRamBlock(locationid,getLocalRamBlock(locationid).replace(offset,size,data));
+	emit ramBlockUpdateRequest(locationid,offset,size,data);
+}
+
+void EmsData::flashBytesLocalUpdate(unsigned short locationid,unsigned short offset,unsigned short size,QByteArray data)
+{
+	if (!hasLocalFlashBlock(locationid))
+	{
+		return;
+	}
+	if (getLocalFlashBlock(locationid).mid(offset,size) == data)
+	{
+		qDebug() << "Data in application memory unchanged, no reason to send write for single value";
+		return;
+	}
+	setLocalFlashBlock(locationid,getLocalFlashBlock(locationid).replace(offset,size,data));
+	//emit flashBlockUpdateRequest(locationid,offset,size,data); //don't emit a signal for flash updates, those are always manual.
+}
+
 bool EmsData::verifyMemoryBlock(unsigned short locationid,QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)

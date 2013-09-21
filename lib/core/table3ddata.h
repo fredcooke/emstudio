@@ -55,7 +55,7 @@
 #include "tabledata.h"
 #include "table3dmetadata.h"
 
-class Table3DData : public TableData
+class Table3DData : public DataBlock
 {
 	Q_OBJECT
 public:
@@ -78,11 +78,14 @@ public:
 	virtual double minYAxis()=0;
 	virtual double minZAxis()=0;
 	virtual void setWritesEnabled(bool enabled)=0;
-	virtual void writeWholeLocation()=0;
+	virtual void writeWholeLocation(bool ram)=0;
 signals:
-	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
+//	void saveSingleDataToRam(unsigned short locationid,unsigned short offset, unsigned short size,QByteArray data);
+//	void saveSingleDataToFlash(unsigned short locationid,unsigned short offset, unsigned short size,QByteArray data);
 public slots:
-	
+	virtual void saveRamToFlash()=0;
+	virtual void updateFromFlash()=0;
+	virtual void updateFromRam()=0;
 };
 
 #endif // TABLE3DDATA_H

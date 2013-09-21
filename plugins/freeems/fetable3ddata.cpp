@@ -27,8 +27,8 @@ FETable3DData::FETable3DData() : Table3DData()
 }
 void FETable3DData::setData(unsigned short locationid,bool isflashonly, QByteArray data)
 {
-	m_isFlashOnly = isflashonly;
 	Q_UNUSED(locationid)
+	m_isFlashOnly = isflashonly;
 	m_xAxis.clear();
 	m_yAxis.clear();
 	m_values.clear();
@@ -66,6 +66,7 @@ void FETable3DData::setData(unsigned short locationid,bool isflashonly, QByteArr
 		}
 		m_values.append(currrow);
 	}
+	emit update();
 }
 
 void FETable3DData::setData(unsigned short locationid,bool isflashonly,QByteArray data,Table3DMetaData metadata)
@@ -113,14 +114,21 @@ void FETable3DData::setXAxis(int index,double val)
 	{
 		if (m_writesEnabled)
 		{
-			emit saveSingleData(m_locationId,data,4+(index*2),2);
+			emit saveSingleDataToRam(m_locationId,4+(index*2),2,data);
 		}
 		m_xAxis[index] = val;
 	}
 }
-void FETable3DData::writeWholeLocation()
+void FETable3DData::writeWholeLocation(bool ram)
 {
-	emit saveSingleData(m_locationId,data(),0,data().size());
+	if (ram)
+	{
+		emit saveSingleDataToRam(m_locationId,0,data().size(),data());
+	}
+	else
+	{
+		emit saveSingleDataToFlash(m_locationId,0,data().size(),data());
+	}
 }
 
 void FETable3DData::setYAxis(int index,double val)
@@ -133,7 +141,7 @@ void FETable3DData::setYAxis(int index,double val)
 	{
 		if (m_writesEnabled)
 		{
-			emit saveSingleData(m_locationId,data,58+(index*2),2);
+			emit saveSingleDataToRam(m_locationId,58+(index*2),2,data);
 		}
 		m_yAxis[index] = val;
 	}
@@ -149,7 +157,7 @@ void FETable3DData::setCell(int yIndex, int xIndex,double val)
 	{
 		if (m_writesEnabled)
 		{
-			emit saveSingleData(m_locationId,data,100+(xIndex*2)+(yIndex * (m_xAxis.size()*2)),2);
+			emit saveSingleDataToRam(m_locationId,100+(xIndex*2)+(yIndex * (m_xAxis.size()*2)),2,data);
 		}
 		m_values[yIndex][xIndex] = val;
 	}
@@ -285,4 +293,19 @@ int FETable3DData::backConvertAxis(double val,QList<QPair<QString,double> > meta
         }
     }
     return (unsigned short)newval;
+}
+void FETable3DData::updateFromFlash()
+{
+	//emit requestBlockFromFlash(m_locationId,0,0);
+	emit requestRamUpdateFromFlash(m_locationId);
+}
+
+void FETable3DData::updateFromRam()
+{
+	//emit requestRamUpdateFromFlash(m_locationId);
+	emit requestBlockFromRam(m_locationId,0,0);
+}
+void FETable3DData::saveRamToFlash()
+{
+	emit requestFlashUpdateFromRam(m_locationId);
 }

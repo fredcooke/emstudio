@@ -38,9 +38,12 @@ class TableView2D : public DataView
 public:
 	explicit TableView2D(bool isram, bool isflash,bool isSigned = false,QWidget *parent = 0);
 	~TableView2D();
-	bool setData(unsigned short locationid,QByteArray data,TableData *newtableData=0);
-	bool setData(unsigned short locationid,QByteArray data,Table2DMetaData metadata,TableData *newtableData);
-	bool setData(unsigned short locationid,QByteArray rawdata);
+	//bool setData(unsigned short locationid,QByteArray data,TableData *newtableData=0);
+	//bool setData(unsigned short locationid,QByteArray data,Table2DMetaData metadata,TableData *newtableData);
+	//bool setData(unsigned short locationid,QByteArray rawdata);
+	void setMetaData(Table2DMetaData metadata);
+	bool updateTable();
+	bool setData(unsigned short locationid,DataBlock *data);
 	//void passData(unsigned short locationid,Table2DData data);
 	void passDatalog(QVariantMap data);
 private:

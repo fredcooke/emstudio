@@ -34,11 +34,10 @@ class TableView3D : public DataView
 	Q_OBJECT
 	
 public:
-	explicit TableView3D(bool isram,bool isflash,QWidget *parent = 0);
+	explicit TableView3D(QWidget *parent = 0);
 	~TableView3D();
-	bool setData(unsigned short locationid,QByteArray data,TableData *newtabledata);
-	bool setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata,TableData *newtabledata);
-	bool setData(unsigned short locationid,QByteArray rawdata);
+	void setMetaData(Table3DMetaData metadata);
+	bool setData(unsigned short locationid,DataBlock *data);
 	void passDatalog(QVariantMap data);
 private:
 	void reColorTable(int rownum,int colnum);
@@ -68,6 +67,8 @@ private:
 protected:
 	void contextMenuEvent(QContextMenuEvent *evt);
 	void keyPressEvent(QKeyEvent *event);
+public slots:
+	bool updateTable();
 private slots:
 	void tracingCheckBoxStateChanged(int newstate);
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);

@@ -31,7 +31,7 @@
 #include <QAction>
 //#include <freeems/fetable3ddata.h>
 #include "tablewidgetdelegate.h"
-TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
+TableView3D::TableView3D(QWidget *parent)
 {
 	Q_UNUSED(parent)
 	m_isFlashOnly = false;
@@ -62,7 +62,7 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 	//addAction(fooAction);
 	//addAction(barAction);
 	metaDataValid = true;
-	if (!isram)
+	/*if (!isram)
 	{
 		//Is only flash
 		ui.loadRamPushButton->setVisible(false);
@@ -76,7 +76,7 @@ TableView3D::TableView3D(bool isram,bool isflash,QWidget *parent)
 	else
 	{
 		//Is both ram and flash
-	}
+	}*/
 	//ui.importPushButton->setVisible(false);
 	connect(ui.showMapPushButton,SIGNAL(clicked()),this,SLOT(showMapClicked()));
 }
@@ -167,7 +167,7 @@ void TableView3D::setValue(int row, int column,double value,bool ignoreselection
 			reColorTable(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column());
 		}
 		tableData->setWritesEnabled(true);
-		tableData->writeWholeLocation();
+		tableData->writeWholeLocation(true);
 	}
 	else
 	{
@@ -554,7 +554,6 @@ void TableView3D::setRange(QList<QPair<QPair<int,int>,double> > data)
 	QList<QString> invalidreasons;
 	for (int i=0;i<data.size();i++)
 	{
-
 		if (!tmpvaluemap.contains(data[i].first.first))
 		{
 			tmpvaluemap[data[i].first.first] = QMap<int,QString>();
@@ -573,6 +572,14 @@ void TableView3D::setRange(QList<QPair<QPair<int,int>,double> > data)
 	if (valid)
 	{
 		writeTable(true);
+		if (data.size() == 1)
+		{
+			reColorTable(data[0].first.first,data[0].first.second);
+		}
+		else
+		{
+			reColorTable(-1,-1);
+		}
 	}
 	else
 	{
@@ -622,7 +629,7 @@ void TableView3D::writeTable(bool ram)
 				}
 			}
 		}
-		tableData->writeWholeLocation();
+		tableData->writeWholeLocation(ram);
 		tableData->setWritesEnabled(true);
 	}
 }
@@ -845,7 +852,8 @@ void TableView3D::loadRamClicked()
 	if (QMessageBox::information(0,"Warning","Doing this will reload the table from ram, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
 		qDebug() << "Ok";
-		emit reloadTableData(m_locationId,true);
+		//emit reloadTableData(m_locationId,true);
+		tableData->updateFromRam();
 	}
 	else
 	{
@@ -858,7 +866,8 @@ void TableView3D::loadClicked()
 	if (QMessageBox::information(0,"Warning","Doing this will reload the table from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
 		qDebug() << "Ok";
-		emit reloadTableData(m_locationId,false);
+		tableData->updateFromFlash();
+		//emit reloadTableData(m_locationId,false);
 	}
 	else
 	{
@@ -866,29 +875,8 @@ void TableView3D::loadClicked()
 	}
 
 }
-bool TableView3D::setData(unsigned short locationid,QByteArray data,TableData *newtabledata)
+bool TableView3D::updateTable()
 {
-
-	if (tableData)
-	{
-		//tableData->deleteLater();
-		tableData->setData(locationid,m_isFlashOnly,data);
-	}
-	else
-	{
-		//tableData = new Table3DData(locationid,m_isFlashOnly,data,m_metaData);
-		//tableData = new FETable3DData();
-		tableData = (Table3DData*)newtabledata;
-		tableData->setData(locationid,m_isFlashOnly,data,m_metaData);
-		connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
-		if (m_tableMap)
-		{
-			m_tableMap->passData(tableData);
-		}
-	}
-
-	m_locationId = locationid;
-
 	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 	ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
 	//connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
@@ -1032,6 +1020,28 @@ bool TableView3D::setData(unsigned short locationid,QByteArray data,TableData *n
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	return true;
 	//return passData(locationid,data,physicallocation,Table3DMetaData());
+}
+
+void TableView3D::setMetaData(Table3DMetaData metadata)
+{
+	m_metaData = metadata;
+	metaDataValid = true;
+}
+
+bool TableView3D::setData(unsigned short locationid,DataBlock *data)
+{
+
+	if (tableData == 0)
+	{
+		tableData = dynamic_cast<Table3DData*>(data);
+		connect(tableData,SIGNAL(update()),this,SLOT(updateTable()));
+		//connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
+	}
+	else
+	{
+	}
+	m_locationId = locationid;
+	return updateTable();
 }
 void TableView3D::reColorTable(int rownum,int colnum)
 {
@@ -1328,16 +1338,24 @@ void TableView3D::passDatalog(QVariantMap data)
 		}
 	}
 }
-bool TableView3D::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata,TableData *newtabledata)
+/*bool TableView3D::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata,TableData *newtabledata)
 {
 	m_metaData = metadata;
 	metaDataValid = true;
 	return setData(locationid,data,newtabledata);
 }
+bool TableView3D::setData(unsigned short locationid,Table3DData *data,Table3DMetaData metadata)
+{
+	m_metaData = metadata;
+	metaDataValid = true;
+	connect(data,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
+	setData(locationid,data);
+}
+
 bool TableView3D::setData(unsigned short locationid,QByteArray rawdata)
 {
 	return setData(locationid,rawdata,tableData);
-}
+}*/
 QString TableView3D::formatNumber(double num,int prec)
 {
 	if (metaDataValid)
@@ -1401,7 +1419,8 @@ void TableView3D::setSilentValue(int row,int column,QString value)
 
 void TableView3D::saveClicked()
 {
-	emit saveToFlash(m_locationId);
+	//emit saveToFlash(m_locationId);
+	tableData->saveRamToFlash();
 }
 TableView3D::~TableView3D()
 {

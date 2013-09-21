@@ -33,8 +33,7 @@ class RawDataView : public DataView
 public:
 	explicit RawDataView(bool isram, bool isflash,QWidget *parent = 0);
 	~RawDataView();
-	bool setData(unsigned short locationid,QByteArray data);
-	bool setData(unsigned short locationid,QByteArray data,TableData *tdata){Q_UNUSED(locationid); Q_UNUSED(data); Q_UNUSED(tdata); return false;}
+	bool setData(unsigned short locationid,DataBlock *tdata);
 	//void verifyData(unsigned short locationid,QByteArray data);
 	void passDatalog(QVariantMap data);
 private:

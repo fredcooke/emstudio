@@ -601,13 +601,13 @@ void TableView2D::setSilentValue(int row,int column,QString value)
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 }
-bool TableView2D::setData(unsigned short locationid,QByteArray data,TableData *newtableData)
+bool TableView2D::setData(unsigned short locationid,DataBlock *data)
 {
 	if (!metaDataValid)
 	{
 		m_metaData = Table2DMetaData();
 	}
-	if (tableData && newtableData && (tableData != newtableData))
+	/*if (tableData && newtableData && (tableData != newtableData))
 	{
 		disconnect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 		tableData->deleteLater();
@@ -615,15 +615,20 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data,TableData *n
 	else if (tableData == newtableData && tableData)
 	{
 		disconnect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
-	}
+	}*/
 	//tableData = new Table2DData(locationid,m_isFlashOnly,data,m_metaData);
 	//tableData = new FETable2DData();
-	tableData = (Table2DData*)newtableData;
-	tableData->setData(locationid,m_isFlashOnly,data,m_metaData,m_isSignedData);
-	connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
+	//tableData = (Table2DData*)newtableData;
+	//tableData->setData(locationid,m_isFlashOnly,data,m_metaData,m_isSignedData);
+	//connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
 	qDebug() << "TableView2D::passData" << "0x" + QString::number(locationid,16).toUpper();
-	samples.clear();
 	m_locationid = locationid;
+	return updateTable();
+}
+bool TableView2D::updateTable()
+{
+	samples.clear();
+
 	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 	ui.tableWidget->clear();
 	ui.tableWidget->setColumnCount(0);
@@ -698,7 +703,9 @@ bool TableView2D::setData(unsigned short locationid,QByteArray data,TableData *n
 	//ui.tableWidget->resizeColumnsToContents();
 	resizeColumnWidths();
 	return true;
+
 }
+
 void TableView2D::tracingCheckBoxStateChanged(int newstate)
 {
 	if (newstate == Qt::Checked)
@@ -854,7 +861,7 @@ void TableView2D::passDatalog(QVariantMap data)
 	}
 }
 
-bool TableView2D::setData(unsigned short locationid,QByteArray rawdata)
+/*bool TableView2D::setData(unsigned short locationid,QByteArray rawdata)
 {
 	return setData(locationid,rawdata,(Table2DData*)(tableData));
 }
@@ -863,6 +870,11 @@ bool TableView2D::setData(unsigned short locationid,QByteArray rawdata,Table2DMe
 	m_metaData = metadata;
 	metaDataValid = true;
 	return setData(locationid,rawdata,newtableData);
+}*/
+void TableView2D::setMetaData(Table2DMetaData metadata)
+{
+	m_metaData = metadata;
+	metaDataValid = true;
 }
 
 TableView2D::~TableView2D()

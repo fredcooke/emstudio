@@ -7,6 +7,10 @@ TEMPLATE = lib
 DEPENDPATH += .
 INCLUDEPATH += . ../../core/src
 CONFIG += plugin
+OBJECTS_DIR = obj
+MOC_DIR = obj
+UI_DIR = obj
+
 QT -= gui
 INCLUDEPATH += $$PWD/../../lib/core
 DEPENDPATH += $$PWD/../../lib/core
@@ -49,6 +53,7 @@ unix {
 HEADERS += datapacketdecoder.h \
            table2ddata.h \
            table3ddata.h \
+	   tabledata.h \
            emscomms.h \
            memorymetadata.h \
 	   fedatapacketdecoder.h \
@@ -59,7 +64,9 @@ HEADERS += datapacketdecoder.h \
            serialport.h \
            serialrxthread.h \
 	   fememorymetadata.h \
-	   datafield.h
+	   datafield.h \
+    memorylocation.h \
+    emsdata.h
 
 SOURCES += fedatapacketdecoder.cpp \
            fetable2ddata.cpp \
@@ -68,4 +75,6 @@ SOURCES += fedatapacketdecoder.cpp \
            serialport.cpp \
            serialrxthread.cpp \
 	   fememorymetadata.cpp \
-	   datafield.cpp
+	   datafield.cpp \
+    memorylocation.cpp \
+    emsdata.cpp

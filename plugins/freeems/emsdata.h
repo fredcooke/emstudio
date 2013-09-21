@@ -97,6 +97,7 @@ public:
 		}
 		return false;
 	}
+	QList<unsigned short> getTopLevelUniqueLocationIdList();
 
 private:
 	bool m_checkEmsDataInUse;
@@ -119,9 +120,13 @@ private:
 	bool verifyMemoryBlock(unsigned short locationid,QByteArray header,QByteArray payload);
 signals:
 	void updateRequired(unsigned short locationid);
+	void ramBlockUpdateRequest(unsigned short locationid,unsigned short offset,unsigned short size,QByteArray data);
+	void flashBlockUpdateRequest(unsigned short locationid,unsigned short offset,unsigned short size,QByteArray data);
 public slots:
 	void ramBlockUpdate(unsigned short locationid, QByteArray header, QByteArray payload);
 	void flashBlockUpdate(unsigned short locationid, QByteArray header, QByteArray payload);
+	void ramBytesLocalUpdate(unsigned short locationid,unsigned short offset,unsigned short size,QByteArray data);
+	void flashBytesLocalUpdate(unsigned short locationid,unsigned short offset,unsigned short size,QByteArray data);
 };
 
 #endif // EMSDATA_H

@@ -53,7 +53,7 @@
 #include <QObject>
 #include <QList>
 #include <QPair>
-class TableData : public QObject
+class DataBlock : public QObject
 {
 public:
     virtual double calcAxis(int val,QList<QPair<QString,double> > metadata)=0;

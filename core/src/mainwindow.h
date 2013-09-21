@@ -27,7 +27,7 @@
 #include <QFile>
 //#include "datafield.h"
 #include "configview.h"
-#include "emsdata.h"
+//#include "emsdata.h"
 #include "memorymetadata.h"
 #include "emscomms.h"
 #include "configblock.h"
@@ -42,7 +42,7 @@
 #include "flagview.h"
 #include "packetstatusview.h"
 #include "aboutview.h"
-#include "memorylocation.h"
+//#include "memorylocation.h"
 #include "interrogateprogressview.h"
 #include "table2ddata.h"
 #include "readonlyramview.h"
@@ -94,11 +94,11 @@ private:
 	bool m_waitingForRamWriteConfirmation;
 	unsigned short m_currentFlashLocationId;
 	bool m_waitingForFlashWriteConfirmation;
-	QList<MemoryLocation*> m_tempMemoryList;
+//	QList<MemoryLocation*> m_tempMemoryList;
 	QMap<unsigned short,QList<ConfigBlock> > m_configBlockMap;
 	QMap<unsigned short,QMdiSubWindow*> m_table3DMapViewMap;
 	QMap<unsigned short,TableMap3D*> m_table3DMapViewWidgetMap;
-	QList<ConfigData> m_configMetaData;
+//	QList<ConfigData> m_configMetaData;
 	MemoryMetaData *m_memoryMetaData;
 	TableView *dataTables;
 	GaugeView *dataGauges;
@@ -156,12 +156,13 @@ private:
 	bool m_deviceFlashDirty;
 	void updateView(unsigned short locid,QObject *view,QByteArray data,DataType type);
 	void createView(unsigned short locid,QByteArray data,DataType type,bool isram, bool isflash);
+	void createView(unsigned short locid,DataType type);
 	QList<int> m_locIdMsgList;
 	QList<int> m_locIdInfoMsgList;
 	void checkRamFlashSync();
 	bool m_interrogationInProgress;
-	EmsData *emsData;
-	EmsData *checkEmsData;
+	//EmsData *emsData;
+	//EmsData *checkEmsData;
 	int m_currentEcuClock;
 private slots:
 	void emsCommsSilence();
@@ -235,6 +236,11 @@ private slots:
 	void saveFlashLocationIdBlock(unsigned short locationid,QByteArray data);
 	void retrieveRamLocationId(unsigned short locationid);
 	void retrieveFlashLocationId(unsigned short locationid);
+	void interrogationProgress(int current, int total);
+	void interrogationComplete();
+	void interrogateTaskStart(QString task, int sequence);
+	void interrogateTaskSucceed(int sequence);
+	void interrogateTaskFail(int sequence);
 
 };
 

@@ -38,6 +38,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 
 	dataPacketDecoder = new FEDataPacketDecoder();
 	m_metaDataParser = new FEMemoryMetaData();
+	m_metaDataParser->loadMetaDataFromFile("freeems.config.json");
 
     m_lastdatalogTimer = new QTimer(this);
     connect(m_lastdatalogTimer,SIGNAL(timeout()),this,SLOT(datalogTimerTimeout()));
@@ -50,6 +51,8 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	m_logOutFile=0;
 	m_logInOutFile=0;
 	m_debugLogsEnabled = false;
+	m_waitingForRamWrite=false;
+	m_waitingForFlashWrite=false;
 	m_sequenceNumber = 1;
 	m_blockFlagList.append(BLOCK_HAS_PARENT);
 	m_blockFlagList.append(BLOCK_IS_RAM);
@@ -81,6 +84,16 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	m_blockFlagToNameMap[BLOCK_IS_MAIN_TABLE] = "3D Table";
 	m_blockFlagToNameMap[BLOCK_IS_LOOKUP_DATA] = "Lookup Table";
 	m_blockFlagToNameMap[BLOCK_IS_CONFIGURATION] = "Configuration";
+	m_interrogateInProgress = false;
+	m_interogateComplete = false;
+	m_interrogateIdListComplete = false;
+	m_interrogateIdInfoComplete = false;
+	m_interrogateTotalCount=0;
+	emsData.setMetaData(m_metaDataParser);
+	connect(&emsData,SIGNAL(updateRequired(unsigned short)),this,SIGNAL(deviceDataUpdated(unsigned short)));
+	connect(&emsData,SIGNAL(ramBlockUpdateRequest(unsigned short,unsigned short,unsigned short,QByteArray)),this,SLOT(updateBlockInRam(unsigned short,unsigned short,unsigned short,QByteArray)));
+	connect(&emsData,SIGNAL(flashBlockUpdateRequest(unsigned short,unsigned short,unsigned short,QByteArray)),this,SLOT(updateBlockInFlash(unsigned short,unsigned short,unsigned short,QByteArray)));
+	connect(&emsData,SIGNAL(updateRequired(unsigned short)),this,SLOT(locationIdUpdate(unsigned short)));
 
 }
 MemoryMetaData *FreeEmsComms::getMetaParser()
@@ -114,6 +127,24 @@ void FreeEmsComms::disconnectSerial()
 	m_reqList.append(req);
 	m_reqListMutex.unlock();
 }
+void FreeEmsComms::startInterrogation()
+{
+	if (!m_interrogateInProgress)
+	{
+		m_interrogatePacketList.clear();
+		m_interrogateInProgress = true;
+		m_interrogatePacketList.append(getFirmwareVersion());
+		m_interrogatePacketList.append(getInterfaceVersion());
+		m_interrogatePacketList.append(getCompilerVersion());
+		m_interrogatePacketList.append(getDecoderName());
+		m_interrogatePacketList.append(getFirmwareBuildDate());
+		m_interrogatePacketList.append(getMaxPacketSize());
+		m_interrogatePacketList.append(getOperatingSystem());
+		m_interrogatePacketList.append(getLocationIdList(0x00,0x00));
+		m_interrogateTotalCount=8;
+	}
+}
+
 void FreeEmsComms::openLogs()
 {
 	qDebug() << "Open logs:" << m_logsDirectory + "/" + m_logsFilename + ".bin";
@@ -910,6 +941,7 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0100;
+					m_waitingForRamWrite = true;
 					if (!sendPacket(m_threadReqList[i],true))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -949,6 +981,7 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0x0102;
+					m_waitingForFlashWrite = true;
 					if (!sendPacket(m_threadReqList[i],true))
 					{
 						qDebug() << "Error writing packet. Quitting thread";
@@ -1198,15 +1231,15 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					details += ",";
 				}
 				details += "}";
-				QList<unsigned short> idlist;
+				m_locationIdList.clear();
 				for (int j=0;j<parsedPacket.payload.size();j+=2)
 				{
 					unsigned short tmp = 0;
 					tmp += parsedPacket.payload[j] << 8;
 					tmp += parsedPacket.payload[j+1];
-					idlist.append(tmp);
+					m_locationIdList.append(tmp);
 				}
-				emit locationIdList(idlist);
+				emit locationIdList(m_locationIdList);
 			}
 		}
 		else if (payloadid == 0xF8E1) //Location ID Info
@@ -1284,6 +1317,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					info.flashpage = flashpage;
 					info.rawflags = test;
 					info.size = size;
+
 					if (flaglist.contains(FreeEmsComms::BLOCK_IS_RAM))
 					{
 						info.isRam = true;
@@ -1337,7 +1371,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 						info.type = DATA_UNDEFINED;
 					}
 					emit locationIdInfo(locationid,info);
-
+					emsData.passLocationInfo(locationid,info);
 				}
 
 
@@ -1376,7 +1410,8 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 			else
 			{
 				unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
-				emit flashBlockRetrieved(locid,parsedPacket.header,parsedPacket.payload);
+				//emit flashBlockRetrieved(locid,parsedPacket.header,parsedPacket.payload);
+				emsData.flashBlockUpdate(locid,parsedPacket.header,parsedPacket.payload);
 			}
 		}
 		else if (payloadid == 0x0105)
@@ -1388,7 +1423,8 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 			{
 				//Block from ram is here.
 				unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
-				emit ramBlockRetrieved(locid,parsedPacket.header,parsedPacket.payload);
+				//emit ramBlockRetrieved(locid,parsedPacket.header,parsedPacket.payload);
+				emsData.ramBlockUpdate(locid,parsedPacket.header,parsedPacket.payload);
 			}
 		}
 		else
@@ -1406,6 +1442,115 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 		{
 			if (m_waitingForResponse)
 			{
+				if (m_interrogateInProgress)
+				{
+					if (m_interrogatePacketList.contains(m_currentWaitingRequest.sequencenumber))
+					{
+						emit interrogateTaskSucceed(m_currentWaitingRequest.sequencenumber);
+						m_interrogatePacketList.removeOne(m_currentWaitingRequest.sequencenumber);
+						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+						if (m_interrogatePacketList.size() == 0)
+						{
+							if (!m_interrogateIdListComplete)
+							{
+								m_interrogateIdListComplete = true;
+								m_interrogateTotalCount += m_locationIdList.size();
+								for (int i=0;i<m_locationIdList.size();i++)
+								{
+									int task = getLocationIdInfo(m_locationIdList[i]);
+									m_interrogatePacketList.append(task);
+									emit interrogateTaskStart("Location ID Info: 0x" + QString::number(m_locationIdList[i],16),task);
+									//void interrogateTaskStart(QString task, int sequence);
+									//void interrogateTaskFail(int sequence);
+								}
+								emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+							}
+							else if (!m_interrogateIdInfoComplete)
+							{
+								//Fill out the parent information for both device, and local ram.
+								emsData.populateDeviceRamAndFlashParents();
+								emsData.populateLocalRamAndFlash();
+								m_interrogateIdInfoComplete = true;
+								QList<unsigned short> ramlist = emsData.getTopLevelDeviceRamLocations();
+								QList<unsigned short> flashlist = emsData.getTopLevelDeviceFlashLocations();
+								m_interrogateTotalCount += ramlist.size() + flashlist.size();
+								for (int i=0;i<ramlist.size();i++)
+								{
+									int task = retrieveBlockFromRam(ramlist[i],0,0);
+									m_interrogatePacketList.append(task);
+									emit interrogateTaskStart("Ram Location: 0x" + QString::number(ramlist[i],16),task);
+								}
+								for (int i=0;i<flashlist.size();i++)
+								{
+									int task = retrieveBlockFromFlash(flashlist[i],0,0);
+									m_interrogatePacketList.append(task);
+									emit interrogateTaskStart("flash Location: 0x" + QString::number(flashlist[i],16),task);
+								}
+								emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+							}
+							else
+							{
+								//Interrogation complete.
+								emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+								emit interrogationComplete();
+								m_interrogateInProgress = false;
+							}
+						}
+						else
+						{
+							if (m_payloadWaitingForResponse == GET_LOCATION_ID_LIST)
+							{
+
+							}
+						}
+					}
+					else
+					{
+					}
+				}
+				if (m_waitingForFlashWrite)
+				{
+					m_waitingForFlashWrite = false;
+					unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
+					if (parsedPacket.isNAK)
+					{
+						emsData.setLocalFlashBlock(locid,emsData.getDeviceFlashBlock(locid));
+						if (m_2dTableMap.contains(locid))
+						{
+							m_2dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalFlashBlock(locid),m_metaDataParser->get2DMetaData(locid),false);
+						}
+						if (m_3dTableMap.contains(locid))
+						{
+							m_3dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalFlashBlock(locid),m_metaDataParser->get3DMetaData(locid));
+						}
+					}
+					else
+					{
+						emsData.setDeviceFlashBlock(locid,emsData.getLocalFlashBlock(locid));
+					}
+				}
+				if (m_waitingForRamWrite)
+				{
+					m_waitingForRamWrite = false;
+					unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
+					if (parsedPacket.isNAK)
+					{
+						emsData.setLocalRamBlock(locid,emsData.getDeviceRamBlock(locid));
+						if (m_2dTableMap.contains(locid))
+						{
+							m_2dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalRamBlock(locid),m_metaDataParser->get2DMetaData(locid),false);
+						}
+						if (m_3dTableMap.contains(locid))
+						{
+							m_3dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalRamBlock(locid),m_metaDataParser->get3DMetaData(locid));
+						}
+					}
+					else
+					{
+						//Change has been accepted, copy local ram to device ram
+						emsData.setDeviceRamBlock(locid,emsData.getLocalRamBlock(locid));
+					}
+				}
 				if (payloadid == m_payloadWaitingForResponse+1)
 				{
 					qDebug() << "Recieved Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
@@ -1488,6 +1633,69 @@ void FreeEmsComms::datalogTimerTimeout()
 		m_lastDatalogUpdateEnabled = false;
 		emit emsSilenceStarted();
 	}
+}
+Table2DData* FreeEmsComms::get2DTableData(unsigned short locationid)
+{
+	if (!m_2dTableMap.contains(locationid))
+	{
+		Table2DData *data = new FETable2DData();
+		connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+		connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+		data->setData(locationid,!emsData.hasLocalRamBlock(locationid),emsData.getLocalRamBlock(locationid),m_metaDataParser->get2DMetaData(locationid),false);
+		m_2dTableMap[locationid] = data;
+	}
+	return m_2dTableMap[locationid];
+
+}
+
+Table3DData* FreeEmsComms::get3DTableData(unsigned short locationid)
+{
+	if (!m_3dTableMap.contains(locationid))
+	{
+		Table3DData *data = new FETable3DData();
+		connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+		connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+		connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
+		connect(data,SIGNAL(requestBlockFromFlash(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromFlash(unsigned short,unsigned short,unsigned short)));
+		connect(data,SIGNAL(requestRamUpdateFromFlash(unsigned short)),this,SLOT(copyFlashToRam(unsigned short)));
+		connect(data,SIGNAL(requestFlashUpdateFromRam(unsigned short)),this,SLOT(copyRamToFlash(unsigned short)));
+		qDebug() << "Attempting to load table. Data size:" << emsData.getLocalRamBlock(locationid).size();
+		data->setData(locationid,!emsData.hasLocalRamBlock(locationid),emsData.getLocalRamBlock(locationid),m_metaDataParser->get3DMetaData(locationid));
+		m_3dTableMap[locationid] = data;
+	}
+	return m_3dTableMap[locationid];
+}
+void FreeEmsComms::locationIdUpdate(unsigned short locationid)
+{
+	if (m_2dTableMap.contains(locationid))
+	{
+		m_2dTableMap[locationid]->setData(locationid,!emsData.hasDeviceRamBlock(locationid),emsData.getDeviceRamBlock(locationid),m_metaDataParser->get2DMetaData(locationid),false);
+	}
+	if (m_3dTableMap.contains(locationid))
+	{
+		m_3dTableMap[locationid]->setData(locationid,!emsData.hasDeviceRamBlock(locationid),emsData.getDeviceRamBlock(locationid),m_metaDataParser->get3DMetaData(locationid));
+	}
+
+}
+void FreeEmsComms::copyFlashToRam(unsigned short locationid)
+{
+	emsData.setLocalRamBlock(locationid,emsData.getLocalFlashBlock(locationid));
+	if (m_2dTableMap.contains(locationid))
+	{
+		m_2dTableMap[locationid]->setData(locationid,!emsData.hasLocalRamBlock(locationid),emsData.getLocalRamBlock(locationid),m_metaDataParser->get2DMetaData(locationid),false);
+	}
+	if (m_3dTableMap.contains(locationid))
+	{
+		m_3dTableMap[locationid]->setData(locationid,!emsData.hasLocalRamBlock(locationid),emsData.getLocalRamBlock(locationid),m_metaDataParser->get3DMetaData(locationid));
+	}
+	updateBlockInRam(locationid,0,emsData.getLocalFlashBlock(locationid).size(),emsData.getLocalFlashBlock(locationid));
+}
+
+void FreeEmsComms::copyRamToFlash(unsigned short locationid)
+{
+	emsData.setLocalFlashBlock(locationid,emsData.getLocalRamBlock(locationid));
+	emsData.setDeviceFlashBlock(locationid,emsData.getDeviceRamBlock(locationid));
+	burnBlockFromRamToFlash(locationid,0,0);
 }
 
 void FreeEmsComms::dataLogWrite(QByteArray buffer)
