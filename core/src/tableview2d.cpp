@@ -28,11 +28,12 @@
 #include <qjson/parser.h>
 #include <QFileDialog>
 #include <tablewidgetdelegate.h>
+#include <QPair>
 //#include "freeems/fetable2ddata.h"
-TableView2D::TableView2D(bool isram, bool isflash,bool isSigned,QWidget *parent)
+TableView2D::TableView2D(QWidget *parent)
 {
 	Q_UNUSED(parent)
-	m_isSignedData = isSigned;
+	//m_isSignedData = isSigned;
 	m_isFlashOnly = false;
 	ui.setupUi(this);
 	metaDataValid = false;
@@ -68,7 +69,7 @@ TableView2D::TableView2D(bool isram, bool isflash,bool isSigned,QWidget *parent)
 
 	//curve->setData()
 	//QwtSeriesData<QwtIntervalSample> series;
-	if (!isram)
+	/*if (!isram)
 	{
 		//Is only flash
 		ui.loadRamPushButton->setVisible(false);
@@ -82,7 +83,7 @@ TableView2D::TableView2D(bool isram, bool isflash,bool isSigned,QWidget *parent)
 	else
 	{
 		//Is both ram and flash
-	}
+	}*/
 	connect(ui.tracingCheckBox,SIGNAL(stateChanged(int)),this,SLOT(tracingCheckBoxStateChanged(int)));
 }
 void TableView2D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
@@ -93,42 +94,55 @@ void TableView2D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
 		{
 			return;
 		}
-		QString text = ui.tableWidget->selectedItems()[0]->text();
-		double textd = text.toDouble();
-		double maxval = 0;
-		//int dp = 0;
-		if (ui.tableWidget->selectedItems()[0]->row() == 0)
+		QList<QPair<QPair<int,int>,double> > vallist;
+		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
 		{
-			maxval = tableData->maxCalcedXAxis();
-		//	dp = m_metaData.xDp;
+			QString text = ui.tableWidget->selectedItems()[i]->text();
+			double textd = text.toDouble();
+			double maxval = 0;
+			//int dp = 0;
+			if (ui.tableWidget->selectedItems()[i]->row() == 0)
+			{
+				maxval = tableData->maxCalcedXAxis();
+			//	dp = m_metaData.xDp;
+			}
+			else /*if (ui.tableWidget->selectedItems()[0]->row() == 1)*/
+			{
+				maxval = tableData->maxCalcedYAxis();
+			//	dp = m_metaData.yDp;
+			}
+
+			if (modifier & Qt::ShiftModifier)
+			{
+				textd += maxval / 10.0;
+			}
+			else
+			{
+				textd += maxval / 100.0;
+			}
+			if (textd > maxval)
+			{
+				///TODO: Talk to fredcooke about DP, and why it makes it impossible
+				//to set any short value to exactly 65535. This is probably unintentional,
+				//but certainly not good.
+				textd = maxval;
+			}
+			else
+			{
+				int stopper = 1;
+				stopper++;
+			}
+			QPair<QPair<int,int>,double> val;
+			val.first = QPair<int,int>(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column());
+			val.second = textd;
+			vallist.append(val);
 		}
-		else /*if (ui.tableWidget->selectedItems()[0]->row() == 1)*/
-		{
-			maxval = tableData->maxCalcedYAxis();
-		//	dp = m_metaData.yDp;
-		}
-		if (modifier & Qt::ShiftModifier)
-		{
-			textd += maxval / 10.0;
-		}
-		else
-		{
-			textd += maxval / 100.0;
-		}
-		if (textd > maxval)
-		{
-			///TODO: Talk to fredcooke about DP, and why it makes it impossible
-			//to set any short value to exactly 65535. This is probably unintentional,
-			//but certainly not good.
-			textd = maxval;
-		}
-		else
-		{
-			int stopper = 1;
-			stopper++;
-		}
+		setRange(vallist);
+
+
+
 		//ui.tableWidget->selectedItems()[0]->setText(QString::number(textd,'f',dp));
-		setValue(ui.tableWidget->selectedItems()[0]->row(),ui.tableWidget->selectedItems()[0]->column(),textd);
+		//setValue(ui.tableWidget->selectedItems()[0]->row(),ui.tableWidget->selectedItems()[0]->column(),textd);
 	}
 	else if (key == Qt::Key_Minus || key == Qt::Key_Underscore)
 	{
@@ -136,38 +150,140 @@ void TableView2D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
 		{
 			return;
 		}
-		QString text = ui.tableWidget->selectedItems()[0]->text();
-		double textd = text.toDouble();
-		double minval = 0;
-		double maxval = 0;
-		//int dp = 0;
-		if (ui.tableWidget->selectedItems()[0]->row() == 0)
+		QList<QPair<QPair<int,int>,double> > vallist;
+		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
 		{
-			minval = tableData->minCalcedXAxis();
-			maxval = tableData->maxCalcedXAxis();
-		//	dp = m_metaData.xDp;
+			QString text = ui.tableWidget->selectedItems()[i]->text();
+			double textd = text.toDouble();
+			double minval = 0;
+			double maxval = 0;
+			//int dp = 0;
+			if (ui.tableWidget->selectedItems()[i]->row() == 0)
+			{
+				minval = tableData->minCalcedXAxis();
+				maxval = tableData->maxCalcedXAxis();
+			//	dp = m_metaData.xDp;
+			}
+			else if (ui.tableWidget->selectedItems()[i]->row() == 1)
+			{
+				minval = tableData->minCalcedYAxis();
+				maxval = tableData->maxCalcedYAxis();
+			//	dp = m_metaData.yDp;
+			}
+			if (modifier & Qt::ShiftModifier)
+			{
+				textd -= maxval / 10.0;
+			}
+			else
+			{
+				textd -= maxval / 100.0;
+			}
+			if (textd < minval)
+			{
+				textd = minval;
+			}
+			QPair<QPair<int,int>,double> val;
+			val.first = QPair<int,int>(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column());
+			val.second = textd;
+			vallist.append(val);
 		}
-		else if (ui.tableWidget->selectedItems()[0]->row() == 1)
+		setRange(vallist);
+	}
+}
+void TableView2D::setRange(QList<QPair<QPair<int,int>,double> > data)
+{
+	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+	ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+	QMap<int,QMap<int,QString> > tmpvaluemap;
+	bool valid = true;
+	QList<QString> invalidreasons;
+	for (int i=0;i<data.size();i++)
+	{
+		if (!tmpvaluemap.contains(data[i].first.first))
 		{
-			minval = tableData->minCalcedYAxis();
-			maxval = tableData->maxCalcedYAxis();
-		//	dp = m_metaData.yDp;
+			tmpvaluemap[data[i].first.first] = QMap<int,QString>();
 		}
-		if (modifier & Qt::ShiftModifier)
+		tmpvaluemap[data[i].first.first][data[i].first.second] = ui.tableWidget->item(data[i].first.first,data[i].first.second)->text();
+		QString formatstr = formatNumber(data[i].second,m_metaData.xDp);
+		QString verifystr = verifyValue(data[i].first.first,data[i].first.second,formatstr);
+		if (verifystr != "GOOD")
 		{
-			textd -= maxval / 10;
+			invalidreasons.append(verifystr);
+			valid = false;
+		}
+		ui.tableWidget->item(data[i].first.first,data[i].first.second)->setText(formatstr);
+	}
+	//Write the values, and re-enable the signals.
+	if (valid)
+	{
+		writeTable(true);
+		if (data.size() == 1)
+		{
+			updateTable();
+			//reColorTable(data[0].first.first,data[0].first.second);
 		}
 		else
 		{
-			textd -= maxval / 100;
+			updateTable();
+			//reColorTable(-1,-1);
 		}
-		if (textd < minval)
+	}
+	else
+	{
+		for (QMap<int,QMap<int,QString> >::const_iterator i=tmpvaluemap.constBegin();i!=tmpvaluemap.constEnd();i++)
 		{
-			textd = minval;
+			for (QMap<int,QString>::const_iterator j=i.value().constBegin();j!=i.value().constEnd();j++)
+			{
+				ui.tableWidget->item(i.key(),j.key())->setText(j.value());
+			}
 		}
+		QString errorstr = "";
+		foreach(QString reason,invalidreasons)
+		{
+			errorstr += reason + ",";
+		}
+		QMessageBox::information(0,"Error",errorstr);
+	}
+	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
+}
+QString TableView2D::verifyValue(int row,int column,QString item)
+{
+	double tempValue = item.toDouble();
 
-		//ui.tableWidget->selectedItems()[0]->setText(QString::number(textd,'f',dp));
-		setValue(ui.tableWidget->selectedItems()[0]->row(),ui.tableWidget->selectedItems()[0]->column(),textd);
+	if (row == 0)
+	{
+		if (tempValue > tableData->maxCalcedXAxis())
+		{
+			return "Axis value entered too large!";
+		}
+		else if (tempValue < tableData->minCalcedXAxis())
+		{
+			return "Axis value entered too small";
+		}
+	}
+	else
+	{
+		if (tempValue > tableData->maxCalcedYAxis())
+		{
+			return "Axis value too large";
+		}
+		else if (tempValue < tableData->minCalcedYAxis())
+		{
+			return  "Axis value too small";
+		}
+	}
+	return "GOOD";
+}
+QString TableView2D::formatNumber(double num,int prec)
+{
+	if (metaDataValid)
+	{
+		return QString::number(num,'f',prec);
+	}
+	else
+	{
+		return QString::number(num);
 	}
 }
 void TableView2D::setValue(int row, int column,double value)
@@ -384,7 +500,7 @@ void TableView2D::writeTable(bool ram)
 			tableData->setCell(0,j,ui.tableWidget->item(0,j)->text().toDouble());
 			tableData->setCell(1,j,ui.tableWidget->item(1,j)->text().toDouble());
 		}
-		tableData->writeWholeLocation();
+		tableData->writeWholeLocation(ram);
 		tableData->setWritesEnabled(true);
 	}
 }
@@ -549,7 +665,8 @@ void TableView2D::loadRamClicked()
 	if (QMessageBox::information(0,"Warning","Doing this will reload the table from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
 		qDebug() << "Ok";
-		emit reloadTableData(m_locationid,true);
+		//emit reloadTableData(m_locationid,true);
+		tableData->updateFromRam();
 	}
 	else
 	{
@@ -562,7 +679,8 @@ void TableView2D::loadFlashClicked()
 	if (QMessageBox::information(0,"Warning","Doing this will reload the table from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
 		qDebug() << "Ok";
-		emit reloadTableData(m_locationid,false);
+		//emit reloadTableData(m_locationid,false);
+		tableData->updateFromFlash();
 	}
 	else
 	{
@@ -607,6 +725,7 @@ bool TableView2D::setData(unsigned short locationid,DataBlock *data)
 	{
 		m_metaData = Table2DMetaData();
 	}
+	tableData = dynamic_cast<Table2DData*>(data);
 	/*if (tableData && newtableData && (tableData != newtableData))
 	{
 		disconnect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
@@ -706,6 +825,79 @@ bool TableView2D::updateTable()
 
 }
 
+void TableView2D::reColorTable(int rownum,int colnum)
+{
+	/*
+	//qDebug() << "Recoloring" << rownum << colnum;
+	if (rownum == ui.tableWidget->rowCount()-1 || colnum == 0)
+	{
+		return;
+	}
+	if (rownum == -1 && colnum == -1)
+	{
+		//Recolor the whole table
+		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+		for (int row=0;row<tableData->rows();row++)
+		{
+			for (int col=0;col<tableData->columns();col++)
+			{
+				double val = tableData->values()[row][col];
+				//ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
+				if (val < tableData->maxZAxis()/4)
+				{
+					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxZAxis()/4.0))),255));
+				}
+				else if (val < ((tableData->maxZAxis()/4)*2))
+				{
+					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((tableData->maxZAxis()/4.0)))/(tableData->maxZAxis()/4.0)))));
+				}
+				else if (val < ((tableData->maxZAxis()/4)*3))
+				{
+					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((tableData->maxZAxis()/4.0)*2))/(tableData->maxZAxis()/4.0))),255,0));
+				}
+				else
+				{
+					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxZAxis()/4.0)*3))/(tableData->maxZAxis()/4.0))),0));
+				}
+			}
+		}
+		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
+	}
+	else
+	{
+
+
+		//qDebug() << "Loc:" << (tableData->rows()-1)-(rownum) << colnum - 1;
+		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+		double val = tableData->values()[(tableData->rows()-1)-(rownum)][colnum-1];
+		//qDebug() << "Value:" << val;
+
+		//ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
+		if (val < tableData->maxZAxis()/4)
+		{
+			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxZAxis()/4.0))),255));
+		}
+		else if (val < ((tableData->maxZAxis()/4)*2))
+		{
+			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((tableData->maxZAxis()/4.0)))/(tableData->maxZAxis()/4.0)))));
+		}
+		else if (val < ((tableData->maxZAxis()/4)*3))
+		{
+			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb((255*((val-((tableData->maxZAxis()/4.0)*2))/(tableData->maxZAxis()/4.0))),255,0));
+		}
+		else
+		{
+			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxZAxis()/4.0)*3))/(tableData->maxZAxis()/4.0))),0));
+		}
+		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
+		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
+
+	}
+	*/
+}
 void TableView2D::tracingCheckBoxStateChanged(int newstate)
 {
 	if (newstate == Qt::Checked)
@@ -882,5 +1074,6 @@ TableView2D::~TableView2D()
 }
 void TableView2D::saveClicked()
 {
-	emit saveToFlash(m_locationid);
+	//emit saveToFlash(m_locationid);
+	tableData->saveRamToFlash();
 }

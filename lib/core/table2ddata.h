@@ -77,9 +77,13 @@ public:
 	virtual int rows() = 0;
 	virtual void setCell(int row, int column,double newval) = 0;
 	virtual void setWritesEnabled(bool enabled) = 0;
-	virtual void writeWholeLocation() = 0;
+	virtual void writeWholeLocation(bool ram) = 0;
 signals:
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
+public slots:
+	virtual void saveRamToFlash()=0;
+	virtual void updateFromFlash()=0;
+	virtual void updateFromRam()=0;
 };
 
 #endif // TABLE2DDATA_H

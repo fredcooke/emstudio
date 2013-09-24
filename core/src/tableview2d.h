@@ -27,6 +27,7 @@
 #include <QKeyEvent>
 #include <QClipboard>
 #include <table2ddata.h>
+#include <QPair>
 #include "ui_tableview2d.h"
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
@@ -36,7 +37,7 @@ class TableView2D : public DataView
 	Q_OBJECT
 	
 public:
-	explicit TableView2D(bool isram, bool isflash,bool isSigned = false,QWidget *parent = 0);
+	explicit TableView2D(QWidget *parent = 0);
 	~TableView2D();
 	//bool setData(unsigned short locationid,QByteArray data,TableData *newtableData=0);
 	//bool setData(unsigned short locationid,QByteArray data,Table2DMetaData metadata,TableData *newtableData);
@@ -68,6 +69,10 @@ private:
 	void writeTable(bool ram);
 	QList<QPair<int,int> > m_highlightItemList;
 	int m_oldXLoc;
+	void setRange(QList<QPair<QPair<int,int>,double> > data);
+	QString formatNumber(double num,int prec);
+	QString verifyValue(int row,int column,QString item);
+	void reColorTable(int rownum,int colnum);
 protected:
 	void resizeEvent(QResizeEvent *evt);
 	void keyPressEvent(QKeyEvent *event);

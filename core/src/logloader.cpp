@@ -140,14 +140,14 @@ void LogLoader::parseBuffer(QByteArray buffer)
 	int iloc = 0;
 	bool seq = false;
 	bool len = false;
-	if (buffer[iloc] & 0b00000100)
+	if (buffer[iloc] & 0x4)
 	{
 		//Has header
 		seq = true;
 		//qDebug() << "Has seq";
 		headersize += 1;
 	}
-	if (buffer[iloc] & 0b00000001)
+	if (buffer[iloc] & 0x1)
 	{
 		//Has length
 		len = true;

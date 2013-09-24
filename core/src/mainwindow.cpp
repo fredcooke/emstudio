@@ -1153,6 +1153,31 @@ void MainWindow::createView(unsigned short locid,DataType type)
 		QApplication::postEvent(win, new QEvent(QEvent::Show));
 		QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
 	}
+	else if (type == DATA_TABLE_2D)
+	{
+		Table2DData *data = emsComms->get2DTableData(locid);
+		TableView2D *view = new TableView2D();
+		QString title;
+		Table2DMetaData metadata = m_memoryMetaData->get2DMetaData(locid);
+		view->setMetaData(metadata);
+		DataBlock *block = dynamic_cast<DataBlock*>(data);
+		if (!view->setData(locid,block))
+		{
+			return;
+		}
+		title = metadata.tableTitle;
+		connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+		//connect(view,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SLOT(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
+		//connect(view,SIGNAL(saveToFlash(unsigned short)),this,SLOT(saveFlashLocationId(unsigned short)));
+		//connect(view,SIGNAL(reloadTableData(unsigned short,bool)),this,SLOT(reloadDataFromDevice(unsigned short,bool)));
+		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+		win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
+		win->setGeometry(view->geometry());
+		m_rawDataView[locid] = view;
+		win->show();
+		QApplication::postEvent(win, new QEvent(QEvent::Show));
+		QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+	}
 }
 
 void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,bool isram, bool isflash)
@@ -1164,11 +1189,11 @@ void MainWindow::createView(unsigned short locid,QByteArray data,DataType type,b
 		TableView2D *view = 0;
 		if (type == DATA_TABLE_2D)
 		{
-			view = new TableView2D(isram,isflash,false);
+			//view = new TableView2D(isram,isflash,false);
 		}
 		else if (type == DATA_TABLE_2D_SIGNED)
 		{
-			view = new TableView2D(isram,isflash,true);
+			//view = new TableView2D(isram,isflash,true);
 		}
 		QString title;
 		Table2DMetaData metadata = m_memoryMetaData->get2DMetaData(locid);

@@ -36,10 +36,16 @@ win32-x-g++ { #Linux based crossplatform 32bit build
 } else:win32 { #Windows based mingw build
 	message("Building for win32")
 	INCLUDEPATH += C:/libs/qwt/include C:/libs/qjson/include
-	LIBS += -LC:/libs/qwt/lib -lqwt -LC:/libs/qjson/lib -lqjson0
+	LIBS += -LC:/libs/qwt/lib -LC:/libs/qjson/lib -lqjson.dll
 	DEFINES += GIT_COMMIT=$$system(\"c:/program files (x86)/git/bin/git.exe\" describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(\"c:/program files (x86)/git/bin/git.exe\" log -n 1 --pretty=format:%H)
         QMAKE_LFLAGS += -static-libgcc -static-libstdc++
+	#CONFIG(debug, debug|release) {
+		LIBS += -lqwtd
+	#}
+	#CONFIG(release, debug|release) {
+	#	LIBS += =lqwt
+	#}
 }
 
 unix {

@@ -50,7 +50,7 @@ public:
 	int rows();
 	void setCell(int row, int column,double newval);
 	void setWritesEnabled(bool enabled);
-	void writeWholeLocation();
+	void writeWholeLocation(bool ram);
     double calcAxis(int val,QList<QPair<QString,double> > metadata);
     int backConvertAxis(double val,QList<QPair<QString,double> > metadata);
 private:
@@ -74,7 +74,17 @@ private:
 	QString axisLabel;
 	QString valuesLabel;
 signals:
-	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
+	void saveSingleDataToFlash(unsigned short locationid,unsigned short offset, unsigned short size,QByteArray data);
+	void saveSingleDataToRam(unsigned short locationid,unsigned short offset, unsigned short size,QByteArray data);
+	void requestBlockFromRam(unsigned short locationid,unsigned short offset,unsigned short size);
+	void requestBlockFromFlash(unsigned short locationid,unsigned short offset,unsigned short size);
+	void update();
+	void requestRamUpdateFromFlash(unsigned short locationid);
+	void requestFlashUpdateFromRam(unsigned short locationid);
+public slots:
+	void updateFromFlash(); //Trigger a flash update, if table is in ram, it copies from flash to ram, and sends a request to the ECU
+	void updateFromRam(); //Trigger a ram udpate. Requests table from the ECU from ram
+	void saveRamToFlash();
 };
 
 #endif // FETABLE2DDATA_H

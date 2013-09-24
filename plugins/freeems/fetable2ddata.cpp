@@ -25,9 +25,16 @@ FETable2DData::FETable2DData() : Table2DData()
 {
 	m_writesEnabled = true;
 }
-void FETable2DData::writeWholeLocation()
+void FETable2DData::writeWholeLocation(bool ram)
 {
-	emit saveSingleData(m_locationId,data(),0,data().size());
+	if (ram)
+	{
+		emit saveSingleDataToRam(m_locationId,0,data().size(),data());
+	}
+	else
+	{
+		emit saveSingleDataToFlash(m_locationId,0,data().size(),data());
+	}
 }
 void FETable2DData::setWritesEnabled(bool enabled)
 {
@@ -153,7 +160,7 @@ void FETable2DData::setCell(int row, int column,double newval)
 {
 	//New value has been accepted. Let's write it.
 	//offset = column + (row * 32), size == 2
-	qDebug() << "Update:" << row << column << newval;
+	//qDebug() << "Update:" << row << column << newval;
 	short val = 0;
 	if (row == 0)
 	{
@@ -194,11 +201,11 @@ void FETable2DData::setCell(int row, int column,double newval)
 		{
 			if (m_metaData.valid)
 			{
-				emit saveSingleData(m_locationId,data,(column*2)+(row * (m_metaData.size / 2.0)),2);
+				emit saveSingleDataToRam(m_locationId,(column*2)+(row * (m_metaData.size / 2.0)),2,data);
 			}
 			else
 			{
-				emit saveSingleData(m_locationId,data,(column*2)+(row * (m_dataSize / 2.0)),2);
+				emit saveSingleDataToRam(m_locationId,(column*2)+(row * (m_dataSize / 2.0)),2,data);
 			}
 		}
 	}
@@ -276,4 +283,19 @@ int FETable2DData::backConvertAxis(double val,QList<QPair<QString,double> > meta
         }
     }
     return (unsigned short)newval;
+}
+void FETable2DData::updateFromFlash()
+{
+	//emit requestBlockFromFlash(m_locationId,0,0);
+	emit requestRamUpdateFromFlash(m_locationId);
+}
+
+void FETable2DData::updateFromRam()
+{
+	//emit requestRamUpdateFromFlash(m_locationId);
+	emit requestBlockFromRam(m_locationId,0,0);
+}
+void FETable2DData::saveRamToFlash()
+{
+	emit requestFlashUpdateFromRam(m_locationId);
 }
