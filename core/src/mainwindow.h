@@ -48,6 +48,7 @@
 #include "readonlyramview.h"
 #include "emsstatus.h"
 #include "tablemap3d.h"
+#include "rawdata.h"
 #include "serialportstatus.h"
 #include <QPluginLoader>
 
@@ -121,10 +122,8 @@ private:
 	QMdiSubWindow *aboutMdiWindow;
 	QMdiSubWindow *emsStatusMdiWindow;
 	void checkMessageCounters(int sequencenumber);
-	void populateParentLists();
 	DataPacketDecoder *dataPacketDecoder;
 	void populateDataFields();
-	void updateRamLocation(unsigned short locationid);
 
 	Ui::MainWindow ui;
 	QString m_pluginFileName;
@@ -155,7 +154,6 @@ private:
 	bool m_debugLogs;
 	bool m_deviceFlashDirty;
 	void updateView(unsigned short locid,QObject *view,QByteArray data,DataType type);
-	void createView(unsigned short locid,QByteArray data,DataType type,bool isram, bool isflash);
 	void createView(unsigned short locid,DataType type);
 	QList<int> m_locIdMsgList;
 	QList<int> m_locIdInfoMsgList;
@@ -167,7 +165,6 @@ private:
 private slots:
 	void emsCommsSilence();
 	void emsCommsSilenceBroken();
-	void updateDataWindows(unsigned short locationid);
 	void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);
 	void tableview3d_show3DTable(unsigned short locationid,Table3DData *data);
 	void emsStatusHardResetRequested();
@@ -180,11 +177,8 @@ private slots:
 	void emsCommsDisconnected();
 	void emsCompilerVersion(QString version);
 	void checkSyncRequest();
-	void rawViewSaveData(unsigned short locationid,QByteArray data,int physicallocation);
-	void configViewSaveData(unsigned short locationid,QByteArray data);
 	void rawDataViewDestroyed(QObject *object);
 	void emsInfoDisplayLocationId(int locid,bool isram,DataType type);
-	void dataViewSaveLocation(unsigned short locationid,QByteArray data,int phyiscallocation);
 	void menu_file_saveOfflineDataClicked();
 	void menu_file_loadOfflineDataClicked();
 	void menu_windows_GaugesClicked();
@@ -211,18 +205,12 @@ private slots:
 	void logPayloadReceived(QByteArray header,QByteArray payload);
 	void logProgress(qlonglong current,qlonglong total);
 	void logFinished();
-	void tableview3d_reloadTableData(unsigned short locationid,bool ram);
-	void tableview2d_reloadTableData(unsigned short locationid,bool isram);
-	void reloadDataFromDevice(unsigned short locationid,bool isram);
 	void loadLogButtonClicked();
 	void playLogButtonClicked();
 	void pauseLogButtonClicked();
-	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
-	void saveFlashLocationId(unsigned short locationid);
 	void stopLogButtonClicked();
 	void emsCommsConnected();
 	void unknownPacket(QByteArray header,QByteArray payload);
-	void locationIdList(QList<unsigned short> idlist);
 	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QString version);
@@ -233,7 +221,6 @@ private slots:
 	void commandFailed(int sequencenumber,unsigned short errornum);
 	void commandTimedOut(int sequencenumber);
 	void interByteDelayChanged(int num);
-	void saveFlashLocationIdBlock(unsigned short locationid,QByteArray data);
 	void retrieveRamLocationId(unsigned short locationid);
 	void retrieveFlashLocationId(unsigned short locationid);
 	void interrogationProgress(int current, int total);

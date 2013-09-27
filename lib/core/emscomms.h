@@ -61,6 +61,7 @@
 #include "table2ddata.h"
 #include "datapacketdecoder.h"
 #include "memorymetadata.h"
+#include "rawdata.h"
 
 class EmsComms : public QThread
 {
@@ -98,6 +99,7 @@ public:
 	virtual void startInterrogation()=0;
 	virtual Table2DData* get2DTableData(unsigned short locationid)=0;
 	virtual Table3DData* get3DTableData(unsigned short locationid)=0;
+	virtual RawData* getRawData(unsigned short locationid)=0;
 	//virtual void populateDataFields()=0;
 	virtual QByteArray generatePacket(QByteArray header,QByteArray payload)=0;
 	virtual int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)=0;

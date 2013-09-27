@@ -40,6 +40,40 @@ void FETable2DData::setWritesEnabled(bool enabled)
 {
 	m_writesEnabled = enabled;
 }
+void FETable2DData::reCalcAxisData()
+{
+/*		m_axis.append(xdouble);
+		m_values.append(ydouble);*/
+	m_minActualXAxis = calcAxis(65535,m_metaData.xAxisCalc);
+	m_minActualYAxis = calcAxis(65535,m_metaData.yAxisCalc);
+	m_maxActualXAxis = calcAxis(-65535,m_metaData.xAxisCalc);
+	m_maxActualYAxis = calcAxis(-65535,m_metaData.yAxisCalc);
+	for (int i=0;i<m_axis.size();i++)
+	{
+		if (m_axis[i] > m_maxActualXAxis)
+		{
+			m_maxActualXAxis = m_axis[i];
+		}
+		if (m_axis[i] < m_minActualXAxis)
+		{
+			m_minActualXAxis = m_axis[i];
+		}
+
+	}
+	for (int i=0;i<m_values.size();i++)
+	{
+
+		if (m_values[i] > m_maxActualYAxis)
+		{
+			m_maxActualYAxis = m_values[i];
+		}
+		if (m_values[i] < m_minActualYAxis)
+		{
+			m_minActualYAxis = m_values[i];
+		}
+	}
+}
+
 void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArray payload,Table2DMetaData metadata,bool signedData)
 {
 	m_dataSize = payload.size();
@@ -97,7 +131,8 @@ void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArr
 		m_axis.append(xdouble);
 		m_values.append(ydouble);
 	}
-	}
+	emit update();
+}
 double FETable2DData::maxActualXAxis()
 {
 	return m_maxActualXAxis;
@@ -195,6 +230,7 @@ void FETable2DData::setCell(int row, int column,double newval)
 		data.append((char)((((unsigned short)val) >> 8) & 0xFF));
 		data.append((char)(((unsigned short)val) & 0xFF));
 	}
+	reCalcAxisData();
 	if (!m_isFlashOnly)
 	{
 		if (m_writesEnabled)

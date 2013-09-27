@@ -5,8 +5,13 @@ moc_*.h
 moc_*.cpp
 obj/
 emstudio
+core/*.dll
+core/debug
+core/release
 core/plugins/
 plugins/freeems/moc_*
+plugins/freeems/*.Debug
+plugins/freeems/*.Release
 
 # Other project stuff
 Makefile

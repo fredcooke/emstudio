@@ -1523,6 +1523,17 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 						{
 							m_3dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalFlashBlock(locid),m_metaDataParser->get3DMetaData(locid));
 						}
+						if (m_rawDataMap.contains(locid))
+						{
+							if (emsData.hasLocalRamBlock(locid))
+							{
+								m_rawDataMap[locid]->setData(locid,false,emsData.getLocalRamBlock(locid));
+							}
+							else
+							{
+								m_rawDataMap[locid]->setData(locid,true,emsData.getLocalFlashBlock(locid));
+							}
+						}
 					}
 					else
 					{
@@ -1543,6 +1554,17 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 						if (m_3dTableMap.contains(locid))
 						{
 							m_3dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalRamBlock(locid),m_metaDataParser->get3DMetaData(locid));
+						}
+						if (m_rawDataMap.contains(locid))
+						{
+							if (emsData.hasLocalRamBlock(locid))
+							{
+								m_rawDataMap[locid]->setData(locid,false,emsData.getLocalRamBlock(locid));
+							}
+							else
+							{
+								m_rawDataMap[locid]->setData(locid,true,emsData.getLocalFlashBlock(locid));
+							}
 						}
 					}
 					else
@@ -1669,6 +1691,24 @@ Table3DData* FreeEmsComms::get3DTableData(unsigned short locationid)
 	}
 	return m_3dTableMap[locationid];
 }
+RawData* FreeEmsComms::getRawData(unsigned short locationid)
+{
+	if (!m_rawDataMap.contains(locationid))
+	{
+		RawData *data = new FERawData();
+		if (emsData.hasLocalRamBlock(locationid))
+		{
+			data->setData(locationid,false,emsData.getLocalRamBlock(locationid));
+		}
+		else
+		{
+			data->setData(locationid,true,emsData.getLocalFlashBlock(locationid));
+		}
+		m_rawDataMap[locationid] = data;
+	}
+	return m_rawDataMap[locationid];
+}
+
 void FreeEmsComms::locationIdUpdate(unsigned short locationid)
 {
 	if (m_2dTableMap.contains(locationid))
@@ -1678,6 +1718,17 @@ void FreeEmsComms::locationIdUpdate(unsigned short locationid)
 	if (m_3dTableMap.contains(locationid))
 	{
 		m_3dTableMap[locationid]->setData(locationid,!emsData.hasDeviceRamBlock(locationid),emsData.getDeviceRamBlock(locationid),m_metaDataParser->get3DMetaData(locationid));
+	}
+	if (m_rawDataMap.contains(locationid))
+	{
+		if (emsData.hasLocalRamBlock(locationid))
+		{
+			m_rawDataMap[locationid]->setData(locationid,false,emsData.getLocalRamBlock(locationid));
+		}
+		else
+		{
+			m_rawDataMap[locationid]->setData(locationid,true,emsData.getLocalFlashBlock(locationid));
+		}
 	}
 
 }
@@ -1691,6 +1742,17 @@ void FreeEmsComms::copyFlashToRam(unsigned short locationid)
 	if (m_3dTableMap.contains(locationid))
 	{
 		m_3dTableMap[locationid]->setData(locationid,!emsData.hasLocalRamBlock(locationid),emsData.getLocalRamBlock(locationid),m_metaDataParser->get3DMetaData(locationid));
+	}
+	if (m_rawDataMap.contains(locationid))
+	{
+		if (emsData.hasLocalRamBlock(locationid))
+		{
+			m_rawDataMap[locationid]->setData(locationid,false,emsData.getLocalRamBlock(locationid));
+		}
+		else
+		{
+			m_rawDataMap[locationid]->setData(locationid,true,emsData.getLocalFlashBlock(locationid));
+		}
 	}
 	updateBlockInRam(locationid,0,emsData.getLocalFlashBlock(locationid).size(),emsData.getLocalFlashBlock(locationid));
 }

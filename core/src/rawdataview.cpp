@@ -57,8 +57,9 @@ void RawDataView::passDatalog(QVariantMap data)
 }
 bool RawDataView::setData(unsigned short locationid,DataBlock *data)
 {
+	m_data = dynamic_cast<RawData*>(data);
 	m_locationId = locationid;
-	//ui.hexEditor->setData(data);
+	ui.hexEditor->setData(m_data->data());
 	ui.locationIdLabel->setText("0x" + QString::number(locationid,16).toUpper());
 	return true;
 }

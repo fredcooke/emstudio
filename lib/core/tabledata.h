@@ -56,8 +56,8 @@
 class DataBlock : public QObject
 {
 public:
-    virtual double calcAxis(int val,QList<QPair<QString,double> > metadata)=0;
-    virtual int backConvertAxis(double val,QList<QPair<QString,double> > metadata)=0;
+    //virtual double calcAxis(int val,QList<QPair<QString,double> > metadata)=0;
+    //virtual int backConvertAxis(double val,QList<QPair<QString,double> > metadata)=0;
 };
 
 #endif // TABLEDATA_H

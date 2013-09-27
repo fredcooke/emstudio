@@ -20,7 +20,9 @@ HEADERS += configdata.h \
            readonlyramblock.h \
            readonlyramdata.h \
            serialportstatus.h \
+	   tabledata.h \
            table2ddata.h \
            table2dmetadata.h \
            table3ddata.h \
-	   table3dmetadata.h
+	   table3dmetadata.h \
+    rawdata.h

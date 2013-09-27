@@ -725,7 +725,11 @@ bool TableView2D::setData(unsigned short locationid,DataBlock *data)
 	{
 		m_metaData = Table2DMetaData();
 	}
-	tableData = dynamic_cast<Table2DData*>(data);
+	if (tableData == 0)
+	{
+		tableData = dynamic_cast<Table2DData*>(data);
+		connect(tableData,SIGNAL(update()),this,SLOT(updateTable()));
+	}
 	/*if (tableData && newtableData && (tableData != newtableData))
 	{
 		disconnect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
@@ -749,6 +753,14 @@ bool TableView2D::updateTable()
 	samples.clear();
 
 	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
+	QList<QPair<int,int> > selectedlist;
+	if (ui.tableWidget->selectedItems().size() > 0)
+	{
+		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
+		{
+			selectedlist.append(QPair<int,int>(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column()));
+		}
+	}
 	ui.tableWidget->clear();
 	ui.tableWidget->setColumnCount(0);
 	ui.tableWidget->setRowCount(2);
@@ -819,8 +831,14 @@ bool TableView2D::updateTable()
 	curve->setSamples(samples);
 	ui.plot->replot();
 	ui.tableWidget->setCurrentCell(m_currRow,m_currCol);
+		resizeColumnWidths();
+	for (int i=0;i<selectedlist.size();i++)
+	{
+		ui.tableWidget->item(selectedlist[i].first,selectedlist[i].second)->setSelected(true);
+	}
+
+	selectedlist.clear();
 	//ui.tableWidget->resizeColumnsToContents();
-	resizeColumnWidths();
 	return true;
 
 }

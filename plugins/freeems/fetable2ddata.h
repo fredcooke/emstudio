@@ -73,6 +73,7 @@ private:
 	QList<double> m_values;
 	QString axisLabel;
 	QString valuesLabel;
+	void reCalcAxisData();
 signals:
 	void saveSingleDataToFlash(unsigned short locationid,unsigned short offset, unsigned short size,QByteArray data);
 	void saveSingleDataToRam(unsigned short locationid,unsigned short offset, unsigned short size,QByteArray data);

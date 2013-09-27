@@ -36,6 +36,8 @@
 #include "table3ddata.h"
 #include "table2ddata.h"
 #include "emsdata.h"
+#include "ferawdata.h"
+
 class FreeEmsComms : public EmsComms
 {
 	Q_OBJECT
@@ -80,6 +82,7 @@ public:
 	int disableDatalogStream();
 	Table2DData* get2DTableData(unsigned short locationid);
 	Table3DData* get3DTableData(unsigned short locationid);
+	RawData* getRawData(unsigned short locationid);
 protected:
 	void run();
 private:
@@ -197,6 +200,7 @@ private:
 	EmsData emsData;
 	QMap<unsigned short,Table2DData*> m_2dTableMap;
 	QMap<unsigned short,Table3DData*> m_3dTableMap;
+	QMap<unsigned short,RawData*> m_rawDataMap;
 
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);

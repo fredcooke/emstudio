@@ -23,6 +23,7 @@
 #define RAWDATAVIEW_H
 
 #include <QWidget>
+#include "rawdata.h"
 #include "dataview.h"
 #include "ui_rawdataview.h"
 
@@ -40,6 +41,7 @@ private:
 	bool m_isRam;
 	Ui::RawDataView ui;
 	unsigned short m_locationId;
+	RawData *m_data;
 
 private slots:
 	void saveFlashButtonClicked();
