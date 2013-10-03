@@ -70,7 +70,7 @@ SerialPortStatus SerialPort::isSerialMonitor(QString portname)
 	unsigned char buf[3];
 	int const count = readBytes( buf, sizeof(buf) );
 
-	if (count >= 0)
+	if (count <= 0)
 	{
 		return UNABLE_TO_READ;
 	}
