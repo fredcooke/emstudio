@@ -70,7 +70,12 @@ SerialPortStatus SerialPort::isSerialMonitor(QString portname)
 	unsigned char buf[3];
 	int const count = readBytes( buf, sizeof(buf) );
 
-	assert( count >= 0 );               /**< fatally catch read errs (temp) */
+	if (count >= 0)
+	{
+		return UNABLE_TO_READ;
+	}
+
+	//assert( count >= 0 );               /**< fatally catch read errs (temp) */
 	SerialPortStatus status = NONE;     /**< default: assume !SM            */
 	qDebug() << "Verify count: " << QString::number( count );
 	if (count >= 2)

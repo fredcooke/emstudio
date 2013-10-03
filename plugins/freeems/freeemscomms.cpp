@@ -649,6 +649,10 @@ void FreeEmsComms::run()
 					{
 						errorstr = "Unable to open serial port " + m_threadReqList[i].args[0].toString() + " Please ensure no other application has the port open and that the port exists!";
 					}
+					else if (errortype == UNABLE_TO_READ)
+					{
+						errorstr = "Unable to read from serial port " + m_threadReqList[i].args[0].toString() + ". This is likely an error with your serial port driver. Please disconnect and reconnect the device and try again";
+					}
 					else if (errortype == SM_MODE)
 					{
 						//TODO Fix this when we have the ability to reset SM mode
