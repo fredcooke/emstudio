@@ -371,6 +371,22 @@ QList<unsigned short> EmsData::getTopLevelUniqueLocationIdList()
 
 
 }
+QList<unsigned short> EmsData::getUniqueLocationIdList()
+{
+	QList<unsigned short> retval;
+	for (int i=0;i<m_deviceRamMemoryList.size();i++)
+	{
+		retval.append(m_deviceRamMemoryList[i]->locationid);
+	}
+	for (int i=0;i<m_deviceFlashMemoryList.size();i++)
+	{
+		if (!retval.contains(m_deviceFlashMemoryList[i]->locationid))
+		{
+			retval.append(m_deviceFlashMemoryList[i]->locationid);
+		}
+	}
+	return retval;
+}
 
 QList<unsigned short> EmsData::getTopLevelDeviceRamLocations()
 {
@@ -657,6 +673,7 @@ void EmsData::flashBlockUpdate(unsigned short locationid, QByteArray header, QBy
 			{
 				setLocalFlashBlock(locationid,payload);
 				setDeviceFlashBlock(locationid,payload);
+				emit updateRequired(locationid);
 				return;
 			}
 			else

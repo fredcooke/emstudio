@@ -87,6 +87,7 @@ public:
 	void setPlugin(QString plugin);
 	void connectToEms();
 private:
+	QList<unsigned short> m_locationIdList;
 	bool m_checkEmsDataInUse;
 	bool m_offlineMode;
 	QMap<unsigned short,MemoryLocationInfo> m_memoryInfoMap;
@@ -153,7 +154,6 @@ private:
 	bool m_localRamDirty;
 	bool m_debugLogs;
 	bool m_deviceFlashDirty;
-	void updateView(unsigned short locid,QObject *view,QByteArray data,DataType type);
 	void createView(unsigned short locid,DataType type);
 	QList<int> m_locIdMsgList;
 	QList<int> m_locIdInfoMsgList;
@@ -228,6 +228,7 @@ private slots:
 	void interrogateTaskStart(QString task, int sequence);
 	void interrogateTaskSucceed(int sequence);
 	void interrogateTaskFail(int sequence);
+	void locationIdList(QList<unsigned short> idlist);
 
 };
 

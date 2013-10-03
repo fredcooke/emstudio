@@ -158,10 +158,10 @@ private:
 		int sequencenumber;
 		void addArg(QVariant arg,int size=0) { args.append(arg); argsize.append(size);}
 	};
-    bool m_isSilent;
-    quint64 m_lastDatalogTime;
-    QTimer *m_lastdatalogTimer;
-    bool m_lastDatalogUpdateEnabled;
+	bool m_isSilent;
+	quint64 m_lastDatalogTime;
+	QTimer *m_lastdatalogTimer;
+	bool m_lastDatalogUpdateEnabled;
 	bool m_isConnected;
 	FEDataPacketDecoder *dataPacketDecoder;
 	FEMemoryMetaData *m_metaDataParser;

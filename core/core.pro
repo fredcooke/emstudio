@@ -16,7 +16,7 @@ CONFIG += console
 
 INCLUDEPATH += $$PWD/../lib/core
 DEPENDPATH += $$PWD/../lib/core
-
+include(QsLog/QsLog.pri)
 win32-x-g++ { #Linux based crossplatform 32bit build
         message("Building for win32-x-g++")
 	INCLUDEPATH += /home/michael/QtWin32/libs/qwt/include /home/michael/QtWin32/libs/qjson/include

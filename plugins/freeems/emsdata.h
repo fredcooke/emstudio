@@ -98,6 +98,7 @@ public:
 		return false;
 	}
 	QList<unsigned short> getTopLevelUniqueLocationIdList();
+	QList<unsigned short> getUniqueLocationIdList();
 
 private:
 	bool m_checkEmsDataInUse;

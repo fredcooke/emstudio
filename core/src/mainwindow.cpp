@@ -20,7 +20,6 @@
  ************************************************************************************/
 
 #include "mainwindow.h"
-#include <QDebug>
 #include <QFileDialog>
 //#include "datafield.h"
 #include <QMdiArea>
@@ -29,7 +28,7 @@
 #include <tableview2d.h>
 #include <qjson/parser.h>
 #include "logloader.h"
-
+#include "QsLog.h"
 #define define2string_p(x) #x
 #define define2string(x) define2string_p(x)
 
@@ -41,8 +40,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	qRegisterMetaType<MemoryLocationInfo>("MemoryLocationInfo");
 	qRegisterMetaType<DataType>("DataType");
 	qRegisterMetaType<SerialPortStatus>("SerialPortStatus");
-	qDebug() << "EMStudio commit:" << define2string(GIT_COMMIT);
-	qDebug() << "Full hash:" << define2string(GIT_HASH);
+	QLOG_INFO() << "EMStudio commit:" << define2string(GIT_COMMIT);
+	QLOG_INFO() << "Full hash:" << define2string(GIT_HASH);
 	progressView=0;
 	emsComms=0;
 	m_interrogationInProgress = false;
@@ -119,8 +118,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 		{
 			QString errormsg = QString("Error parsing JSON from config file on line number: ") + QString::number(decoderparser.errorLine()) + " error text: " + decoderparser.errorString();
 			QMessageBox::information(0,"Error",errormsg);
-			qDebug() << "Error parsing JSON";
-			qDebug() << "Line number:" << decoderparser.errorLine() << "error text:" << decoderparser.errorString();
+			QLOG_ERROR() << "Error parsing json";
+			QLOG_ERROR() << "Line number:" << decoderparser.errorLine() << "error text:" << decoderparser.errorString();
 			//return;
 		}
 		else
@@ -148,7 +147,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 				QVariantList calcliststr = tmpmap["calc"].toList();
 				for (int j=0;j<calcliststr.size();j++)
 				{
-					qDebug() << "XCalc:" << calcliststr[j].toMap()["type"].toString() << calcliststr[j].toMap()["value"].toDouble();
+					QLOG_TRACE() << "XCalc:" << calcliststr[j].toMap()["type"].toString() << calcliststr[j].toMap()["value"].toDouble();
 					calclist.append(QPair<QString,double>(calcliststr[j].toMap()["type"].toString(),calcliststr[j].toMap()["value"].toDouble()));
 				}
 				block.setCalc(calclist);
@@ -205,33 +204,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	{
 		m_pluginFileName = "plugins/freeemsplugin.lib";
 	}
-	qDebug() << "Loading plugin from:" << m_pluginFileName;
+	QLOG_INFO() << "Loading plugin from:" << m_pluginFileName;
 	//m_pluginFileName = "plugins/libmsplugin.so";
 	//m_pluginFileName = "plugins/libo5eplugin.so";
 
-	/*pluginLoader->setFileName(m_pluginFileName);
-	//loader->setFileName("plugins/libmsplugin.so");
-	if (!pluginLoader->load())
-	{
-		qDebug() << "Unable to load plugin. error:" << pluginLoader->errorString();
-		exit(-1);
-	}
-
-
-	emsComms = qobject_cast<EmsComms*>(pluginLoader->instance());
-	if (!emsComms)
-	{
-		qDebug() << "Unable to load plugin!!!";
-		qDebug() << pluginLoader->errorString();
-		exit(-1);
-	}
-
-	dataPacketDecoder = emsComms->getDecoder();
-	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
-
-
-
-	emsComms->setLogFileName(m_logFileName);*/
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 
 	emsInfo = new EmsInfoView();
@@ -300,7 +276,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	packetStatusMdiWindow->setWindowTitle(packetStatus->windowTitle());
 
 	//Load settings
-	qDebug() << "Local settings file is:" << m_settingsFile;
+	QLOG_INFO() << "Local settings file is:" << m_settingsFile;
 	QSettings settings(m_settingsFile,QSettings::IniFormat);
 	settings.beginGroup("comms");
 	m_comPort = settings.value("port","/dev/ttyUSB0").toString();
@@ -349,6 +325,92 @@ void MainWindow::menu_file_saveOfflineDataClicked()
 	QVariantMap flashMap;
 	QVariantMap metaMap;
 	QVariantMap ramMap;
+	QVariantMap datatable2d;
+	QVariantMap datatable3d;
+	QVariantMap dataraw;
+	if (!emsComms)
+	{
+		return;
+	}
+	for (int i=0;i<m_locationIdList.size();i++)
+	{
+
+		if (emsComms->get2DTableData(m_locationIdList[i]))
+		{
+			QVariantMap current;
+			QVariantList axis;
+			QVariantList data;
+			for (int j=0;j<emsComms->get2DTableData(m_locationIdList[i])->axis().size();j++)
+			{
+				axis.append(emsComms->get2DTableData(m_locationIdList[i])->axis()[j]);
+			}
+			for (int j=0;j<emsComms->get2DTableData(m_locationIdList[i])->values().size();j++)
+			{
+				data.append(emsComms->get2DTableData(m_locationIdList[i])->values()[j]);
+			}
+			QLOG_DEBUG() << "2D Table Saved";
+			QLOG_DEBUG() << "Axis Size:" << axis.size();
+			QLOG_DEBUG() << "Data Size:" << data.size();
+			current["axis"] = axis;
+			current["data"] = data;
+			current["title"] = emsComms->getMetaParser()->get2DMetaData(m_locationIdList[i]).tableTitle;
+			current["xtitle"] = emsComms->getMetaParser()->get2DMetaData(m_locationIdList[i]).xAxisTitle;
+			current["ytitle"] = emsComms->getMetaParser()->get2DMetaData(m_locationIdList[i]).yAxisTitle;
+			datatable2d[QString::number(m_locationIdList[i],16).toUpper()] = current;
+		}
+		if (emsComms->get3DTableData(m_locationIdList[i]))
+		{
+			QVariantMap current;
+			QVariantList xlist;
+			QVariantList ylist;
+			QVariantList zlist;
+			for (int j=0;j<emsComms->get3DTableData(m_locationIdList[i])->xAxis().size();j++)
+			{
+				xlist.append(emsComms->get3DTableData(m_locationIdList[i])->xAxis()[j]);
+			}
+			for (int j=0;j<emsComms->get3DTableData(m_locationIdList[i])->yAxis().size();j++)
+			{
+				ylist.append(emsComms->get3DTableData(m_locationIdList[i])->yAxis()[j]);
+			}
+			for (int j=0;j<emsComms->get3DTableData(m_locationIdList[i])->values().size();j++)
+			{
+				QVariantList zrow;
+				for (int k=1;k<emsComms->get3DTableData(m_locationIdList[i])->values()[j].size();k++)
+				{
+					zrow.append(emsComms->get3DTableData(m_locationIdList[i])->values()[j][k]);
+				}
+				zlist.append((QVariant)zrow);
+			}
+			current["x"] = xlist;
+			current["y"] = ylist;
+			current["z"] = zlist;
+			current["title"] = emsComms->getMetaParser()->get3DMetaData(m_locationIdList[i]).tableTitle;
+			current["xtitle"] = emsComms->getMetaParser()->get3DMetaData(m_locationIdList[i]).xAxisTitle;
+			current["ytitle"] = emsComms->getMetaParser()->get3DMetaData(m_locationIdList[i]).yAxisTitle;
+			current["ztitle"] = emsComms->getMetaParser()->get3DMetaData(m_locationIdList[i]).zAxisTitle;
+			datatable3d[QString::number(m_locationIdList[i],16).toUpper()] = current;
+		}
+		if (emsComms->getRawData(m_locationIdList[i]))
+		{
+			QVariantList raw;
+			for (int j=0;j<emsComms->getRawData(m_locationIdList[i])->data().size();j++)
+			{
+				raw.append((unsigned char)emsComms->getRawData(m_locationIdList[i])->data()[j]);
+			}
+			dataraw[QString::number(m_locationIdList[i],16).toUpper()] = raw;
+		}
+	}
+	top["2D"] = datatable2d;
+	top["3D"] = datatable3d;
+	top["RAW"] = dataraw;
+	QJson::Serializer serializer2;
+	QByteArray out2 = serializer2.serialize(top);
+	QFile outfile2(filename);
+	outfile2.open(QIODevice::ReadWrite | QIODevice::Truncate);
+	outfile2.write(out2);
+	outfile2.flush();
+	outfile2.close();
+	return;
 	QMap<unsigned short,MemoryLocationInfo>::const_iterator i = m_memoryInfoMap.constBegin();
 	while (i != m_memoryInfoMap.constEnd())
 	{
@@ -424,7 +486,7 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 	QString filename = QFileDialog::getOpenFileName(this,"Load Offline File",".","Offline JSON Files (*.json)");
 	if (filename == "")
 	{
-		qDebug() << "No offline file selected!";
+		QLOG_ERROR() << "No offline file selected!";
 		return;
 	}
 	//QByteArray out = serializer.serialize(top);
@@ -438,7 +500,7 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 	QVariant outputvar = parser.parse(out,&ok);
 	if (!ok)
 	{
-		qDebug() << "Error parsing json:" << parser.errorString();
+		QLOG_ERROR() << "Error parsing json:" << parser.errorString();
 		return;
 	}
 	m_offlineMode = true;
@@ -547,7 +609,6 @@ void MainWindow::menu_file_loadOfflineDataClicked()
         while (i != flashMap.constEnd())
         {
             bool ok = false;
-            //qDebug() << "Flash location" << i.key().toInt(&ok,16);
             QString val = i.value().toString();
             QStringList valsplit = val.split(",");
             QByteArray bytes;
@@ -566,8 +627,8 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 	    emsComms->hardReset();
 	}
         return;
-    }
-    i = metaMap.constBegin();
+	}
+	i = metaMap.constBegin();
 	while (i != metaMap.constEnd())
 	{
 
@@ -663,7 +724,6 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 	while (i != flashMap.constEnd())
 	{
 		bool ok = false;
-		//qDebug() << "Flash location" << i.key().toInt(&ok,16);
 		QString val = i.value().toString();
 		QStringList valsplit = val.split(",");
 		QByteArray bytes;
@@ -688,13 +748,13 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 void MainWindow::emsCommsSilence()
 {
 	//This is called when the ems has been silent for 5 seconds, when it was previously talking.
-	qDebug() << "EMS HAS GONE SILENT";
+	QLOG_WARN() << "EMS HAS GONE SILENT";
 }
 
 void MainWindow::emsCommsSilenceBroken()
 {
 	//This is called when ems had previously been talking, gone silent, then started talking again.
-	qDebug() << "EMS HAS GONE NOISEY";
+	QLOG_WARN() << "EMS HAS GONE NOISEY";
 }
 
 void MainWindow::emsCommsDisconnected()
@@ -707,7 +767,7 @@ void MainWindow::emsCommsDisconnected()
 	ui.actionConnect->setEnabled(true);
 	ui.actionDisconnect->setEnabled(false);
 	emsComms = 0;
-	qDebug() << "emsCommsDisconnected, resetting and reloading plugin";
+	QLOG_INFO() << "emsCommsDisconnected, resetting and reloading plugin";
 
 	//Need to reset everything here.
 	pluginLoader->unload();
@@ -717,7 +777,7 @@ void MainWindow::emsCommsDisconnected()
 	pluginLoader->setFileName(m_pluginFileName);
 	if (!pluginLoader->load())
 	{
-		qDebug() << "Unable to load plugin. " << m_pluginFileName << "error:" << pluginLoader->errorString();
+		QLOG_ERROR() << "Unable to load plugin. " << m_pluginFileName << "error:" << pluginLoader->errorString();
 		exit(-1);
 	}
 
@@ -725,8 +785,8 @@ void MainWindow::emsCommsDisconnected()
 	emsComms = qobject_cast<EmsComms*>(pluginLoader->instance());
 	if (!emsComms)
 	{
-		qDebug() << "Unable to instantiate plugin:" << m_pluginFileName << pluginLoader->instance();
-		qDebug() << pluginLoader->errorString();
+		QLOG_ERROR() << "Unable to instantiate plugin:" << m_pluginFileName << pluginLoader->instance();
+		QLOG_ERROR() << pluginLoader->errorString();
 		exit(-1);
 	}
 
@@ -752,9 +812,9 @@ void MainWindow::emsCommsDisconnected()
 	m_memoryMetaData = emsComms->getMetaParser();
 	//m_memoryMetaData->loadMetaDataFromFile(filestr);
 	//emsData->setMetaData(m_memoryMetaData);
-	qDebug() << m_memoryMetaData->errorMap().keys().size() << "Error Keys Loaded";
-	qDebug() << m_memoryMetaData->table3DMetaData().size() << "3D Tables Loaded";
-	qDebug() << m_memoryMetaData->table2DMetaData().size() << "2D Tables Loaded";
+	QLOG_INFO() << m_memoryMetaData->errorMap().keys().size() << "Error Keys Loaded";
+	QLOG_INFO() << m_memoryMetaData->table3DMetaData().size() << "3D Tables Loaded";
+	QLOG_INFO() << m_memoryMetaData->table2DMetaData().size() << "2D Tables Loaded";
 
 
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
@@ -798,6 +858,7 @@ void MainWindow::emsCommsDisconnected()
 	ui.actionConnect->setEnabled(true);
 	m_offlineMode = true;
 }
+
 void MainWindow::setPlugin(QString plugin)
 {
 	m_pluginFileName = plugin;
@@ -813,18 +874,18 @@ void MainWindow::setPlugin(QString plugin)
 	pluginLoader=0;
 	pluginLoader = new QPluginLoader(this);
 	pluginLoader->setFileName(m_pluginFileName);
-    qDebug() << "Attempting to load plugin:" << m_pluginFileName;
+	QLOG_INFO() << "Attempting to load plugin:" << m_pluginFileName;
 	if (!pluginLoader->load())
 	{
 
-		qDebug() << "Unable to load plugin. error:" << pluginLoader->errorString();
+		QLOG_ERROR() << "Unable to load plugin. error:" << pluginLoader->errorString();
 		exit(-1);
 	}
 	emsComms = qobject_cast<EmsComms*>(pluginLoader->instance());
 	if (!emsComms)
 	{
-		qDebug() << "Unable to load plugin!!!";
-		qDebug() << pluginLoader->errorString();
+		QLOG_ERROR() << "Unable to load plugin!!!";
+		QLOG_ERROR() << pluginLoader->errorString();
 		exit(-1);
 	}
 	QString filestr = "";
@@ -847,9 +908,9 @@ void MainWindow::setPlugin(QString plugin)
 	m_memoryMetaData = emsComms->getMetaParser();
 	m_memoryMetaData->loadMetaDataFromFile(filestr);
 	//emsData->setMetaData(m_memoryMetaData);
-	qDebug() << m_memoryMetaData->errorMap().keys().size() << "Error Keys Loaded";
-	qDebug() << m_memoryMetaData->table3DMetaData().size() << "3D Tables Loaded";
-	qDebug() << m_memoryMetaData->table2DMetaData().size() << "2D Tables Loaded";
+	QLOG_INFO() << m_memoryMetaData->errorMap().keys().size() << "Error Keys Loaded";
+	QLOG_INFO() << m_memoryMetaData->table3DMetaData().size() << "3D Tables Loaded";
+	QLOG_INFO() << m_memoryMetaData->table2DMetaData().size() << "2D Tables Loaded";
 	dataPacketDecoder = emsComms->getDecoder();
 	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
 	dataTables->passDecoder(dataPacketDecoder);
@@ -895,6 +956,12 @@ void MainWindow::setPlugin(QString plugin)
 	emsComms->setInterByteSendDelay(m_comInterByte);
 	emsComms->setlogsDebugEnabled(m_debugLogs);
 }
+
+void MainWindow::locationIdList(QList<unsigned short> idlist)
+{
+	m_locationIdList = idlist;
+}
+
 void MainWindow::menu_enableDatalogsClicked()
 {
 	if (emsComms)
@@ -931,23 +998,14 @@ void MainWindow::menu_aboutClicked()
 	QApplication::postEvent(aboutMdiWindow, new QEvent(QEvent::Show));
 	QApplication::postEvent(aboutMdiWindow, new QEvent(QEvent::WindowActivate));
 }
+
 void MainWindow::menu_windows_PacketStatusClicked()
 {
 	packetStatusMdiWindow->show();
 	QApplication::postEvent(packetStatusMdiWindow, new QEvent(QEvent::Show));
 	QApplication::postEvent(packetStatusMdiWindow, new QEvent(QEvent::WindowActivate));
 }
-void MainWindow::updateView(unsigned short locid,QObject *view,QByteArray data,DataType type)
-{
-	Q_UNUSED(type)
-	DataView *dview = dynamic_cast<DataView*>(view);
-	//dview->setData(locid,data,0);
-	m_rawDataView[locid]->show();
-	m_rawDataView[locid]->raise();
-	QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::Show));
-	QApplication::postEvent(m_rawDataView[locid], new QEvent(QEvent::WindowActivate));
 
-}
 void MainWindow::createView(unsigned short locid,DataType type)
 {
 	if (type == DATA_TABLE_3D)
@@ -1003,7 +1061,7 @@ void MainWindow::createView(unsigned short locid,DataType type)
 	}
     else
     {
-	//Unhandled data type. Show it as a hex view.
+		//Unhandled data type. Show it as a hex view.
 		RawData *data = emsComms->getRawData(locid);
 		RawDataView *view = new RawDataView(!data->isFlashOnly(),true);
 		connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
@@ -1023,59 +1081,17 @@ void MainWindow::createView(unsigned short locid,DataType type)
 
 void MainWindow::emsInfoDisplayLocationId(int locid,bool isram,DataType type)
 {
-	Q_UNUSED(type)
 	Q_UNUSED(isram)
-	createView(locid,type);
-	if (type == DATA_TABLE_2D)
+	if (!m_rawDataView.contains(locid))
 	{
+		createView(locid,type);
+	}
+	else
+	{
+		QApplication::postEvent(m_rawDataView[locid]->parent(), new QEvent(QEvent::Show));
+		QApplication::postEvent(m_rawDataView[locid]->parent(), new QEvent(QEvent::WindowActivate));
+	}
 
-	}
-	else if (type == DATA_TABLE_3D)
-	{
-		if (m_rawDataView.contains(locid))
-		{
-			//updateView(locid,m_rawDataView[locid],emsData->getLocalFlashBlock(locid),type);
-		}
-		else
-		{
-			createView(locid,type);
-		}
-	}
-	/*
-	if (emsData->hasLocalRamBlock(locid))
-	{
-		if (m_rawDataView.contains(locid))
-		{
-			updateView(locid,m_rawDataView[locid],emsData->getLocalRamBlock(locid),type);
-		}
-		else
-		{
-			createView(locid,emsData->getLocalRamBlock(locid),type,true,emsData->hasLocalFlashBlock(locid));
-		}
-	}*/
-	/*else if (m_configBlockMap.contains(locid))
-	{
-		ConfigView *view = new ConfigView();
-		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-		win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
-		win->setGeometry(view->geometry());
-		m_rawDataView[locid] = view;
-		view->passConfig(m_configBlockMap[locid],emsData->getLocalFlashBlock(locid));
-		win->show();
-		QApplication::postEvent(win, new QEvent(QEvent::Show));
-		QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
-	}*/
-/*	else if (emsData->hasLocalFlashBlock(locid))
-	{
-		if (m_rawDataView.contains(locid))
-		{
-			updateView(locid,m_rawDataView[locid],emsData->getLocalFlashBlock(locid),type);
-		}
-		else
-		{
-			createView(locid,emsData->getLocalFlashBlock(locid),type,emsData->hasLocalRamBlock(locid),true);
-		}
-	}*/
 }
 
 void MainWindow::interrogateProgressViewDestroyed(QObject *object)
@@ -1089,7 +1105,6 @@ void MainWindow::interrogateProgressViewDestroyed(QObject *object)
 	QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>(object->parent());
 	if (!win)
 	{
-		//qDebug() << "Error "
 		return;
 	}
 	win->hide();
@@ -1109,7 +1124,6 @@ void MainWindow::rawDataViewDestroyed(QObject *object)
 			QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>(object->parent());
 			if (!win)
 			{
-				//qDebug() << "Raw Data View without a QMdiSubWindow parent!!";
 				return;
 			}
 			win->hide();
@@ -1192,7 +1206,7 @@ void MainWindow::menu_connectClicked()
 		else
 		{
 			//Something is wrong here
-			qDebug() << "QWidget pointer found in m_rawDataView that is NOT a QMdiSubWindow!!!";
+			QLOG_ERROR() << "QWidget pointer found in m_rawDataView that is NOT a QMdiSubWindow!!!";
 		}
 
 		//delete (*i);
@@ -1200,9 +1214,9 @@ void MainWindow::menu_connectClicked()
 	m_rawDataView.clear();
 	if (!emsComms)
 	{
-		qDebug() << "No EMSCOMMS!!!";
+		QLOG_ERROR() << "No EMSCOMMS!!!";
 	}
-	qDebug() << "Starting emsComms:" << emsComms;
+	QLOG_INFO() << "Starting emsComms:" << emsComms;
 	emsComms->start();
 	emsComms->connectSerial(m_comPort,m_comBaud);
 	emsComms->startInterrogation();
@@ -1258,7 +1272,7 @@ void MainWindow::locationIdInfo(unsigned short locationid,MemoryLocationInfo inf
 {
 	if (m_memoryInfoMap.contains(locationid))
 	{
-		qDebug() << "Duplicate location ID recieved from ECU:" << "0x" + QString::number(locationid,16).toUpper();
+		QLOG_WARN() << "Duplicate location ID recieved from ECU:" << "0x" + QString::number(locationid,16).toUpper();
 		//return;
 	}
 	m_memoryInfoMap[locationid] = info;
@@ -1442,7 +1456,7 @@ void MainWindow::error(SerialPortStatus error,QString msg)
 		QTimer::singleShot(500,this,SLOT(menu_file_loadOfflineDataClicked()));
 		break;
 	default:
-		qDebug() << "WEEEE";
+		QLOG_FATAL() << "WEEEE";
 		break;
 	}
 }
@@ -1573,7 +1587,7 @@ void MainWindow::interrogationComplete()
 		}
 		progressView->done();
 	}
-	qDebug() << "Interrogation complete";
+	QLOG_INFO() << "Interrogation complete";
 	emsMdiWindow->show();
 }
 void MainWindow::interrogateTaskStart(QString task, int sequence)
@@ -1648,7 +1662,7 @@ void MainWindow::emsStatusHardResetRequested()
 {
 	if (QMessageBox::information(0,"Warning","Hard resetting the ECU will erase all changes currently in RAM, but not saved to FLASH, and restart the ECU. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
-		qDebug() << "Attempting hard reset:" << emsComms->hardReset();
+		QLOG_INFO() << "Attempting hard reset:" << emsComms->hardReset();
 	}
 }
 
@@ -1656,7 +1670,7 @@ void MainWindow::emsStatusSoftResetRequested()
 {
 	if (QMessageBox::information(0,"Warning","Soft resetting the ECU will erase all changes currently in RAM, but not saved to FLASH, and restart the ECU. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
-		qDebug() << "Attempting soft reset:" << emsComms->softReset();
+		QLOG_INFO() << "Attempting soft reset:" << emsComms->softReset();
 	}
 	//ui.mdiArea->removeSubWindow(emsStatusMdiWindow);
 	//this->addDockWidget(Qt::RightDockWidgetArea,statusView);
@@ -1664,69 +1678,18 @@ void MainWindow::emsStatusSoftResetRequested()
 
 void MainWindow::commandTimedOut(int sequencenumber)
 {
-	qDebug() << "Command timed out:" << QString::number(sequencenumber);
+	QLOG_INFO() << "Command timed out:" << QString::number(sequencenumber);
 	if (m_waitingForRamWriteConfirmation)
 	{
-		/*TODO
-		m_waitingForRamWriteConfirmation = false;
-		if (emsData->hasLocalRamBlock(m_currentRamLocationId))
-		{
-			if (emsData->hasDeviceRamBlock(m_currentRamLocationId))
-			{
-				qDebug() << "Data reverting for location id 0x" + QString::number(m_currentRamLocationId,16);
-				if (emsData->getLocalRamBlock(m_currentRamLocationId) == emsData->getDeviceRamBlock(m_currentRamLocationId))
-				{
-					qDebug() << "Data valid. No need for a revert.";
-				}
-				else
-				{
-					qDebug() << "Invalid data, reverting...";
-					emsData->setLocalRamBlock(m_currentRamLocationId,emsData->getDeviceRamBlock(m_currentRamLocationId));
-					updateRamLocation(m_currentRamLocationId);
-				}
-			}
-		}
-		else
-		{
-			qDebug() << "Unable to find memory location " << QString::number(m_currentRamLocationId,16) << "in local or device memory!";
-		}
-		//Find all windows that use that location id
-		m_currentRamLocationId = 0;
-		//checkRamFlashSync();
-		*/
+
 	}
 	else
 	{
-		//qDebug() << "Error reverting! " << QString::number(m_currentRamLocationId,16) << "Location not found!";
 	}
 	if (m_waitingForFlashWriteConfirmation)
 	{
 		m_waitingForFlashWriteConfirmation = false;
-		/*TODO
-		if (emsData->hasLocalFlashBlock(m_currentFlashLocationId))
-		{
-			if (emsData->hasDeviceFlashBlock(m_currentFlashLocationId))
-			{
-				qDebug() << "Data reverting for location id 0x" + QString::number(m_currentFlashLocationId,16);
-				if (emsData->getLocalFlashBlock(m_currentFlashLocationId) == emsData->getDeviceFlashBlock(m_currentFlashLocationId))
-				{
-					qDebug() << "Data valid. No need for a revert.";
-				}
-				else
-				{
-					qDebug() << "Invalid data, reverting...";
-					//m_flashMemoryList[i]->setData(m_deviceFlashMemoryList[j]->data());
-					emsData->setLocalFlashBlock(m_currentFlashLocationId,emsData->getDeviceFlashBlock(m_currentFlashLocationId));
 
-					updateRamLocation(m_currentFlashLocationId);
-				}
-			}
-		}
-		else
-		{
-			qDebug() << "Unable to find memory location " << QString::number(m_currentFlashLocationId,16) << "in local or device memory!";
-		}
-			*/
 		//Find all windows that use that location id
 		m_currentFlashLocationId = 0;
 		//checkRamFlashSync();
@@ -1734,7 +1697,6 @@ void MainWindow::commandTimedOut(int sequencenumber)
 	}
 	else
 	{
-		//qDebug() << "Error reverting! " << QString::number(m_currentFlashLocationId,16) << "Location not found!";
 	}
 	if (m_interrogationInProgress)
 	{
@@ -1748,30 +1710,16 @@ void MainWindow::commandTimedOut(int sequencenumber)
 }
 void MainWindow::commandSuccessful(int sequencenumber)
 {
-	qDebug() << "Command succesful:" << QString::number(sequencenumber);
+	QLOG_INFO() << "Command succesful:" << QString::number(sequencenumber);
 	if (m_interrogationInProgress)
 	{
 		if (progressView) progressView->taskSucceed(sequencenumber);
 	}
-	if (m_waitingForRamWriteConfirmation)
-	{
-		m_waitingForRamWriteConfirmation = false;
-		checkRamFlashSync();
-		m_currentRamLocationId=0;
-		return;
-	}
-	if (m_waitingForFlashWriteConfirmation)
-	{
-		m_waitingForFlashWriteConfirmation = false;
-		m_currentFlashLocationId=0;
-		return;
-	}
-	//checkMessageCounters(sequencenumber);
 
 }
 void MainWindow::checkMessageCounters(int sequencenumber)
 {
-	qDebug() << "Checking message counters:" << sequencenumber << m_locIdInfoMsgList.size() << m_locIdMsgList.size() << interrogationSequenceList.size();
+	QLOG_INFO() << "Checking message counters:" << sequencenumber << m_locIdInfoMsgList.size() << m_locIdMsgList.size() << interrogationSequenceList.size();
 	if (m_locIdInfoMsgList.contains(sequencenumber))
 	{
 		m_locIdInfoMsgList.removeOne(sequencenumber);
@@ -1780,82 +1728,24 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 			if (m_offlineMode && m_checkEmsDataInUse)
 			{
 				//We were offline. Let's check.
-				/*TODO
-				QList<unsigned short> ramlocs = checkEmsData->getTopLevelDeviceRamLocations();
-				QList<unsigned short> flashlocs = checkEmsData->getTopLevelDeviceFlashLocations();
-				bool ramdirty = false;
-				bool flashdirty = false;
-				for (int i=0;i<ramlocs.size();i++)
-				{
-					if (!(emsData->getDeviceRamBlock(ramlocs[i])==checkEmsData->getDeviceRamBlock(ramlocs[i])))
-					{
-						qDebug() << "Ram Location id:" << "0x" + QString::number(ramlocs[i],16).toUpper() << "is different!";
-						ramdirty = true;
-					}
-				}
-				for (int i=0;i<flashlocs.size();i++)
-				{
-					if (!(emsData->getDeviceFlashBlock(flashlocs[i]) == checkEmsData->getDeviceFlashBlock(flashlocs[i])))
-					{
-						qDebug() << "Flash Location id:" << "0x" + QString::number(flashlocs[i],16).toUpper() << "is different!";
-						flashdirty = true;
-					}
-				}
-				if (ramdirty)
-				{
-					if (QMessageBox::information(0,"Warning","RAM from offline mode does not equal ram on device! Do you wish to write offline RAM data to the device?",QMessageBox::Yes,QMessageBox::No) != QMessageBox::Yes)
-					{
-						for (int i=0;i<ramlocs.size();i++)
-						{
-							emsData->setDeviceRamBlock(ramlocs[i],checkEmsData->getDeviceRamBlock(ramlocs[i]));
-							emsData->setLocalRamBlock(ramlocs[i],checkEmsData->getDeviceRamBlock(ramlocs[i]));
-						}
-					}
-					else
-					{
-						for (int i=0;i<ramlocs.size();i++)
-						{
-							emsComms->updateBlockInRam(ramlocs[i],0,emsData->getDeviceRamBlock(ramlocs[i]).size(),emsData->getDeviceRamBlock(ramlocs[i]));
-						}
-					}
-				}
-				if (flashdirty)
-				{
-					if (QMessageBox::information(0,"Warning","Flash from offline mode does not equal flash on device! Do you wish to write offline flash data to the device?",QMessageBox::Yes,QMessageBox::No) != QMessageBox::Yes)
-					{
-						for (int i=0;i<flashlocs.size();i++)
-						{
-							emsData->setDeviceFlashBlock(flashlocs[i],checkEmsData->getDeviceFlashBlock(flashlocs[i]));
-							emsData->setLocalFlashBlock(flashlocs[i],checkEmsData->getDeviceFlashBlock(flashlocs[i]));
-						}
-					}
-					else
-					{
-						for (int i=0;i<flashlocs.size();i++)
-						{
-							emsComms->updateBlockInFlash(flashlocs[i],0,emsData->getDeviceFlashBlock(flashlocs[i]).size(),emsData->getDeviceFlashBlock(flashlocs[i]));
-						}
-					}
 
-				}
-				*/
 				m_offlineMode = false;
 			}
-			qDebug() << "All Ram and Flash locations updated";
+			QLOG_INFO() << "All Ram and Flash locations updated";
 			//End of the location ID information messages.
 			checkRamFlashSync();
 		}
 	}
 	else
 	{
-		qDebug() << "Not in locidinfo";
+		QLOG_INFO() << "Not in locidinfo";
 	}
 	if (m_locIdMsgList.contains(sequencenumber))
 	{
 		m_locIdMsgList.removeOne(sequencenumber);
 		if (m_locIdMsgList.size() == 0)
 		{
-			qDebug() << "All ID information recieved. Requesting Ram and Flash updates";
+			QLOG_INFO() << "All ID information recieved. Requesting Ram and Flash updates";
 			//populateParentLists();
 			/*TODO
 			 *QList<unsigned short>  memorylist = emsData->getTopLevelDeviceFlashLocations();
@@ -1880,11 +1770,11 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 	}
 	else
 	{
-		qDebug() << "Not in locidmsglist";
+		QLOG_INFO() << "Not in locidmsglist";
 	}
 	if (interrogationSequenceList.contains(sequencenumber))
 	{
-		qDebug() << "GOOD!";
+		QLOG_INFO() << "GOOD!";
 		if (progressView)
 		{
 			progressView->setProgress(progressView->progress()+1);
@@ -1904,7 +1794,7 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 				progressView->done();
 			}
 			//this->setEnabled(true);
-			qDebug() << "Interrogation complete";
+			QLOG_INFO() << "Interrogation complete";
 
 //			emsData->setInterrogation(false);
 
@@ -1935,12 +1825,12 @@ void MainWindow::checkMessageCounters(int sequencenumber)
 		}
 		else
 		{
-			qDebug() << interrogationSequenceList.size() << "messages left to go. First one:" << interrogationSequenceList[0];
+			QLOG_INFO() << interrogationSequenceList.size() << "messages left to go. First one:" << interrogationSequenceList[0];
 		}
 	}
 	else
 	{
-		qDebug() << "Not in interrogation list";
+		QLOG_INFO() << "Not in interrogation list";
 	}
 }
 
@@ -1965,7 +1855,7 @@ void MainWindow::checkRamFlashSync()
 
 void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 {
-	qDebug() << "Command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
+	QLOG_INFO() << "Command failed:" << QString::number(sequencenumber) << "0x" + QString::number(errornum,16);
 	if (!m_interrogationInProgress)
 	{
 		QMessageBox::information(0,"Command Failed","Command failed with error: " + m_memoryMetaData->getErrorString(errornum));
@@ -1974,79 +1864,6 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	{
 		if (progressView) progressView->taskFail(sequencenumber);
 	}
-	//bool found = false;
-	if (m_waitingForRamWriteConfirmation)
-	{
-		m_waitingForRamWriteConfirmation = false;
-		/*TODOif (emsData->hasLocalRamBlock(m_currentRamLocationId))
-		{
-			if (emsData->hasDeviceRamBlock(m_currentRamLocationId))
-			{
-				qDebug() << "Data reverting for location id 0x" + QString::number(m_currentRamLocationId,16);
-				if (emsData->getLocalRamBlock(m_currentRamLocationId) == emsData->getDeviceRamBlock(m_currentRamLocationId))
-				{
-					qDebug() << "Data valid. No need for a revert.";
-				}
-				else
-				{
-					qDebug() << "Invalid data, reverting...";
-					emsData->setLocalRamBlock(m_currentRamLocationId,emsData->getDeviceRamBlock(m_currentRamLocationId));
-					updateRamLocation(m_currentRamLocationId);
-				}
-			}
-		}
-		else
-		{
-			qDebug() << "Unable to find memory location " << QString::number(m_currentRamLocationId,16) << "in local or device memory!";
-		}
-		*/
-		//Find all windows that use that location id
-		m_currentRamLocationId = 0;
-		//checkRamFlashSync();
-	}
-	else
-	{
-		//qDebug() << "Error reverting! " << QString::number(m_currentRamLocationId,16) << "Location not found!";
-	}
-	if (m_waitingForFlashWriteConfirmation)
-	{
-		m_waitingForFlashWriteConfirmation = false;
-		/*TODO
-		if (emsData->hasLocalFlashBlock(m_currentFlashLocationId))
-		{
-			if (emsData->hasDeviceFlashBlock(m_currentFlashLocationId))
-			{
-				qDebug() << "Data reverting for location id 0x" + QString::number(m_currentFlashLocationId,16);
-				if (emsData->getLocalFlashBlock(m_currentFlashLocationId) == emsData->getDeviceFlashBlock(m_currentFlashLocationId))
-				{
-					qDebug() << "Data valid. No need for a revert.";
-				}
-				else
-				{
-					qDebug() << "Invalid data, reverting...";
-					//m_flashMemoryList[i]->setData(m_deviceFlashMemoryList[j]->data());
-					emsData->setLocalFlashBlock(m_currentFlashLocationId,emsData->getDeviceFlashBlock(m_currentFlashLocationId));
-
-					updateRamLocation(m_currentFlashLocationId);
-				}
-			}
-		}
-		else
-		{
-			qDebug() << "Unable to find memory location " << QString::number(m_currentFlashLocationId,16) << "in local or device memory!";
-		}
-		//Find all windows that use that location id
-		*/
-		m_currentFlashLocationId = 0;
-		//checkRamFlashSync();
-		return;
-	}
-	else
-	{
-		//qDebug() << "Error reverting! " << QString::number(m_currentFlashLocationId,16) << "Location not found!";
-	}
-	//checkMessageCounters(sequencenumber);
-
 }
 
 
@@ -2134,7 +1951,7 @@ void MainWindow::dataLogDecoded(QVariantMap data)
 				}
 				else
 				{
-					qDebug() << "A: Packets lost! At least:" << newval << "packets";
+					QLOG_WARN() << "A: Packets lost! At least:" << newval << "packets";
 				}
 			}
 			else
@@ -2143,11 +1960,11 @@ void MainWindow::dataLogDecoded(QVariantMap data)
 				{
 					if (m_currentEcuClock > newval)
 					{
-						qDebug() << "B: Packets lost! At least:" << (255 - m_currentEcuClock) + newval << "packets";
+						QLOG_WARN() << "B: Packets lost! At least:" << (255 - m_currentEcuClock) + newval << "packets";
 					}
 					else
 					{
-						qDebug() << "C: Packets lost! At least:" << newval - m_currentEcuClock << "packets";
+						QLOG_WARN() << "C: Packets lost! At least:" << newval - m_currentEcuClock << "packets";
 					}
 
 				}

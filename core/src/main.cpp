@@ -23,6 +23,7 @@
 #include <QtGui/QApplication>
 #include "mainwindow.h"
 #include <QString>
+#include "QsLog.h"
 
 QList<QPair<QString,QString> > getArgs(int argc, char **argv)
 {
@@ -78,6 +79,33 @@ void printHelp()
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
+
+	//Init the logger
+	QsLogging::Logger& logger = QsLogging::Logger::instance();
+	logger.setLoggingLevel(QsLogging::DebugLevel);
+#ifdef Q_OS_WIN
+	QString appDataDir = QString(getenv("USERPROFILE")).replace("\\","/");
+#else
+	QString appDataDir = getenv("HOME");
+#endif
+    QDir appDir(appDataDir);
+	if (appDir.exists())
+	{
+		if (!appDir.cd("EMStudio"))
+		{
+			appDir.mkdir("EMStudio");
+		}
+	}
+	const QString sLogPath(QDir(appDataDir + "/EMStudio").filePath("log.txt"));
+
+	QsLogging::DestinationPtr fileDestination(
+	   QsLogging::DestinationFactory::MakeFileDestination(sLogPath, true, 0, 5) );
+	QsLogging::DestinationPtr debugDestination(
+	   QsLogging::DestinationFactory::MakeDebugOutputDestination() );
+	logger.addDestination(debugDestination);
+	logger.addDestination(fileDestination);
+
+
 	QString port = "";
 	bool autoconnect = true;
 	QString plugin = "";

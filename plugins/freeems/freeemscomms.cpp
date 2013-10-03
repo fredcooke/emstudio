@@ -1372,6 +1372,34 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					}
 					emit locationIdInfo(locationid,info);
 					emsData.passLocationInfo(locationid,info);
+
+					if (info.type == DATA_TABLE_2D)
+					{
+						Table2DData *data = new FETable2DData();
+						connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+						connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+						connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
+						connect(data,SIGNAL(requestBlockFromFlash(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromFlash(unsigned short,unsigned short,unsigned short)));
+						connect(data,SIGNAL(requestRamUpdateFromFlash(unsigned short)),this,SLOT(copyFlashToRam(unsigned short)));
+						connect(data,SIGNAL(requestFlashUpdateFromRam(unsigned short)),this,SLOT(copyRamToFlash(unsigned short)));
+						m_2dTableMap[locationid] = data;
+					}
+					else if (info.type == DATA_TABLE_3D)
+					{
+						Table3DData *data = new FETable3DData();
+						connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+						connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+						connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
+						connect(data,SIGNAL(requestBlockFromFlash(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromFlash(unsigned short,unsigned short,unsigned short)));
+						connect(data,SIGNAL(requestRamUpdateFromFlash(unsigned short)),this,SLOT(copyFlashToRam(unsigned short)));
+						connect(data,SIGNAL(requestFlashUpdateFromRam(unsigned short)),this,SLOT(copyRamToFlash(unsigned short)));
+						m_3dTableMap[locationid] = data;
+					}
+					else
+					{
+						RawData *data = new FERawData();
+						m_rawDataMap[locationid] = data;
+					}
 				}
 
 
@@ -1494,6 +1522,11 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 								emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
 								emit interrogationComplete();
 								m_interrogateInProgress = false;
+								for (int i=0;i<emsData.getUniqueLocationIdList().size();i++)
+								{
+									locationIdUpdate(emsData.getUniqueLocationIdList()[i]);
+								}
+								//deviceDataUpdated(unsigned short)
 							}
 						}
 						else
@@ -1660,7 +1693,7 @@ Table2DData* FreeEmsComms::get2DTableData(unsigned short locationid)
 {
 	if (!m_2dTableMap.contains(locationid))
 	{
-		Table2DData *data = new FETable2DData();
+		/*Table2DData *data = new FETable2DData();
 		connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
 		connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
 		connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
@@ -1668,7 +1701,8 @@ Table2DData* FreeEmsComms::get2DTableData(unsigned short locationid)
 		connect(data,SIGNAL(requestRamUpdateFromFlash(unsigned short)),this,SLOT(copyFlashToRam(unsigned short)));
 		connect(data,SIGNAL(requestFlashUpdateFromRam(unsigned short)),this,SLOT(copyRamToFlash(unsigned short)));
 		data->setData(locationid,!emsData.hasLocalRamBlock(locationid),emsData.getLocalRamBlock(locationid),m_metaDataParser->get2DMetaData(locationid),false);
-		m_2dTableMap[locationid] = data;
+		m_2dTableMap[locationid] = data;*/
+		return 0;
 	}
 	return m_2dTableMap[locationid];
 
@@ -1678,7 +1712,7 @@ Table3DData* FreeEmsComms::get3DTableData(unsigned short locationid)
 {
 	if (!m_3dTableMap.contains(locationid))
 	{
-		Table3DData *data = new FETable3DData();
+		/*Table3DData *data = new FETable3DData();
 		connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
 		connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
 		connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
@@ -1687,7 +1721,8 @@ Table3DData* FreeEmsComms::get3DTableData(unsigned short locationid)
 		connect(data,SIGNAL(requestFlashUpdateFromRam(unsigned short)),this,SLOT(copyRamToFlash(unsigned short)));
 		qDebug() << "Attempting to load table. Data size:" << emsData.getLocalRamBlock(locationid).size();
 		data->setData(locationid,!emsData.hasLocalRamBlock(locationid),emsData.getLocalRamBlock(locationid),m_metaDataParser->get3DMetaData(locationid));
-		m_3dTableMap[locationid] = data;
+		m_3dTableMap[locationid] = data;*/
+		return 0;
 	}
 	return m_3dTableMap[locationid];
 }
@@ -1695,6 +1730,7 @@ RawData* FreeEmsComms::getRawData(unsigned short locationid)
 {
 	if (!m_rawDataMap.contains(locationid))
 	{
+		/*
 		RawData *data = new FERawData();
 		if (emsData.hasLocalRamBlock(locationid))
 		{
@@ -1704,7 +1740,8 @@ RawData* FreeEmsComms::getRawData(unsigned short locationid)
 		{
 			data->setData(locationid,true,emsData.getLocalFlashBlock(locationid));
 		}
-		m_rawDataMap[locationid] = data;
+		m_rawDataMap[locationid] = data;*/
+		return 0;
 	}
 	return m_rawDataMap[locationid];
 }
