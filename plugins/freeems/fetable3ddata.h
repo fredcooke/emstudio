@@ -50,8 +50,9 @@ public:
 	double minZAxis();
 	void setWritesEnabled(bool enabled);
 	void writeWholeLocation(bool ram);
-    double calcAxis(int val,QList<QPair<QString,double> > metadata);
-    int backConvertAxis(double val,QList<QPair<QString,double> > metadata);
+	bool isRam() { return !m_isFlashOnly; }
+	double calcAxis(int val,QList<QPair<QString,double> > metadata);
+	int backConvertAxis(double val,QList<QPair<QString,double> > metadata);
 private:
 	bool m_writesEnabled;
 	bool m_isFlashOnly;

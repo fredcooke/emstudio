@@ -78,6 +78,7 @@ public:
 	virtual void setCell(int row, int column,double newval) = 0;
 	virtual void setWritesEnabled(bool enabled) = 0;
 	virtual void writeWholeLocation(bool ram) = 0;
+	virtual bool isRam()=0;
 signals:
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
 public slots:

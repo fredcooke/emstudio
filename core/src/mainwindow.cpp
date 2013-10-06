@@ -356,6 +356,7 @@ void MainWindow::menu_file_saveOfflineDataClicked()
 			current["title"] = emsComms->getMetaParser()->get2DMetaData(m_locationIdList[i]).tableTitle;
 			current["xtitle"] = emsComms->getMetaParser()->get2DMetaData(m_locationIdList[i]).xAxisTitle;
 			current["ytitle"] = emsComms->getMetaParser()->get2DMetaData(m_locationIdList[i]).yAxisTitle;
+			current["ram"] = emsComms->get2DTableData(m_locationIdList[i])->isRam();
 			datatable2d[QString::number(m_locationIdList[i],16).toUpper()] = current;
 		}
 		if (emsComms->get3DTableData(m_locationIdList[i]))
@@ -375,7 +376,7 @@ void MainWindow::menu_file_saveOfflineDataClicked()
 			for (int j=0;j<emsComms->get3DTableData(m_locationIdList[i])->values().size();j++)
 			{
 				QVariantList zrow;
-				for (int k=1;k<emsComms->get3DTableData(m_locationIdList[i])->values()[j].size();k++)
+				for (int k=0;k<emsComms->get3DTableData(m_locationIdList[i])->values()[j].size();k++)
 				{
 					zrow.append(emsComms->get3DTableData(m_locationIdList[i])->values()[j][k]);
 				}
@@ -388,6 +389,7 @@ void MainWindow::menu_file_saveOfflineDataClicked()
 			current["xtitle"] = emsComms->getMetaParser()->get3DMetaData(m_locationIdList[i]).xAxisTitle;
 			current["ytitle"] = emsComms->getMetaParser()->get3DMetaData(m_locationIdList[i]).yAxisTitle;
 			current["ztitle"] = emsComms->getMetaParser()->get3DMetaData(m_locationIdList[i]).zAxisTitle;
+			current["ram"] = emsComms->get3DTableData(m_locationIdList[i])->isRam();
 			datatable3d[QString::number(m_locationIdList[i],16).toUpper()] = current;
 		}
 		if (emsComms->getRawData(m_locationIdList[i]))
@@ -503,8 +505,115 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 		QLOG_ERROR() << "Error parsing json:" << parser.errorString();
 		return;
 	}
-	m_offlineMode = true;
+
+	/*
+	top["2D"] = datatable2d;
+	top["3D"] = datatable3d;
+	top["RAW"] = dataraw;
+	*/
 	QVariantMap top = outputvar.toMap();
+	QVariantMap datatable2d = top["2D"].toMap();
+	QVariantMap datatable3d = top["3D"].toMap();
+	QVariantMap dataraw = top["RAW"].toMap();
+
+	for(QVariantMap::const_iterator i=datatable2d.constBegin();i!=datatable2d.constEnd();i++)
+	{
+		bool ok = false;
+		unsigned short locid = i.key().toInt(&ok,16);
+		if (!ok)
+		{
+			QMessageBox::information(0,"Error","Error parsing json");
+			return;
+		}
+		QVariantMap tablemap = i.value().toMap();
+		QVariantList axislist = tablemap["axis"].toList();
+		QVariantList datalist = tablemap["data"].toList();
+		Table2DData *data = emsComms->get2DTableData(locid);
+		data->setWritesEnabled(false);
+		for (int j=0;j<axislist.size();j++)
+		{
+			data->setCell(0,j,axislist[j].toDouble());
+
+		}
+		for (int j=0;j<datalist.size();j++)
+		{
+			data->setCell(1,j,datalist[j].toDouble());
+		}
+		data->setWritesEnabled(true);
+		if (tablemap["ram"].toBool())
+		{
+			data->writeWholeLocation(true);
+		}
+		else
+		{
+			data->writeWholeLocation(false);
+		}
+	}
+	for (QVariantMap::const_iterator i=datatable3d.constBegin();i!=datatable3d.constEnd();i++)
+	{
+		bool ok = false;
+		unsigned short locid = i.key().toInt(&ok,16);
+		if (!ok)
+		{
+			QMessageBox::information(0,"Error","Error parsing json");
+			return;
+		}
+		QVariantMap current = i.value().toMap();
+		QVariantList xlist = current["x"].toList();
+		QVariantList ylist = current["y"].toList();
+		QVariantList zlist = current["z"].toList();
+		Table3DData *data = emsComms->get3DTableData(locid);
+		data->setWritesEnabled(false);
+		for (int j=0;j<xlist.size();j++)
+		{
+			data->setCell(ylist.size()-1,j,xlist[j].toDouble());
+		}
+		for (int j=0;j<ylist.size();j++)
+		{
+			data->setCell(j,0,ylist[j].toDouble());
+		}
+		for (int j=0;j<zlist.size();j++)
+		{
+			QVariantList z2list = zlist[j].toList();
+			for (int k=0;k<z2list.size();k++)
+			{
+				data->setCell(j,k,z2list[k].toDouble());
+			}
+
+		}
+		data->setWritesEnabled(true);
+		if (current["ram"].toBool())
+		{
+			data->writeWholeLocation(true);
+		}
+		else
+		{
+			data->writeWholeLocation(false);
+		}
+
+	}
+	for (QVariantMap::const_iterator i=dataraw.constBegin();i!=datatable3d.constEnd();i++)
+	{
+		bool ok = false;
+		unsigned short locid = i.key().toInt(&ok,16);
+		if (!ok)
+		{
+			QMessageBox::information(0,"Error","Error parsing json");
+			return;
+		}
+		QVariantList bytes = i.value().toList();
+		RawData *data = emsComms->getRawData(locid);
+		QByteArray bytearray;
+		for (int j=0;j<bytes.size();j++)
+		{
+			bytearray.append(bytes[j].toUInt());
+		}
+		data->setData(locid,true,bytearray);
+	}
+	return;
+
+	m_offlineMode = true;
+
 	QVariantMap ramMap = top["ram"].toMap();
 	QVariantMap flashMap = top["flash"].toMap();
 	QVariantMap metaMap = top["meta"].toMap();

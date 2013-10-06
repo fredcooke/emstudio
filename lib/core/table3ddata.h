@@ -79,6 +79,7 @@ public:
 	virtual double minZAxis()=0;
 	virtual void setWritesEnabled(bool enabled)=0;
 	virtual void writeWholeLocation(bool ram)=0;
+	virtual bool isRam()=0;
 signals:
 //	void saveSingleDataToRam(unsigned short locationid,unsigned short offset, unsigned short size,QByteArray data);
 //	void saveSingleDataToFlash(unsigned short locationid,unsigned short offset, unsigned short size,QByteArray data);
