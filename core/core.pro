@@ -16,7 +16,7 @@ CONFIG += console
 
 INCLUDEPATH += $$PWD/../lib/core
 DEPENDPATH += $$PWD/../lib/core
-include(QsLog/QsLog.pri)
+#include(QsLog/QsLog.pri)
 win32-x-g++ { #Linux based crossplatform 32bit build
         message("Building for win32-x-g++")
 	INCLUDEPATH += /home/michael/QtWin32/libs/qwt/include /home/michael/QtWin32/libs/qjson/include
@@ -95,8 +95,6 @@ SOURCES += src/main.cpp\
     src/tablemap3d.cpp \
     src/tablewidget.cpp \
     src/configview.cpp \
-    src/configblock.cpp \
-    src/emsdata.cpp \
     src/tablewidgetdelegate.cpp \
     src/parameterview.cpp \
     src/parameterwidget.cpp
@@ -133,7 +131,6 @@ HEADERS  += src/mainwindow.h \
     src/tablewidget.h \
     src/configview.h \
     src/configblock.h \
-    src/emsdata.h \
     table2ddata.h \
     table3ddata.h \
     memorymetadata.h \

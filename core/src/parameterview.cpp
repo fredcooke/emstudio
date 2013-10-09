@@ -8,7 +8,7 @@
 ParameterView::ParameterView(QWidget *parent) : QWidget(parent)
 {
 	m_metaData=0;
-	m_emsData = 0;
+	//m_emsData = 0;
 	ui.setupUi(this);
 	connect(ui.parameterTreeWidget,SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),this,SLOT(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
 	connect(ui.parameterTreeWidget,SIGNAL(itemSelectionChanged()),this,SLOT(itemSelectionChanged()));
@@ -108,7 +108,7 @@ void ParameterView::generateDialog(QString title,QList<DialogField> fieldlist)
 						}
 					}
 				}
-				if (m_emsData)
+/*				if (m_emsData)
 				{
 					if (m_emsData->hasLocalFlashBlock(m_memoryConfigBlockList[j].locationId()))
 					{
@@ -118,7 +118,7 @@ void ParameterView::generateDialog(QString title,QList<DialogField> fieldlist)
 					{
 						widget->updateValue(m_memoryConfigBlockList[j].locationId(),m_emsData->getLocalRamBlock(m_memoryConfigBlockList[j].locationId()));
 					}
-				}
+				}*/
 			}
 		}
 		//fieldlist[i].condition
@@ -126,7 +126,7 @@ void ParameterView::generateDialog(QString title,QList<DialogField> fieldlist)
 }
 void ParameterView::updateValues()
 {
-	if (!m_emsData)
+	/*if (!m_emsData)
 	{
 		return;
 	}
@@ -140,50 +140,15 @@ void ParameterView::updateValues()
 				paramWidgetList[i]->updateValue(loclist[k],m_emsData->getLocalFlashBlock(loclist[k]));
 			}
 		}
-	}
+	}*/
 	return;
-	for(QMap<QLineEdit*,ConfigBlock>::Iterator i=lineEditToConfigBlockMap.begin();i!=lineEditToConfigBlockMap.end();i++)
-	{
-		if (m_emsData->hasLocalFlashBlock(i.value().locationId()))
-		{
-
-			qDebug() << "Page:" << i.value().locationId();
-			qDebug() << "Offset:" << i.value().offset();
-			qDebug() << "Name:" << i.value().name();
-			QByteArray block = m_emsData->getLocalFlashBlock(i.value().locationId());
-			qDebug() << "Block size:" << block.size();
-			QString valstr = "";
-			for (int k=1;k<block.size();k++)
-			{
-				unsigned int val = (((unsigned char)block[k-1]) << 8) + ((unsigned char)block[k]);
-				if (val == 8000)
-				{
-					qDebug() << "Offset:" << k;
-				}
-			}
-			for (int k=0;k<i.value().size();k++)
-			{
-				unsigned int value = 0;
-				for (int j=0;j<i.value().elementSize();j++)
-				{
-					qDebug() << (unsigned char)block[i.value().offset() + (k * i.value().elementSize()) + j];
-					value += ((unsigned char)block[i.value().offset() + (k * i.value().elementSize()) + j]) << (8 * (i.value().elementSize() - (j+1)));
-				}
-				//userValue = (ecuValue + translate) * scale
-				valstr += QString::number(calcAxis(value,i.value().calc())) + ",";
-			}
-			valstr = valstr.mid(0,valstr.length()-1);
-			i.key()->setText(valstr);
-		}
-
-	}
 }
 
-void ParameterView::passEmsData(EmsData *data)
+/*void ParameterView::passEmsData(EmsData *data)
 {
 	m_emsData = data;
 	updateValues();
-}
+}*/
 
 void ParameterView::passMenuList(MenuSetup menu)
 {

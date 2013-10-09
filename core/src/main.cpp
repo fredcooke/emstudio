@@ -23,7 +23,7 @@
 #include <QtGui/QApplication>
 #include "mainwindow.h"
 #include <QString>
-#include "QsLog.h"
+//#include "QsLog.h"
 
 QList<QPair<QString,QString> > getArgs(int argc, char **argv)
 {
@@ -81,6 +81,7 @@ int main(int argc, char *argv[])
 	QApplication a(argc, argv);
 
 	//Init the logger
+#ifdef QLOG_DEBUG()
 	QsLogging::Logger& logger = QsLogging::Logger::instance();
 	logger.setLoggingLevel(QsLogging::DebugLevel);
 #ifdef Q_OS_WIN
@@ -104,7 +105,7 @@ int main(int argc, char *argv[])
 	   QsLogging::DestinationFactory::MakeDebugOutputDestination() );
 	logger.addDestination(debugDestination);
 	logger.addDestination(fileDestination);
-
+#endif
 
 	QString port = "";
 	bool autoconnect = true;

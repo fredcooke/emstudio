@@ -28,7 +28,15 @@
 #include <tableview2d.h>
 #include <qjson/parser.h>
 #include "logloader.h"
-#include "QsLog.h"
+//#include "QsLog.h"
+#ifndef QLOG_DEBUG()
+#define QLOG_INFO() qDebug()
+#define QLOG_TRACE() qDebug()
+#define QLOG_DEBUG() qDebug()
+#define QLOG_ERROR() qDebug()
+#define QLOG_WARN() qDebug()
+#define QLOG_FATAL() qDebug()
+#endif
 #define define2string_p(x) #x
 #define define2string(x) define2string_p(x)
 

@@ -4,7 +4,6 @@
 #include <QWidget>
 #include "ui_parameterview.h"
 #include "configblock.h"
-#include "emsdata.h"
 #include "parameterwidget.h"
 #include "memorymetadata.h"
 #include "menusetup.h"
@@ -16,7 +15,7 @@ public:
 	void passMenuList(MenuSetup menu);
 	void passConfigBlockList(QMap<QString,QList<ConfigBlock> > blocklist);
 	void generateDialog(QString title,QList<DialogField> fieldlist);
-	void passEmsData(EmsData *data);
+	//void passEmsData(EmsData *data);
 	void passMetaData(MemoryMetaData *metadata);
 	void updateValues();
 	double calcAxis(unsigned short val,QList<QPair<QString,double> > metadata);
@@ -25,7 +24,7 @@ private:
 	QList<ParameterWidget*> paramWidgetList;
 	QMap<QLineEdit*,ConfigBlock> lineEditToConfigBlockMap;
 	QMap<QWidget*,QList<DialogField> > widgetToFieldMap;
-	EmsData *m_emsData;
+	//EmsData *m_emsData;
 	MenuSetup m_metaMenu;
 	QList<ConfigBlock> m_memoryConfigBlockList;
 	Ui::Form ui;
