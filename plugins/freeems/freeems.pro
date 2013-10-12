@@ -10,7 +10,7 @@ CONFIG += plugin rtti
 OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
-
+include (../../core/QsLog/QsLog.pri)
 QT -= gui
 INCLUDEPATH += $$PWD/../../lib/core
 DEPENDPATH += $$PWD/../../lib/core

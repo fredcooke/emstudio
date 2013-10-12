@@ -48,7 +48,7 @@ void TableMap3D::mouseReleaseEvent(QMouseEvent *event)
 {
 	Q_UNUSED(event)
 	m_mouseDown = false;
-	//qDebug() << "Mouse UP";
+	//QLOG_DEBUG() << "Mouse UP";
 }
 
 void TableMap3D::mousePressEvent(QMouseEvent *event)

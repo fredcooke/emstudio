@@ -20,8 +20,9 @@
  ************************************************************************************/
 
 #include "configview.h"
-#include <QDebug>
 #include <QTreeWidget>
+#include "QsLog.h"
+
 ConfigView::ConfigView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
@@ -43,7 +44,7 @@ void ConfigView::treeItemDoubleClicked(QTreeWidgetItem* item,int column)
 	if (item->parent() == 0)
 	{
 		//Item is a top level item, uneditable.
-		qDebug() << "Top level item";
+		QLOG_DEBUG() << "Top level item";
 		return;
 	}
 	ui.treeWidget->openPersistentEditor(item,column);
@@ -53,7 +54,7 @@ void ConfigView::treeItemChanged(QTreeWidgetItem* item,int column)
 {
 	//Q_UNUSED(column)
 	ui.treeWidget->closePersistentEditor(item,column);
-	qDebug() << "Item changed:" << item->text(0);
+	QLOG_DEBUG() << "Item changed:" << item->text(0);
 	for (int i=0;i<ui.treeWidget->topLevelItemCount();i++)
 	{
 		if (ui.treeWidget->topLevelItem(i) == item->parent())
@@ -71,13 +72,13 @@ void ConfigView::treeItemChanged(QTreeWidgetItem* item,int column)
 			{
 				retval.append(newval & 0xFF);
 			}
-			qDebug() << newval << totaloffset << m_configList[i].elementSize();
+			QLOG_DEBUG() << newval << totaloffset << m_configList[i].elementSize();
 			m_rawData.replace(totaloffset,m_configList[i].elementSize(),retval);
 			emit saveData(m_configList[i].locationId(),m_rawData);
 		}
-		qDebug() << ui.treeWidget->topLevelItem(i)->text(0) << item->text(0);
+		QLOG_DEBUG() << ui.treeWidget->topLevelItem(i)->text(0) << item->text(0);
 	}
-	qDebug() << "No item found";
+	QLOG_DEBUG() << "No item found";
 }
 void ConfigView::passConfig(QList<ConfigBlock> config,QByteArray data)
 {
@@ -98,9 +99,9 @@ void ConfigView::passConfig(QList<ConfigBlock> config,QByteArray data)
 			for (int j=0;j<config[i].size();j++)
 			{
 				val += ((unsigned char)data[config[i].offset() + j]) << (8 * (config[i].size() - (j+1)));
-				qDebug() << j << (8 * (config[i].size() - (j+1))) << QString::number(data[config[i].offset() + j]);
+				QLOG_DEBUG() << j << (8 * (config[i].size() - (j+1))) << QString::number(data[config[i].offset() + j]);
 			}
-			qDebug() << "Item:" << config[i].name() << val;
+			QLOG_DEBUG() << "Item:" << config[i].name() << val;
 			ui.treeWidget->topLevelItem(ui.treeWidget->topLevelItemCount()-1)->addChild(new QTreeWidgetItem(QStringList() << QString::number(calcAxis(val,config[i].calc()))));
 			//int count = ui.treeWidget->topLevelItemCount()-1;
 			//ui.treeWidget->topLevelItem(count)->child(ui.treeWidget->topLevelItem(count)->childCount()-1)->setFlags(ui.treeWidget->topLevelItem(count)->child(ui.treeWidget->topLevelItem(count)->childCount()-1)->flags() & Qt::ItemIsEditable);
@@ -113,12 +114,12 @@ void ConfigView::passConfig(QList<ConfigBlock> config,QByteArray data)
 			int max = 0;
 			if (config[i].sizeOverride() != "")
 			{
-				qDebug() << "We have a size override for" << config[i].name();
+				QLOG_DEBUG() << "We have a size override for" << config[i].name();
 				for (int j=0;j<config.size();j++)
 				{
 					if (config[j].name() == config[i].sizeOverride())
 					{
-						qDebug() << "Found config override";
+						QLOG_DEBUG() << "Found config override";
 						unsigned short val = 0;
 						for (int k=0;k<config[j].size();k++)
 						{
@@ -138,7 +139,7 @@ void ConfigView::passConfig(QList<ConfigBlock> config,QByteArray data)
 			{
 				max = config[i].size();
 			}
-			qDebug() << "Max array size:" << max;
+			QLOG_DEBUG() << "Max array size:" << max;
 			for (int j=0;j<max;j++)
 			{
 				unsigned short val = 0;

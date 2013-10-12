@@ -22,7 +22,8 @@
 #include "emsinfoview.h"
 #include <QMdiSubWindow>
 #include <QMessageBox>
-#include <QDebug>
+#include "QsLog.h"
+
 EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
@@ -76,7 +77,7 @@ void EmsInfoView::normalViewClicked()
 	//int locid = num.toInt(&ok,16);
 	if (!ok)
 	{
-		qDebug() << "Numeric conversion failed for:" << num;
+		QLOG_ERROR() << "Numeric conversion failed for:" << num;
 		return;
 	}
 	//displayLocationId(locid,true,0); //0 for normal view, 1 for hex view
@@ -94,7 +95,7 @@ void EmsInfoView::hexViewClicked()
 	//int locid = num.toInt(&ok,16);
 	if (!ok)
 	{
-		qDebug() << "Numeric conversion failed for:" << num;
+		QLOG_ERROR() << "Numeric conversion failed for:" << num;
 		return;
 	}
 	//displayLocationId(locid,true,1); //0 for normal view, 1 for hex view
@@ -133,7 +134,7 @@ void EmsInfoView::setDeviceFlash(bool dirty)
 
 void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 {
-	qDebug() << "Double click";
+	QLOG_DEBUG() << "Double click";
 	Q_UNUSED(column)
 	if (ui.locationIdInfoTableWidget->rowCount() <= row)
 	{
@@ -144,7 +145,7 @@ void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 	int locid = num.toInt(&ok,16);
 	if (!ok)
 	{
-		qDebug() << "Numeric conversion failed for:" << num;
+		QLOG_ERROR() << "Numeric conversion failed for:" << num;
 		return;
 	}
 	DataType type = DATA_UNDEFINED;
@@ -232,7 +233,7 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,QString title,MemoryL
 		ui.locationIdInfoTableWidget->setHorizontalHeaderItem(3+i,new QTableWidgetItem(info.propertymap[i].first));
 	}
 	Q_UNUSED(info)
-	qDebug() << "Location ID Info for:" << "0x" + QString::number(locationid,16).toUpper();
+	QLOG_TRACE() << "Location ID Info for:" << "0x" + QString::number(locationid,16).toUpper();
 	int foundi = -1;
 	bool ok = false;
 	bool found = false;

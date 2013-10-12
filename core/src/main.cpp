@@ -23,7 +23,7 @@
 #include <QtGui/QApplication>
 #include "mainwindow.h"
 #include <QString>
-//#include "QsLog.h"
+#include "QsLog.h"
 
 QList<QPair<QString,QString> > getArgs(int argc, char **argv)
 {
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 	//Init the logger
 #ifdef QLOG_DEBUG()
 	QsLogging::Logger& logger = QsLogging::Logger::instance();
-	logger.setLoggingLevel(QsLogging::DebugLevel);
+	logger.setLoggingLevel(QsLogging::TraceLevel);
 #ifdef Q_OS_WIN
 	QString appDataDir = QString(getenv("USERPROFILE")).replace("\\","/");
 #else

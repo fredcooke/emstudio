@@ -62,12 +62,19 @@
 #include "datapacketdecoder.h"
 #include "memorymetadata.h"
 #include "rawdata.h"
+//#include "QsLog.h"
+
+namespace QsLogging
+{
+	class Logger;
+}
 
 class EmsComms : public QThread
 {
 	Q_OBJECT
 public:
 	EmsComms(QObject *parent) : QThread(parent) {}
+	virtual void passLogger(QsLogging::Logger *log)=0;
 	virtual void stop()=0;
 	virtual void setLogsEnabled(bool enabled)=0;
 	virtual DataPacketDecoder *getDecoder()=0;

@@ -20,7 +20,8 @@
  ************************************************************************************/
 
 #include "fetable3ddata.h"
-#include <QDebug>
+#include "QsLog.h"
+
 FETable3DData::FETable3DData() : Table3DData()
 {
 	m_writesEnabled = true;
@@ -34,8 +35,8 @@ void FETable3DData::setData(unsigned short locationid,bool isflashonly, QByteArr
 	m_values.clear();
 	unsigned short xaxissize = (((unsigned char)data[0]) << 8) + (unsigned char)data[1];
 	unsigned short yaxissize = (((unsigned char)data[2]) << 8) + (unsigned char)data[3];
-	qDebug() << "XAxis:" << xaxissize;
-	qDebug() << "YAxis:" << yaxissize;
+	QLOG_DEBUG() << "XAxis:" << xaxissize;
+	QLOG_DEBUG() << "YAxis:" << yaxissize;
 
 
 	m_maxXAxis = calcAxis(65535,m_metaData.xAxisCalc);

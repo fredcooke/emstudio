@@ -20,7 +20,7 @@
  ************************************************************************************/
 
 #include "tablewidget.h"
-#include <QDebug>
+#include "QsLog.h"
 
 TableWidget::TableWidget(QWidget *parent) : QTableWidget(parent)
 {
@@ -44,7 +44,7 @@ void TableWidget::keyPressEvent(QKeyEvent *event)
 		{
 			if (m_hotkeyList[i].first == event->key() && m_hotkeyList[i].second & event->modifiers())
 			{
-				qDebug() << "found event";
+				QLOG_DEBUG() << "found event";
 				emit hotKeyPressed(event->key(),event->modifiers());
 				return;
 			}
@@ -53,13 +53,13 @@ void TableWidget::keyPressEvent(QKeyEvent *event)
 		{
 			if (m_hotkeyList[i].first == event->key())
 			{
-				qDebug() << "found event2";
+				QLOG_DEBUG() << "found event2";
 				emit hotKeyPressed(event->key(),event->modifiers());
 				return;
 			}
 		}
 	}
-	//qDebug() << "Unhandled event:" << event->key() << event->modifiers();
+	//QLOG_DEBUG() << "Unhandled event:" << event->key() << event->modifiers();
 	event->ignore();
 	QTableWidget::keyPressEvent(event);
 }

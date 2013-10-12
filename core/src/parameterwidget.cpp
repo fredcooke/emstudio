@@ -1,9 +1,10 @@
 #include "parameterwidget.h"
 #include <QScrollArea>
-#include <QDebug>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include "QsLog.h"
+
 ParameterWidget::ParameterWidget(QWidget *parent) : QWidget(parent)
 {
 	scrollArea = new QScrollArea(this);
@@ -60,7 +61,7 @@ void ParameterWidget::saveButtonClicked()
 					valstr += QString::number(first,16).toUpper() + "," + QString::number(second,16).toUpper() + ",";
 				}
 			}
-			qDebug() << "Saving:" << "0x" + QString::number(m_fieldConfigList[i].second.locationId(),16).toUpper() << "Offset:" << QString::number(m_fieldConfigList[i].second.offset()) << valstr;
+			QLOG_DEBUG() << "Saving:" << "0x" + QString::number(m_fieldConfigList[i].second.locationId(),16).toUpper() << "Offset:" << QString::number(m_fieldConfigList[i].second.offset()) << valstr;
 			emit saveSingleData(m_fieldConfigList[i].second.locationId(),array,m_fieldConfigList[i].second.offset(),array.size());
 		}
 	}
@@ -92,7 +93,7 @@ void ParameterWidget::updateValue(unsigned short locationid,QByteArray block)
 				unsigned int value = 0;
 				for (int j=0;j<m_fieldConfigList[i].second.elementSize();j++)
 				{
-					//qDebug() << (unsigned char)block[m_fieldConfigList[i].second.offset() + (k * m_fieldConfigList[i].second.elementSize()) + j];
+					//QLOG_DEBUG() << (unsigned char)block[m_fieldConfigList[i].second.offset() + (k * m_fieldConfigList[i].second.elementSize()) + j];
 					bytestr += QString::number((unsigned char)block[m_fieldConfigList[i].second.offset() + (k * m_fieldConfigList[i].second.elementSize()) + j],16).toUpper() + ",";
 					value += ((unsigned char)block[m_fieldConfigList[i].second.offset() + (k * m_fieldConfigList[i].second.elementSize()) + j]) << (8 * (m_fieldConfigList[i].second.elementSize() - (j+1)));
 				}
@@ -101,7 +102,7 @@ void ParameterWidget::updateValue(unsigned short locationid,QByteArray block)
 				valstr += QString::number(calcAxis(value,m_fieldConfigList[i].second.calc())) + ",";
 			}
 			valstr = valstr.mid(0,valstr.length()-1);
-			qDebug() << "Pre value:" << "0x" + QString::number(locationid,16) << bytestr;
+			QLOG_DEBUG() << "Pre value:" << "0x" + QString::number(locationid,16) << bytestr;
 			if (m_nameToLineEditMap.contains(m_fieldConfigList[i].first.variable))
 			{
 				m_nameToLineEditMap[m_fieldConfigList[i].first.variable]->setText(valstr);
@@ -113,10 +114,10 @@ void ParameterWidget::updateValue(unsigned short locationid,QByteArray block)
 
 void ParameterWidget::addParam(QString title,DialogField field,ConfigBlock block)
 {
-	qDebug() << "Title:" << title;
-	qDebug() << "Field:" << field.title << field.variable;
-	qDebug() << "Found config block:" << block.type();
-	qDebug() << block.name();
+	QLOG_DEBUG() << "Title:" << title;
+	QLOG_DEBUG() << "Field:" << field.title << field.variable;
+	QLOG_DEBUG() << "Found config block:" << block.type();
+	QLOG_DEBUG() << block.name();
 	m_fieldConfigList.append(QPair<DialogField,ConfigBlock>(field,block));
 	//This is the config block.
 	if (block.type() == "scalar" || block.type() == "value" || block.type() == "array")

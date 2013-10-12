@@ -42,7 +42,6 @@ GaugeWidget::GaugeWidget(QWidget *parent) : QDeclarativeView(parent)
 	}
 	else
 	{
-		qDebug() << "Unable to locate gauges.qml";
 	}*/
 }
 

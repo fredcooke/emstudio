@@ -39,7 +39,7 @@ void OverviewProgressItemDelegate::paint(QPainter *painter, const QStyleOptionVi
 		painter->setPen(QColor::fromRgb(100,100,255));
 		//painter->fillRect();
 		//painter->setBrush(Qt::SolidPattern);
-		//qDebug() << "IValue:" << ivalue << "IMax:" << imax;
+		//QLOG_DEBUG() << "IValue:" << ivalue << "IMax:" << imax;
 		if (imax ==0 && ivalue == 0)
 		{
 		}

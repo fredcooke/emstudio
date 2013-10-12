@@ -76,7 +76,7 @@ void TableView::guiUpdateTimerTick()
 				ui.tableWidget->item(m_nameToIndexMap[i.key()],1)->setText(valstr);
 			}
 		}
-		//qDebug() << i.key() << m_nameToIndexMap[i.key()] << i.value();
+		//QLOG_DEBUG() << i.key() << m_nameToIndexMap[i.key()] << i.value();
 		i++;
 	}
 

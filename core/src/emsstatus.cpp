@@ -67,7 +67,6 @@ void EmsStatus::passData(QVariantMap data)
 {
 
 	unsigned char decoderFlags = data["decoderFlags"].toInt();
-	//qDebug() << "Sync:" << decoderFlags;
 	setFlag(ui.combustionSyncLineEdit,decoderFlags & 0x01);
 	setFlag(ui.crankSyncLineEdit,decoderFlags & 0x02);
 	setFlag(ui.camSyncLineEdit,decoderFlags & 0x04);

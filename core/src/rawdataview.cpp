@@ -20,7 +20,7 @@
  ************************************************************************************/
 
 #include "rawdataview.h"
-
+#include "QsLog.h"
 
 RawDataView::RawDataView(bool isram, bool isflash,QWidget *parent)
 {
@@ -67,12 +67,12 @@ void RawDataView::loadRamButtonClicked()
 {
 	if (QMessageBox::information(0,"Warning","Doing this will reload the block from ram, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
-		qDebug() << "Ok";
+		QLOG_DEBUG() << "Ok";
 		emit reloadData(m_locationId,true);
 	}
 	else
 	{
-		qDebug() << "Not ok";
+		QLOG_DEBUG() << "Not ok";
 	}
 
 }
@@ -81,12 +81,12 @@ void RawDataView::loadFlashButtonClicked()
 {
 	if (QMessageBox::information(0,"Warning","Doing this will reload the block from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
-		qDebug() << "Ok";
+		QLOG_DEBUG() << "Ok";
 		emit reloadData(m_locationId,false);
 	}
 	else
 	{
-		qDebug() << "Not ok";
+		QLOG_DEBUG() << "Not ok";
 	}
 }
 

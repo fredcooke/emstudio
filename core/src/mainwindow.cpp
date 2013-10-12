@@ -28,15 +28,8 @@
 #include <tableview2d.h>
 #include <qjson/parser.h>
 #include "logloader.h"
-//#include "QsLog.h"
-#ifndef QLOG_DEBUG()
-#define QLOG_INFO() qDebug()
-#define QLOG_TRACE() qDebug()
-#define QLOG_DEBUG() qDebug()
-#define QLOG_ERROR() qDebug()
-#define QLOG_WARN() qDebug()
-#define QLOG_FATAL() qDebug()
-#endif
+#include "QsLog.h"
+
 #define define2string_p(x) #x
 #define define2string(x) define2string_p(x)
 
@@ -919,6 +912,7 @@ void MainWindow::emsCommsDisconnected()
 		QLOG_ERROR() << pluginLoader->errorString();
 		exit(-1);
 	}
+	emsComms->passLogger(&QsLogging::Logger::instance());
 
 	dataPacketDecoder = emsComms->getDecoder();
 	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
@@ -1018,6 +1012,7 @@ void MainWindow::setPlugin(QString plugin)
 		QLOG_ERROR() << pluginLoader->errorString();
 		exit(-1);
 	}
+	emsComms->passLogger(&QsLogging::Logger::instance());
 	QString filestr = "";
 	if (QFile::exists(m_settingsDir + "/" + "definitions/freeems.config.json"))
 	{

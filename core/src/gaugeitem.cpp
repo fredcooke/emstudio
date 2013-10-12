@@ -127,8 +127,6 @@ void GaugeItem::drawBackground(QPainter *painter)
 		for (int i=internalWidth;i<=(width() - ((width() - internalWidth)/2));i++)
 		{
 			tmpPainter.setPen(QPen(QColor(255.0 * (1.0-((float)(internalWidth - i) / (internalWidth - (width() - ((width() - internalWidth)/2))))),160.0 * (1.0-((float)(internalWidth - i) / (internalWidth - (width() - ((width() - internalWidth)/2))))),0)));
-			//qDebug() << (internalWidth - i) + widthOffset << (internalWidth-i) + heightOffset << i << widthOffset << (internalWidth-i);
-			//qDebug() << 255 * ((float)(internalWidth - i) / (internalWidth - (width() - ((width() - internalWidth)/2))));
 			tmpPainter.drawEllipse(widthOffset+(internalWidth - i),heightOffset+(internalWidth - i),i-(internalWidth-i),i - (internalWidth-i));
 		}
 		int r=0;
@@ -455,7 +453,6 @@ void GaugeItem::drawBackground(QPainter *painter)
 	}
 	else if (m_style == 3)
 	{
-		//qDebug() << "Draw";
 		int internalWidth = width() * 0.90;
 		int internalHeight = height() * 0.90;
 		int widthOffset = width() * 0.05;
@@ -473,10 +470,6 @@ void GaugeItem::drawBackground(QPainter *painter)
 			//tmpPainter.setPen(QPen(QColor(255.0 * (1.0-((float)(internalWidth - i) / (internalWidth - (width() - ((width() - internalWidth)/2))))),160.0 * (1.0-((float)(internalWidth - i) / (internalWidth - (width() - ((width() - internalWidth)/2))))),0)));
 			int random = rand() % 100 + 155;
 			tmpPainter.setPen(QPen(QColor(random,random,random,(int)counter % 255)));
-			//qDebug() << (internalWidth - i) + widthOffset << (internalWidth-i) + heightOffset << i << widthOffset << (internalWidth-i);
-			//qDebug() << 255 * ((float)(internalWidth - i) / (internalWidth - (width() - ((width() - internalWidth)/2))));
-			//tmpPainter.drawEllipse(widthOffset+(internalWidth - i),heightOffset+(internalWidth - i),i-(internalWidth-i),i - (internalWidth-i));
-			//qDebug() << _scaleStartAngle << _scaleEndAngle;
 			tmpPainter.drawArc(widthOffset+(internalWidth - i),heightOffset+(internalWidth - i),i-(internalWidth-i),i - (internalWidth-i),(270-_scaleStartAngle) * 16,(0-(_scaleEndAngle - _scaleStartAngle)) * 16);
 		}
 		tmpPainter.setPen(QPen(QColor::fromRgb(255,255,255)));
@@ -816,7 +809,6 @@ void GaugeItem::setValue(double value)
 }
 void GaugeItem::setRaw(double value)
 {
-	//qDebug() << value;
 	_value = value;
 	m_value = value;
 	update();

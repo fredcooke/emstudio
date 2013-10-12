@@ -195,7 +195,7 @@ void FETable2DData::setCell(int row, int column,double newval)
 {
 	//New value has been accepted. Let's write it.
 	//offset = column + (row * 32), size == 2
-	//qDebug() << "Update:" << row << column << newval;
+	//QLOG_DEBUG() << "Update:" << row << column << newval;
 	short val = 0;
 	if (row == 0)
 	{

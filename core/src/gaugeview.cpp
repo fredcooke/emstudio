@@ -68,7 +68,6 @@ void GaugeView::guiUpdateTimerTick()
 			widget->propertyMap.setProperty(i.key().toAscii(),i.value());
 		}
 		//ui.tableWidget->item(m_nameToIndexMap[i.key()],1)->setText(QString::number(i.value()));
-		//qDebug() << i.key() << m_nameToIndexMap[i.key()] << i.value();
 		i++;
 	}
 

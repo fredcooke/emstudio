@@ -20,7 +20,8 @@
  ************************************************************************************/
 
 #include "emsdata.h"
-#include <QDebug>
+#include "QsLog.h"
+
 EmsData::EmsData() : QObject()
 {
 	m_interrogationInProgress = false;
@@ -593,7 +594,8 @@ void EmsData::passLocationInfo(unsigned short locationid,MemoryLocationInfo info
 void EmsData::ramBlockUpdate(unsigned short locationid, QByteArray header, QByteArray payload)
 {
 	Q_UNUSED(header)
-	qDebug() << "Ram Block retrieved:" << "0x" + QString::number(locationid,16).toUpper();
+	QLOG_TRACE() << "Ram Block retrieved:" << "0x" + QString::number(locationid,16).toUpper();
+
 	if (!hasDeviceRamBlock(locationid))
 	{
 		//This should not happen
@@ -610,14 +612,14 @@ void EmsData::ramBlockUpdate(unsigned short locationid, QByteArray header, QByte
 		if (!verifyMemoryBlock(locationid,header,payload))
 		{
 			//QMessageBox::information(this,"Error","RAM Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen");
-			qDebug() << "RAM Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen";
+			QLOG_ERROR() << "RAM Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen";
 			return;
 		}
 		if (getDeviceRamBlock(locationid).isEmpty())
 		{
 			//This should not happen
-			qDebug() << "Ram block on device while ram block on tuner is empty! This should not happen" << "0x" + QString::number(locationid,16).toUpper();
-			qDebug() << "Current block size:" << getDeviceRamBlock(locationid).size();
+			QLOG_ERROR() << "Ram block on device while ram block on tuner is empty! This should not happen" << "0x" + QString::number(locationid,16).toUpper();
+			QLOG_ERROR() << "Current block size:" << getDeviceRamBlock(locationid).size();
 			setLocalRamBlock(locationid,payload);
 			setDeviceRamBlock(locationid,payload);
 		}
@@ -640,8 +642,8 @@ void EmsData::ramBlockUpdate(unsigned short locationid, QByteArray header, QByte
 			{
 				if (getDeviceRamBlock(locationid) != payload)
 				{
-					qDebug() << "Ram block on device does not match ram block on tuner! This should ONLY happen during a manual update!";
-					qDebug() << "Tuner ram size:" << getDeviceRamBlock(locationid).size();
+					QLOG_ERROR() << "Ram block on device does not match ram block on tuner! This should ONLY happen during a manual update!";
+					QLOG_ERROR() << "Tuner ram size:" << getDeviceRamBlock(locationid).size();
 					setDeviceRamBlock(locationid,payload);
 				}
 				if (payload != getLocalRamBlock(locationid))
@@ -659,12 +661,12 @@ void EmsData::ramBlockUpdate(unsigned short locationid, QByteArray header, QByte
 
 void EmsData::flashBlockUpdate(unsigned short locationid, QByteArray header, QByteArray payload)
 {
-	qDebug() << "Flash Block retrieved:" << "0x" + QString::number(locationid,16).toUpper();
+	QLOG_TRACE() << "Flash Block retrieved:" << "0x" + QString::number(locationid,16).toUpper();
 	Q_UNUSED(header)
 	if (!verifyMemoryBlock(locationid,header,payload))
 	{
 		//QMessageBox::information(this,"Error","Flash Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen");
-		qDebug() << "Flash Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen";
+		QLOG_ERROR() << "Flash Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen";
 		return;
 	}
 	if (hasDeviceFlashBlock(locationid))
@@ -695,9 +697,9 @@ void EmsData::flashBlockUpdate(unsigned short locationid, QByteArray header, QBy
 				{
 					if (getDeviceFlashBlock(locationid) != payload)
 					{
-						qDebug() << "Flash block in memory does not match flash block on tuner! This should not happen!";
-						qDebug() << "Flash size:" << getDeviceFlashBlock(locationid).size();
-						qDebug() << "Flash ID:" << "0x" + QString::number(locationid,16).toUpper();
+						QLOG_ERROR() << "Flash block in memory does not match flash block on tuner! This should not happen!";
+						QLOG_ERROR() << "Flash size:" << getDeviceFlashBlock(locationid).size();
+						QLOG_ERROR() << "Flash ID:" << "0x" + QString::number(locationid,16).toUpper();
 						setDeviceFlashBlock(locationid,payload);
 					}
 					if (getLocalFlashBlock(locationid) != payload)
@@ -715,12 +717,12 @@ void EmsData::ramBytesLocalUpdate(unsigned short locationid,unsigned short offse
 {
 	if (!hasLocalRamBlock(locationid))
 	{
-		qDebug() << "Write requested when there is no local ram block!";
+		QLOG_WARN() << "Write requested when there is no local ram block!";
 		return;
 	}
 	if (getLocalRamBlock(locationid).mid(offset,size) == data)
 	{
-		qDebug() << "Data in application memory unchanged, no reason to send write for single value";
+		QLOG_WARN() << "Data in application memory unchanged, no reason to send write for single value";
 		return;
 	}
 	setLocalRamBlock(locationid,getLocalRamBlock(locationid).replace(offset,size,data));
@@ -735,7 +737,7 @@ void EmsData::flashBytesLocalUpdate(unsigned short locationid,unsigned short off
 	}
 	if (getLocalFlashBlock(locationid).mid(offset,size) == data)
 	{
-		qDebug() << "Data in application memory unchanged, no reason to send write for single value";
+		QLOG_WARN() << "Data in application memory unchanged, no reason to send write for single value";
 		return;
 	}
 	setLocalFlashBlock(locationid,getLocalFlashBlock(locationid).replace(offset,size,data));

@@ -20,7 +20,6 @@
  ************************************************************************************/
 
 #include "tableview3d.h"
-#include <QDebug>
 #include <QMessageBox>
 #include <QFile>
 #include <QFileDialog>
@@ -29,6 +28,8 @@
 #include <QContextMenuEvent>
 #include <QMenu>
 #include <QAction>
+#include "QsLog.h"
+
 //#include <freeems/fetable3ddata.h>
 #include "tablewidgetdelegate.h"
 TableView3D::TableView3D(QWidget *parent)
@@ -106,18 +107,18 @@ void TableView3D::setValue(int row, int column,double value,bool ignoreselection
 {
 	if (row == -1 || column == -1)
 	{
-		qDebug() << "Negative array index! Should be unreachable code! FIXME!";
+		QLOG_ERROR() << "Negative array index! Should be unreachable code! FIXME!";
 		return;
 	}
 	if (row >= ui.tableWidget->rowCount() || column >= ui.tableWidget->columnCount())
 	{
-		qDebug() << "Larger than life, should be unreachable code! FIXME!";
+		QLOG_ERROR() << "Larger than life, should be unreachable code! FIXME!";
 		return;
 	}
 	// Ignore bottom right corner if the disallow on editing fails
 	if (row == ui.tableWidget->rowCount()-1 && column == 0)
 	{
-		qDebug() << "This should not happen! Bottom right corner ignored!";
+		QLOG_ERROR() << "This should not happen! Bottom right corner ignored!";
 		return;
 	}
 	//bool conversionOk = false; // Note, value of this is irrelevant, overwritten during call in either case, but throws a compiler error if not set.
@@ -144,21 +145,21 @@ void TableView3D::setValue(int row, int column,double value,bool ignoreselection
 		{
 			if (ui.tableWidget->selectedItems()[i]->row() == ui.tableWidget->rowCount()-1)
 			{
-				qDebug() << "XAxis edit attempted with multiple cells selected. This is not allowed";
+				QLOG_ERROR() << "XAxis edit attempted with multiple cells selected. This is not allowed";
 				QMessageBox::information(0,"Error","Editing of multiple AXIS cells at once is not allowed. Please select a single axis cell to edit at a time");
 				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
 				return;
 			}
 			if (ui.tableWidget->selectedItems()[i]->column() == 0)
 			{
-				qDebug() << "YAxis edit attempted with multiple cells selected. This is not allowed";
+				QLOG_ERROR() << "YAxis edit attempted with multiple cells selected. This is not allowed";
 				QMessageBox::information(0,"Error","Editing of multiple AXIS cells at once is not allowed. Please select a single axis cell to edit at a time");
 				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
 				return;
 			}
 		}
 		currentvalue = oldValue;
-		qDebug() << "Setting all cells to" << currentvalue << "for" << row << column;
+		QLOG_DEBUG() << "Setting all cells to" << currentvalue << "for" << row << column;
 		tableData->setWritesEnabled(false);
 		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
 		{
@@ -504,7 +505,7 @@ QString TableView3D::verifyValue(int row,int column,QString item)
 {
 	if (row == ui.tableWidget->rowCount()-1 && column == 0)
 	{
-		qDebug() << "This should not happen! Bottom right corner ignored!";
+		QLOG_ERROR() << "This should not happen! Bottom right corner ignored!";
 		return "INVALID INDEX";
 	}
 	double tempValue = item.toDouble();
@@ -730,7 +731,7 @@ void TableView3D::exportJson(QString filename)
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
 	{
-		qDebug() << "Unable to open file to output JSON!";
+		QLOG_ERROR() << "Unable to open file to output JSON!";
 		return;
 	}
 	file.write(serialized);
@@ -751,7 +752,7 @@ void TableView3D::importClicked()
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		qDebug() << "Unable to open file to output JSON!";
+		QLOG_ERROR() << "Unable to open file to output JSON!";
 		QMessageBox::information(0,"Error","Unable to open JSON file:" + file.errorString());
 		return;
 	}
@@ -762,7 +763,7 @@ void TableView3D::importClicked()
 	QVariant topvar = parser.parse(toparsebytes,&ok);
 	if (!ok)
 	{
-		qDebug() << "Unable to parse import json";
+		QLOG_ERROR() << "Unable to parse import json";
 		QMessageBox::information(0,"Error","Unable to parse JSON. Error: " +  parser.errorString());
 		return;
 	}
@@ -851,13 +852,13 @@ void TableView3D::loadRamClicked()
 {
 	if (QMessageBox::information(0,"Warning","Doing this will reload the table from ram, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
-		qDebug() << "Ok";
+		QLOG_DEBUG() << "Ok";
 		//emit reloadTableData(m_locationId,true);
 		tableData->updateFromRam();
 	}
 	else
 	{
-		qDebug() << "Not ok";
+		QLOG_DEBUG() << "Not ok";
 	}
 }
 
@@ -865,13 +866,13 @@ void TableView3D::loadClicked()
 {
 	if (QMessageBox::information(0,"Warning","Doing this will reload the table from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
-		qDebug() << "Ok";
+		QLOG_DEBUG() << "Ok";
 		tableData->updateFromFlash();
 		//emit reloadTableData(m_locationId,false);
 	}
 	else
 	{
-		qDebug() << "Not ok";
+		QLOG_DEBUG() << "Not ok";
 	}
 
 }
@@ -896,7 +897,7 @@ bool TableView3D::updateTable()
 	if (tableData->yAxis().size() == 0 || tableData->xAxis().size() == 0)
 	{
 		//Invalid/empty data
-		qDebug() << "3D Table axis had zero values. This is INVALID and should be fixed.";
+		QLOG_ERROR() << "3D Table axis had zero values. This is INVALID and should be fixed.";
 		return false;
 	}
 	double first = tableData->yAxis()[0];
@@ -1045,7 +1046,7 @@ bool TableView3D::setData(unsigned short locationid,DataBlock *data)
 }
 void TableView3D::reColorTable(int rownum,int colnum)
 {
-	//qDebug() << "Recoloring" << rownum << colnum;
+	//QLOG_DEBUG() << "Recoloring" << rownum << colnum;
 	if (rownum == ui.tableWidget->rowCount()-1 || colnum == 0)
 	{
 		return;
@@ -1099,11 +1100,11 @@ void TableView3D::reColorTable(int rownum,int colnum)
 
 */
 
-		//qDebug() << "Loc:" << (tableData->rows()-1)-(rownum) << colnum - 1;
+		//QLOG_DEBUG() << "Loc:" << (tableData->rows()-1)-(rownum) << colnum - 1;
 		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
 		double val = tableData->values()[(tableData->rows()-1)-(rownum)][colnum-1];
-		//qDebug() << "Value:" << val;
+		//QLOG_DEBUG() << "Value:" << val;
 
 		//ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
 		if (val < tableData->maxZAxis()/4)
@@ -1334,7 +1335,7 @@ void TableView3D::passDatalog(QVariantMap data)
 		}
 		else
 		{
-			qDebug() << "Error parsing datalog, xloc and yloc aren't != -1";
+			QLOG_ERROR() << "Error parsing datalog, xloc and yloc aren't != -1";
 		}
 	}
 }

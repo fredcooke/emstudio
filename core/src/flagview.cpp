@@ -21,7 +21,8 @@
 
 #include "flagview.h"
 #include <QMdiSubWindow>
-#include <QDebug>
+#include "QsLog.h"
+
 FlagView::FlagView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
@@ -48,7 +49,6 @@ void FlagView::passData(QVariantMap data)
 	{
 		if (i.value().type() == QVariant::Bool)
 		{
-			//qDebug() << "Flag value:" << i.key() << i.value();
 			//Flag
 			bool found = false;
 			for (int j=0;j<ui.flagsTableWidget->rowCount();j++)
@@ -86,11 +86,10 @@ void FlagView::passData(QVariantMap data)
 		else if (i.value().type() == QVariant::Double)
 		{
 			//Value
-			//qDebug() << "Double value:" << i.key() << i.value();
 		}
 		else
 		{
-			qDebug() << "unknown value type:" << i.value().typeName();
+			QLOG_TRACE() << "unknown value type:" << i.value().typeName();
 		}
 		i++;
 	}

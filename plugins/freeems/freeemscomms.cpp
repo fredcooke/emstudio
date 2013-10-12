@@ -27,6 +27,8 @@
 #include <qjson/parser.h>
 #include "fetable2ddata.h"
 #include "fetable3ddata.h"
+#include "QsLog.h"
+
 #define NAK 0x02
 FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 {
@@ -178,6 +180,13 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 
 
 }
+void FreeEmsComms::passLogger(QsLogging::Logger *log)
+{
+	//Set the internal instance.
+	QsLogging::Logger::instance(log);
+	QLOG_DEBUG() << "Logging from the plugin!!!";
+}
+
 MemoryMetaData *FreeEmsComms::getMetaParser()
 {
 	return m_metaDataParser;
@@ -229,7 +238,7 @@ void FreeEmsComms::startInterrogation()
 
 void FreeEmsComms::openLogs()
 {
-	qDebug() << "Open logs:" << m_logsDirectory + "/" + m_logsFilename + ".bin";
+	QLOG_INFO() << "Open logs:" << m_logsDirectory + "/" + m_logsFilename + ".bin";
 	if (!QDir(m_logsDirectory).exists())
 	{
 		QDir dir(QCoreApplication::instance()->applicationDirPath());
@@ -587,7 +596,7 @@ bool FreeEmsComms::sendPacket(RequestClass request,bool haslength)
 {
 	if (!sendPacket(request.type,request.args,request.argsize,haslength))
 	{
-		qDebug() << "sendPacket failed";
+		QLOG_ERROR() << "sendPacket failed";
 		return false;
 	}
 	return true;
@@ -651,12 +660,12 @@ bool FreeEmsComms::sendPacket(unsigned short payloadid,QList<QVariant> arglist,Q
 		header.append((char)((payloadid >> 8) & 0xFF));
 		header.append((char)((payloadid) & 0xFF));
 	}
-	qDebug() << "About to send packet";
+	QLOG_TRACE() << "About to send packet";
     if (serialPort->writeBytes(generatePacket(header,payload)) < 0)
 	{
 		return false;
 	}
-	qDebug() << "Sent packet" << "0x" + QString::number(payloadid,16).toUpper();
+	QLOG_TRACE() << "Sent packet" << "0x" + QString::number(payloadid,16).toUpper();
 	emit packetSent(payloadid,header,payload);
 	return true;
 }
@@ -748,7 +757,7 @@ void FreeEmsComms::run()
 				SerialPortStatus errortype = serialPort->isSerialMonitor(m_threadReqList[i].args[0].toString());
 				if (errortype != NONE)
 				{
-					qDebug() << "Unable to verify ECU";
+					QLOG_ERROR() << "Unable to verify ECU";
 					QString errorstr = "UNKNOWN ERROR";
 					if (errortype == UNABLE_TO_CONNECT)
 					{
@@ -787,23 +796,23 @@ void FreeEmsComms::run()
 					if (errornum == -1)
 					{
 						emit error(UNABLE_TO_CONNECT,"Unable to open serial port " + m_threadReqList[i].args[0].toString() + " Please ensure no other application has the port open and that the port exists!");
-						qDebug() << "Unable to connect to COM port";
+						QLOG_ERROR() << "Unable to connect to COM port";
 					}
 					else if (errornum == -2)
 					{
 						emit error(UNABLE_TO_LOCK,"Unable to open serial port " + m_threadReqList[i].args[0].toString() + " due to another freeems application locking the port. Please close all other freeems related applications and try again.");
-						qDebug() << "Unable to connect to COM port due to process lock";
+						QLOG_ERROR() << "Unable to connect to COM port due to process lock";
 					}
 					m_threadReqList.removeAt(i);
 					i--;
 					emit disconnected();
 					continue;
 				}
-				qDebug() << "Serial connected!";
+				QLOG_INFO() << "Serial connected!";
 				//Before we finish emitting the fact that we are connected, let's verify this is a freeems system we are talking to.
 				if (!sendPacket(GET_FIRMWARE_VERSION))
 				{
-					qDebug() << "Error writing packet. Quitting thread";
+					QLOG_FATAL() << "Error writing packet. Quitting thread";
 					return;
 				}
 				int dataattempts = 0;
@@ -892,7 +901,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0xDA5E;
 					if (!sendPacket(m_threadReqList[i],true))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -911,7 +920,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0xEEEE;
 					if (!sendPacket(GET_DECODER_NAME))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -930,7 +939,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0xEEF0;
 					if (!sendPacket(GET_FIRMWARE_BUILD_DATE))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -949,7 +958,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0xEEF2;
 					if (!sendPacket(GET_COMPILER_VERSION))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -968,7 +977,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0xEEF4;
 					if (!sendPacket(GET_OPERATING_SYSTEM))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -987,7 +996,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0x0108;
 					if (!sendPacket(m_threadReqList[i],false))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -1006,7 +1015,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0xF8E0;
 					if (!sendPacket(m_threadReqList[i],false))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -1026,7 +1035,7 @@ void FreeEmsComms::run()
 					m_waitingForRamWrite = true;
 					if (!sendPacket(m_threadReqList[i],true))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -1046,7 +1055,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0x0104;
 					if (!sendPacket(m_threadReqList[i],false))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -1066,7 +1075,7 @@ void FreeEmsComms::run()
 					m_waitingForFlashWrite = true;
 					if (!sendPacket(m_threadReqList[i],true))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -1085,7 +1094,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0x0106;
 					if (!sendPacket(m_threadReqList[i],false))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -1104,7 +1113,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0x0000;
 					if (!sendPacket(GET_INTERFACE_VERSION))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -1123,7 +1132,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0x0002;
 					if (!sendPacket(GET_FIRMWARE_VERSION))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -1142,7 +1151,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0x0004;
 					if (!sendPacket(GET_MAX_PACKET_SIZE))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -1161,7 +1170,7 @@ void FreeEmsComms::run()
 					m_payloadWaitingForResponse = 0x0006;
 					if (!sendPacket(m_threadReqList[i],true))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -1177,7 +1186,7 @@ void FreeEmsComms::run()
 					m_currentWaitingRequest = m_threadReqList[i];
 					if (!sendPacket(SOFT_RESET))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -1194,7 +1203,7 @@ void FreeEmsComms::run()
 					m_currentWaitingRequest = m_threadReqList[i];
 					if (!sendPacket(HARD_RESET))
 					{
-						qDebug() << "Error writing packet. Quitting thread";
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
 					}
 					m_threadReqList.removeAt(i);
@@ -1218,16 +1227,16 @@ void FreeEmsComms::run()
 		if (QDateTime::currentDateTime().currentMSecsSinceEpoch() - m_timeoutMsecs > 500 && m_waitingForResponse)
 		{
 			//5 seconds
-			qDebug() << "TIMEOUT waiting for response to payload:" << "0x" + QString::number(m_payloadWaitingForResponse,16).toUpper() << "Sequence:" << m_currentWaitingRequest.sequencenumber;
+			QLOG_WARN() << "TIMEOUT waiting for response to payload:" << "0x" + QString::number(m_payloadWaitingForResponse,16).toUpper() << "Sequence:" << m_currentWaitingRequest.sequencenumber;
 			if (m_currentWaitingRequest.retryCount >= 2)
 			{
-				qDebug() << "No retries left!";
+				QLOG_ERROR() << "No retries left!";
 				emit commandTimedOut(m_currentWaitingRequest.sequencenumber);
 				m_waitingForResponse = false;
 			}
 			else
 			{
-				qDebug() << "Retrying";
+				QLOG_WARN() << "Retrying";
 				m_waitingForResponse = false;
 				m_currentWaitingRequest.retryCount++;
 				m_threadReqList.insert(0,m_currentWaitingRequest);
@@ -1303,7 +1312,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 			else
 			{
 				//TODO double check to make sure that there aren't an odd number of items here...
-				qDebug() << "Location ID List";
+				QLOG_DEBUG() << "Location ID List";
 				QString details = "Details: {";
 				for (int j=0;j<parsedPacket.payload.size();j++)
 				{
@@ -1343,9 +1352,9 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 
 				if (m_currentWaitingRequest.args.size() == 0)
 				{
-					qDebug() << "ERROR! Current waiting packet's arg size is zero1!!";
-					qDebug() << "0x" + QString::number(m_currentWaitingRequest.type,16).toUpper();
-					qDebug() << "0x" + QString::number(payloadid,16).toUpper();
+					QLOG_ERROR() << "ERROR! Current waiting packet's arg size is zero1!!";
+					QLOG_ERROR() << "0x" + QString::number(m_currentWaitingRequest.type,16).toUpper();
+					QLOG_ERROR() << "0x" + QString::number(payloadid,16).toUpper();
 				}
 				unsigned short locationid = m_currentWaitingRequest.args[0].toInt();
 				//TODO double check to make sure that there aren't an odd number of items here...
@@ -1493,7 +1502,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 			if (parsedPacket.isNAK)
 			{
 				//NAK
-				qDebug() << "IFACE VERSION NAK";
+				QLOG_ERROR() << "IFACE VERSION NAK";
 			}
 			else
 			{
@@ -1505,7 +1514,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 			if (parsedPacket.isNAK)
 			{
 				//NAK
-				qDebug() << "FIRMWARE VERSION NAK";
+				QLOG_ERROR() << "FIRMWARE VERSION NAK";
 			}
 			else
 			{
@@ -1690,8 +1699,8 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 				}
 				if (payloadid == m_payloadWaitingForResponse+1)
 				{
-					qDebug() << "Recieved Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
-					qDebug() << "Currently waiting for:" << QString::number(m_currentWaitingRequest.type,16).toUpper();
+					QLOG_TRACE() << "Recieved Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
+					QLOG_TRACE() << "Currently waiting for:" << QString::number(m_currentWaitingRequest.type,16).toUpper();
 					if (parsedPacket.isNAK)
 					{
 						//NAK to our packet
@@ -1710,7 +1719,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 				}
 				else
 				{
-					qDebug() << "ERROR! Invalid packet:" << "0x" + QString::number(payloadid,16).toUpper();
+					QLOG_ERROR() << "ERROR! Invalid packet:" << "0x" + QString::number(payloadid,16).toUpper();
 				}
 			}
 
@@ -1718,7 +1727,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 	}
 	else
 	{
-		qDebug() << "Header size is only" << parsedPacket.header.length() << "! THIS SHOULD NOT HAPPEN!";
+		QLOG_FATAL() << "Header size is only" << parsedPacket.header.length() << "! THIS SHOULD NOT HAPPEN!";
 		QString headerstring = "";
 		QString packetstring = "";
 		for (int i=0;i<parsedPacket.header.size();i++)
@@ -1729,8 +1738,8 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 		{
 			packetstring += QString::number((unsigned char)parsedPacket.payload[i],16);
 		}
-		qDebug() << "Header:" << headerstring;
-		qDebug() << "Packet:" << packetstring;
+		QLOG_DEBUG() << "Header:" << headerstring;
+		QLOG_DEBUG() << "Packet:" << packetstring;
 	}
 }
 
@@ -1746,7 +1755,7 @@ bool FreeEmsComms::sendSimplePacket(unsigned short payloadid)
 	m_payloadWaitingForResponse = payloadid;
     if (serialPort->writeBytes(generatePacket(header,payload)) < 0)
 	{
-		qDebug() << "Error writing packet. Quitting thread";
+		QLOG_FATAL() << "Error writing packet. Quitting thread";
 		return false;
 	}
 	return true;
@@ -1801,7 +1810,7 @@ Table3DData* FreeEmsComms::get3DTableData(unsigned short locationid)
 		connect(data,SIGNAL(requestBlockFromFlash(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromFlash(unsigned short,unsigned short,unsigned short)));
 		connect(data,SIGNAL(requestRamUpdateFromFlash(unsigned short)),this,SLOT(copyFlashToRam(unsigned short)));
 		connect(data,SIGNAL(requestFlashUpdateFromRam(unsigned short)),this,SLOT(copyRamToFlash(unsigned short)));
-		qDebug() << "Attempting to load table. Data size:" << emsData.getLocalRamBlock(locationid).size();
+		QLOG_DEBUG() << "Attempting to load table. Data size:" << emsData.getLocalRamBlock(locationid).size();
 		data->setData(locationid,!emsData.hasLocalRamBlock(locationid),emsData.getLocalRamBlock(locationid),m_metaDataParser->get3DMetaData(locationid));
 		m_3dTableMap[locationid] = data;*/
 		return 0;
@@ -1919,7 +1928,7 @@ FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 	if (buffer.size() <= 2)
 	{
 
-		qDebug() << "Not long enough to even contain a header!";
+		QLOG_ERROR() << "Not long enough to even contain a header!";
 		emit decoderFailure(buffer);
 		return Packet(false);
 	}
@@ -1970,7 +1979,7 @@ FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
 		iloc += 2;
 		if ((unsigned int)buffer.length() > (unsigned int)(length + iloc))
 		{
-			qDebug() << "Packet length should be:" << length + iloc << "But it is" << buffer.length();
+			QLOG_ERROR() << "Packet length should be:" << length + iloc << "But it is" << buffer.length();
 			emit decoderFailure(buffer);
 			return Packet(false);
 		}

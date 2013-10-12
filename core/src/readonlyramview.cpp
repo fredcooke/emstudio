@@ -20,7 +20,7 @@
  ************************************************************************************/
 
 #include "readonlyramview.h"
-#include <QDebug>
+#include "QsLog.h"
 
 ReadOnlyRamView::ReadOnlyRamView(QWidget *parent) : QWidget(parent)
 {
@@ -33,7 +33,7 @@ ReadOnlyRamView::ReadOnlyRamView(QWidget *parent) : QWidget(parent)
 }
 void ReadOnlyRamView::passData(unsigned short locationid,QByteArray data,QList<ReadOnlyRamData> metadata)
 {
-	qDebug() << "ReadOnlyRamView. Meta data:" << metadata.size() << "Data:" << data.size();
+	QLOG_DEBUG() << "ReadOnlyRamView. Meta data:" << metadata.size() << "Data:" << data.size();
 	m_locationId = locationid;
 	if (readRamTimer)
 	{
@@ -48,7 +48,7 @@ void ReadOnlyRamView::passData(unsigned short locationid,QByteArray data,QList<R
 	//ui.tableWidget->clearContents();
 	if (ui.tableWidget->rowCount() != metadata.size() && ui.tableWidget->rowCount() != 0)
 	{
-		qDebug() << "TableWidget rows does NOT equal metadata.size(). This should not happen!!";
+		QLOG_DEBUG() << "TableWidget rows does NOT equal metadata.size(). This should not happen!!";
 		ui.tableWidget->setRowCount(metadata.size());
 		for (int i=0;i<metadata.size();i++)
 		{

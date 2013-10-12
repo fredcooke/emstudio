@@ -21,7 +21,8 @@
 
 #include "serialrxthread.h"
 #include <QDateTime>
-#include <QDebug>
+#include "QsLog.h"
+
 SerialRXThread::SerialRXThread(QObject *parent) : QThread(parent)
 {
 	m_terminate = false;
@@ -51,12 +52,12 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 		len = port->readBytes(&buf,1);
 		if (len < 0)
 		{
-			qDebug() << "Timeout";
+			QLOG_DEBUG() << "Timeout";
 		}
 		else if (len == 0)
 		{
 			//This should be an error
-			qDebug() << "Nothing to read:" << attempts;
+			QLOG_DEBUG() << "Nothing to read:" << attempts;
 			msleep(10); //Need a sleep now, due to select timeout.
 			attempts++;
 			continue;
@@ -71,7 +72,7 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 					//Clear out the buffer and start fresh
 					m_inescape = false;
 					qbuffer.clear();
-					qDebug() << "Buffer error";
+					QLOG_DEBUG() << "Buffer error";
 				}
 				//Start of packet
 				m_inpacket = true;
@@ -90,7 +91,7 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 
 				if (sum != (unsigned char)qbuffer[qbuffer.size()-1])
 				{
-					qDebug() << "BAD CHECKSUM!";
+					QLOG_DEBUG() << "BAD CHECKSUM!";
 					qbuffer.clear();
 				}
 				else
@@ -129,7 +130,7 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 					}
 					else
 					{
-						qDebug() << "Error, escaped character is not valid!:" << QString::number(buf,16);
+						QLOG_DEBUG() << "Error, escaped character is not valid!:" << QString::number(buf,16);
 					}
 					m_inescape = false;
 				}
@@ -154,7 +155,7 @@ void SerialRXThread::run()
 		if (readlen < 0)
 		{
 			//Nothing on the port
-			qDebug() << "Timeout";
+			QLOG_DEBUG() << "Timeout";
 		}
 		if (readlen == 0)
 		{
@@ -181,7 +182,7 @@ void SerialRXThread::run()
 					bufToEmit.append(0xCC);
 					emit dataRead(bufToEmit);
 					qbuffer.clear();
-					qDebug() << "Buffer error";
+					QLOG_DEBUG() << "Buffer error";
 					m_packetErrorCount++;
 				}
 				//Start of packet
@@ -209,7 +210,7 @@ void SerialRXThread::run()
 				emit dataRead(bufToEmit);
 				if (sum != (unsigned char)qbuffer[qbuffer.size()-1])
 				{
-					qDebug() << "BAD CHECKSUM!";
+					QLOG_DEBUG() << "BAD CHECKSUM!";
 					m_packetErrorCount++;
 				}
 				else
@@ -257,7 +258,7 @@ void SerialRXThread::run()
 					}
 					else
 					{
-						qDebug() << "Error, escaped character is not valid!:" << QString::number(buffer[i],16);
+						QLOG_DEBUG() << "Error, escaped character is not valid!:" << QString::number(buffer[i],16);
 						m_packetErrorCount++;
 					}
 					m_inescape = false;

@@ -49,6 +49,7 @@ public:
 	MemoryMetaData *getMetaParser();
 	Table3DData *getNew3DTableData();
 	Table2DData *getNew2DTableData();
+	void passLogger(QsLogging::Logger *log);
 	void stop() { m_terminateLoop = true; }
 	void setLogsEnabled(bool enabled);
 	void setLogDirectory(QString dir);

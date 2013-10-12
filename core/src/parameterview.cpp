@@ -1,10 +1,11 @@
 #include "parameterview.h"
-#include <QDebug>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QScrollArea>
 #include <parameterwidget.h>
+#include "QsLog.h"
+
 ParameterView::ParameterView(QWidget *parent) : QWidget(parent)
 {
 	m_metaData=0;
@@ -16,17 +17,6 @@ ParameterView::ParameterView(QWidget *parent) : QWidget(parent)
 void ParameterView::itemSelectionChanged()
 {
 	return;
-	/*qDebug() << "Item selection changed";
-	if (ui.parameterTreeWidget->selectedItems().size() <= 0)
-	{
-		return;
-	}
-	QTreeWidgetItem *current = ui.parameterTreeWidget->selectedItems()[0];
-	qDebug() << "Menu selected:" << current->text(0);
-	if (m_metaMenu.dialogmap.contains(current->text(0)))
-	{
-		qDebug() << "Dialog:" << m_metaMenu.dialogmap[current->text(0)];
-	}*/
 }
 
 void ParameterView::currentItemChanged(QTreeWidgetItem *current,QTreeWidgetItem *prev)
@@ -36,13 +26,6 @@ void ParameterView::currentItemChanged(QTreeWidgetItem *current,QTreeWidgetItem 
 	{
 		return;
 	}
-	/*if (m_metaMenu.menunamemap.contains(current->text(0)))
-	{
-		if (m_metaMenu.dialogmap.contains(current->text(0)))
-		{
-			qDebug() << "Dialog:" << m_metaMenu.dialogmap[current->text(0)];
-		}
-	}*/
 	if (current->parent() == 0)
 	{
 		//It is a top level item. don't do anything
@@ -60,12 +43,12 @@ void ParameterView::currentItemChanged(QTreeWidgetItem *current,QTreeWidgetItem 
 					//This is our current item!
 					if (!m_metaMenu.menulist[i].subMenuList[j].is_seperator)
 					{
-						qDebug() << "Variable:" << m_metaMenu.menulist[i].subMenuList[j].variable;
+						QLOG_DEBUG() << "Variable:" << m_metaMenu.menulist[i].subMenuList[j].variable;
 						for (int k=0;k<m_metaMenu.dialoglist.size();k++)
 						{
 							if (m_metaMenu.dialoglist[k].variable == m_metaMenu.menulist[i].subMenuList[j].variable)
 							{
-								qDebug() << "Found Dialog:" << m_metaMenu.dialoglist[k].title << m_metaMenu.dialoglist[k].fieldList.size();
+								QLOG_DEBUG() << "Found Dialog:" << m_metaMenu.dialoglist[k].title << m_metaMenu.dialoglist[k].fieldList.size();
 								generateDialog(m_metaMenu.dialoglist[k].title,m_metaMenu.dialoglist[k].fieldList);
 								//Generate a dialog here.
 							}
@@ -86,15 +69,15 @@ void ParameterView::generateDialog(QString title,QList<DialogField> fieldlist)
 	paramWidgetList.append(widget);
 	for (int i=0;i<fieldlist.size();i++)
 	{
-		qDebug() << "Field:" << fieldlist[i].title << fieldlist[i].variable;
+		QLOG_DEBUG() << "Field:" << fieldlist[i].title << fieldlist[i].variable;
 		for (int j=0;j<m_memoryConfigBlockList.size();j++)
 		{
-			//qDebug() << "Config block:" << m_memoryConfigBlockList[j].type();
+			//QLOG_DEBUG() << "Config block:" << m_memoryConfigBlockList[j].type();
 			if (m_memoryConfigBlockList[j].name() == fieldlist[i].variable)
 			{
 				widget->addParam(title,fieldlist[i],m_memoryConfigBlockList[j]);
-				qDebug() << "Found config block:" << m_memoryConfigBlockList[j].type();
-				qDebug() << m_memoryConfigBlockList[j].name() << j;
+				QLOG_DEBUG() << "Found config block:" << m_memoryConfigBlockList[j].type();
+				QLOG_DEBUG() << m_memoryConfigBlockList[j].name() << j;
 				//This is the config block.
 				//int sizeoverride = -1;
 				if (m_memoryConfigBlockList[j].sizeOverride() != "")

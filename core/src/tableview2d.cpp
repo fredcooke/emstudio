@@ -21,7 +21,6 @@
 
 #include "tableview2d.h"
 #include <QMessageBox>
-#include <QDebug>
 #include <qwt_plot_grid.h>
 #include <qwt_plot_curve.h>
 #include <qjson/serializer.h>
@@ -29,6 +28,8 @@
 #include <QFileDialog>
 #include <tablewidgetdelegate.h>
 #include <QPair>
+#include "QsLog.h"
+
 //#include "freeems/fetable2ddata.h"
 TableView2D::TableView2D(QWidget *parent)
 {
@@ -288,15 +289,15 @@ QString TableView2D::formatNumber(double num,int prec)
 }
 void TableView2D::setValue(int row, int column,double value)
 {
-	qDebug() << "Set value:" << row << column << value;
+	QLOG_DEBUG() << "Set value:" << row << column << value;
 	if (row == -1 || column == -1)
 	{
-		qDebug() << "Negative array index! Should be unreachable code! FIXME!";
+		QLOG_DEBUG() << "Negative array index! Should be unreachable code! FIXME!";
 		return;
 	}
 	if (row >= ui.tableWidget->rowCount() || column >= ui.tableWidget->columnCount())
 	{
-		qDebug() << "Larger than life, should be unreachable code! FIXME!";
+		QLOG_DEBUG() << "Larger than life, should be unreachable code! FIXME!";
 		return;
 	}
 	//bool conversionOk = false;
@@ -310,7 +311,7 @@ void TableView2D::setValue(int row, int column,double value)
 		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 		return;
 	}*/
-	//qDebug() << "New Value:" << tempValue;
+	//QLOG_DEBUG() << "New Value:" << tempValue;
 
 	//This is to make sure we round the value properly. So value displayed == value sent.
 	//New value has been accepted. Let's write it.
@@ -543,7 +544,7 @@ void TableView2D::exportJson(QString filename)
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
 	{
-		qDebug() << "Unable to open file to output JSON!";
+		QLOG_DEBUG() << "Unable to open file to output JSON!";
 		return;
 	}
 	file.write(serialized);
@@ -578,7 +579,7 @@ void TableView2D::importClicked()
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		qDebug() << "Unable to open file to output JSON!";
+		QLOG_DEBUG() << "Unable to open file to output JSON!";
 		QMessageBox::information(0,"Error","Unable to open JSON file:" + file.errorString());
 		return;
 	}
@@ -589,7 +590,7 @@ void TableView2D::importClicked()
 	QVariant topvar = parser.parse(toparsebytes,&ok);
 	if (!ok)
 	{
-		qDebug() << "Unable to parse import json";
+		QLOG_DEBUG() << "Unable to parse import json";
 		QMessageBox::information(0,"Error","Unable to parse JSON. Error: " +  parser.errorString());
 		return;
 	}
@@ -664,13 +665,13 @@ void TableView2D::loadRamClicked()
 {
 	if (QMessageBox::information(0,"Warning","Doing this will reload the table from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
-		qDebug() << "Ok";
+		QLOG_DEBUG() << "Ok";
 		//emit reloadTableData(m_locationid,true);
 		tableData->updateFromRam();
 	}
 	else
 	{
-		qDebug() << "Not ok";
+		QLOG_DEBUG() << "Not ok";
 	}
 }
 
@@ -678,19 +679,19 @@ void TableView2D::loadFlashClicked()
 {
 	if (QMessageBox::information(0,"Warning","Doing this will reload the table from flash, and wipe out any changes you may have made. Are you sure you want to do this?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 	{
-		qDebug() << "Ok";
+		QLOG_DEBUG() << "Ok";
 		//emit reloadTableData(m_locationid,false);
 		tableData->updateFromFlash();
 	}
 	else
 	{
-		qDebug() << "Not ok";
+		QLOG_DEBUG() << "Not ok";
 	}
 }
 
 void TableView2D::tableCellChanged(int row,int column)
 {
-	qDebug() << "Cell changed";
+	QLOG_DEBUG() << "Cell changed";
 	bool conversionOk = false;
 	double tempValue=ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
 	if (!conversionOk)
@@ -744,7 +745,7 @@ bool TableView2D::setData(unsigned short locationid,DataBlock *data)
 	//tableData = (Table2DData*)newtableData;
 	//tableData->setData(locationid,m_isFlashOnly,data,m_metaData,m_isSignedData);
 	//connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
-	qDebug() << "TableView2D::passData" << "0x" + QString::number(locationid,16).toUpper();
+	QLOG_DEBUG() << "TableView2D::passData" << "0x" + QString::number(locationid,16).toUpper();
 	m_locationid = locationid;
 	return updateTable();
 }
@@ -767,7 +768,7 @@ bool TableView2D::updateTable()
 	if (tableData->axis().size() == 0)
 	{
 		//Invalid/empty data
-		qDebug() << "2D Table axis had zero values. This is INVALID and should be fixed.";
+		QLOG_ERROR() << "2D Table axis had zero values. This is INVALID and should be fixed.";
 		return false;
 	}
 	double first = tableData->axis()[0];
@@ -790,7 +791,7 @@ bool TableView2D::updateTable()
 			if (tableData->axis()[i] > first)
 			{
 				//Out of order table axis.
-				qDebug() << "2D Table axis is out of order!";
+				QLOG_ERROR() << "2D Table axis is out of order!";
 				return false;
 			}
 		}
@@ -799,7 +800,7 @@ bool TableView2D::updateTable()
 			if (tableData->axis()[i] < first)
 			{
 				//Out of order table axis.
-				qDebug() << "2D Table axis is out of order!";
+				QLOG_ERROR() << "2D Table axis is out of order!";
 				return false;
 			}
 		}
@@ -846,7 +847,7 @@ bool TableView2D::updateTable()
 void TableView2D::reColorTable(int rownum,int colnum)
 {
 	/*
-	//qDebug() << "Recoloring" << rownum << colnum;
+	//QLOG_DEBUG() << "Recoloring" << rownum << colnum;
 	if (rownum == ui.tableWidget->rowCount()-1 || colnum == 0)
 	{
 		return;
@@ -887,11 +888,11 @@ void TableView2D::reColorTable(int rownum,int colnum)
 	{
 
 
-		//qDebug() << "Loc:" << (tableData->rows()-1)-(rownum) << colnum - 1;
+		//QLOG_DEBUG() << "Loc:" << (tableData->rows()-1)-(rownum) << colnum - 1;
 		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
 		double val = tableData->values()[(tableData->rows()-1)-(rownum)][colnum-1];
-		//qDebug() << "Value:" << val;
+		//QLOG_DEBUG() << "Value:" << val;
 
 		//ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
 		if (val < tableData->maxZAxis()/4)
@@ -1066,7 +1067,7 @@ void TableView2D::passDatalog(QVariantMap data)
 		}
 		else
 		{
-			qDebug() << "Error parsing datalog, xloc and yloc aren't != -1";
+			QLOG_ERROR() << "Error parsing datalog, xloc and yloc aren't != -1";
 		}
 	}
 }

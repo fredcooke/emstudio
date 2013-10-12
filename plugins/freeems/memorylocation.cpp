@@ -20,7 +20,8 @@
  ************************************************************************************/
 
 #include "memorylocation.h"
-#include <QDebug>
+#include "QsLog.h"
+
 MemoryLocation::MemoryLocation()
 {
 	m_parent = 0;
@@ -48,7 +49,7 @@ void MemoryLocation::childChanged(MemoryLocation *child,QByteArray data)
 	}
 	if (data.size() != child->size)
 	{
-		qDebug() << "Error. Child tried to replace memory location not equal to its own size! Data size: " << data.size() << "Child size:" << child->size;
+		QLOG_ERROR() << "Error. Child tried to replace memory location not equal to its own size! Data size: " << data.size() << "Child size:" << child->size;
 	}
 	m_data.replace(childinparent,data.length(),data);
 }

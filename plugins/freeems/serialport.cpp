@@ -23,6 +23,7 @@
 #include <QDateTime>
 #include <QMutexLocker>
 #include <cassert>
+#include "QsLog.h"
 
 SerialPort::SerialPort(QObject *parent) : QObject(parent)
 {
@@ -56,7 +57,7 @@ SerialPortStatus SerialPort::isSerialMonitor(QString portname)
 	int const writei = writeBytes( QByteArray("\x0d") );
 	if (writei < 0)
 	{
-		qDebug() << "Error writing to verify FreeEMS";
+		QLOG_ERROR() << "Error writing to verify FreeEMS";
 	closePort();
 		return UNABLE_TO_WRITE;
 	}
@@ -77,14 +78,14 @@ SerialPortStatus SerialPort::isSerialMonitor(QString portname)
 
 	//assert( count >= 0 );               /**< fatally catch read errs (temp) */
 	SerialPortStatus status = NONE;     /**< default: assume !SM            */
-	qDebug() << "Verify count: " << QString::number( count );
+	QLOG_DEBUG() << "Verify count: " << QString::number( count );
 	if (count >= 2)
 	{
-		qDebug() << "Verify:" << QString::number(buf[0],16);
-		qDebug() << "Verify:" << QString::number(buf[1],16);
+		QLOG_DEBUG() << "Verify:" << QString::number(buf[0],16);
+		QLOG_DEBUG() << "Verify:" << QString::number(buf[1],16);
 		if ( (count >= 3) && (buf[0] == 0xE0 || buf[0] == 0xE1) )
 		{
-			qDebug() << "Verify:" << QString::number(buf[2],16);
+			QLOG_DEBUG() << "Verify:" << QString::number(buf[2],16);
 			if (buf[2] == 0x3E)
 				status = SM_MODE;   // Serial monitor IS running
 		}
@@ -106,7 +107,7 @@ int SerialPort::readBytes(unsigned char *buf,int maxlen)
 	DWORD evt;
 	if (!WaitCommEvent(m_portHandle,&evt,NULL))
 	{
-		qDebug() << "Unable to WaitCommEvent!!";
+		QLOG_ERROR() << "Unable to WaitCommEvent!!";
 		return -1;
 	}
 	if (!(evt & EV_RXCHAR))
@@ -117,7 +118,7 @@ int SerialPort::readBytes(unsigned char *buf,int maxlen)
 	if (!ReadFile(m_portHandle,(LPVOID)buf,maxlen,(LPDWORD)&readlen,NULL))
 	{
 		//Serial error here
-		qDebug() << "Serial Read error";
+		QLOG_ERROR() << "Serial Read error";
 	}
 #else
 	fd_set set;
@@ -151,7 +152,7 @@ int SerialPort::writeBytes(QByteArray packet)
 			char c = packet.data()[i];
 			if (!::WriteFile(m_portHandle, (void*)&c, (DWORD)1, (LPDWORD)&len, NULL))
 			{
-				qDebug() << "Serial Write Error";
+				QLOG_ERROR() << "Serial Write Error";
 				return -1;
 			}
 			Sleep(m_interByteSendDelay);
@@ -161,7 +162,7 @@ int SerialPort::writeBytes(QByteArray packet)
 	{
 		if (!::WriteFile(m_portHandle, (void*)packet.data(), (DWORD)packet.length(), (LPDWORD)&len, NULL))
 		{
-			qDebug() << "Serial Write Error";
+			QLOG_ERROR() << "Serial Write Error";
 			return -1;
 		}
 	}
@@ -174,7 +175,7 @@ int SerialPort::writeBytes(QByteArray packet)
 			if (write(m_portHandle,&c,1)<0)
 			{
 				//TODO: Error here
-				qDebug() << "Serial write error";
+				QLOG_ERROR() << "Serial write error";
 				return -1;
 			}
 			usleep(m_interByteSendDelay * 1000);
@@ -184,7 +185,7 @@ int SerialPort::writeBytes(QByteArray packet)
 	{
 		if (write(m_portHandle,packet.data(),packet.size())<0)
 		{
-			qDebug() << "Serial write error";
+			QLOG_ERROR() << "Serial write error";
 			return -1;
 		}
 	}
@@ -219,12 +220,12 @@ int SerialPort::openPort(QString portName,int baudrate,bool oddparity)
 	GetCommConfig(m_portHandle, &Win_CommConfig, &confSize);
 	if (oddparity)
 	{
-		qDebug() << "SerialPort Odd parity selected";
+		QLOG_DEBUG() << "SerialPort Odd parity selected";
 		Win_CommConfig.dcb.Parity = 1; //Odd parity
 	}
 	else
 	{
-		qDebug() << "SerialPort No parity selected";
+		QLOG_DEBUG() << "SerialPort No parity selected";
 		Win_CommConfig.dcb.Parity = 0; //No parity
 	}
 	Win_CommConfig.dcb.fRtsControl = RTS_CONTROL_DISABLE;
@@ -263,13 +264,13 @@ int SerialPort::openPort(QString portName,int baudrate,bool oddparity)
 	if (m_portHandle < 0)
 	{
 		perror("Error opening COM port Low Level");
-		qDebug() << "Port:" << portName;
+		QLOG_ERROR() << "Port:" << portName;
 		return -1;
 	}
 	if (flock(m_portHandle,LOCK_EX | LOCK_NB))
 	{
-		qDebug() << "Unable to maintain lock on serial port" << portName;
-		qDebug() << "This port is likely open in another process";
+		QLOG_ERROR() << "Unable to maintain lock on serial port" << portName;
+		QLOG_ERROR() << "This port is likely open in another process";
 		return -2;
 	}
 	struct termios newtio;

@@ -41,10 +41,15 @@ class LoggerImpl; // d pointer
 class Logger
 {
 public:
-    static Logger& instance()
+    /*static Logger& instance()
     {
         static Logger staticLog;
         return staticLog;
+    }*/
+    static Logger& instance(Logger *existing = 0)
+    {
+	    static Logger *theLog = (existing ? existing : new Logger);
+	    return *theLog;
     }
 
     //! Adds a log message destination. Don't add null destinations.
