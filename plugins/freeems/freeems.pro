@@ -6,7 +6,7 @@ TEMPLATE = lib
 
 DEPENDPATH += .
 INCLUDEPATH += . ../../core/src
-CONFIG += plugin
+CONFIG += plugin rtti
 OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
