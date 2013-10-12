@@ -57,8 +57,11 @@ Section "EMStudio (Required)" ;No components page, name is not important
   SetOutPath "$INSTDIR\dashboards"
   File "core/src/gauges.qml"
   SetOutPath "$INSTDIR\plugins"
+!ifndef PLUGIN
   File "core/plugins/libfreeemsplugin.a"
-  
+!else
+  File "core/plugins/${PLUGIN}"
+!endif
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\EMStudio "Install_Dir" "$INSTDIR"
   
