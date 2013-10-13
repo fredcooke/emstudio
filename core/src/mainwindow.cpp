@@ -1721,15 +1721,15 @@ void MainWindow::interrogateTaskStart(QString task, int sequence)
 {
 	if(task.contains("Location ID"))
 	{
-		progressView->addTask(task,sequence,0);
-	}
-	else if (task.contains("Ram Location"))
-	{
 		progressView->addTask(task,sequence,1);
 	}
-	else if (task.contains("Flash Location"))
+	else if (task.contains("Ram Location") || task.contains("Flash Location"))
 	{
 		progressView->addTask(task,sequence,2);
+	}
+	else if (task.contains("Ecu Info"))
+	{
+		progressView->addTask(task,sequence,0);
 	}
 }
 
@@ -1840,7 +1840,7 @@ void MainWindow::commandSuccessful(int sequencenumber)
 	QLOG_INFO() << "Command succesful:" << QString::number(sequencenumber);
 	if (m_interrogationInProgress)
 	{
-		if (progressView) progressView->taskSucceed(sequencenumber);
+		//if (progressView) progressView->taskSucceed(sequencenumber);
 	}
 
 }
@@ -1989,7 +1989,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	}
 	else
 	{
-		if (progressView) progressView->taskFail(sequencenumber);
+		//if (progressView) progressView->taskFail(sequencenumber);
 	}
 }
 

@@ -222,17 +222,13 @@ void FreeEmsComms::startInterrogation()
 {
 	if (!m_interrogateInProgress)
 	{
+		RequestClass req;
+		req.type = INTERROGATE_START;
+		m_reqListMutex.lock();
+		m_reqList.append(req);
+		m_reqListMutex.unlock();
 		m_interrogatePacketList.clear();
 		m_interrogateInProgress = true;
-		m_interrogatePacketList.append(getFirmwareVersion());
-		m_interrogatePacketList.append(getInterfaceVersion());
-		m_interrogatePacketList.append(getCompilerVersion());
-		m_interrogatePacketList.append(getDecoderName());
-		m_interrogatePacketList.append(getFirmwareBuildDate());
-		m_interrogatePacketList.append(getMaxPacketSize());
-		m_interrogatePacketList.append(getOperatingSystem());
-		m_interrogatePacketList.append(getLocationIdList(0x00,0x00));
-		m_interrogateTotalCount=8;
 	}
 }
 
@@ -888,6 +884,45 @@ void FreeEmsComms::run()
 				serialPort->closePort();
 				serialconnected = false;
 				emit disconnected();
+			}
+			else if (m_threadReqList[i].type == INTERROGATE_START)
+			{
+				int seq = getFirmwareVersion();
+				emit interrogateTaskStart("Ecu Info FW Version",seq);
+				m_interrogatePacketList.append(seq);
+
+				seq = getInterfaceVersion();
+				emit interrogateTaskStart("Ecu Info Interface Version",seq);
+				m_interrogatePacketList.append(seq);
+
+				seq = getCompilerVersion();
+				emit interrogateTaskStart("Ecu Info Compiler Version",seq);
+				m_interrogatePacketList.append(seq);
+
+				seq = getDecoderName();
+				emit interrogateTaskStart("Ecu Info Decoder Name",seq);
+				m_interrogatePacketList.append(seq);
+
+				seq = getFirmwareBuildDate();
+				emit interrogateTaskStart("Ecu Info Firmware Build Date",seq);
+				m_interrogatePacketList.append(seq);
+
+				seq = getMaxPacketSize();
+				emit interrogateTaskStart("Ecu Info Max Packet Size",seq);
+				m_interrogatePacketList.append(seq);
+
+				seq = getOperatingSystem();
+				emit interrogateTaskStart("Ecu Info Operating System",seq);
+				m_interrogatePacketList.append(seq);
+
+				seq = getLocationIdList(0x00,0x00);
+				emit interrogateTaskStart("Ecu Info Location ID List",seq);
+				m_interrogatePacketList.append(seq);
+
+				m_interrogateTotalCount=8;
+				m_threadReqList.removeAt(i);
+				i--;
+				continue;
 			}
 			else if (m_threadReqList[i].type == GET_LOCATION_ID_LIST)
 			{
@@ -1607,7 +1642,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 								{
 									int task = retrieveBlockFromFlash(flashlist[i],0,0);
 									m_interrogatePacketList.append(task);
-									emit interrogateTaskStart("flash Location: 0x" + QString::number(flashlist[i],16),task);
+									emit interrogateTaskStart("Flash Location: 0x" + QString::number(flashlist[i],16),task);
 								}
 								emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
 							}
