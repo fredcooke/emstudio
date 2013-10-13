@@ -18,6 +18,8 @@ private:
 	unsigned short m_locationId;
 signals:
 	void update();
+	void saveSingleDataToFlash(unsigned short locationid,unsigned short offset, unsigned short size,QByteArray data);
+	void saveSingleDataToRam(unsigned short locationid,unsigned short offset, unsigned short size,QByteArray data);
 };
 
 #endif // FERAWDATA_H

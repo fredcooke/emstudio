@@ -57,7 +57,7 @@ void RawDataView::passDatalog(QVariantMap data)
 }
 bool RawDataView::setData(unsigned short locationid,DataBlock *data)
 {
-	m_data = dynamic_cast<RawData*>(data);
+	m_data = (RawData*)(data);
 	m_locationId = locationid;
 	ui.hexEditor->setData(m_data->data());
 	ui.locationIdLabel->setText("0x" + QString::number(locationid,16).toUpper());
@@ -96,6 +96,7 @@ RawDataView::~RawDataView()
 void RawDataView::saveFlashButtonClicked()
 {
 	emit saveData(m_locationId,ui.hexEditor->data(),1); //0 for RAM, 1 for flash.
+	m_data->setData(m_locationId,false,ui.hexEditor->data());
 }
 
 void RawDataView::saveRamButtonClicked()

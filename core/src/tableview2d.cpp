@@ -250,6 +250,7 @@ void TableView2D::setRange(QList<QPair<QPair<int,int>,double> > data)
 }
 QString TableView2D::verifyValue(int row,int column,QString item)
 {
+	Q_UNUSED(column)
 	double tempValue = item.toDouble();
 
 	if (row == 0)
@@ -846,6 +847,8 @@ bool TableView2D::updateTable()
 
 void TableView2D::reColorTable(int rownum,int colnum)
 {
+	Q_UNUSED(rownum)
+	Q_UNUSED(colnum)
 	/*
 	//QLOG_DEBUG() << "Recoloring" << rownum << colnum;
 	if (rownum == ui.tableWidget->rowCount()-1 || colnum == 0)

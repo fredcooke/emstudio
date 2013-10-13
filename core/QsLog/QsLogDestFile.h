@@ -97,11 +97,12 @@ public:
     void setBackupCount(int backups);
 
 private:
-    bool mFirstFile;
-    QString mFileName;
     qint64 mCurrentSizeInBytes;
     qint64 mMaxSizeInBytes;
     int mBackupsCount;
+    bool mFirstFile;
+    QString mFileName;
+
 };
 
 typedef QSharedPointer<RotationStrategy> RotationStrategyPtr;
