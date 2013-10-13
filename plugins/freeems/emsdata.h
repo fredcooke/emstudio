@@ -56,9 +56,14 @@ public:
 	void addDeviceRamBlock(MemoryLocation *loc);
 
 	QList<unsigned short> getChildrenOfLocalRamLocation(unsigned short id);
-	QList<unsigned short> getParentOfLocalRamLocation(unsigned short id);
+	unsigned short getParentOfLocalRamLocation(unsigned short id);
 	bool localRamHasParent(unsigned short id);
 	bool localRamHasChildren(unsigned short id);
+
+	QList<unsigned short> getChildrenOfLocalFlashLocation(unsigned short id);
+	unsigned short getParentOfLocalFlashLocation(unsigned short id);
+	bool localFlashHasParent(unsigned short id);
+	bool localFlashHasChildren(unsigned short id);
 
 	QString serialize(unsigned short id,bool isram);
 

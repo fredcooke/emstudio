@@ -37,11 +37,11 @@ bool FEMemoryMetaData::parseMetaData(QString json)
 	if (!top.isValid())
 	{
 		QString errormsg = QString("Error parsing JSON from config file on line number: ") + QString::number(parser.errorLine()) + " error text: " + parser.errorString();
-		QLOG_FATAL() << "Error parsing JSON";
-		QLOG_FATAL() << "Line number:" << parser.errorLine() << "error text:" << parser.errorString();
-		QLOG_FATAL() << "Start Json";
-		QLOG_FATAL() << "Json:" << json;
-		QLOG_FATAL() << "End Json";
+		//QLOG_FATAL() << "Error parsing JSON";
+		//QLOG_FATAL() << "Line number:" << parser.errorLine() << "error text:" << parser.errorString();
+		//QLOG_FATAL() << "Start Json";
+		//QLOG_FATAL() << "Json:" << json;
+		//QLOG_FATAL() << "End Json";
 		return false;
 	}
 	QVariantMap topmap = top.toMap();
@@ -104,7 +104,7 @@ bool FEMemoryMetaData::parseMetaData(QString json)
 		m_lookupMetaData[keyint] = meta;
 		i++;
 	}
-	QLOG_DEBUG() << m_readOnlyMetaData.size() << "Ram entries found";
+	//QLOG_DEBUG() << m_readOnlyMetaData.size() << "Ram entries found";
 	QVariantMap tables = topmap["tables"].toMap();
 	i = tables.begin();
 	while (i != tables.end())
@@ -135,7 +135,7 @@ bool FEMemoryMetaData::parseMetaData(QString json)
 			QList<QPair<QString,double> > zcalclist;
 			for (int j=0;j<xcalc.size();j++)
 			{
-				QLOG_DEBUG() << "XCalc:" << xcalc[j].toMap()["type"].toString() << xcalc[j].toMap()["value"].toDouble();
+				//QLOG_DEBUG() << "XCalc:" << xcalc[j].toMap()["type"].toString() << xcalc[j].toMap()["value"].toDouble();
 				xcalclist.append(QPair<QString,double>(xcalc[j].toMap()["type"].toString(),xcalc[j].toMap()["value"].toDouble()));
 			}
 			for (int j=0;j<ycalc.size();j++)
@@ -168,7 +168,7 @@ bool FEMemoryMetaData::parseMetaData(QString json)
                 if (m_table3DMetaData[i].locationId == meta.locationId)
                 {
                     //Error, already exists;
-		    QLOG_DEBUG() << "Error: Location ID 0x" + QString::number(meta.locationId,16).toUpper() + " is defined twice in the metadata file";
+		    //QLOG_DEBUG() << "Error: Location ID 0x" + QString::number(meta.locationId,16).toUpper() + " is defined twice in the metadata file";
                     return false;
                 }
             }
@@ -192,7 +192,7 @@ bool FEMemoryMetaData::parseMetaData(QString json)
 
 			for (int j=0;j<xcalc.size();j++)
 			{
-				QLOG_DEBUG() << "XCalc:" << xcalc[j].toMap()["type"].toString() << xcalc[j].toMap()["value"].toDouble();
+				//QLOG_DEBUG() << "XCalc:" << xcalc[j].toMap()["type"].toString() << xcalc[j].toMap()["value"].toDouble();
 				xcalclist.append(QPair<QString,double>(xcalc[j].toMap()["type"].toString(),xcalc[j].toMap()["value"].toDouble()));
 			}
 			for (int j=0;j<ycalc.size();j++)
@@ -216,7 +216,7 @@ bool FEMemoryMetaData::parseMetaData(QString json)
                 if (m_table2DMetaData[i].locationId == meta.locationId)
                 {
                     //Error, already exists;
-		    QLOG_FATAL() << "Error: Location ID 0x" + QString::number(meta.locationId,16).toUpper() + " is defined twice in the metadata file";
+		    //QLOG_FATAL() << "Error: Location ID 0x" + QString::number(meta.locationId,16).toUpper() + " is defined twice in the metadata file";
                     return false;
                 }
             }
@@ -229,7 +229,7 @@ bool FEMemoryMetaData::parseMetaData(QString json)
 
 bool FEMemoryMetaData::loadMetaDataFromFile(QString filestr)
 {
-	QLOG_DEBUG() << "Loading config file from:" << filestr;
+	//QLOG_DEBUG() << "Loading config file from:" << filestr;
 	QFile file(filestr);
 	if (!file.open(QIODevice::ReadOnly))
 	{
@@ -237,7 +237,7 @@ bool FEMemoryMetaData::loadMetaDataFromFile(QString filestr)
 		//Can't open the file.
 	}
 	QByteArray filebytes = file.readAll();
-	QLOG_DEBUG() << "Loaded:" << filebytes.size() << "chars from config file";
+	//QLOG_DEBUG() << "Loaded:" << filebytes.size() << "chars from config file";
 	file.close();
 	return parseMetaData(filebytes);
 }

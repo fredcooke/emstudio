@@ -48,6 +48,7 @@ private slots:
 	void saveRamButtonClicked();
 	void loadRamButtonClicked();
 	void loadFlashButtonClicked();
+	void update();
 signals:
 	void saveData(unsigned short locationid,QByteArray data,int physicallocation);
 	void reloadData(unsigned short locationid,bool isram);

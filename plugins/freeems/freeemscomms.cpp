@@ -1489,6 +1489,10 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					else
 					{
 						RawData *data = new FERawData();
+						connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+						connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+						connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
+						connect(data,SIGNAL(requestBlockFromFlash(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromFlash(unsigned short,unsigned short,unsigned short)));
 						m_rawDataMap[locationid] = data;
 					}
 				}
@@ -1662,6 +1666,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					else
 					{
 						emsData.setDeviceFlashBlock(locid,emsData.getLocalFlashBlock(locid));
+						emit locationIdUpdate(locid);
 					}
 				}
 				if (m_waitingForRamWrite)
@@ -1695,6 +1700,7 @@ void FreeEmsComms::parsePacket(Packet parsedPacket)
 					{
 						//Change has been accepted, copy local ram to device ram
 						emsData.setDeviceRamBlock(locid,emsData.getLocalRamBlock(locid));
+						emit locationIdUpdate(locid);
 					}
 				}
 				if (payloadid == m_payloadWaitingForResponse+1)
@@ -1839,26 +1845,49 @@ RawData* FreeEmsComms::getRawData(unsigned short locationid)
 
 void FreeEmsComms::locationIdUpdate(unsigned short locationid)
 {
-	if (m_2dTableMap.contains(locationid))
+	//emsData.getChildrenOfLocalRamLocation()
+	QList<unsigned short> updatelist;
+	updatelist.append(locationid);
+	if (emsData.localFlashHasParent(locationid))
 	{
-		m_2dTableMap[locationid]->setData(locationid,!emsData.hasDeviceRamBlock(locationid),emsData.getDeviceRamBlock(locationid),m_metaDataParser->get2DMetaData(locationid),false);
+		updatelist.append(emsData.getParentOfLocalFlashLocation(locationid));
 	}
-	if (m_3dTableMap.contains(locationid))
+	if (emsData.localRamHasParent(locationid))
 	{
-		m_3dTableMap[locationid]->setData(locationid,!emsData.hasDeviceRamBlock(locationid),emsData.getDeviceRamBlock(locationid),m_metaDataParser->get3DMetaData(locationid));
+		updatelist.append(emsData.getParentOfLocalRamLocation(locationid));
 	}
-	if (m_rawDataMap.contains(locationid))
+	if (emsData.localFlashHasChildren(locationid))
 	{
-		if (emsData.hasLocalRamBlock(locationid))
-		{
-			m_rawDataMap[locationid]->setData(locationid,false,emsData.getLocalRamBlock(locationid));
-		}
-		else
-		{
-			m_rawDataMap[locationid]->setData(locationid,true,emsData.getLocalFlashBlock(locationid));
-		}
+		updatelist.append(emsData.getChildrenOfLocalFlashLocation(locationid));
+	}
+	if (emsData.localRamHasChildren(locationid))
+	{
+		updatelist.append(emsData.getChildrenOfLocalRamLocation(locationid));
 	}
 
+	for (int i=0;i<updatelist.size();i++)
+	{
+		QLOG_DEBUG() << "Updating location id:" << QString::number(updatelist[i],16);
+		if (m_2dTableMap.contains(updatelist[i]))
+		{
+			m_2dTableMap[updatelist[i]]->setData(updatelist[i],!emsData.hasDeviceRamBlock(updatelist[i]),emsData.getDeviceRamBlock(updatelist[i]),m_metaDataParser->get2DMetaData(updatelist[i]),false);
+		}
+		if (m_3dTableMap.contains(updatelist[i]))
+		{
+			m_3dTableMap[updatelist[i]]->setData(updatelist[i],!emsData.hasDeviceRamBlock(updatelist[i]),emsData.getDeviceRamBlock(updatelist[i]),m_metaDataParser->get3DMetaData(updatelist[i]));
+		}
+		if (m_rawDataMap.contains(updatelist[i]))
+		{
+			if (emsData.hasLocalRamBlock(updatelist[i]))
+			{
+				m_rawDataMap[updatelist[i]]->setData(updatelist[i],false,emsData.getLocalRamBlock(updatelist[i]));
+			}
+			else
+			{
+				m_rawDataMap[updatelist[i]]->setData(updatelist[i],true,emsData.getLocalFlashBlock(updatelist[i]));
+			}
+		}
+	}
 }
 void FreeEmsComms::copyFlashToRam(unsigned short locationid)
 {

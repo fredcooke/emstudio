@@ -269,18 +269,16 @@ QList<unsigned short> EmsData::getChildrenOfLocalRamLocation(unsigned short id)
 	return retVal;
 }
 
-QList<unsigned short> EmsData::getParentOfLocalRamLocation(unsigned short id)
+unsigned short EmsData::getParentOfLocalRamLocation(unsigned short id)
 {
-	QList<unsigned short> retVal;
-
 	for (int i=0;i<m_ramMemoryList.size();i++)
 	{
 		if (m_ramMemoryList[i]->locationid == id)
 		{
-			retVal.append(m_ramMemoryList[i]->parent);
+			return m_ramMemoryList[i]->parent;
 		}
 	}
-	return retVal;
+	return 0;
 }
 bool EmsData::localRamHasParent(unsigned short id)
 {
@@ -293,6 +291,69 @@ bool EmsData::localRamHasParent(unsigned short id)
 	}
 	return false;
 }
+bool EmsData::localRamHasChildren(unsigned short id)
+{
+	for (int i=0;i<m_ramMemoryList.size();i++)
+	{
+		if (m_ramMemoryList[i]->hasParent && m_ramMemoryList[i]->parent == id)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+QList<unsigned short> EmsData::getChildrenOfLocalFlashLocation(unsigned short id)
+{
+	QList<unsigned short> retVal;
+	for (int i=0;i<m_flashMemoryList.size();i++)
+	{
+		if (m_flashMemoryList[i]->hasParent)
+		{
+			if (m_flashMemoryList[i]->parent == id)
+			{
+				retVal.append(m_flashMemoryList[i]->locationid);
+			}
+		}
+	}
+	return retVal;
+}
+
+unsigned short EmsData::getParentOfLocalFlashLocation(unsigned short id)
+{
+	for (int i=0;i<m_flashMemoryList.size();i++)
+	{
+		if (m_flashMemoryList[i]->locationid == id)
+		{
+			return m_flashMemoryList[i]->parent;
+		}
+	}
+	return 0;
+}
+bool EmsData::localFlashHasParent(unsigned short id)
+{
+	for (int i=0;i<m_flashMemoryList.size();i++)
+	{
+		if (m_flashMemoryList[i]->locationid == id)
+		{
+			return m_flashMemoryList[i]->hasParent;
+		}
+	}
+	return false;
+}
+bool EmsData::localFlashHasChildren(unsigned short id)
+{
+	for (int i=0;i<m_flashMemoryList.size();i++)
+	{
+		if (m_flashMemoryList[i]->hasParent && m_flashMemoryList[i]->parent == id)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
 QList<unsigned short> EmsData::getTopLevelDeviceFlashLocations()
 {
 	QList<unsigned short> retval;
@@ -402,17 +463,6 @@ QList<unsigned short> EmsData::getTopLevelDeviceRamLocations()
 	return retval;
 }
 
-bool EmsData::localRamHasChildren(unsigned short id)
-{
-	for (int i=0;i<m_flashMemoryList.size();i++)
-	{
-		if (m_flashMemoryList[i]->locationid == id)
-		{
-			return m_flashMemoryList[i]->hasParent;
-		}
-	}
-	return false;
-}
 QString EmsData::serialize(unsigned short id,bool isram)
 {
 	QString val = "";
@@ -722,10 +772,12 @@ void EmsData::ramBytesLocalUpdate(unsigned short locationid,unsigned short offse
 	}
 	if (getLocalRamBlock(locationid).mid(offset,size) == data)
 	{
-		QLOG_WARN() << "Data in application memory unchanged, no reason to send write for single value";
+		QLOG_WARN() << "Data in application ram memory unchanged, no reason to send write for single value";
 		return;
 	}
+	QLOG_TRACE() << "Updating ram locationid" << locationid << "with" << data.size() << "bytes at offset" << offset;
 	setLocalRamBlock(locationid,getLocalRamBlock(locationid).replace(offset,size,data));
+	//emit updateRequired(locationid);
 	emit ramBlockUpdateRequest(locationid,offset,size,data);
 }
 
@@ -733,15 +785,18 @@ void EmsData::flashBytesLocalUpdate(unsigned short locationid,unsigned short off
 {
 	if (!hasLocalFlashBlock(locationid))
 	{
+		QLOG_ERROR() << "Requested flash update for locationid" << locationid << "but location has no flash!";
 		return;
 	}
 	if (getLocalFlashBlock(locationid).mid(offset,size) == data)
 	{
-		QLOG_WARN() << "Data in application memory unchanged, no reason to send write for single value";
+		QLOG_WARN() << "Data in application flash memory unchanged, no reason to send write for single value";
 		return;
 	}
+	QLOG_TRACE() << "Updating flash locationid" << locationid << "with" << data.size() << "bytes at offset" << offset;
 	setLocalFlashBlock(locationid,getLocalFlashBlock(locationid).replace(offset,size,data));
-	//emit flashBlockUpdateRequest(locationid,offset,size,data); //don't emit a signal for flash updates, those are always manual.
+	//emit updateRequired(locationid);
+	emit flashBlockUpdateRequest(locationid,offset,size,data); //don't emit a signal for flash updates, those are always manual.
 }
 
 bool EmsData::verifyMemoryBlock(unsigned short locationid,QByteArray header,QByteArray payload)

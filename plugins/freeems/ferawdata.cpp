@@ -13,7 +13,6 @@ void FERawData::setData(unsigned short locationid,bool isflashonly,QByteArray pa
 void FERawData::updateValue(QByteArray data)
 {
 	m_data = data;
-	emit update();
 	if (m_isFlashOnly)
 	{
 		emit saveSingleDataToFlash(m_locationId,0,m_data.size(),m_data);
@@ -21,8 +20,8 @@ void FERawData::updateValue(QByteArray data)
 	else
 	{
 		emit saveSingleDataToRam(m_locationId,0,m_data.size(),m_data);
-
 	}
+	emit update();
 }
 
 QByteArray FERawData::data()
@@ -38,4 +37,24 @@ unsigned short FERawData::locationId()
 bool FERawData::isFlashOnly()
 {
 	return m_isFlashOnly;
+}
+void FERawData::updateFromFlash()
+{
+	if (m_isFlashOnly)
+	{
+		emit requestBlockFromFlash(m_locationId,0,0);
+	}
+}
+
+void FERawData::updateFromRam()
+{
+	if (!m_isFlashOnly)
+	{
+		emit requestBlockFromRam(m_locationId,0,0);
+	}
+}
+
+void FERawData::saveRamToFlash()
+{
+
 }
