@@ -23,6 +23,8 @@
 #define FETABLE3DDATA_H
 
 #include <QObject>
+#include <QMutex>
+
 #include "table3ddata.h"
 #include "table3dmetadata.h"
 
@@ -54,6 +56,7 @@ public:
 	double calcAxis(int val,QList<QPair<QString,double> > metadata);
 	int backConvertAxis(double val,QList<QPair<QString,double> > metadata);
 private:
+	QMutex *m_acccessMutex;
 	bool m_writesEnabled;
 	bool m_isFlashOnly;
 	unsigned short m_locationId;

@@ -25,9 +25,11 @@
 FETable3DData::FETable3DData() : Table3DData()
 {
 	m_writesEnabled = true;
+	m_acccessMutex = new QMutex();
 }
 void FETable3DData::setData(unsigned short locationid,bool isflashonly, QByteArray data)
 {
+	m_acccessMutex->lock();
 	Q_UNUSED(locationid)
 	m_isFlashOnly = isflashonly;
 	m_xAxis.clear();
@@ -67,6 +69,7 @@ void FETable3DData::setData(unsigned short locationid,bool isflashonly, QByteArr
 		}
 		m_values.append(currrow);
 	}
+	m_acccessMutex->unlock();
 	emit update();
 }
 
@@ -79,34 +82,41 @@ void FETable3DData::setData(unsigned short locationid,bool isflashonly,QByteArra
 }
 double FETable3DData::maxXAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_maxXAxis;
 }
 
 double FETable3DData::maxYAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_maxYAxis;
 }
 
 double FETable3DData::maxZAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_maxZAxis;
 }
 double FETable3DData::minXAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_minXAxis;
 }
 
 double FETable3DData::minYAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_minYAxis;
 }
 
 double FETable3DData::minZAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_minZAxis;
 }
 void FETable3DData::setXAxis(int index,double val)
 {
+	QMutexLocker locker(m_acccessMutex);
 	QByteArray data;
 	unsigned short newval = backConvertAxis(val,m_metaData.xAxisCalc);
 	data.append((char)((newval >> 8) & 0xFF));
@@ -134,6 +144,7 @@ void FETable3DData::writeWholeLocation(bool ram)
 
 void FETable3DData::setYAxis(int index,double val)
 {
+	QMutexLocker locker(m_acccessMutex);
 	QByteArray data;
 	unsigned short newval = backConvertAxis(val,m_metaData.yAxisCalc);
 	data.append((char)((newval >> 8) & 0xFF));
@@ -150,6 +161,7 @@ void FETable3DData::setYAxis(int index,double val)
 
 void FETable3DData::setCell(int yIndex, int xIndex,double val)
 {
+	QMutexLocker locker(m_acccessMutex);
 	QByteArray data;
 	unsigned short newval = backConvertAxis(val,m_metaData.zAxisCalc);
 	data.append((char)((newval >> 8) & 0xFF));
@@ -170,6 +182,7 @@ void FETable3DData::setWritesEnabled(bool enabled)
 
 QByteArray FETable3DData::data()
 {
+	QMutexLocker locker(m_acccessMutex);
 	QByteArray data;
 
 	unsigned short xaxissize = m_xAxis.size();
@@ -217,26 +230,31 @@ QByteArray FETable3DData::data()
 
 QList<double> FETable3DData::yAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_yAxis;
 }
 
 QList<double> FETable3DData::xAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_xAxis;
 }
 
 QList<QList<double> > FETable3DData::values()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_values;
 }
 
 int FETable3DData::columns()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_xAxis.size();
 }
 
 int FETable3DData::rows()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_yAxis.size();
 }
 double FETable3DData::calcAxis(int val,QList<QPair<QString,double> > metadata)

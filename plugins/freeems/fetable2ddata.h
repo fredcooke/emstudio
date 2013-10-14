@@ -25,6 +25,8 @@
 #include <QString>
 #include <QList>
 #include <QByteArray>
+#include <QMutex>
+
 #include "table2ddata.h"
 #include "table2dmetadata.h"
 
@@ -55,6 +57,7 @@ public:
 	double calcAxis(int val,QList<QPair<QString,double> > metadata);
 	int backConvertAxis(double val,QList<QPair<QString,double> > metadata);
 private:
+	QMutex *m_acccessMutex;
 	unsigned short m_dataSize;
 	bool m_isSignedData;
 	bool m_isFlashOnly;

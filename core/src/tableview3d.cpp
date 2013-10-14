@@ -889,6 +889,7 @@ bool TableView3D::updateTable()
 			selectedlist.append(QPair<int,int>(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column()));
 		}
 	}
+	QLOG_DEBUG() << "updateTable(): Clearing table";
 	ui.tableWidget->clear();
 	ui.tableWidget->horizontalHeader()->hide();
 	ui.tableWidget->verticalHeader()->hide();
@@ -1019,6 +1020,7 @@ bool TableView3D::updateTable()
 	selectedlist.clear();
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
+	QLOG_DEBUG() << "updateTable(): Done with table";
 	return true;
 	//return passData(locationid,data,physicallocation,Table3DMetaData());
 }
@@ -1056,6 +1058,7 @@ void TableView3D::reColorTable(int rownum,int colnum)
 		//Recolor the whole table
 		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
+		QLOG_DEBUG() << "reColorTable(): Starting";
 		for (int row=0;row<tableData->rows();row++)
 		{
 			for (int col=0;col<tableData->columns();col++)
@@ -1080,6 +1083,7 @@ void TableView3D::reColorTable(int rownum,int colnum)
 				}
 			}
 		}
+		QLOG_DEBUG() << "reColorTable(): Finished";
 		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	}

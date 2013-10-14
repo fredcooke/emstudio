@@ -42,6 +42,7 @@ void FETable2DData::setWritesEnabled(bool enabled)
 }
 void FETable2DData::reCalcAxisData()
 {
+	QMutexLocker locker(m_acccessMutex);
 /*		m_axis.append(xdouble);
 		m_values.append(ydouble);*/
 	m_minActualXAxis = calcAxis(65535,m_metaData.xAxisCalc);
@@ -76,6 +77,7 @@ void FETable2DData::reCalcAxisData()
 
 void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArray payload,Table2DMetaData metadata,bool signedData)
 {
+	m_acccessMutex->lock();
 	m_dataSize = payload.size();
 	m_isSignedData = signedData;
 	m_isFlashOnly = isflashonly;
@@ -131,68 +133,82 @@ void FETable2DData::setData(unsigned short locationid, bool isflashonly,QByteArr
 		m_axis.append(xdouble);
 		m_values.append(ydouble);
 	}
+	m_acccessMutex->unlock();
 	emit update();
 }
 double FETable2DData::maxActualXAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_maxActualXAxis;
 }
 
 double FETable2DData::maxActualYAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_maxActualYAxis;
 }
 
 double FETable2DData::minActualXAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_minActualXAxis;
 }
 
 double FETable2DData::minActualYAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_minActualYAxis;
 }
 double FETable2DData::maxCalcedXAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_maxCalcedXAxis;
 }
 
 double FETable2DData::maxCalcedYAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_maxCalcedYAxis;
 }
 
 double FETable2DData::minCalcedXAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_minCalcedXAxis;
 }
 
 double FETable2DData::minCalcedYAxis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_minCalcedYAxis;
 }
 
 QList<double> FETable2DData::axis()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_axis;
 }
 
 QList<double> FETable2DData::values()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_values;
 }
 int FETable2DData::columns()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return m_axis.size();
 }
 
 int FETable2DData::rows()
 {
+	QMutexLocker locker(m_acccessMutex);
 	return 2;
 }
 
 void FETable2DData::setCell(int row, int column,double newval)
 {
+	QMutexLocker locker(m_acccessMutex);
 	//New value has been accepted. Let's write it.
 	//offset = column + (row * 32), size == 2
 	//QLOG_DEBUG() << "Update:" << row << column << newval;
@@ -249,6 +265,7 @@ void FETable2DData::setCell(int row, int column,double newval)
 
 QByteArray FETable2DData::data()
 {
+	QMutexLocker locker(m_acccessMutex);
 	QByteArray data;
 	for (int i=0;i<m_axis.size();i++)
 	{
