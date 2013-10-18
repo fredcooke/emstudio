@@ -24,6 +24,7 @@
 FETable2DData::FETable2DData() : Table2DData()
 {
 	m_writesEnabled = true;
+	m_acccessMutex = new QMutex();
 }
 void FETable2DData::writeWholeLocation(bool ram)
 {
@@ -42,7 +43,7 @@ void FETable2DData::setWritesEnabled(bool enabled)
 }
 void FETable2DData::reCalcAxisData()
 {
-	QMutexLocker locker(m_acccessMutex);
+	//QMutexLocker locker(m_acccessMutex);
 /*		m_axis.append(xdouble);
 		m_values.append(ydouble);*/
 	m_minActualXAxis = calcAxis(65535,m_metaData.xAxisCalc);
