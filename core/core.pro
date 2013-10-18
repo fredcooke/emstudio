@@ -12,7 +12,7 @@ INCLUDEPATH += src
 OBJECTS_DIR = obj
 MOC_DIR = obj
 UI_DIR = obj
-CONFIG += console rtti
+CONFIG += console rtti exceptions
 
 INCLUDEPATH += $$PWD/../lib/core
 DEPENDPATH += $$PWD/../lib/core
