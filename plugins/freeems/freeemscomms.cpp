@@ -29,20 +29,23 @@
 #include "fetable3ddata.h"
 #include "QsLog.h"
 
-#define NAK 0x02
 FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 {
 	qRegisterMetaType<QList<unsigned short> >("QList<unsigned short>");
-	qRegisterMetaType<QList<FreeEmsComms::LocationIdFlags> >("QList<FreeEmsComms::LocationIdFlags>");
+	qRegisterMetaType<QList<LocationIdFlags> >("QList<LocationIdFlags>");
 	qRegisterMetaType<SerialPortStatus>("SerialPortStatus");
 	serialPort = new SerialPort(this);
 	connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
-	connect(serialPort,SIGNAL(parseBuffer(QByteArray)),this,SLOT(parseBuffer(QByteArray)),Qt::DirectConnection);
 	m_isConnected = false;
 
 	dataPacketDecoder = new FEDataPacketDecoder();
 	m_metaDataParser = new FEMemoryMetaData();
 	m_metaDataParser->loadMetaDataFromFile("freeems.config.json");
+	m_packetDecoder = new PacketDecoder(this);
+	connect(m_packetDecoder,SIGNAL(locationIdInfo(MemoryLocationInfo)),this,SLOT(locationIdInfoRec(MemoryLocationInfo)),Qt::BlockingQueuedConnection);
+	connect(m_packetDecoder,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),this,SLOT(packetAckedRec(unsigned short,QByteArray,QByteArray)),Qt::BlockingQueuedConnection);
+	connect(m_packetDecoder,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),this,SLOT(packetNakedRec(unsigned short,QByteArray,QByteArray,unsigned short)),Qt::BlockingQueuedConnection);
+	connect(m_packetDecoder,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdListRec(QList<unsigned short>)),Qt::BlockingQueuedConnection);
 
     m_lastdatalogTimer = new QTimer(this);
     connect(m_lastdatalogTimer,SIGNAL(timeout()),this,SLOT(datalogTimerTimeout()));
@@ -815,14 +818,19 @@ void FreeEmsComms::run()
 				int nodataattempts=0;
 				bool good = false;
 				bool nodata = true;
-				while (dataattempts < 10 && !good && nodataattempts < 4)
+				while (dataattempts < 50 && !good && nodataattempts < 4)
 				{
 					QByteArray result = rxThread->readSinglePacket(serialPort);
 					if (result.size() > 0)
 					{
 						dataattempts++;
 						nodata = false;
-						Packet p = parseBuffer(result);
+
+						Packet p = m_packetDecoder->parseBuffer(result);
+						if (!p.isValid)
+						{
+							emit decoderFailure(result);
+						}
 						if (p.isValid && p.payloadid == GET_FIRMWARE_VERSION+1)
 						{
 							//We're good!
@@ -1283,506 +1291,6 @@ void FreeEmsComms::run()
 	rxThread->stop();
 	rxThread->wait(500);
 }
-void FreeEmsComms::parsePacket(Packet parsedPacket)
-{
-	if (parsedPacket.isValid)
-	{
-		QMutexLocker locker(&m_waitingInfoMutex);
-		unsigned short payloadid = parsedPacket.payloadid;
-		if (m_isSilent)
-		{
-			emit emsSilenceBroken();
-			m_isSilent = false;
-		}
-		if (payloadid == 0x0191)
-		{	//Datalog packet
-
-			if (parsedPacket.isNAK)
-			{
-				//NAK
-			}
-			else
-			{
-				emit dataLogPayloadReceived(parsedPacket.header,parsedPacket.payload);
-			}
-		}
-		else if (payloadid == 0xEEEF)
-		{
-			//Decoder
-			if (!(parsedPacket.isNAK))
-			{
-				emit decoderName(QString(parsedPacket.payload));
-			}
-		}
-		else if (payloadid == 0xEEF1)
-		{
-			//Firmware build date
-			if (!(parsedPacket.isNAK))
-			{
-				emit firmwareBuild(QString(parsedPacket.payload));
-			}
-		}
-		else if (payloadid == 0xEEF3)
-		{
-			//Compiler Version
-			if (!(parsedPacket.isNAK))
-			{
-				emit compilerVersion(QString(parsedPacket.payload));
-			}
-		}
-		else if (payloadid == 0xEEF5)
-		{
-			//Operating System
-			if (!(parsedPacket.isNAK))
-			{
-				emit operatingSystem(QString(parsedPacket.payload));
-			}
-		}
-		else if (payloadid == 0xDA5F)
-		{
-			//Location ID List
-			if (parsedPacket.isNAK)
-			{
-			}
-			else
-			{
-				//TODO double check to make sure that there aren't an odd number of items here...
-				QLOG_DEBUG() << "Location ID List";
-				QString details = "Details: {";
-				for (int j=0;j<parsedPacket.payload.size();j++)
-				{
-					details += "0x";
-					details += (((unsigned char)parsedPacket.payload[j] < 0xF) ? "0" : "");
-					details += QString::number(parsedPacket.payload[j],16);
-					details += ",";
-				}
-				details += "}";
-				m_locationIdList.clear();
-				for (int j=0;j<parsedPacket.payload.size();j+=2)
-				{
-					unsigned short tmp = 0;
-					tmp += parsedPacket.payload[j] << 8;
-					tmp += parsedPacket.payload[j+1];
-					m_locationIdList.append(tmp);
-				}
-				emit locationIdList(m_locationIdList);
-			}
-		}
-		else if (payloadid == 0xF8E1) //Location ID Info
-		{
-			if (parsedPacket.isNAK)
-			{
-			}
-			else
-			{
-				QString details = "Details: {";
-				for (int j=0;j<parsedPacket.payload.size();j++)
-				{
-					details += "0x";
-					details += (((unsigned char)parsedPacket.payload[j] < 0xF) ? "0" : "");
-					details += QString::number(parsedPacket.payload[j],16);
-					details += ",";
-				}
-				details += "}";
-
-				if (m_currentWaitingRequest.args.size() == 0)
-				{
-					QLOG_ERROR() << "ERROR! Current waiting packet's arg size is zero1!!";
-					QLOG_ERROR() << "0x" + QString::number(m_currentWaitingRequest.type,16).toUpper();
-					QLOG_ERROR() << "0x" + QString::number(payloadid,16).toUpper();
-				}
-				unsigned short locationid = m_currentWaitingRequest.args[0].toInt();
-				//TODO double check to make sure that there aren't an odd number of items here...
-				QList<LocationIdFlags> flaglist;
-				if (parsedPacket.payload.size() >= 2)
-				{
-					MemoryLocationInfo info;
-					unsigned short test = parsedPacket.payload[0] << 8;
-					unsigned short parent;
-					unsigned char rampage;
-					unsigned char flashpage;
-					unsigned short ramaddress;
-					unsigned short flashaddress;
-					unsigned short size;
-					test += parsedPacket.payload[1];
-
-					for (int j=0;j<m_blockFlagList.size();j++)
-					{
-						if (test & m_blockFlagList[j])
-						{
-							flaglist.append(m_blockFlagList[j]);
-							if (m_blockFlagToNameMap.contains(m_blockFlagList[j]))
-							{
-								info.propertymap.append(QPair<QString,QString>(m_blockFlagToNameMap[m_blockFlagList[j]],"true"));
-							}
-						}
-						else
-						{
-							if (m_blockFlagToNameMap.contains(m_blockFlagList[j]))
-							{
-								info.propertymap.append(QPair<QString,QString>(m_blockFlagToNameMap[m_blockFlagList[j]],"false"));
-							}
-						}
-					}
-					parent = ((unsigned char)parsedPacket.payload[2]) << 8;
-					parent += (unsigned char)parsedPacket.payload[3];
-					rampage = (unsigned char)parsedPacket.payload[4];
-					flashpage = (unsigned char)parsedPacket.payload[5];
-					ramaddress = ((unsigned char)parsedPacket.payload[6]) << 8;
-					ramaddress += (unsigned char)parsedPacket.payload[7];
-					flashaddress = ((unsigned char)parsedPacket.payload[8]) << 8;
-					flashaddress += (unsigned char)parsedPacket.payload[9];
-					size = ((unsigned char)parsedPacket.payload[10]) << 8;
-					size += (unsigned char)parsedPacket.payload[11];
-
-					info.locationid = locationid;
-					info.parent = parent;
-					info.ramaddress = ramaddress;
-					info.rampage = rampage;
-					info.flashaddress = flashaddress;
-					info.flashpage = flashpage;
-					info.rawflags = test;
-					info.size = size;
-
-					if (flaglist.contains(FreeEmsComms::BLOCK_IS_RAM))
-					{
-						info.isRam = true;
-					}
-					else
-					{
-						info.isRam = false;
-					}
-					if (flaglist.contains(FreeEmsComms::BLOCK_IS_FLASH))
-					{
-						info.isFlash = true;
-					}
-					else
-					{
-						info.isFlash = false;
-					}
-					if (flaglist.contains(BLOCK_HAS_PARENT))
-					{
-						info.hasParent = true;
-					}
-					else
-					{
-						info.hasParent = false;
-					}
-					if (flaglist.contains(BLOCK_IS_READ_ONLY))
-					{
-						info.isReadOnly = true;
-					}
-					if (flaglist.contains(FreeEmsComms::BLOCK_IS_2D_TABLE))
-					{
-						info.type = DATA_TABLE_2D;
-					}
-					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_2D_SIGNED_TABLE))
-					{
-						info.type = DATA_TABLE_2D_SIGNED;
-					}
-					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_MAIN_TABLE))
-					{
-						info.type = DATA_TABLE_3D;
-					}
-					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_CONFIGURATION))
-					{
-						info.type = DATA_CONFIG;
-					}
-					else if (flaglist.contains(FreeEmsComms::BLOCK_IS_LOOKUP_DATA))
-					{
-						info.type = DATA_TABLE_LOOKUP;
-					}
-					else
-					{
-						info.type = DATA_UNDEFINED;
-					}
-					emit locationIdInfo(locationid,info);
-					emsData.passLocationInfo(locationid,info);
-
-					if (info.type == DATA_TABLE_2D)
-					{
-						Table2DData *data = new FETable2DData();
-						connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
-						connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
-						connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
-						connect(data,SIGNAL(requestBlockFromFlash(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromFlash(unsigned short,unsigned short,unsigned short)));
-						connect(data,SIGNAL(requestRamUpdateFromFlash(unsigned short)),this,SLOT(copyFlashToRam(unsigned short)));
-						connect(data,SIGNAL(requestFlashUpdateFromRam(unsigned short)),this,SLOT(copyRamToFlash(unsigned short)));
-						m_2dTableMap[locationid] = data;
-					}
-					else if (info.type == DATA_TABLE_3D)
-					{
-						Table3DData *data = new FETable3DData();
-						connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
-						connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
-						connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
-						connect(data,SIGNAL(requestBlockFromFlash(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromFlash(unsigned short,unsigned short,unsigned short)));
-						connect(data,SIGNAL(requestRamUpdateFromFlash(unsigned short)),this,SLOT(copyFlashToRam(unsigned short)));
-						connect(data,SIGNAL(requestFlashUpdateFromRam(unsigned short)),this,SLOT(copyRamToFlash(unsigned short)));
-						m_3dTableMap[locationid] = data;
-					}
-					else
-					{
-						RawData *data = new FERawData();
-						connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
-						connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
-						connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
-						connect(data,SIGNAL(requestBlockFromFlash(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromFlash(unsigned short,unsigned short,unsigned short)));
-						m_rawDataMap[locationid] = data;
-					}
-				}
-
-
-			}
-		}
-		else if (payloadid == 0x0001) //Interface version response
-		{
-			//Handle interface version
-			if (parsedPacket.isNAK)
-			{
-				//NAK
-				QLOG_ERROR() << "IFACE VERSION NAK";
-			}
-			else
-			{
-				emit interfaceVersion(QString(parsedPacket.payload));
-			}
-		}
-		else if (payloadid == 0x0003) //Firmware version response
-		{
-			if (parsedPacket.isNAK)
-			{
-				//NAK
-				QLOG_ERROR() << "FIRMWARE VERSION NAK";
-			}
-			else
-			{
-				emit firmwareVersion(QString(parsedPacket.payload));
-			}
-		}
-		else if (payloadid == 0x0107)
-		{
-			if (parsedPacket.isNAK)
-			{
-			}
-			else
-			{
-				unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
-				//emit flashBlockRetrieved(locid,parsedPacket.header,parsedPacket.payload);
-				emsData.flashBlockUpdate(locid,parsedPacket.header,parsedPacket.payload);
-			}
-		}
-		else if (payloadid == 0x0105)
-		{
-			if (parsedPacket.isNAK)
-			{
-			}
-			else
-			{
-				//Block from ram is here.
-				unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
-				//emit ramBlockRetrieved(locid,parsedPacket.header,parsedPacket.payload);
-				emsData.ramBlockUpdate(locid,parsedPacket.header,parsedPacket.payload);
-			}
-		}
-		else
-		{
-			emit unknownPacket(parsedPacket.header,parsedPacket.payload);
-		}
-		if (payloadid == 0x0191)
-		{
-			m_lastDatalogUpdateEnabled = true;
-			m_lastDatalogTime = QDateTime::currentMSecsSinceEpoch();
-
-			//Need to pull sequence number out of here
-		}
-		else
-		{
-			if (m_waitingForResponse)
-			{
-				if (m_interrogateInProgress)
-				{
-					if (m_interrogatePacketList.contains(m_currentWaitingRequest.sequencenumber))
-					{
-						emit interrogateTaskSucceed(m_currentWaitingRequest.sequencenumber);
-						m_interrogatePacketList.removeOne(m_currentWaitingRequest.sequencenumber);
-						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
-						if (m_interrogatePacketList.size() == 0)
-						{
-							if (!m_interrogateIdListComplete)
-							{
-								m_interrogateIdListComplete = true;
-								m_interrogateTotalCount += m_locationIdList.size();
-								for (int i=0;i<m_locationIdList.size();i++)
-								{
-									int task = getLocationIdInfo(m_locationIdList[i]);
-									m_interrogatePacketList.append(task);
-									emit interrogateTaskStart("Location ID Info: 0x" + QString::number(m_locationIdList[i],16),task);
-									//void interrogateTaskStart(QString task, int sequence);
-									//void interrogateTaskFail(int sequence);
-								}
-								emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
-							}
-							else if (!m_interrogateIdInfoComplete)
-							{
-								//Fill out the parent information for both device, and local ram.
-								emsData.populateDeviceRamAndFlashParents();
-								emsData.populateLocalRamAndFlash();
-								m_interrogateIdInfoComplete = true;
-								QList<unsigned short> ramlist = emsData.getTopLevelDeviceRamLocations();
-								QList<unsigned short> flashlist = emsData.getTopLevelDeviceFlashLocations();
-								m_interrogateTotalCount += ramlist.size() + flashlist.size();
-								for (int i=0;i<ramlist.size();i++)
-								{
-									int task = retrieveBlockFromRam(ramlist[i],0,0);
-									m_interrogatePacketList.append(task);
-									emit interrogateTaskStart("Ram Location: 0x" + QString::number(ramlist[i],16),task);
-								}
-								for (int i=0;i<flashlist.size();i++)
-								{
-									int task = retrieveBlockFromFlash(flashlist[i],0,0);
-									m_interrogatePacketList.append(task);
-									emit interrogateTaskStart("Flash Location: 0x" + QString::number(flashlist[i],16),task);
-								}
-								emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
-							}
-							else
-							{
-								//Interrogation complete.
-								emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
-								emit interrogationComplete();
-								m_interrogateInProgress = false;
-								for (int i=0;i<emsData.getUniqueLocationIdList().size();i++)
-								{
-									locationIdUpdate(emsData.getUniqueLocationIdList()[i]);
-								}
-								//deviceDataUpdated(unsigned short)
-							}
-						}
-						else
-						{
-							if (m_payloadWaitingForResponse == GET_LOCATION_ID_LIST)
-							{
-
-							}
-						}
-					}
-					else
-					{
-					}
-				}
-				if (m_waitingForFlashWrite)
-				{
-					m_waitingForFlashWrite = false;
-					unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
-					if (parsedPacket.isNAK)
-					{
-						emsData.setLocalFlashBlock(locid,emsData.getDeviceFlashBlock(locid));
-						if (m_2dTableMap.contains(locid))
-						{
-							m_2dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalFlashBlock(locid),m_metaDataParser->get2DMetaData(locid),false);
-						}
-						if (m_3dTableMap.contains(locid))
-						{
-							m_3dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalFlashBlock(locid),m_metaDataParser->get3DMetaData(locid));
-						}
-						if (m_rawDataMap.contains(locid))
-						{
-							if (emsData.hasLocalRamBlock(locid))
-							{
-								m_rawDataMap[locid]->setData(locid,false,emsData.getLocalRamBlock(locid));
-							}
-							else
-							{
-								m_rawDataMap[locid]->setData(locid,true,emsData.getLocalFlashBlock(locid));
-							}
-						}
-					}
-					else
-					{
-						emsData.setDeviceFlashBlock(locid,emsData.getLocalFlashBlock(locid));
-						emit locationIdUpdate(locid);
-					}
-				}
-				if (m_waitingForRamWrite)
-				{
-					m_waitingForRamWrite = false;
-					unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
-					if (parsedPacket.isNAK)
-					{
-						emsData.setLocalRamBlock(locid,emsData.getDeviceRamBlock(locid));
-						if (m_2dTableMap.contains(locid))
-						{
-							m_2dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalRamBlock(locid),m_metaDataParser->get2DMetaData(locid),false);
-						}
-						if (m_3dTableMap.contains(locid))
-						{
-							m_3dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalRamBlock(locid),m_metaDataParser->get3DMetaData(locid));
-						}
-						if (m_rawDataMap.contains(locid))
-						{
-							if (emsData.hasLocalRamBlock(locid))
-							{
-								m_rawDataMap[locid]->setData(locid,false,emsData.getLocalRamBlock(locid));
-							}
-							else
-							{
-								m_rawDataMap[locid]->setData(locid,true,emsData.getLocalFlashBlock(locid));
-							}
-						}
-					}
-					else
-					{
-						//Change has been accepted, copy local ram to device ram
-						emsData.setDeviceRamBlock(locid,emsData.getLocalRamBlock(locid));
-						emit locationIdUpdate(locid);
-					}
-				}
-				if (payloadid == m_payloadWaitingForResponse+1)
-				{
-					QLOG_TRACE() << "Recieved Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
-					QLOG_TRACE() << "Currently waiting for:" << QString::number(m_currentWaitingRequest.type,16).toUpper();
-					if (parsedPacket.isNAK)
-					{
-						//NAK to our packet
-						unsigned short errornum = parsedPacket.payload[0] << 8;
-						errornum += parsedPacket.payload[1];
-						emit commandFailed(m_currentWaitingRequest.sequencenumber,errornum);
-						emit packetNaked(m_currentWaitingRequest.type,parsedPacket.header,parsedPacket.payload,errornum);
-					}
-					else
-					{
-						//Packet is good.
-						emit commandSuccessful(m_currentWaitingRequest.sequencenumber);
-						emit packetAcked(m_currentWaitingRequest.type,parsedPacket.header,parsedPacket.payload);
-					}
-					m_waitingForResponse = false;
-				}
-				else
-				{
-					QLOG_ERROR() << "ERROR! Invalid packet:" << "0x" + QString::number(payloadid,16).toUpper();
-				}
-			}
-
-		}
-	}
-	else
-	{
-		QLOG_FATAL() << "Header size is only" << parsedPacket.header.length() << "! THIS SHOULD NOT HAPPEN!";
-		QString headerstring = "";
-		QString packetstring = "";
-		for (int i=0;i<parsedPacket.header.size();i++)
-		{
-			headerstring += QString::number((unsigned char)parsedPacket.header[i],16);
-		}
-		for (int i=0;i<parsedPacket.payload.size();i++)
-		{
-			packetstring += QString::number((unsigned char)parsedPacket.payload[i],16);
-		}
-		QLOG_DEBUG() << "Header:" << headerstring;
-		QLOG_DEBUG() << "Packet:" << packetstring;
-	}
-}
 
 bool FreeEmsComms::sendSimplePacket(unsigned short payloadid)
 {
@@ -1800,6 +1308,258 @@ bool FreeEmsComms::sendSimplePacket(unsigned short payloadid)
 		return false;
 	}
 	return true;
+}
+
+void FreeEmsComms::packetNakedRec(unsigned short payloadid,QByteArray header,QByteArray payload,unsigned short errornum)
+{
+	if (m_waitingForResponse)
+	{
+		if (m_interrogateInProgress)
+		{
+			if (m_interrogatePacketList.contains(m_currentWaitingRequest.sequencenumber))
+			{
+				//Interrogate command failed!!
+				/*emit interrogateTaskSucceed(m_currentWaitingRequest.sequencenumber);
+				m_interrogatePacketList.removeOne(m_currentWaitingRequest.sequencenumber);
+				emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+				if (m_interrogatePacketList.size() == 0)
+				{
+					if (!m_interrogateIdListComplete)
+					{
+						m_interrogateIdListComplete = true;
+						m_interrogateTotalCount += m_locationIdList.size();
+						for (int i=0;i<m_locationIdList.size();i++)
+						{
+							int task = getLocationIdInfo(m_locationIdList[i]);
+							m_interrogatePacketList.append(task);
+							emit interrogateTaskStart("Location ID Info: 0x" + QString::number(m_locationIdList[i],16),task);
+							//void interrogateTaskStart(QString task, int sequence);
+							//void interrogateTaskFail(int sequence);
+						}
+						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+					}
+					else if (!m_interrogateIdInfoComplete)
+					{
+						//Fill out the parent information for both device, and local ram.
+						emsData.populateDeviceRamAndFlashParents();
+						emsData.populateLocalRamAndFlash();
+						m_interrogateIdInfoComplete = true;
+						QList<unsigned short> ramlist = emsData.getTopLevelDeviceRamLocations();
+						QList<unsigned short> flashlist = emsData.getTopLevelDeviceFlashLocations();
+						m_interrogateTotalCount += ramlist.size() + flashlist.size();
+						for (int i=0;i<ramlist.size();i++)
+						{
+							int task = retrieveBlockFromRam(ramlist[i],0,0);
+							m_interrogatePacketList.append(task);
+							emit interrogateTaskStart("Ram Location: 0x" + QString::number(ramlist[i],16),task);
+						}
+						for (int i=0;i<flashlist.size();i++)
+						{
+							int task = retrieveBlockFromFlash(flashlist[i],0,0);
+							m_interrogatePacketList.append(task);
+							emit interrogateTaskStart("Flash Location: 0x" + QString::number(flashlist[i],16),task);
+						}
+						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+					}
+					else
+					{
+						//Interrogation complete.
+						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+						emit interrogationComplete();
+						m_interrogateInProgress = false;
+						for (int i=0;i<emsData.getUniqueLocationIdList().size();i++)
+						{
+							locationIdUpdate(emsData.getUniqueLocationIdList()[i]);
+						}
+						//deviceDataUpdated(unsigned short)
+					}
+				}
+				else
+				{
+					if (m_payloadWaitingForResponse == GET_LOCATION_ID_LIST)
+					{
+
+					}
+				}*/
+			}
+			else
+			{
+			}
+		}
+		if (m_waitingForFlashWrite)
+		{
+			m_waitingForFlashWrite = false;
+			unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
+			emsData.setLocalFlashBlock(locid,emsData.getDeviceFlashBlock(locid));
+			if (m_2dTableMap.contains(locid))
+			{
+				m_2dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalFlashBlock(locid),m_metaDataParser->get2DMetaData(locid),false);
+			}
+			if (m_3dTableMap.contains(locid))
+			{
+				m_3dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalFlashBlock(locid),m_metaDataParser->get3DMetaData(locid));
+			}
+			if (m_rawDataMap.contains(locid))
+			{
+				if (emsData.hasLocalRamBlock(locid))
+				{
+					m_rawDataMap[locid]->setData(locid,false,emsData.getLocalRamBlock(locid));
+				}
+				else
+				{
+					m_rawDataMap[locid]->setData(locid,true,emsData.getLocalFlashBlock(locid));
+				}
+			}
+		}
+		if (m_waitingForRamWrite)
+		{
+			m_waitingForRamWrite = false;
+			unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
+			emsData.setLocalRamBlock(locid,emsData.getDeviceRamBlock(locid));
+			if (m_2dTableMap.contains(locid))
+			{
+				m_2dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalRamBlock(locid),m_metaDataParser->get2DMetaData(locid),false);
+			}
+			if (m_3dTableMap.contains(locid))
+			{
+				m_3dTableMap[locid]->setData(locid,!emsData.hasLocalRamBlock(locid),emsData.getLocalRamBlock(locid),m_metaDataParser->get3DMetaData(locid));
+			}
+			if (m_rawDataMap.contains(locid))
+			{
+				if (emsData.hasLocalRamBlock(locid))
+				{
+					m_rawDataMap[locid]->setData(locid,false,emsData.getLocalRamBlock(locid));
+				}
+				else
+				{
+					m_rawDataMap[locid]->setData(locid,true,emsData.getLocalFlashBlock(locid));
+				}
+			}
+		}
+		if (payloadid == m_payloadWaitingForResponse+1)
+		{
+			QLOG_TRACE() << "Recieved Negative Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
+			QLOG_TRACE() << "Currently waiting for:" << QString::number(m_currentWaitingRequest.type,16).toUpper();
+			//NAK to our packet
+			//unsigned short errornum = parsedPacket.payload[0] << 8;
+			//errornum += parsedPacket.payload[1];
+			emit commandFailed(m_currentWaitingRequest.sequencenumber,errornum);
+			emit packetNaked(m_currentWaitingRequest.type,header,payload,errornum);
+			m_waitingForResponse = false;
+		}
+		else
+		{
+			QLOG_ERROR() << "ERROR! Invalid packet:" << "0x" + QString::number(payloadid,16).toUpper();
+		}
+	}
+}
+
+void FreeEmsComms::packetAckedRec(unsigned short payloadid,QByteArray header,QByteArray payload)
+{
+	if (m_waitingForResponse)
+	{
+		if (m_interrogateInProgress)
+		{
+			if (m_interrogatePacketList.contains(m_currentWaitingRequest.sequencenumber))
+			{
+				emit interrogateTaskSucceed(m_currentWaitingRequest.sequencenumber);
+				m_interrogatePacketList.removeOne(m_currentWaitingRequest.sequencenumber);
+				emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+				if (m_interrogatePacketList.size() == 0)
+				{
+					if (!m_interrogateIdListComplete)
+					{
+						QLOG_DEBUG() << "Interrogation ID List complete" << m_locationIdList.size() << "entries";
+						m_interrogateIdListComplete = true;
+						m_interrogateTotalCount += m_locationIdList.size();
+						for (int i=0;i<m_locationIdList.size();i++)
+						{
+							int task = getLocationIdInfo(m_locationIdList[i]);
+							m_interrogatePacketList.append(task);
+							emit interrogateTaskStart("Location ID Info: 0x" + QString::number(m_locationIdList[i],16),task);
+							//void interrogateTaskStart(QString task, int sequence);
+							//void interrogateTaskFail(int sequence);
+						}
+						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+					}
+					else if (!m_interrogateIdInfoComplete)
+					{
+						//Fill out the parent information for both device, and local ram.
+						emsData.populateDeviceRamAndFlashParents();
+						emsData.populateLocalRamAndFlash();
+						m_interrogateIdInfoComplete = true;
+						QList<unsigned short> ramlist = emsData.getTopLevelDeviceRamLocations();
+						QList<unsigned short> flashlist = emsData.getTopLevelDeviceFlashLocations();
+						m_interrogateTotalCount += ramlist.size() + flashlist.size();
+						for (int i=0;i<ramlist.size();i++)
+						{
+							int task = retrieveBlockFromRam(ramlist[i],0,0);
+							m_interrogatePacketList.append(task);
+							emit interrogateTaskStart("Ram Location: 0x" + QString::number(ramlist[i],16),task);
+						}
+						for (int i=0;i<flashlist.size();i++)
+						{
+							int task = retrieveBlockFromFlash(flashlist[i],0,0);
+							m_interrogatePacketList.append(task);
+							emit interrogateTaskStart("Flash Location: 0x" + QString::number(flashlist[i],16),task);
+						}
+						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+					}
+					else
+					{
+						QLOG_DEBUG() << "Interrogation complete";
+						//Interrogation complete.
+						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+						emit interrogationComplete();
+						m_interrogateInProgress = false;
+						for (int i=0;i<emsData.getUniqueLocationIdList().size();i++)
+						{
+							locationIdUpdate(emsData.getUniqueLocationIdList()[i]);
+						}
+						//deviceDataUpdated(unsigned short)
+					}
+				}
+				else
+				{
+					if (m_payloadWaitingForResponse == GET_LOCATION_ID_LIST)
+					{
+
+					}
+				}
+			}
+			else
+			{
+			}
+		}
+		if (m_waitingForFlashWrite)
+		{
+			m_waitingForFlashWrite = false;
+			unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
+			emsData.setDeviceFlashBlock(locid,emsData.getLocalFlashBlock(locid));
+			emit locationIdUpdate(locid);
+		}
+		if (m_waitingForRamWrite)
+		{
+			m_waitingForRamWrite = false;
+			unsigned short locid = m_currentWaitingRequest.args[0].toUInt();
+			//Change has been accepted, copy local ram to device ram
+			emsData.setDeviceRamBlock(locid,emsData.getLocalRamBlock(locid));
+			emit locationIdUpdate(locid);
+		}
+		if (payloadid == m_payloadWaitingForResponse+1)
+		{
+			QLOG_TRACE() << "Recieved Response" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper() << "For Payload:" << "0x" + QString::number(m_payloadWaitingForResponse+1,16).toUpper()<< "Sequence Number:" << m_currentWaitingRequest.sequencenumber;
+			QLOG_TRACE() << "Currently waiting for:" << QString::number(m_currentWaitingRequest.type,16).toUpper();
+			//Packet is good.
+			emit commandSuccessful(m_currentWaitingRequest.sequencenumber);
+			emit packetAcked(m_currentWaitingRequest.type,header,payload);
+			m_waitingForResponse = false;
+		}
+		else if (payloadid != 0x0191)
+		{
+			QLOG_ERROR() << "ERROR! Invalid packet:" << "0x" + QString::number(payloadid,16).toUpper();
+		}
+	}
 }
 
 void FreeEmsComms::setLogFileName(QString filename)
@@ -1850,6 +1610,15 @@ RawData* FreeEmsComms::getRawData(unsigned short locationid)
 	}
 	return m_rawDataMap[locationid];
 }
+void FreeEmsComms::locationIdListRec(QList<unsigned short> locationidlist)
+{
+	m_locationIdList.clear();
+	for (int i=0;i<locationidlist.size();i++)
+	{
+		m_locationIdList.append(locationidlist[i]);
+	}
+	QLOG_DEBUG() << m_locationIdList.size() << "Locations loaded";
+}
 
 void FreeEmsComms::locationIdUpdate(unsigned short locationid)
 {
@@ -1875,7 +1644,7 @@ void FreeEmsComms::locationIdUpdate(unsigned short locationid)
 
 	for (int i=0;i<updatelist.size();i++)
 	{
-		QLOG_DEBUG() << "Updating location id:" << QString::number(updatelist[i],16);
+		//QLOG_DEBUG() << "Updating location id:" << QString::number(updatelist[i],16);
 		if (m_2dTableMap.contains(updatelist[i]))
 		{
 			m_2dTableMap[updatelist[i]]->setData(updatelist[i],!emsData.hasDeviceRamBlock(updatelist[i]),emsData.getDeviceRamBlock(updatelist[i]),m_metaDataParser->get2DMetaData(updatelist[i]),false);
@@ -1956,107 +1725,60 @@ void FreeEmsComms::dataLogRead(QByteArray buffer)
 
 void FreeEmsComms::parseEverything(QByteArray buffer)
 {
-	Packet p = parseBuffer(buffer);
-	parsePacket(p);
-}
-
-FreeEmsComms::Packet FreeEmsComms::parseBuffer(QByteArray buffer)
-{
-	if (buffer.size() <= 2)
+	Packet p = m_packetDecoder->parseBuffer(buffer);
+	if (!p.isValid)
 	{
-
-		QLOG_ERROR() << "Not long enough to even contain a header!";
 		emit decoderFailure(buffer);
-		return Packet(false);
-	}
-
-
-	Packet retval;
-	QByteArray header;
-	//Parse the packet here
-	int headersize = 3;
-	int iloc = 0;
-	bool seq = false;
-	bool len = false;
-	if (buffer[iloc] & 0x100)
-	{
-		//Has header
-		seq = true;
-		headersize += 1;
-	}
-	if (buffer[iloc] & 0x1)
-	{
-		//Has length
-		len = true;
-		headersize += 2;
-	}
-	header = buffer.mid(0,headersize);
-	iloc++;
-	unsigned int payloadid = (unsigned int)buffer[iloc] << 8;
-
-	payloadid += (unsigned char)buffer[iloc+1];
-	retval.payloadid = payloadid;
-	iloc += 2;
-	if (seq)
-	{
-		iloc += 1;
-		retval.hasseq = true;
 	}
 	else
 	{
-		retval.hasseq = false;
+		m_packetDecoder->parsePacket(p);
+		//parsePacket(p);
 	}
-	QByteArray payload;
-	if (len)
+}
+void FreeEmsComms::locationIdInfoRec(MemoryLocationInfo info)
+{
+	if (m_currentWaitingRequest.args.size() == 0)
 	{
-		retval.haslength = true;
-		unsigned int length = buffer[iloc] << 8;
-		length += (unsigned char)buffer[iloc+1];
-		retval.length = length;
-		iloc += 2;
-		if ((unsigned int)buffer.length() > (unsigned int)(length + iloc))
-		{
-			QLOG_ERROR() << "Packet length should be:" << length + iloc << "But it is" << buffer.length();
-			emit decoderFailure(buffer);
-			return Packet(false);
-		}
-		payload.append(buffer.mid(iloc,length));
+		QLOG_ERROR() << "ERROR! Current waiting packet's arg size is zero1!!";
+		QLOG_ERROR() << "0x" + QString::number(m_currentWaitingRequest.type,16).toUpper();
+		//QLOG_ERROR() << "0x" + QString::number(payloadid,16).toUpper();
 	}
-	else
+	unsigned short locationid = m_currentWaitingRequest.args[0].toInt();
+	info.locationid = locationid;
+	emit locationIdInfo(locationid,info);
+	emsData.passLocationInfo(locationid,info);
+	QLOG_DEBUG() << "Got memory location:" << info.locationid;
+	if (info.type == DATA_TABLE_2D)
 	{
-		retval.haslength = false;
-		payload.append(buffer.mid(iloc),(buffer.length()-iloc));
+		Table2DData *data = new FETable2DData();
+		connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+		connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+		connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
+		connect(data,SIGNAL(requestBlockFromFlash(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromFlash(unsigned short,unsigned short,unsigned short)));
+		connect(data,SIGNAL(requestRamUpdateFromFlash(unsigned short)),this,SLOT(copyFlashToRam(unsigned short)));
+		connect(data,SIGNAL(requestFlashUpdateFromRam(unsigned short)),this,SLOT(copyRamToFlash(unsigned short)));
+		m_2dTableMap[locationid] = data;
 	}
-	QString output;
-	for (int i=0;i<payload.size();i++)
+	else if (info.type == DATA_TABLE_3D)
 	{
-		int num = (unsigned char)payload[i];
-		output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
-	}
-	output.clear();
-	for (int i=0;i<header.size();i++)
-	{
-		int num = (unsigned char)header[i];
-		output.append(" ").append((num < 0xF) ? "0" : "").append(QString::number(num,16));
-	}
-	//Last byte of currPacket should be out checksum.
-	retval.header = header;
-	retval.payload = payload;
-	if (header[0] & NAK)
-	{
-		retval.isNAK = true;
+		Table3DData *data = new FETable3DData();
+		connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+		connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+		connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
+		connect(data,SIGNAL(requestBlockFromFlash(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromFlash(unsigned short,unsigned short,unsigned short)));
+		connect(data,SIGNAL(requestRamUpdateFromFlash(unsigned short)),this,SLOT(copyFlashToRam(unsigned short)));
+		connect(data,SIGNAL(requestFlashUpdateFromRam(unsigned short)),this,SLOT(copyRamToFlash(unsigned short)));
+		m_3dTableMap[locationid] = data;
 	}
 	else
 	{
-		retval.isNAK = false;
-	}
-	if (retval.header.size() >= 3)
-	{
-		return retval;
-	}
-	else
-	{
-		return Packet(false);
+		RawData *data = new FERawData();
+		connect(data,SIGNAL(saveSingleDataToRam(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(ramBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+		connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+		connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
+		connect(data,SIGNAL(requestBlockFromFlash(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromFlash(unsigned short,unsigned short,unsigned short)));
+		m_rawDataMap[locationid] = data;
 	}
 }
 

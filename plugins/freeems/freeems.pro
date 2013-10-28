@@ -68,7 +68,9 @@ HEADERS += datapacketdecoder.h \
     memorylocation.h \
     emsdata.h \
 	   rawdata.h \
-    ferawdata.h
+    ferawdata.h \
+    packetdecoder.h \
+    packet.h
 
 SOURCES += fedatapacketdecoder.cpp \
            fetable2ddata.cpp \
@@ -80,4 +82,5 @@ SOURCES += fedatapacketdecoder.cpp \
 	   datafield.cpp \
     memorylocation.cpp \
     emsdata.cpp \
-    ferawdata.cpp
+    ferawdata.cpp \
+    packetdecoder.cpp

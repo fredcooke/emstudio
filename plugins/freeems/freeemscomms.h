@@ -37,6 +37,8 @@
 #include "table2ddata.h"
 #include "emsdata.h"
 #include "ferawdata.h"
+#include "packet.h"
+#include "packetdecoder.h"
 
 class FreeEmsComms : public EmsComms
 {
@@ -87,63 +89,9 @@ public:
 protected:
 	void run();
 private:
-	enum LocationIdFlags
-	{
-		BLOCK_HAS_PARENT=0x0001,
-		BLOCK_IS_RAM=0x0002,
-		BLOCK_IS_FLASH=0x0004,
-		BLOCK_IS_INDEXABLE=0x0008,
-		BLOCK_IS_READ_ONLY=0x0010,
-		BLOCK_GETS_VERIFIED=0x0020,
-		BLOCK_FOR_BACKUP_RESTORE=0x0040,
-		BLOCK_SPARE_7=0x0080,
-		BLOCK_SPARE_8=0x0100,
-		BLOCK_SPARE_9=0x0200,
-		BLOCK_SPARE_10=0x0400,
-		BLOCK_IS_2D_SIGNED_TABLE=0x0800,
-		BLOCK_IS_2D_TABLE=0x1000,
-		BLOCK_IS_MAIN_TABLE=0x2000,
-		BLOCK_IS_LOOKUP_DATA=0x4000,
-		BLOCK_IS_CONFIGURATION=0x8000
-	};
-	enum RequestType
-	{
-		GET_INTERFACE_VERSION=0x0000,
-		GET_FIRMWARE_VERSION=0x0002,
-		GET_MAX_PACKET_SIZE=0x0004,
-		ECHO_PACKET=0x0006,
-		SOFT_RESET=0x0008,
-		HARD_RESET=0x000A,
-		UPDATE_BLOCK_IN_RAM=0x0100,
-		UPDATE_BLOCK_IN_FLASH=0x0102,
-		RETRIEVE_BLOCK_IN_RAM=0x0104,
-		RETRIEVE_BLOCK_IN_FLASH=0x0106,
-		BURN_BLOCK_FROM_RAM_TO_FLASH=0x0108,
-		GET_LOCATION_ID_LIST=0xDA5E,
-		GET_DECODER_NAME=0xEEEE,
-		GET_FIRMWARE_BUILD_DATE=0xEEF0,
-		GET_COMPILER_VERSION=0xEEF2,
-		GET_OPERATING_SYSTEM=0xEEF4,
-		GET_LOCATION_ID_INFO=0xF8E0,
-		SERIAL_CONNECT=0xFFFF01,
-		SERIAL_DISCONNECT=0xFFFF02,
-		INTERROGATE_START=0xFFFF03
-	};
 
-	class Packet
-	{
-	public:
-		Packet(bool valid = true) { isValid = valid; }
-		bool isNAK;
-		bool isValid;
-		QByteArray header;
-		QByteArray payload;
-		unsigned short payloadid;
-		unsigned short length;
-		bool haslength;
-		bool hasseq;
-		unsigned short sequencenum;
-	};
+
+
 
 	class RequestClass
 	{
@@ -168,7 +116,7 @@ private:
 	FEDataPacketDecoder *dataPacketDecoder;
 	FEMemoryMetaData *m_metaDataParser;
 	bool m_debugLogsEnabled;
-	QMap<FreeEmsComms::LocationIdFlags,QString> m_blockFlagToNameMap;
+	QMap<LocationIdFlags,QString> m_blockFlagToNameMap;
 	bool m_terminateLoop;
 	QMutex m_waitingInfoMutex;
 	SerialRXThread *rxThread;
@@ -203,6 +151,7 @@ private:
 	QMap<unsigned short,Table2DData*> m_2dTableMap;
 	QMap<unsigned short,Table3DData*> m_3dTableMap;
 	QMap<unsigned short,RawData*> m_rawDataMap;
+	PacketDecoder *m_packetDecoder;
 
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);
@@ -245,11 +194,15 @@ public slots:
 	int retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size);
 	int burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size);
 private slots:
-    void datalogTimerTimeout();
+	void packetNakedRec(unsigned short payloadid,QByteArray header,QByteArray payload,unsigned short errornum);
+	void packetAckedRec(unsigned short payloadid,QByteArray header,QByteArray payload);
+	void locationIdInfoRec(MemoryLocationInfo info);
+	void locationIdListRec(QList<unsigned short> locationidlist);
+	void datalogTimerTimeout();
 	void dataLogWrite(QByteArray buffer);
 	void dataLogRead(QByteArray buffer);
 	void parseEverything(QByteArray buffer);
-	Packet parseBuffer(QByteArray buffer);
+	//Packet parseBuffer(QByteArray buffer);
 	void parsePacket(Packet parsedPacket);
 	void locationIdUpdate(unsigned short locationid);
 	void copyFlashToRam(unsigned short locationid);
