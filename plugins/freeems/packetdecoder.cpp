@@ -421,17 +421,17 @@ void PacketDecoder::parsePacket(Packet parsedPacket)
 		}
 		else
 		{
-
+			if (parsedPacket.isNAK)
+			{
+				unsigned short errornum = parsedPacket.payload[0] << 8;
+				errornum += parsedPacket.payload[1];
+				emit packetNaked(payloadid,parsedPacket.header,parsedPacket.payload,errornum);
+				return;
+			}
+			emit packetAcked(payloadid,parsedPacket.header,parsedPacket.payload);
 
 		}
-		if (parsedPacket.isNAK)
-		{
-			unsigned short errornum = parsedPacket.payload[0] << 8;
-			errornum += parsedPacket.payload[1];
-			emit packetNaked(payloadid,parsedPacket.header,parsedPacket.payload,errornum);
-			return;
-		}
-		emit packetAcked(payloadid,parsedPacket.header,parsedPacket.payload);
+
 
 	}
 	else

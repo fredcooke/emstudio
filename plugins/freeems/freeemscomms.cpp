@@ -42,18 +42,20 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	m_metaDataParser = new FEMemoryMetaData();
 	m_metaDataParser->loadMetaDataFromFile("freeems.config.json");
 	m_packetDecoder = new PacketDecoder(this);
-	connect(m_packetDecoder,SIGNAL(locationIdInfo(MemoryLocationInfo)),this,SLOT(locationIdInfoRec(MemoryLocationInfo)),Qt::BlockingQueuedConnection);
-	connect(m_packetDecoder,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),this,SLOT(packetAckedRec(unsigned short,QByteArray,QByteArray)),Qt::BlockingQueuedConnection);
-	connect(m_packetDecoder,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),this,SLOT(packetNakedRec(unsigned short,QByteArray,QByteArray,unsigned short)),Qt::BlockingQueuedConnection);
-	connect(m_packetDecoder,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdListRec(QList<unsigned short>)),Qt::BlockingQueuedConnection);
+	connect(m_packetDecoder,SIGNAL(locationIdInfo(MemoryLocationInfo)),this,SLOT(locationIdInfoRec(MemoryLocationInfo)));
+	connect(m_packetDecoder,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),this,SLOT(packetAckedRec(unsigned short,QByteArray,QByteArray)));
+	connect(m_packetDecoder,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),this,SLOT(packetNakedRec(unsigned short,QByteArray,QByteArray,unsigned short)));
+	connect(m_packetDecoder,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdListRec(QList<unsigned short>)));
+	connect(m_packetDecoder,SIGNAL(ramBlockUpdatePacket(QByteArray,QByteArray)),this,SLOT(ramBlockUpdateRec(QByteArray,QByteArray)));
+	connect(m_packetDecoder,SIGNAL(flashBlockUpdatePacket(QByteArray,QByteArray)),this,SLOT(flashBlockUpdateRec(QByteArray,QByteArray)));
 
-    m_lastdatalogTimer = new QTimer(this);
-    connect(m_lastdatalogTimer,SIGNAL(timeout()),this,SLOT(datalogTimerTimeout()));
-    m_lastdatalogTimer->start(500); //Every half second, check to see if we've timed out on datalogs.
+	m_lastdatalogTimer = new QTimer(this);
+	connect(m_lastdatalogTimer,SIGNAL(timeout()),this,SLOT(datalogTimerTimeout()));
+	m_lastdatalogTimer->start(500); //Every half second, check to see if we've timed out on datalogs.
 
 	m_waitingForResponse = false;
 	m_logsEnabled = false;
-    m_lastDatalogUpdateEnabled = false;
+	m_lastDatalogUpdateEnabled = false;
 	m_logInFile=0;
 	m_logOutFile=0;
 	m_logInOutFile=0;
@@ -738,7 +740,7 @@ void FreeEmsComms::setInterByteSendDelay(int milliseconds)
 void FreeEmsComms::run()
 {
 	rxThread = new SerialRXThread(this);
-	connect(rxThread,SIGNAL(incomingPacket(QByteArray)),this,SLOT(parseEverything(QByteArray)),Qt::DirectConnection);
+	connect(rxThread,SIGNAL(incomingPacket(QByteArray)),this,SLOT(parseEverything(QByteArray)));
 	connect(rxThread,SIGNAL(dataRead(QByteArray)),this,SLOT(dataLogRead(QByteArray)));
 	m_terminateLoop = false;
 	bool serialconnected = false;
@@ -1736,6 +1738,30 @@ void FreeEmsComms::parseEverything(QByteArray buffer)
 		//parsePacket(p);
 	}
 }
+void FreeEmsComms::ramBlockUpdateRec(QByteArray header,QByteArray payload)
+{
+	if (m_currentWaitingRequest.args.size() == 0)
+	{
+		QLOG_ERROR() << "ERROR! Current waiting packet's arg size is zero1!!";
+		QLOG_ERROR() << "0x" + QString::number(m_currentWaitingRequest.type,16).toUpper();
+		//QLOG_ERROR() << "0x" + QString::number(payloadid,16).toUpper();
+	}
+	unsigned short locationid = m_currentWaitingRequest.args[0].toInt();
+	emsData.ramBlockUpdate(locationid,header,payload);
+}
+
+void FreeEmsComms::flashBlockUpdateRec(QByteArray header,QByteArray payload)
+{
+	if (m_currentWaitingRequest.args.size() == 0)
+	{
+		QLOG_ERROR() << "ERROR! Current waiting packet's arg size is zero1!!";
+		QLOG_ERROR() << "0x" + QString::number(m_currentWaitingRequest.type,16).toUpper();
+		//QLOG_ERROR() << "0x" + QString::number(payloadid,16).toUpper();
+	}
+	unsigned short locationid = m_currentWaitingRequest.args[0].toInt();
+	emsData.flashBlockUpdate(locationid,header,payload);
+}
+
 void FreeEmsComms::locationIdInfoRec(MemoryLocationInfo info)
 {
 	if (m_currentWaitingRequest.args.size() == 0)

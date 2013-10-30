@@ -194,6 +194,8 @@ public slots:
 	int retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size);
 	int burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size);
 private slots:
+	void ramBlockUpdateRec(QByteArray header,QByteArray payload);
+	void flashBlockUpdateRec(QByteArray header,QByteArray payload);
 	void packetNakedRec(unsigned short payloadid,QByteArray header,QByteArray payload,unsigned short errornum);
 	void packetAckedRec(unsigned short payloadid,QByteArray header,QByteArray payload);
 	void locationIdInfoRec(MemoryLocationInfo info);
