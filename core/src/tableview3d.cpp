@@ -158,17 +158,18 @@ void TableView3D::setValue(int row, int column,double value,bool ignoreselection
 				return;
 			}
 		}
-		currentvalue = oldValue;
+		setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp)); //Reset the value, setRange will set it properly.
+		//currentvalue = oldValue;
 		QLOG_DEBUG() << "Setting all cells to" << currentvalue << "for" << row << column;
-		tableData->setWritesEnabled(false);
+		QList<QPair<QPair<int,int>,double> > vallist;
 		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
 		{
-			setSilentValue(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column(),formatNumber(tempValue,m_metaData.zDp));
-			tableData->setCell(ui.tableWidget->rowCount()-(ui.tableWidget->selectedItems()[i]->row()+2),ui.tableWidget->selectedItems()[i]->column()-1,currentvalue);
-			reColorTable(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column());
+			QPair<QPair<int,int>,double> val;
+			val.first = QPair<int,int>(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column());
+			val.second = tempValue;
+			vallist.append(val);
 		}
-		tableData->setWritesEnabled(true);
-		tableData->writeWholeLocation(true);
+		setRange(vallist);
 	}
 	else
 	{
