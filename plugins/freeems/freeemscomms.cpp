@@ -1669,6 +1669,7 @@ void FreeEmsComms::locationIdListRec(QList<unsigned short> locationidlist)
 	{
 		m_locationIdList.append(locationidlist[i]);
 	}
+	emit locationIdList(m_locationIdList);
 	QLOG_DEBUG() << m_locationIdList.size() << "Locations loaded";
 }
 
