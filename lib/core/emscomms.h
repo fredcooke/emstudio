@@ -118,6 +118,7 @@ public:
 	virtual void setlogsDebugEnabled(bool enabled)=0;
 	virtual int enableDatalogStream()=0;
 	virtual int disableDatalogStream()=0;
+	virtual void writeAllRamToRam()=0;
 };
 Q_DECLARE_INTERFACE(EmsComms,"EmsComms/1.0")
 #endif // EMSCOMMS_H

@@ -39,6 +39,8 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	m_isConnected = false;
 
 	dataPacketDecoder = new FEDataPacketDecoder();
+	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SIGNAL(dataLogPayloadDecoded(QVariantMap)));
+	connect(dataPacketDecoder,SIGNAL(resetDetected(int)),this,SIGNAL(resetDetected(int)));
 	m_metaDataParser = new FEMemoryMetaData();
 	m_metaDataParser->loadMetaDataFromFile("freeems.config.json");
 	m_packetDecoder = new PacketDecoder(this);
@@ -49,6 +51,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	connect(m_packetDecoder,SIGNAL(ramBlockUpdatePacket(QByteArray,QByteArray)),this,SLOT(ramBlockUpdateRec(QByteArray,QByteArray)));
 	connect(m_packetDecoder,SIGNAL(flashBlockUpdatePacket(QByteArray,QByteArray)),this,SLOT(flashBlockUpdateRec(QByteArray,QByteArray)));
 	connect(m_packetDecoder,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)));
+	connect(m_packetDecoder,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),dataPacketDecoder,SLOT(decodePayloadPacket(QByteArray,QByteArray)));
 	connect(m_packetDecoder,SIGNAL(compilerVersion(QString)),this,SLOT(compilerVersion(QString)));
 	connect(m_packetDecoder,SIGNAL(decoderName(QString)),this,SLOT(decoderName(QString)));
 	connect(m_packetDecoder,SIGNAL(firmwareBuild(QString)),this,SLOT(firmwareBuild(QString)));
@@ -192,6 +195,15 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 
 
 }
+void FreeEmsComms::writeAllRamToRam()
+{
+	QList<unsigned short> ramlist = emsData.getTopLevelDeviceRamLocations();
+	for (int i=0;i<ramlist.size();i++)
+	{
+		updateBlockInRam(ramlist[i],0,emsData.getDeviceRamBlock(ramlist[i]).size(),emsData.getDeviceRamBlock(ramlist[i]));
+	}
+}
+
 void FreeEmsComms::decoderName(QString name)
 {
 	m_interrogationMetaDataMap["Decoder Name"] = name;

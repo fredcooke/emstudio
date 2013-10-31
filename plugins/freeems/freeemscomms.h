@@ -86,6 +86,7 @@ public:
 	Table2DData* get2DTableData(unsigned short locationid);
 	Table3DData* get3DTableData(unsigned short locationid);
 	RawData* getRawData(unsigned short locationid);
+	void writeAllRamToRam();
 protected:
 	void run();
 private:
@@ -183,6 +184,8 @@ signals:
 	void interrogationComplete();
 	void deviceDataUpdated(unsigned short locationid);
 	void interrogationData(QMap<QString,QString> datamap);
+	void dataLogPayloadDecoded(QVariantMap data);
+	void resetDetected(int missedPackets);
 public slots:
 	int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
 	int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);

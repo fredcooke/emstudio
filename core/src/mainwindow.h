@@ -221,6 +221,7 @@ private slots:
 	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QString version);
+	void ecuResetDetected(int missedpackets);
 	void firmwareVersion(QString version);
 	void error(QString msg);
 	void error(SerialPortStatus error,QString msg);

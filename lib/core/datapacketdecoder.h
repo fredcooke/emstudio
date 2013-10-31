@@ -64,7 +64,7 @@ public:
     virtual QString getFieldName(int num)=0;
     virtual QString getFieldDescription(int num)=0;
 public slots:
-	virtual void decodePayload(QByteArray payload)=0;
+	//virtual void decodePayload(QByteArray payload)=0;
 };
 
 #endif // DATAPACKETDECODER_H

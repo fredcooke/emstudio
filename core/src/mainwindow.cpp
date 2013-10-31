@@ -913,7 +913,7 @@ void MainWindow::emsCommsDisconnected()
 	emsComms->passLogger(&QsLogging::Logger::instance());
 
 	dataPacketDecoder = emsComms->getDecoder();
-	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
+	//connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
 	QString filestr = "";
 	if (QFile::exists(m_settingsDir + "/" + "definitions/freeems.config.json"))
 	{
@@ -943,6 +943,7 @@ void MainWindow::emsCommsDisconnected()
 	emsComms->setLogFileName(m_logFileName);
 	emsComms->setLogDirectory(m_logDirectory);
 	connect(emsComms,SIGNAL(interrogationProgress(int,int)),this,SLOT(interrogationProgress(int,int)));
+	connect(emsComms,SIGNAL(resetDetected(int)),this,SLOT(ecuResetDetected(int)));
 	connect(emsComms,SIGNAL(interrogationComplete()),this,SLOT(interrogationComplete()));
 	connect(emsComms,SIGNAL(interrogateTaskStart(QString,int)),this,SLOT(interrogateTaskStart(QString,int)));
 	connect(emsComms,SIGNAL(interrogateTaskSucceed(int)),this,SLOT(interrogateTaskSucceed(int)));
@@ -1032,11 +1033,14 @@ void MainWindow::setPlugin(QString plugin)
 	QLOG_INFO() << m_memoryMetaData->table3DMetaData().size() << "3D Tables Loaded";
 	QLOG_INFO() << m_memoryMetaData->table2DMetaData().size() << "2D Tables Loaded";
 	dataPacketDecoder = emsComms->getDecoder();
-	connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
+	//connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
+	connect(emsComms,SIGNAL(dataLogPayloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
 	dataTables->passDecoder(dataPacketDecoder);
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
 	emsComms->setLogDirectory(m_logDirectory);
+	connect(emsComms,SIGNAL(resetDetected(int)),this,SLOT(ecuResetDetected(int)));
+	connect(emsComms,SIGNAL(dataLogPayloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
 	connect(emsComms,SIGNAL(interrogationProgress(int,int)),this,SLOT(interrogationProgress(int,int)));
 	connect(emsComms,SIGNAL(interrogationComplete()),this,SLOT(interrogationComplete()));
 	connect(emsComms,SIGNAL(interrogateTaskStart(QString,int)),this,SLOT(interrogateTaskStart(QString,int)));
@@ -1524,7 +1528,8 @@ void MainWindow::blockRetrieved(int sequencenumber,QByteArray header,QByteArray 
 void MainWindow::dataLogPayloadReceived(QByteArray header,QByteArray payload)
 {
 	Q_UNUSED(header)
-	dataPacketDecoder->decodePayload(payload);
+	Q_UNUSED(payload)
+	//dataPacketDecoder->decodePayload(payload);
 
 }
 void MainWindow::interrogationData(QMap<QString,QString> datamap)
@@ -2009,6 +2014,18 @@ void MainWindow::logProgress(qlonglong current,qlonglong total)
 void MainWindow::guiUpdateTimerTick()
 {
 }
+void MainWindow::ecuResetDetected(int missedpackets)
+{
+	if (QMessageBox::question(this,"Error","ECU Reset detected with " + QString::number(missedpackets) + " missed packets! Would you like to reflash data? If you do not, then EMStudio will continue with an INVALID idea of ECU memory, and you will lose any changes made",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+	{
+		emsComms->writeAllRamToRam();
+	}
+	else
+	{
+		QMessageBox::information(this,"Warning","EMStudio will now continue with a corrupt version of ECU memory. The death of your engine is on your head now");
+	}
+}
+
 void MainWindow::dataLogDecoded(QVariantMap data)
 {
 	//m_valueMap = data;
@@ -2036,6 +2053,7 @@ void MainWindow::dataLogDecoded(QVariantMap data)
 			dview->passDatalog(data);
 		}
 	}
+	/*
 	if (data.contains("tempClock"))
 	{
 		int newval = data["tempClock"].toInt();
@@ -2050,14 +2068,6 @@ void MainWindow::dataLogDecoded(QVariantMap data)
 				//We probably had a chip reset here. Ask, and verify.
 				if (QMessageBox::question(0,"Warning","It seems that the ECU has reset. This means any un-flashed RAM changes may be lost. Would you like to re-send any RAM data in the tuner to ensure no changes are lost?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 				{
-					/*TODOQList<unsigned short> loclist = emsData->getTopLevelDeviceRamLocations();
-					for (int i=0;i<loclist.size();i++)
-					{
-						if (!emsData->isReadOnlyRamBlock(loclist[i]))
-						{
-							emsComms->updateBlockInRam(loclist[i],0,emsData->getDeviceRamBlock(loclist[i]).size(),emsData->getDeviceRamBlock(loclist[i]));
-						}
-					}*/
 				}
 
 			}
@@ -2089,7 +2099,7 @@ void MainWindow::dataLogDecoded(QVariantMap data)
 			}
 			m_currentEcuClock = newval;
 		}
-	}
+	}*/
 }
 void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 {
@@ -2102,7 +2112,7 @@ void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 		//return;
 	}
     //If we are logging, disable this:
-    dataPacketDecoder->decodePayload(payload);
+    //dataPacketDecoder->decodePayload(payload);
 	//guiUpdateTimerTick();
 
 }

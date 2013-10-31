@@ -23,9 +23,16 @@
 #include <QDebug>
 #include <QFile>
 #include <qjson/parser.h>
+#include "QsLog.h"
+
 FEDataPacketDecoder::FEDataPacketDecoder() : DataPacketDecoder()
 {
     loadDataFieldsFromValues();
+}
+
+void FEDataPacketDecoder::decodePayloadPacket(QByteArray header,QByteArray payload)
+{
+	decodePayload(payload);
 }
 
 void FEDataPacketDecoder::decodePayload(QByteArray payload)
@@ -42,6 +49,52 @@ void FEDataPacketDecoder::decodePayload(QByteArray payload)
 		{
 			double value = m_dataFieldList[i].getValue(&payload);
 			m_valueMap[m_dataFieldList[i].name()] = value;
+		}
+	}
+	if (m_valueMap.contains("tempClock"))
+	{
+		int newval = m_valueMap["tempClock"].toInt();
+		if (m_currentEcuClock == -1)
+		{
+			m_currentEcuClock = newval;
+		}
+		else
+		{
+			//Check for first and second packet, since often on reset first packet comes through corrupt
+			if ((newval == 0 && m_currentEcuClock != 255) || (newval == 1 && m_currentEcuClock != 0))
+			{
+				//We probably had a chip reset here.
+				emit resetDetected((255 - m_currentEcuClock) + newval);
+
+			}
+			if (m_currentEcuClock == 255)
+			{
+				if (newval == 0)
+				{
+					//All is good
+				}
+				else
+				{
+					//emit resetDetected(newval);
+					QLOG_WARN() << "A: Packets lost! At least:" << newval << "packets";
+				}
+			}
+			else
+			{
+				if (m_currentEcuClock + 1 != newval)
+				{
+					if (m_currentEcuClock > newval)
+					{
+						QLOG_WARN() << "B: Packets lost! At least:" << (255 - m_currentEcuClock) + newval << "packets";
+					}
+					else
+					{
+						QLOG_WARN() << "C: Packets lost! At least:" << newval - m_currentEcuClock << "packets";
+					}
+
+				}
+			}
+			m_currentEcuClock = newval;
 		}
 	}
 	emit payloadDecoded(m_valueMap);

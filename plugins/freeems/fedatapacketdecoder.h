@@ -39,10 +39,13 @@ public:
 private:
 	void loadDataFieldsFromValues();
 	QList<DataField> m_dataFieldList;
+	unsigned char m_currentEcuClock;
 signals:
 	void payloadDecoded(QVariantMap data);
+	void resetDetected(int missedPackets);
 public slots:
 	void decodePayload(QByteArray payload);
+	void decodePayloadPacket(QByteArray,QByteArray);
 };
 
 #endif // FEDATAPACKETDECODER_H
