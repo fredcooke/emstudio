@@ -213,8 +213,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 
 	emsInfo = new EmsInfoView();
-	emsInfo->setFirmwareVersion(m_firmwareVersion);
-	emsInfo->setInterfaceVersion(m_interfaceVersion);
 	connect(emsInfo,SIGNAL(displayLocationId(int,bool,DataType)),this,SLOT(emsInfoDisplayLocationId(int,bool,DataType)));
 
 	emsMdiWindow = ui.mdiArea->addSubWindow(emsInfo);
@@ -957,13 +955,7 @@ void MainWindow::emsCommsDisconnected()
 
 	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
-	connect(emsComms,SIGNAL(decoderName(QString)),this,SLOT(emsDecoderName(QString)));
-	connect(emsComms,SIGNAL(compilerVersion(QString)),this,SLOT(emsCompilerVersion(QString)));
-	connect(emsComms,SIGNAL(interfaceVersion(QString)),this,SLOT(interfaceVersion(QString)));
-	connect(emsComms,SIGNAL(operatingSystem(QString)),this,SLOT(emsOperatingSystem(QString)));
 	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)),Qt::QueuedConnection);
-	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));
 	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
@@ -973,6 +965,7 @@ void MainWindow::emsCommsDisconnected()
 	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
 	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
+	connect(emsComms,SIGNAL(interrogationData(QMap<QString,QString>)),this,SLOT(interrogationData(QMap<QString,QString>)));
 	emsComms->setBaud(m_comBaud);
 	emsComms->setPort(m_comPort);
 	emsComms->setLogsEnabled(m_saveLogs);
@@ -1057,13 +1050,7 @@ void MainWindow::setPlugin(QString plugin)
 
 	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
 	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
-	connect(emsComms,SIGNAL(decoderName(QString)),this,SLOT(emsDecoderName(QString)));
-	connect(emsComms,SIGNAL(compilerVersion(QString)),this,SLOT(emsCompilerVersion(QString)));
-	connect(emsComms,SIGNAL(interfaceVersion(QString)),this,SLOT(interfaceVersion(QString)));
-	connect(emsComms,SIGNAL(operatingSystem(QString)),this,SLOT(emsOperatingSystem(QString)));
 	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)),Qt::QueuedConnection);
-	connect(emsComms,SIGNAL(firmwareBuild(QString)),this,SLOT(emsFirmwareBuildDate(QString)));
 	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
@@ -1077,6 +1064,7 @@ void MainWindow::setPlugin(QString plugin)
 	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
 	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
+	connect(emsComms,SIGNAL(interrogationData(QMap<QString,QString>)),this,SLOT(interrogationData(QMap<QString,QString>)));
 	emsComms->setBaud(m_comBaud);
 	emsComms->setPort(m_comPort);
 	emsComms->setLogsEnabled(m_saveLogs);
@@ -1539,13 +1527,17 @@ void MainWindow::dataLogPayloadReceived(QByteArray header,QByteArray payload)
 	dataPacketDecoder->decodePayload(payload);
 
 }
+void MainWindow::interrogationData(QMap<QString,QString> datamap)
+{
+	emsInfo->setInterrogationData(datamap);
+}
+
 void MainWindow::interfaceVersion(QString version)
 {
 	//ui.interfaceVersionLineEdit->setText(version);
 	m_interfaceVersion = version;
 	if (emsInfo)
 	{
-		emsInfo->setInterfaceVersion(version);
 
 	}
 	emsinfo.interfaceVersion = version;
@@ -1557,7 +1549,6 @@ void MainWindow::firmwareVersion(QString version)
 	this->setWindowTitle(QString("EMStudio ") + QString(define2string(GIT_COMMIT)) + " Firmware: " + version);
 	if (emsInfo)
 	{
-		emsInfo->setFirmwareVersion(version);
 	}
 	emsinfo.firmwareVersion = version;
 }

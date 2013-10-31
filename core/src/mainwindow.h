@@ -168,6 +168,7 @@ private:
 	//EmsData *checkEmsData;
 	int m_currentEcuClock;
 private slots:
+	void interrogationData(QMap<QString,QString> datamap);
 	void emsCommsSilence();
 	void emsCommsSilenceBroken();
 	void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);

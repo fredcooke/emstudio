@@ -27,43 +27,15 @@
 EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
-	/*ui.locationIdInfoTableWidget->setColumnCount(17);
 
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("LocID"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Table Name"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("Flags"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(3,new QTableWidgetItem("Parent"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(4,new QTableWidgetItem("RamPage"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(5,new QTableWidgetItem("FlashPage"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(6,new QTableWidgetItem("RamAddress"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(7,new QTableWidgetItem("FlashAddress"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(8,new QTableWidgetItem("Size"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(9,new QTableWidgetItem("Has Parent"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(10,new QTableWidgetItem("Is Ram"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(11,new QTableWidgetItem("Is Flash"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(12,new QTableWidgetItem("Is Index"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(13,new QTableWidgetItem("Is Read Only"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(14,new QTableWidgetItem("Is Verified"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(15,new QTableWidgetItem("For Backup"));
-	ui.locationIdInfoTableWidget->setHorizontalHeaderItem(16,new QTableWidgetItem("Table Type"));*/
 
+	ui.tableWidget->setColumnCount(2);
+	ui.tableWidget->setColumnWidth(0,200);
+	ui.tableWidget->setColumnWidth(1,400);
+	ui.tableWidget->horizontalHeader()->hide();
+	ui.tableWidget->verticalHeader()->hide();
 	connect(ui.locationIdInfoTableWidget,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(locationInfoWidgetDoubleClicked(int,int)));
 	connect(ui.checkSyncButton,SIGNAL(clicked()),this,SIGNAL(checkSync()));
-
-	//ui.locationIdInfoTableWidget->set
-
-	//ui.locationIdInfoTableWidget->setContextMenuPolicy(Qt::ActionsContextMenu);
-
-	//QAction *hexAction = new QAction(this);
-	//hexAction->setText("Hex View");
-	//connect(hexAction,SIGNAL(triggered()),this,SLOT(hexViewClicked()));
-	//QAction *normalAction= new QAction(this);
-	//normalAction->setText("Normal View");
-	//connect(normalAction,SIGNAL(triggered()),this,SLOT(normalViewClicked()));
-
-	//ui.locationIdInfoTableWidget->addAction(normalAction);
-	//ui.locationIdInfoTableWidget->addAction(hexAction);
-
 }
 void EmsInfoView::normalViewClicked()
 {
@@ -115,8 +87,8 @@ void EmsInfoView::setLocalRam(bool dirty)
 void EmsInfoView::clear()
 {
 	ui.locationIdInfoTableWidget->clearContents();
-	ui.firmwareVersionLineEdit->clear();
-	ui.interfaceVersionLineEdit->clear();
+//	ui.firmwareVersionLineEdit->clear();
+//	ui.interfaceVersionLineEdit->clear();
 	ui.locationIdInfoTableWidget->setRowCount(0);
 }
 
@@ -293,16 +265,24 @@ void EmsInfoView::locationIdInfo(unsigned short locationid,QString title,MemoryL
 
 	ui.locationIdInfoTableWidget->resizeColumnsToContents();
 }
-
-void EmsInfoView::setInterfaceVersion(QString version)
+void EmsInfoView::setInterrogationData(QMap<QString,QString> datamap)
 {
-	ui.interfaceVersionLineEdit->setText(version);
+	for (QMap<QString,QString>::const_iterator i=datamap.constBegin();i!=datamap.constEnd();i++)
+	{
+		for (int j=0;j<ui.tableWidget->rowCount();j++)
+		{
+			if (ui.tableWidget->item(j,0)->text() == i.key())
+			{
+				ui.tableWidget->item(j,1)->setText(i.value());
+				return;
+			}
+		}
+		ui.tableWidget->setRowCount(ui.tableWidget->rowCount()+1);
+		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,0,new QTableWidgetItem(i.key()));
+		ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,1,new QTableWidgetItem(i.value()));
+	}
 }
 
-void EmsInfoView::setFirmwareVersion(QString firmware)
-{
-	ui.firmwareVersionLineEdit->setText(firmware);
-}
 
 EmsInfoView::~EmsInfoView()
 {

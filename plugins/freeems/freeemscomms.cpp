@@ -48,6 +48,13 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	connect(m_packetDecoder,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdListRec(QList<unsigned short>)));
 	connect(m_packetDecoder,SIGNAL(ramBlockUpdatePacket(QByteArray,QByteArray)),this,SLOT(ramBlockUpdateRec(QByteArray,QByteArray)));
 	connect(m_packetDecoder,SIGNAL(flashBlockUpdatePacket(QByteArray,QByteArray)),this,SLOT(flashBlockUpdateRec(QByteArray,QByteArray)));
+	connect(m_packetDecoder,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)));
+	connect(m_packetDecoder,SIGNAL(compilerVersion(QString)),this,SLOT(compilerVersion(QString)));
+	connect(m_packetDecoder,SIGNAL(decoderName(QString)),this,SLOT(decoderName(QString)));
+	connect(m_packetDecoder,SIGNAL(firmwareBuild(QString)),this,SLOT(firmwareBuild(QString)));
+	connect(m_packetDecoder,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
+	connect(m_packetDecoder,SIGNAL(interfaceVersion(QString)),this,SLOT(interfaceVersion(QString)));
+	connect(m_packetDecoder,SIGNAL(operatingSystem(QString)),this,SLOT(operatingSystem(QString)));
 
 	m_lastdatalogTimer = new QTimer(this);
 	connect(m_lastdatalogTimer,SIGNAL(timeout()),this,SLOT(datalogTimerTimeout()));
@@ -185,6 +192,36 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 
 
 }
+void FreeEmsComms::decoderName(QString name)
+{
+	m_interrogationMetaDataMap["Decoder Name"] = name;
+}
+
+void FreeEmsComms::firmwareBuild(QString date)
+{
+	m_interrogationMetaDataMap["Firmware Build Date"] = date;
+}
+
+void FreeEmsComms::compilerVersion(QString version)
+{
+	m_interrogationMetaDataMap["Compiler Version"] = version;
+}
+
+void FreeEmsComms::operatingSystem(QString os)
+{
+	m_interrogationMetaDataMap["Operating System"] = os;
+}
+
+void FreeEmsComms::interfaceVersion(QString version)
+{
+	m_interrogationMetaDataMap["Interface Version"] = version;
+}
+
+void FreeEmsComms::firmwareVersion(QString version)
+{
+	m_interrogationMetaDataMap["Firmware Version"] = version;
+}
+
 void FreeEmsComms::passLogger(QsLogging::Logger *log)
 {
 	//Set the internal instance.
@@ -1518,6 +1555,7 @@ void FreeEmsComms::packetAckedRec(unsigned short payloadid,QByteArray header,QBy
 						{
 							locationIdUpdate(emsData.getUniqueLocationIdList()[i]);
 						}
+						emit interrogationData(m_interrogationMetaDataMap);
 						//deviceDataUpdated(unsigned short)
 					}
 				}

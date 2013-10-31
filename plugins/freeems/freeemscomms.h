@@ -152,16 +152,13 @@ private:
 	QMap<unsigned short,Table3DData*> m_3dTableMap;
 	QMap<unsigned short,RawData*> m_rawDataMap;
 	PacketDecoder *m_packetDecoder;
+	QMap<QString,QString> m_interrogationMetaDataMap;
 
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);
 	void packetAcked(unsigned short locationid,QByteArray header,QByteArray payload);
 	void packetNaked(unsigned short locationid,QByteArray header,QByteArray payload,unsigned short errornum);
 	void decoderFailure(QByteArray packet);
-	void decoderName(QString name);
-	void firmwareBuild(QString date);
-	void compilerVersion(QString version);
-	void operatingSystem(QString os);
 	void connected();
 	void disconnected();
 	void locationIdList(QList<unsigned short> idlist);
@@ -169,8 +166,6 @@ signals:
 	void ramBlockRetrieved(unsigned short locationid, QByteArray header,QByteArray payload);
 	void flashBlockRetrieved(unsigned short locationid,QByteArray header,QByteArray payload);
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
-	void interfaceVersion(QString version);
-	void firmwareVersion(QString version);
 	void debugVerbose(QString msg);
 	void unknownPacket(QByteArray header,QByteArray payload);
 	void debug(QString msg);
@@ -187,6 +182,7 @@ signals:
 	void interrogationProgress(int current, int total);
 	void interrogationComplete();
 	void deviceDataUpdated(unsigned short locationid);
+	void interrogationData(QMap<QString,QString> datamap);
 public slots:
 	int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
 	int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
@@ -209,6 +205,13 @@ private slots:
 	void locationIdUpdate(unsigned short locationid);
 	void copyFlashToRam(unsigned short locationid);
 	void copyRamToFlash(unsigned short locationid);
+	void decoderName(QString name);
+	void firmwareBuild(QString date);
+	void compilerVersion(QString version);
+	void operatingSystem(QString os);
+	void interfaceVersion(QString version);
+	void firmwareVersion(QString version);
+
 
 };
 
