@@ -1,6 +1,10 @@
 #include "wizardview.h"
 #include <QDebug>
-WizardView::WizardView(EmsComms *comms,QWidget *parent) : QDeclarativeView(parent)
+WizardView::WizardView(QWidget *parent) : QDeclarativeView(parent)
+{
+
+}
+void WizardView::setFile(EmsComms *comms,QString filename)
 {
 	updateTimer = new QTimer(this);
 	connect(updateTimer,SIGNAL(timeout()),this,SLOT(updateTimerTick()));
@@ -8,9 +12,10 @@ WizardView::WizardView(EmsComms *comms,QWidget *parent) : QDeclarativeView(paren
 	connect(comms->getDecoder(),SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(decoderPayloadDecoded(QVariantMap)));
 	this->rootContext()->setContextProperty("decoder",this);
 	this->rootContext()->setContextProperty("emscomms",comms);
-	setSource(QUrl::fromLocalFile("wizard.qml"));
+	setSource(QUrl::fromLocalFile(filename));
 	emscomms = comms;
 }
+
 void WizardView::updateTimerTick()
 {
 	emit payloadDecoded(m_savedPayload);

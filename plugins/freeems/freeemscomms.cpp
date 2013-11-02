@@ -34,8 +34,8 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	qRegisterMetaType<QList<unsigned short> >("QList<unsigned short>");
 	qRegisterMetaType<QList<LocationIdFlags> >("QList<LocationIdFlags>");
 	qRegisterMetaType<SerialPortStatus>("SerialPortStatus");
-	serialPort = new SerialPort(this);
-	connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
+	//serialPort = new SerialPort(this);
+	//connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
 	m_isConnected = false;
 
 	dataPacketDecoder = new FEDataPacketDecoder();
@@ -283,6 +283,13 @@ void FreeEmsComms::startInterrogation()
 		m_reqListMutex.unlock();
 		m_interrogatePacketList.clear();
 		m_interrogateInProgress = true;
+		m_interrogateIdListComplete = false;
+		m_interrogateIdInfoComplete = false;
+		QLOG_DEBUG() << "Interrogate in progress is now true";
+	}
+	else
+	{
+		QLOG_DEBUG() << "Interrogate in progress is somehow true!!";
 	}
 }
 
@@ -392,12 +399,12 @@ void FreeEmsComms::setLogDirectory(QString dir)
 
 void FreeEmsComms::setPort(QString portname)
 {
-	serialPort->setPort(portname);
+	//serialPort->setPort(portname);
 }
 
 void FreeEmsComms::setBaud(int baudrate)
 {
-	serialPort->setBaud(baudrate);
+	//serialPort->setBaud(baudrate);
 }
 int FreeEmsComms::burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size)
 {
@@ -783,17 +790,15 @@ QByteArray FreeEmsComms::generatePacket(QByteArray header,QByteArray payload)
 }
 void FreeEmsComms::setInterByteSendDelay(int milliseconds)
 {
-	serialPort->setInterByteSendDelay(milliseconds);
+	//serialPort->setInterByteSendDelay(milliseconds);
 }
 
 void FreeEmsComms::run()
 {
-	rxThread = new SerialRXThread(this);
-	connect(rxThread,SIGNAL(incomingPacket(QByteArray)),this,SLOT(parseEverything(QByteArray)));
-	connect(rxThread,SIGNAL(dataRead(QByteArray)),this,SLOT(dataLogRead(QByteArray)));
 	m_terminateLoop = false;
 	bool serialconnected = false;
-
+	serialPort = new SerialPort();
+	connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
 	while (!m_terminateLoop)
 	{
 		m_reqListMutex.lock();
@@ -859,6 +864,10 @@ void FreeEmsComms::run()
 					continue;
 				}
 				QLOG_INFO() << "Serial connected!";
+				rxThread = new SerialRXThread();
+				connect(rxThread,SIGNAL(incomingPacket(QByteArray)),this,SLOT(parseEverything(QByteArray)));
+				connect(rxThread,SIGNAL(dataRead(QByteArray)),this,SLOT(dataLogRead(QByteArray)));
+
 				//Before we finish emitting the fact that we are connected, let's verify this is a freeems system we are talking to.
 				if (!sendPacket(GET_FIRMWARE_VERSION))
 				{
@@ -912,7 +921,8 @@ void FreeEmsComms::run()
 					serialPort->closePort();
 					emit disconnected();
 					//On a disconnect, we are going to be deleting this thread, so go ahead and quit out;
-					return;
+					QLOG_FATAL() << "Error communicating with ECU!!!";
+					//return;
 					m_threadReqList.removeAt(i);
 					i--;
 					continue;
@@ -937,12 +947,18 @@ void FreeEmsComms::run()
 				emit debugVerbose("SERIAL_DISCONNECT");
 				rxThread->stop();
 				rxThread->wait(500);
-				rxThread->terminate();
-				rxThread->deleteLater();
+				//rxThread->terminate();
+				delete rxThread;
+				rxThread = 0;
 
 				serialPort->closePort();
+				//delete serialPort;
+				//serialPort = new SerialPort();
+				//connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
 				serialconnected = false;
 				emit disconnected();
+				m_threadReqList.removeAt(i);
+				i--;
 			}
 			else if (m_threadReqList[i].type == INTERROGATE_START)
 			{
@@ -1339,6 +1355,7 @@ void FreeEmsComms::run()
 		}
 		m_waitingInfoMutex.unlock();
 	}
+	QLOG_DEBUG() << "Exiting FreeEMSComms Thread!!!!";
 	rxThread->stop();
 	rxThread->wait(500);
 }
@@ -1563,6 +1580,7 @@ void FreeEmsComms::packetAckedRec(unsigned short payloadid,QByteArray header,QBy
 						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
 						emit interrogationComplete();
 						m_interrogateInProgress = false;
+						QLOG_DEBUG() << "Interrogate in progress is now false";
 						for (int i=0;i<emsData.getUniqueLocationIdList().size();i++)
 						{
 							locationIdUpdate(emsData.getUniqueLocationIdList()[i]);

@@ -11,8 +11,9 @@ class WizardView : public QDeclarativeView
 	Q_OBJECT
 
 public:
-	explicit WizardView(EmsComms *comms,QWidget *parent = 0);
+	explicit WizardView(QWidget *parent = 0);
 	Q_INVOKABLE void setMemory(unsigned short locationid,unsigned short offset,unsigned short length,QVariantList array);
+	void setFile(EmsComms *comms,QString filename);
 private:
 	QTimer *updateTimer;
 	QVariantMap m_savedPayload;

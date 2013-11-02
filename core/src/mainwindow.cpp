@@ -313,6 +313,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	logfile = new QFile("myoutput.log");
 	logfile->open(QIODevice::ReadWrite | QIODevice::Truncate);
+
+
+	//ui.menuWizards
+
+
 }
 void MainWindow::menu_windows_interrogateProgressViewClicked()
 {
@@ -882,6 +887,25 @@ void MainWindow::emsCommsSilenceBroken()
 
 void MainWindow::emsCommsDisconnected()
 {
+	//emsComms->disconnect();
+
+	delete interrogateProgressMdiWindow;
+	//delete progressView;
+	progressView = 0;
+	interrogateProgressMdiWindow = 0;
+	ui.actionInterrogation_Progress->setEnabled(false);
+
+	/*for (int i=0;i<m_wizardList.size();i++)
+	{
+		delete m_wizardList[i];
+	}
+	m_wizardList.clear();
+	while (ui.menuWizards->actions().size() > 0)
+	{
+		QAction *action = ui.menuWizards->actions()[0];
+		ui.menuWizards->removeAction(ui.menuWizards->actions()[0]);
+		delete action;
+	}
 	emsComms->stop();
 	emsComms->disconnect();
 	emsComms->terminate();
@@ -973,7 +997,7 @@ void MainWindow::emsCommsDisconnected()
 	emsComms->setPort(m_comPort);
 	emsComms->setLogsEnabled(m_saveLogs);
 	emsComms->setInterByteSendDelay(m_comInterByte);
-	emsComms->setlogsDebugEnabled(m_debugLogs);
+	emsComms->setlogsDebugEnabled(m_debugLogs);*/
 
 	ui.actionConnect->setEnabled(true);
 	m_offlineMode = true;
@@ -1076,6 +1100,7 @@ void MainWindow::setPlugin(QString plugin)
 	emsComms->setLogsEnabled(m_saveLogs);
 	emsComms->setInterByteSendDelay(m_comInterByte);
 	emsComms->setlogsDebugEnabled(m_debugLogs);
+	emsComms->start();
 }
 
 void MainWindow::locationIdList(QList<unsigned short> idlist)
@@ -1338,7 +1363,7 @@ void MainWindow::menu_connectClicked()
 		QLOG_ERROR() << "No EMSCOMMS!!!";
 	}
 	QLOG_INFO() << "Starting emsComms:" << emsComms;
-	emsComms->start();
+	//emsComms->start();
 	emsComms->connectSerial(m_comPort,m_comBaud);
 	emsComms->startInterrogation();
 }
@@ -1594,10 +1619,10 @@ void MainWindow::error(QString msg)
 void MainWindow::interrogateProgressViewCancelClicked()
 {
 	m_offlineMode = true;
-	emsComms->disconnectSerial();
-	emsComms->wait(1000);
-	emsComms->terminate();
-	emsComms->wait(1000);
+	//emsComms->disconnectSerial();
+	//emsComms->wait(1000);
+	//emsComms->terminate();
+	//emsComms->wait(1000);
 }
 void MainWindow::emsCompilerVersion(QString version)
 {
@@ -1621,9 +1646,19 @@ void MainWindow::emsOperatingSystem(QString os)
 
 void MainWindow::emsCommsConnected()
 {
-	WizardView *view = new WizardView(emsComms);
-	view->setGeometry(0,0,400,300);
-	view->show();
+	QDir wizards("Wizards");
+	foreach (QString file,wizards.entryList(QDir::Files | QDir::NoDotAndDotDot))
+	{
+		WizardView *view = new WizardView();
+		m_wizardList.append(view);
+		view->setFile(emsComms,wizards.absoluteFilePath(file));
+		view->setGeometry(0,0,400,300);
+		QAction *action = new QAction(this);
+		action->setText(file.mid(0,file.lastIndexOf(".")));
+		action->setCheckable(true);
+		ui.menuWizards->addAction(action);
+		connect(action,SIGNAL(triggered(bool)),view,SLOT(setVisible(bool)));
+	}
 	//New log and settings file here.
 	if (m_memoryInfoMap.size() == 0)
 	{
@@ -1632,6 +1667,7 @@ void MainWindow::emsCommsConnected()
 	if (progressView)
 	{
 		progressView->reset();
+		ui.actionInterrogation_Progress->setEnabled(true);
 	}
 	else
 	{

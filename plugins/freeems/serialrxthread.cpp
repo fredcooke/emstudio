@@ -35,13 +35,13 @@ void SerialRXThread::start(SerialPort *serialport)
 SerialRXThread::~SerialRXThread()
 {
 	m_terminate = true;
-	this->terminate();
-	this->wait(1000);
+	//this->terminate();
+	//this->wait(1000);
 }
 QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 {
 
-	unsigned char buf;
+	QByteArray qbuf;
 	int len = 0;
 	bool m_inpacket = false;
 	bool m_inescape = false;
@@ -49,7 +49,7 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 	int attempts = 0; //This allows for a 2 second timeout.
 	while (attempts <= 50)
 	{
-		len = port->readBytes(&buf,1);
+		len = port->readBytes(&qbuf,1);
 		if (len < 0)
 		{
 			QLOG_DEBUG() << "Timeout";
@@ -64,6 +64,7 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 		}
 		else
 		{
+			unsigned char buf = (unsigned char)qbuf.at(0);
 			if (buf == 0xAA)
 			{
 				if (m_inpacket)
@@ -71,8 +72,8 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 					//Start byte in the middle of a packet
 					//Clear out the buffer and start fresh
 					m_inescape = false;
+					QLOG_DEBUG() << "Buffer error" << qbuffer.size();
 					qbuffer.clear();
-					QLOG_DEBUG() << "Buffer error";
 				}
 				//Start of packet
 				m_inpacket = true;
@@ -86,12 +87,12 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 				unsigned char sum = 0;
 				for (int i=0;i<qbuffer.size()-1;i++)
 				{
-					sum += qbuffer[i];
+					sum += (unsigned char)qbuffer[i];
 				}
 
 				if (sum != (unsigned char)qbuffer[qbuffer.size()-1])
 				{
-					QLOG_DEBUG() << "BAD CHECKSUM!";
+					QLOG_DEBUG() << "BAD CHECKSUM!" << qbuffer.size();
 					qbuffer.clear();
 				}
 				else
@@ -144,14 +145,15 @@ void SerialRXThread::run()
 {
 	QString byteoutofpacket;
 	QByteArray qbuffer;
-	unsigned char buffer[10240];
+	//unsigned char buffer[10240];
+	QByteArray buffer;
 	bool m_inpacket = false;
 	bool m_inescape = false;
 	int m_packetErrorCount=0;
 	int readlen=0;
 	while (!m_terminate)
 	{
-		readlen = m_serialPort->readBytes(buffer,1024);
+		readlen = m_serialPort->readBytes(&buffer,100);
 		if (readlen < 0)
 		{
 			//Nothing on the port
@@ -165,7 +167,8 @@ void SerialRXThread::run()
 		}
 		for (int i=0;i<readlen;i++)
 		{
-			if (buffer[i] == 0xAA)
+			unsigned char buf = static_cast<unsigned char>(buffer[i]);
+			if (buf == 0xAA)
 			{
 				if (m_inpacket)
 				{
@@ -181,14 +184,14 @@ void SerialRXThread::run()
 					bufToEmit.append(nbuffer);
 					bufToEmit.append(0xCC);
 					emit dataRead(bufToEmit);
+					QLOG_DEBUG() << "Buffer error" << qbuffer.size();
 					qbuffer.clear();
-					QLOG_DEBUG() << "Buffer error";
 					m_packetErrorCount++;
 				}
 				//Start of packet
 				m_inpacket = true;
 			}
-			else if (buffer[i] == 0xCC && m_inpacket)
+			else if (buf == 0xCC && m_inpacket)
 			{
 				//End of packet
 				m_inpacket = false;
@@ -231,44 +234,45 @@ void SerialRXThread::run()
 			{
 				if (m_inpacket && !m_inescape)
 				{
-					if (buffer[i] == 0xBB)
+					if (buf == 0xBB)
 					{
 						//Need to escape the next byte
 						m_inescape = true;
 					}
 					else
 					{
-						qbuffer.append(buffer[i]);
+						qbuffer.append(buf);
 					}
 
 				}
 				else if (m_inpacket && m_inescape)
 				{
-					if (buffer[i] == 0x55)
+					if (buf == 0x55)
 					{
 						qbuffer.append((char)0xAA);
 					}
-					else if (buffer[i] == 0x44)
+					else if (buf == 0x44)
 					{
 						qbuffer.append((char)0xBB);
 					}
-					else if (buffer[i] == 0x33)
+					else if (buf == 0x33)
 					{
 						qbuffer.append((char)0xCC);
 					}
 					else
 					{
-						QLOG_DEBUG() << "Error, escaped character is not valid!:" << QString::number(buffer[i],16);
+						QLOG_DEBUG() << "Error, escaped character is not valid!:" << QString::number(buf,16);
 						m_packetErrorCount++;
 					}
 					m_inescape = false;
 				}
 				else
 				{
-					byteoutofpacket += QString::number(buffer[i],16) + " ";
+					byteoutofpacket += QString::number(buf,16) + " ";
 				}
 			}
 		}
 	}
+	QLOG_DEBUG() << "SerialRXThread::run() terminating...";
 	return;
 }

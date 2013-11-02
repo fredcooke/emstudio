@@ -52,6 +52,7 @@
 #include "serialportstatus.h"
 #include <QPluginLoader>
 #include "parameterview.h"
+#include "wizardview.h"
 class RawDataBlock
 {
 public:
@@ -152,6 +153,7 @@ private:
 	QString m_firmwareVersion;
 	QString m_interfaceVersion;
 	QFile *logfile;
+	QList<WizardView*> m_wizardList;
 	void markRamDirty();
 	void markDeviceFlashDirty();
 	void markRamClean();

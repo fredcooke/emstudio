@@ -30,16 +30,17 @@
 #include "serialportstatus.h"
 #include "memorylocationinfo.h"
 #ifdef Q_OS_WIN
-#include <windows.h>
+//#include <windows.h>
 #else
-#define HANDLE int
-#include <sys/file.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <unistd.h>
+//#define HANDLE int
+//#include <sys/file.h>
+//#include <sys/types.h>
+//#include <sys/stat.h>
+//#include <fcntl.h>
+//#include <termios.h>
+//#include <unistd.h>
 #endif
+#include "qserialport.h"
 
 class SerialPort : public QObject
 {
@@ -52,10 +53,13 @@ public:
     int openPort(QString portName,int baudrate,bool oddparity = true);
     void closePort();
     int writeBytes(QByteArray bytes);
-    int readBytes(unsigned char *buf,int maxlen);
+    //int readBytes(unsigned char *buf,int maxlen);
+    int readBytes(QByteArray *array, int maxlen,int timeout=0);
     int bufferSize() { return m_queuedMessages.size(); }
     void setInterByteSendDelay(int milliseconds);
 private:
+    QSerialPort *m_serialPort;
+    QByteArray m_privBuffer;
     QMutex *m_serialLockMutex;
     void openLogs();
     unsigned int m_packetErrorCount;
@@ -69,7 +73,7 @@ private:
     QString m_logFileName;
     QString m_portName;
     int m_baud;
-    HANDLE m_portHandle;
+    //HANDLE m_portHandle;
 
 signals:
     void parseBuffer(QByteArray buffer);

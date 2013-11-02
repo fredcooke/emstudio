@@ -32,6 +32,7 @@ SerialPort::SerialPort(QObject *parent) : QObject(parent)
 	m_inpacket = false;
 	m_inescape = false;
 	m_packetErrorCount=0;
+	m_serialPort = new QSerialPort();
 }
 void SerialPort::setPort(QString portname)
 {
@@ -44,54 +45,45 @@ void SerialPort::setBaud(int baudrate)
 
 SerialPortStatus SerialPort::isSerialMonitor(QString portname)
 {
-	int errornum = openPort(portname,115200,false);
-	if (errornum == -2)
-	{
-		return UNABLE_TO_LOCK;
-	}
-	else if (errornum < 0)
-	{
-		return UNABLE_TO_CONNECT;
-	}
+	openPort(portname,115200,false);
+	int retry = 0;
 
-	int const writei = writeBytes( QByteArray("\x0d") );
-	if (writei < 0)
+	while (retry++ <= 3)
 	{
-		QLOG_ERROR() << "Error writing to verify FreeEMS";
-	closePort();
-		return UNABLE_TO_WRITE;
-	}
-
-#ifdef Q_OS_WIN
-	Sleep(100);
-#else
-	usleep(100000);
-#endif
-
-	unsigned char buf[3];
-	int const count = readBytes( buf, sizeof(buf) );
-
-	if (count <= 0)
-	{
-		return UNABLE_TO_READ;
-	}
-
-	//assert( count >= 0 );               /**< fatally catch read errs (temp) */
-	SerialPortStatus status = NONE;     /**< default: assume !SM            */
-	QLOG_DEBUG() << "Verify count: " << QString::number( count );
-	if (count >= 2)
-	{
-		QLOG_DEBUG() << "Verify:" << QString::number(buf[0],16);
-		QLOG_DEBUG() << "Verify:" << QString::number(buf[1],16);
-		if ( (count >= 3) && (buf[0] == 0xE0 || buf[0] == 0xE1) )
+		//m_port->clear();
+		//m_port->flush();
+		//m_privBuffer.clear();
+		writeBytes(QByteArray().append(0x0D));
+		QByteArray verifybuf;
+		int verifylen = readBytes(&verifybuf,3,1000);
+		qDebug() << "Verify len:" << verifylen;
+		if ((unsigned char)verifybuf[0] == 0xE0)
 		{
-			QLOG_DEBUG() << "Verify:" << QString::number(buf[2],16);
-			if (buf[2] == 0x3E)
-				status = SM_MODE;   // Serial monitor IS running
+			if ((unsigned char)verifybuf[2] == 0x3E)
+			{
+				qDebug() << "In SM mode";
+				closePort();
+				return SM_MODE;
+			}
+		}
+		else if ((unsigned char)verifybuf[0] == 0xE1)
+		{
+			if ((unsigned char)verifybuf[2] == 0x3E)
+			{
+				qDebug() << "In SM mode two";
+				closePort();
+				return SM_MODE;
+			}
+		}
+		else
+		{
+			//Likely not in SM mode
+			//qDebug() << "Bad return:" << QString::number((unsigned char)verifybuf[0],16) << QString::number((unsigned char)verifybuf[2],16);
 		}
 	}
+	//Timed out.
 	closePort();
-	return status;
+	return NONE;
 }
 
 void SerialPort::setInterByteSendDelay(int milliseconds)
@@ -99,241 +91,85 @@ void SerialPort::setInterByteSendDelay(int milliseconds)
 	m_interByteSendDelay = milliseconds;
 }
 
-int SerialPort::readBytes(unsigned char *buf,int maxlen)
+int SerialPort::readBytes(QByteArray *array, int maxlen,int timeout)
 {
-	int readlen=0;
-	QMutexLocker locker(m_serialLockMutex);	
-#ifdef Q_OS_WIN
-	DWORD evt;
-	if (!WaitCommEvent(m_portHandle,&evt,NULL))
+	if (m_privBuffer.size() >= maxlen)
 	{
-		QLOG_ERROR() << "Unable to WaitCommEvent!!";
-		return -1;
+		*array = m_privBuffer.mid(0,maxlen);
+		m_privBuffer.remove(0,maxlen);
+		return maxlen;
 	}
-	if (!(evt & EV_RXCHAR))
+	while (m_serialPort->waitForReadyRead(timeout))
 	{
-		//No RX
-		return 0;
+		m_privBuffer.append(m_serialPort->readAll());
+		if (m_privBuffer.size() >= maxlen)
+		{
+			*array = m_privBuffer.mid(0,maxlen);
+			m_privBuffer.remove(0,maxlen);
+			return maxlen;
+		}
 	}
-	if (!ReadFile(m_portHandle,(LPVOID)buf,maxlen,(LPDWORD)&readlen,NULL))
-	{
-		//Serial error here
-		QLOG_ERROR() << "Serial Read error";
-	}
-#else
-	fd_set set;
-	FD_ZERO(&set);
-	FD_SET(m_portHandle,&set);
-	timeval time;
-	time.tv_sec = 0;
-	time.tv_usec = 0;
-	if (select(m_portHandle+1,&set,NULL,NULL,&time))
-	{
-		readlen = read(m_portHandle,buf,maxlen);
-	}
-	else
-	{
-		return 0;
-	}
-
-#endif //Q_OS_WIN
-	return readlen;
+	return 0;
 }
 
 int SerialPort::writeBytes(QByteArray packet)
 {
 	QMutexLocker locker(m_serialLockMutex);
-#ifdef Q_OS_WIN
-	int len=0;
 	if (m_interByteSendDelay > 0)
 	{
 		for (int i=0;i<packet.size();i++)
 		{
 			char c = packet.data()[i];
-			if (!::WriteFile(m_portHandle, (void*)&c, (DWORD)1, (LPDWORD)&len, NULL))
-			{
-				QLOG_ERROR() << "Serial Write Error";
-				return -1;
-			}
-			Sleep(m_interByteSendDelay);
-		}
-	}
-	else
-	{
-		if (!::WriteFile(m_portHandle, (void*)packet.data(), (DWORD)packet.length(), (LPDWORD)&len, NULL))
-		{
-			QLOG_ERROR() << "Serial Write Error";
-			return -1;
-		}
-	}
-#else
-	if (m_interByteSendDelay > 0)
-	{
-		for (int i=0;i<packet.size();i++)
-		{
-			char c = packet.data()[i];
-			if (write(m_portHandle,&c,1)<0)
+
+			//if (write(m_portHandle,&c,1)<0)
+			if (m_serialPort->write(QByteArray().append(packet.at(i))) == -1)
 			{
 				//TODO: Error here
-				QLOG_ERROR() << "Serial write error";
+				QLOG_ERROR() << "Serial write error" << m_serialPort->errorString();
 				return -1;
 			}
-			usleep(m_interByteSendDelay * 1000);
+			m_serialPort->waitForBytesWritten(1); //Verify.
+			//usleep(m_interByteSendDelay * 1000);
 		}
+
 	}
 	else
 	{
-		if (write(m_portHandle,packet.data(),packet.size())<0)
+		if (m_serialPort->write(packet) == -1)
 		{
-			QLOG_ERROR() << "Serial write error";
+			QLOG_ERROR() << "Serial write error" << m_serialPort->errorString();
 			return -1;
 		}
+		m_serialPort->waitForBytesWritten(1); //Verify.
 	}
 
-#endif //Q_OS_WIN
-	emit dataWritten(packet);
-	return 0;
 }
 
 void SerialPort::closePort()
 {
-#ifdef Q_OS_WIN
-	CloseHandle(m_portHandle);
-#else
-	flock(m_portHandle,LOCK_UN);
-	close(m_portHandle);
-#endif
+	QLOG_DEBUG() << "SerialPort::closePort thread:" << QThread::currentThread();
+	m_serialPort->close();
+	//delete m_serialPort;
+	m_privBuffer.clear();
 }
 
 int SerialPort::openPort(QString portName,int baudrate,bool oddparity)
 {
-#ifdef Q_OS_WIN
-	m_portHandle=CreateFileA(portName.toAscii(), GENERIC_READ|GENERIC_WRITE,0, NULL, OPEN_EXISTING, 0, NULL);
-	if (m_portHandle == INVALID_HANDLE_VALUE)
+	//QLOG_DEBUG() << "SerialPort::openPort thread:" << QThread::currentThread();
+	//m_serialPort = new QSerialPort();
+	m_serialPort->setPortName(portName);
+	if (!m_serialPort->open(QIODevice::ReadWrite))
 	{
 		return -1;
 	}
-	COMMCONFIG Win_CommConfig;
-
-	unsigned long confSize = sizeof(COMMCONFIG);
-	Win_CommConfig.dwSize = confSize;
-	GetCommConfig(m_portHandle, &Win_CommConfig, &confSize);
+	m_serialPort->setBaudRate(baudrate);
 	if (oddparity)
 	{
-		QLOG_DEBUG() << "SerialPort Odd parity selected";
-		Win_CommConfig.dcb.Parity = 1; //Odd parity
+		m_serialPort->setParity(QSerialPort::OddParity);
 	}
 	else
 	{
-		QLOG_DEBUG() << "SerialPort No parity selected";
-		Win_CommConfig.dcb.Parity = 0; //No parity
+		m_serialPort->setParity(QSerialPort::NoParity);
 	}
-	Win_CommConfig.dcb.fRtsControl = RTS_CONTROL_DISABLE;
-	Win_CommConfig.dcb.fOutxCtsFlow = FALSE;
-	Win_CommConfig.dcb.fOutxDsrFlow = FALSE;
-	Win_CommConfig.dcb.fDtrControl = DTR_CONTROL_DISABLE;
-	Win_CommConfig.dcb.fDsrSensitivity = FALSE;
-	Win_CommConfig.dcb.fNull=FALSE;
-	Win_CommConfig.dcb.fTXContinueOnXoff = FALSE;
-	Win_CommConfig.dcb.fInX=FALSE;
-	Win_CommConfig.dcb.fOutX=FALSE;
-	Win_CommConfig.dcb.fBinary=TRUE;
-	Win_CommConfig.dcb.DCBlength = sizeof(DCB);
-	if (baudrate != -1)
-	{
-		Win_CommConfig.dcb.BaudRate = baudrate;
-	}
-	else
-	{
-		Win_CommConfig.dcb.BaudRate = 115200;
-	}
-	Win_CommConfig.dcb.ByteSize = 8;
-	COMMTIMEOUTS Win_CommTimeouts;
-	Win_CommTimeouts.ReadIntervalTimeout = MAXDWORD; //inter-byte timeout value (Disabled)
-	Win_CommTimeouts.ReadTotalTimeoutMultiplier = MAXDWORD; //Multiplier
-	Win_CommTimeouts.ReadTotalTimeoutConstant = 1; //Total timeout, 1/10th of a second to match *nix
-	Win_CommTimeouts.WriteTotalTimeoutMultiplier = 0;
-	Win_CommTimeouts.WriteTotalTimeoutConstant = 0;
-	SetCommConfig(m_portHandle, &Win_CommConfig, sizeof(COMMCONFIG));
-	SetCommTimeouts(m_portHandle,&Win_CommTimeouts);
-	SetCommMask(m_portHandle,EV_RXCHAR);
 	return 0;
-#else
-
-	m_portHandle = open(portName.toAscii(),O_RDWR | O_NOCTTY | O_NDELAY); //Should open the port non blocking
-	if (m_portHandle < 0)
-	{
-		perror("Error opening COM port Low Level");
-		QLOG_ERROR() << "Port:" << portName;
-		return -1;
-	}
-	if (flock(m_portHandle,LOCK_EX | LOCK_NB))
-	{
-		QLOG_ERROR() << "Unable to maintain lock on serial port" << portName;
-		QLOG_ERROR() << "This port is likely open in another process";
-		return -2;
-	}
-	struct termios newtio;
-	tcgetattr(m_portHandle,&newtio);
-	long BAUD = B115200;
-	switch (baudrate)
-	{
-		case 38400:
-			BAUD = B38400;
-			break;
-		case 115200:
-			BAUD  = B115200;
-			break;
-		case 19200:
-			BAUD  = B19200;
-			break;
-		case 9600:
-			BAUD  = B9600;
-			break;
-		case 4800:
-			BAUD  = B4800;
-			break;
-		default:
-			BAUD = B115200;
-			break;
-	}  //end of switch baud_rate
-	if (strspn("/dev/pts",portName.toAscii()) >= 8)
-	{
-		baudrate = -1;
-	}
-	else
-	{
-	}
-	newtio.c_cflag = (newtio.c_cflag & ~CSIZE) | CS8;
-	newtio.c_cflag |= CLOCAL | CREAD;
-	if (oddparity)
-	{
-		newtio.c_cflag |= (PARENB | PARODD);
-	}
-	else
-	{
-		newtio.c_cflag &= ~(PARENB | PARODD);
-	}
-	newtio.c_cflag &= ~CRTSCTS;
-	newtio.c_cflag &= ~CSTOPB;
-	newtio.c_iflag=IGNBRK;
-	newtio.c_iflag &= ~(IXON|IXOFF|IXANY);
-	newtio.c_lflag=0;
-	newtio.c_oflag=0;
-	newtio.c_cc[VTIME]=1; //1/10th second timeout, to allow for quitting the read thread
-	newtio.c_cc[VMIN]=0; //We want a pure timer timeout
-	if (baudrate != -1)
-	{
-		if(cfsetispeed(&newtio, BAUD))
-		{
-		}
-
-		if(cfsetospeed(&newtio, BAUD))
-		{
-		}
-	}
-	fcntl(m_portHandle, F_SETFL, 0); //Set to blocking
-	tcsetattr(m_portHandle,TCSANOW,&newtio);
-	return 0;
-#endif //Q_OS_WIN
 }
