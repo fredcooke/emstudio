@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_offlineMode = false;
 	m_checkEmsDataInUse = false;
 	m_currentEcuClock = -1;
+	interrogateProgressMdiWindow=0;
 	qRegisterMetaType<MemoryLocationInfo>("MemoryLocationInfo");
 	qRegisterMetaType<DataType>("DataType");
 	qRegisterMetaType<SerialPortStatus>("SerialPortStatus");
@@ -163,8 +164,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	//return;
 	m_currentRamLocationId=0;
 	//populateDataFields();
-	m_localRamDirty = false;
-	m_deviceFlashDirty = false;
 	m_waitingForRamWriteConfirmation = false;
 	m_waitingForFlashWriteConfirmation = false;
 	ui.setupUi(this);
@@ -887,117 +886,13 @@ void MainWindow::emsCommsSilenceBroken()
 
 void MainWindow::emsCommsDisconnected()
 {
-	//emsComms->disconnect();
-
-	delete interrogateProgressMdiWindow;
-	//delete progressView;
-	progressView = 0;
-	interrogateProgressMdiWindow = 0;
+	if (interrogateProgressMdiWindow)
+	{
+		delete interrogateProgressMdiWindow;
+		progressView = 0;
+		interrogateProgressMdiWindow = 0;
+	}
 	ui.actionInterrogation_Progress->setEnabled(false);
-
-	/*for (int i=0;i<m_wizardList.size();i++)
-	{
-		delete m_wizardList[i];
-	}
-	m_wizardList.clear();
-	while (ui.menuWizards->actions().size() > 0)
-	{
-		QAction *action = ui.menuWizards->actions()[0];
-		ui.menuWizards->removeAction(ui.menuWizards->actions()[0]);
-		delete action;
-	}
-	emsComms->stop();
-	emsComms->disconnect();
-	emsComms->terminate();
-	emsComms->wait(250); //Join it, fixes a race condition where the thread deletes before it's finished.
-	emsComms->deleteLater();
-	ui.actionConnect->setEnabled(true);
-	ui.actionDisconnect->setEnabled(false);
-	emsComms = 0;
-	QLOG_INFO() << "emsCommsDisconnected, resetting and reloading plugin";
-
-	//Need to reset everything here.
-	pluginLoader->unload();
-	delete pluginLoader;
-	pluginLoader = 0;
-	pluginLoader = new QPluginLoader(this);
-	pluginLoader->setFileName(m_pluginFileName);
-	if (!pluginLoader->load())
-	{
-		QLOG_ERROR() << "Unable to load plugin. " << m_pluginFileName << "error:" << pluginLoader->errorString();
-		exit(-1);
-	}
-
-
-	emsComms = qobject_cast<EmsComms*>(pluginLoader->instance());
-	if (!emsComms)
-	{
-		QLOG_ERROR() << "Unable to instantiate plugin:" << m_pluginFileName << pluginLoader->instance();
-		QLOG_ERROR() << pluginLoader->errorString();
-		exit(-1);
-	}
-	emsComms->passLogger(&QsLogging::Logger::instance());
-
-	dataPacketDecoder = emsComms->getDecoder();
-	//connect(dataPacketDecoder,SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
-	QString filestr = "";
-	if (QFile::exists(m_settingsDir + "/" + "definitions/freeems.config.json"))
-	{
-		filestr = m_settingsDir + "/" + "definitions/freeems.config.json";
-	}
-	else if (QFile::exists(m_defaultsDir + "/definitions/freeems.config.json"))
-	{
-		filestr = m_defaultsDir + "/definitions/freeems.config.json";
-	}
-	else if (QFile::exists("freeems.config.json"))
-	{
-		filestr = "freeems.config.json";
-	}
-	else
-	{
-		QMessageBox::information(0,"Error","Error: No freeems.config.json file found!");
-	}
-	m_memoryMetaData = emsComms->getMetaParser();
-	//m_memoryMetaData->loadMetaDataFromFile(filestr);
-	//emsData->setMetaData(m_memoryMetaData);
-	QLOG_INFO() << m_memoryMetaData->errorMap().keys().size() << "Error Keys Loaded";
-	QLOG_INFO() << m_memoryMetaData->table3DMetaData().size() << "3D Tables Loaded";
-	QLOG_INFO() << m_memoryMetaData->table2DMetaData().size() << "2D Tables Loaded";
-
-
-	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
-	emsComms->setLogFileName(m_logFileName);
-	emsComms->setLogDirectory(m_logDirectory);
-	connect(emsComms,SIGNAL(interrogationProgress(int,int)),this,SLOT(interrogationProgress(int,int)));
-	connect(emsComms,SIGNAL(resetDetected(int)),this,SLOT(ecuResetDetected(int)));
-	connect(emsComms,SIGNAL(interrogationComplete()),this,SLOT(interrogationComplete()));
-	connect(emsComms,SIGNAL(interrogateTaskStart(QString,int)),this,SLOT(interrogateTaskStart(QString,int)));
-	connect(emsComms,SIGNAL(interrogateTaskSucceed(int)),this,SLOT(interrogateTaskSucceed(int)));
-	connect(emsComms,SIGNAL(interrogateTaskFail(int)),this,SLOT(interrogateTaskFail(int)));
-	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
-	connect(emsComms,SIGNAL(emsSilenceStarted()),this,SLOT(emsCommsSilence()));
-	connect(emsComms,SIGNAL(emsSilenceBroken()),this,SLOT(emsCommsSilenceBroken()));
-	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
-	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
-
-	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
-	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)),Qt::QueuedConnection);
-	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
-	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
-	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
-	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
-	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
-	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
-	connect(emsComms,SIGNAL(interrogationData(QMap<QString,QString>)),this,SLOT(interrogationData(QMap<QString,QString>)));
-	emsComms->setBaud(m_comBaud);
-	emsComms->setPort(m_comPort);
-	emsComms->setLogsEnabled(m_saveLogs);
-	emsComms->setInterByteSendDelay(m_comInterByte);
-	emsComms->setlogsDebugEnabled(m_debugLogs);*/
 
 	ui.actionConnect->setEnabled(true);
 	m_offlineMode = true;
@@ -1085,11 +980,7 @@ void MainWindow::setPlugin(QString plugin)
 	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
 	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
 	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
-	//connect(emsComms,SIGNAL(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)),this,SLOT(locationIdInfo(unsigned short,unsigned short,QList<FreeEmsComms::LocationIdFlags>,unsigned short,unsigned char,unsigned char,unsigned short,unsigned short,unsigned short)));
 	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
-//	connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(ramBlockUpdate(unsigned short,QByteArray,QByteArray)));
-//	connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),emsData,SLOT(flashBlockUpdate(unsigned short,QByteArray,QByteArray)));
-//	emsData->setInterrogation(true);
 	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
 	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
@@ -1279,27 +1170,6 @@ void MainWindow::rawDataViewDestroyed(QObject *object)
 		i++;
 	}
 }
-void MainWindow::markRamDirty()
-{
-	m_localRamDirty = true;
-	emsInfo->setLocalRam(true);
-}
-void MainWindow::markDeviceFlashDirty()
-{
-	m_deviceFlashDirty = true;
-	emsInfo->setDeviceFlash(true);
-}
-void MainWindow::markRamClean()
-{
-	m_localRamDirty = false;
-	emsInfo->setLocalRam(false);
-}
-void MainWindow::markDeviceFlashClean()
-{
-	m_deviceFlashDirty = false;
-	emsInfo->setDeviceFlash(false);
-}
-
 
 void MainWindow::ui_saveDataButtonClicked()
 {
@@ -1546,19 +1416,6 @@ void MainWindow::playLogButtonClicked()
 	emsComms->playLog();
 	ui.statusLabel->setText("Status: File loaded and playing");
 }
-void MainWindow::blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload)
-{
-	Q_UNUSED(sequencenumber)
-	Q_UNUSED(header)
-	Q_UNUSED(payload)
-}
-void MainWindow::dataLogPayloadReceived(QByteArray header,QByteArray payload)
-{
-	Q_UNUSED(header)
-	Q_UNUSED(payload)
-	//dataPacketDecoder->decodePayload(payload);
-
-}
 void MainWindow::interrogationData(QMap<QString,QString> datamap)
 {
 	emsInfo->setInterrogationData(datamap);
@@ -1613,16 +1470,11 @@ void MainWindow::error(SerialPortStatus error,QString msg)
 
 void MainWindow::error(QString msg)
 {
-	//Q_UNUSED(msg)
 	QMessageBox::information(0,"Error",msg);
 }
 void MainWindow::interrogateProgressViewCancelClicked()
 {
 	m_offlineMode = true;
-	//emsComms->disconnectSerial();
-	//emsComms->wait(1000);
-	//emsComms->terminate();
-	//emsComms->wait(1000);
 }
 void MainWindow::emsCompilerVersion(QString version)
 {
@@ -1680,58 +1532,9 @@ void MainWindow::emsCommsConnected()
 		progressView->setMaximum(0);
 	}
 	interrogationSequenceList.clear();
-	//disconnect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,0);
-	//disconnect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,0);
-	//connect(emsComms,SIGNAL(ramBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateRamBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	//connect(emsComms,SIGNAL(flashBlockRetrieved(unsigned short,QByteArray,QByteArray)),this,SLOT(interrogateFlashBlockRetrieved(unsigned short,QByteArray,QByteArray)));
-	//emsData->setInterrogation(true);
 	progressView->show();
 	interrogateProgressMdiWindow->show();
 	progressView->addOutput("Connected to EMS");
-	//this->setEnabled(false);
-	/*
-	int seq = emsComms->getFirmwareVersion();
-	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Firmware Version",seq,0);
-
-	seq = emsComms->getInterfaceVersion();
-	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Interface Version",seq,0);
-
-	seq = emsComms->getLocationIdList(0x00,0x00);
-	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Location ID List",seq,0);
-
-	seq = emsComms->getCompilerVersion();
-	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Compiler Version",seq,0);
-
-	seq = emsComms->getDecoderName();
-	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Decoder Name",seq,0);
-
-	seq = emsComms->getFirmwareBuildDate();
-	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Firmware Build Date",seq,0);
-
-	seq = emsComms->getMaxPacketSize();
-	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Max Packet Size",seq,0);
-
-	seq = emsComms->getOperatingSystem();
-	interrogationSequenceList.append(seq);
-	progressView->addTask("Get Operating System",seq,0);
-
-
-	progressView->setMaximum(8);
-	*/
-	//progressView->setMax(progressView->max()+1);
-
-    //LogLoader *loader = new LogLoader();
-    //connect(loader,SIGNAL(payloadReceived(QByteArray,QByteArray)),this,SLOT(dataLogPayloadReceived(QByteArray,QByteArray)));
-    //loader->loadFile("/home/michael/Downloads/2013.05.01-19.50.30.bin");
-    //loader->start();
-
 }
 void MainWindow::interrogationProgress(int current, int total)
 {
@@ -1836,8 +1639,6 @@ void MainWindow::emsStatusSoftResetRequested()
 	{
 		QLOG_INFO() << "Attempting soft reset:" << emsComms->softReset();
 	}
-	//ui.mdiArea->removeSubWindow(emsStatusMdiWindow);
-	//this->addDockWidget(Qt::RightDockWidgetArea,statusView);
 }
 
 void MainWindow::commandTimedOut(int sequencenumber)
@@ -2026,7 +1827,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	}
 	else
 	{
-		//if (progressView) progressView->taskFail(sequencenumber);
+		if (progressView) progressView->taskFail(sequencenumber);
 	}
 }
 
@@ -2094,68 +1895,13 @@ void MainWindow::dataLogDecoded(QVariantMap data)
 			dview->passDatalog(data);
 		}
 	}
-	/*
-	if (data.contains("tempClock"))
-	{
-		int newval = data["tempClock"].toInt();
-		if (m_currentEcuClock == -1)
-		{
-			m_currentEcuClock = newval;
-		}
-		else
-		{
-			if (newval == 0 && m_currentEcuClock != 255)
-			{
-				//We probably had a chip reset here. Ask, and verify.
-				if (QMessageBox::question(0,"Warning","It seems that the ECU has reset. This means any un-flashed RAM changes may be lost. Would you like to re-send any RAM data in the tuner to ensure no changes are lost?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
-				{
-				}
-
-			}
-			if (m_currentEcuClock == 255)
-			{
-				if (newval == 0)
-				{
-					//All is good
-				}
-				else
-				{
-					QLOG_WARN() << "A: Packets lost! At least:" << newval << "packets";
-				}
-			}
-			else
-			{
-				if (m_currentEcuClock + 1 != newval)
-				{
-					if (m_currentEcuClock > newval)
-					{
-						QLOG_WARN() << "B: Packets lost! At least:" << (255 - m_currentEcuClock) + newval << "packets";
-					}
-					else
-					{
-						QLOG_WARN() << "C: Packets lost! At least:" << newval - m_currentEcuClock << "packets";
-					}
-
-				}
-			}
-			m_currentEcuClock = newval;
-		}
-	}*/
 }
 void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 {
+	//All we're doing here is counting the incoming packets.
 	Q_UNUSED(header)
+	Q_UNUSED(payload)
 	pidcount++;
-	if (payload.length() != 96)
-	{
-		//Wrong sized payload!
-		//We should do something here or something...
-		//return;
-	}
-    //If we are logging, disable this:
-    //dataPacketDecoder->decodePayload(payload);
-	//guiUpdateTimerTick();
-
 }
 
 MainWindow::~MainWindow()

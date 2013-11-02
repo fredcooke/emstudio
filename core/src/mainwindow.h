@@ -154,13 +154,7 @@ private:
 	QString m_interfaceVersion;
 	QFile *logfile;
 	QList<WizardView*> m_wizardList;
-	void markRamDirty();
-	void markDeviceFlashDirty();
-	void markRamClean();
-	void markDeviceFlashClean();
-	bool m_localRamDirty;
 	bool m_debugLogs;
-	bool m_deviceFlashDirty;
 	void createView(unsigned short locid,DataType type);
 	QList<int> m_locIdMsgList;
 	QList<int> m_locIdInfoMsgList;
@@ -220,8 +214,6 @@ private slots:
 	void stopLogButtonClicked();
 	void emsCommsConnected();
 	void unknownPacket(QByteArray header,QByteArray payload);
-	void blockRetrieved(int sequencenumber,QByteArray header,QByteArray payload);
-	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QString version);
 	void ecuResetDetected(int missedpackets);
 	void firmwareVersion(QString version);
