@@ -1498,6 +1498,17 @@ void MainWindow::emsOperatingSystem(QString os)
 
 void MainWindow::emsCommsConnected()
 {
+	while (ui.menuWizards->actions().size() > 0)
+	{
+		QAction *action = ui.menuWizards->actions().takeFirst();
+		ui.menuWizards->removeAction(action);
+		delete action;
+	}
+	for (int i=0;i<m_wizardList.size();i++)
+	{
+		delete m_wizardList[i];
+	}
+	m_wizardList.clear();
 	QDir wizards("Wizards");
 	foreach (QString file,wizards.entryList(QDir::Files | QDir::NoDotAndDotDot))
 	{
