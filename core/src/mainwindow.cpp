@@ -886,6 +886,8 @@ void MainWindow::emsCommsSilenceBroken()
 
 void MainWindow::emsCommsDisconnected()
 {
+	ui.actionSave_Offline_Data->setEnabled(false);
+	ui.actionLoad_Offline_Data->setEnabled(false);
 	if (interrogateProgressMdiWindow)
 	{
 		delete interrogateProgressMdiWindow;
@@ -1498,6 +1500,8 @@ void MainWindow::emsOperatingSystem(QString os)
 
 void MainWindow::emsCommsConnected()
 {
+	ui.actionSave_Offline_Data->setEnabled(true);
+	ui.actionLoad_Offline_Data->setEnabled(true);
 	while (ui.menuWizards->actions().size() > 0)
 	{
 		QAction *action = ui.menuWizards->actions().takeFirst();
