@@ -897,6 +897,7 @@ void MainWindow::emsCommsDisconnected()
 	ui.actionInterrogation_Progress->setEnabled(false);
 
 	ui.actionConnect->setEnabled(true);
+	ui.actionDisconnect->setEnabled(false);
 	m_offlineMode = true;
 }
 
@@ -1237,7 +1238,6 @@ void MainWindow::menu_connectClicked()
 	QLOG_INFO() << "Starting emsComms:" << emsComms;
 	//emsComms->start();
 	emsComms->connectSerial(m_comPort,m_comBaud);
-	emsComms->startInterrogation();
 }
 
 void MainWindow::menu_disconnectClicked()
@@ -1458,7 +1458,7 @@ void MainWindow::error(SerialPortStatus error,QString msg)
 		{
 			//We need to send a SM reset, this is not supported yet.
 		}
-		QTimer::singleShot(2000,this,SLOT(menu_connectClicked()));
+		QTimer::singleShot(500,this,SLOT(menu_connectClicked()));
 		break;
 	case 2:		//Load Offline Data
 		//Delay here, to ensure that it goes into the event loop and isn't directly called.
@@ -1500,6 +1500,7 @@ void MainWindow::emsOperatingSystem(QString os)
 
 void MainWindow::emsCommsConnected()
 {
+	emsComms->startInterrogation();
 	ui.actionSave_Offline_Data->setEnabled(true);
 	ui.actionLoad_Offline_Data->setEnabled(true);
 	while (ui.menuWizards->actions().size() > 0)

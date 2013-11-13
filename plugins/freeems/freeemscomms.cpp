@@ -839,7 +839,7 @@ void FreeEmsComms::run()
 					serialconnected = false;
 					emit disconnected();
 					//On a disconnect, we are going to be deleting this thread, so go ahead and quit out;
-					return;
+					//return;
 					m_threadReqList.removeAt(i);
 					i--;
 					continue;
