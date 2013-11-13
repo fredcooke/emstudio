@@ -18,7 +18,6 @@
  * License along with this program; if not, write to the Free Software              *
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA   *
  ************************************************************************************/
-
 #include "emsdata.h"
 #include "QsLog.h"
 
@@ -645,6 +644,31 @@ void EmsData::ramBlockUpdate(unsigned short locationid, QByteArray header, QByte
 {
 	Q_UNUSED(header)
 	QLOG_TRACE() << "Ram Block retrieved:" << "0x" + QString::number(locationid,16).toUpper();
+	QList<ConfigBlock> configlist = m_memoryMetaData->getConfigMetaData(QString::number(locationid,16).toUpper());
+	for (int i=0;i<configlist.size();i++)
+	{
+		//configlist[i].offset()
+
+		QString valstr = "";
+		QString bytestr = "";
+		for (int k=0;k<configlist[i].size();k++)
+		{
+			unsigned int value = 0;
+			for (int j=0;j<configlist[i].elementSize();j++)
+			{
+				//QLOG_DEBUG() << (unsigned char)block[m_fieldConfigList[i].second.offset() + (k * m_fieldConfigList[i].second.elementSize()) + j];
+				bytestr += QString::number((unsigned char)payload[configlist[i].offset() + (k * configlist[i].elementSize()) + j],16).toUpper() + ",";
+				value += ((unsigned char)payload[configlist[i].offset() + (k * configlist[i].elementSize()) + j]) << (8 * (configlist[i].elementSize() - (j+1)));
+			}
+			//userValue = (ecuValue + translate) * scale
+
+			valstr += QString::number(calcAxis(value,configlist[i].calc())) + ",";
+		}
+		valstr = valstr.mid(0,valstr.length()-1);
+		QLOG_DEBUG() << "Pre value:" << "0x" + QString::number(locationid,16) << bytestr;
+		//valstr == variable.
+		emit configRecieved(configlist[i],QVariant(valstr));
+	}
 
 	if (!hasDeviceRamBlock(locationid))
 	{
@@ -713,6 +737,36 @@ void EmsData::flashBlockUpdate(unsigned short locationid, QByteArray header, QBy
 {
 	QLOG_TRACE() << "Flash Block retrieved:" << "0x" + QString::number(locationid,16).toUpper();
 	Q_UNUSED(header)
+	for (int l=0;l<getChildrenOfLocalFlashLocation(locationid).size();l++)
+	{
+		unsigned short childid = getChildrenOfLocalFlashLocation(locationid)[l];
+	QList<ConfigBlock> configlist = m_memoryMetaData->getConfigMetaData(QString::number(childid,16).toUpper());
+	QLOG_TRACE() << "Location" << QString::number(childid,16).toUpper() << "Size:" << configlist.size();
+	for (int i=0;i<configlist.size();i++)
+	{
+		//configlist[i].offset()
+
+		QString valstr = "";
+		QString bytestr = "";
+		for (int k=0;k<configlist[i].size();k++)
+		{
+			unsigned int value = 0;
+			for (int j=0;j<configlist[i].elementSize();j++)
+			{
+				//QLOG_DEBUG() << (unsigned char)block[m_fieldConfigList[i].second.offset() + (k * m_fieldConfigList[i].second.elementSize()) + j];
+				bytestr += QString::number((unsigned char)payload[configlist[i].offset() + (k * configlist[i].elementSize()) + j],16).toUpper() + ",";
+				value += ((unsigned char)payload[configlist[i].offset() + (k * configlist[i].elementSize()) + j]) << (8 * (configlist[i].elementSize() - (j+1)));
+			}
+			//userValue = (ecuValue + translate) * scale
+
+			valstr += QString::number(calcAxis(value,configlist[i].calc())) + ",";
+		}
+		valstr = valstr.mid(0,valstr.length()-1);
+		QLOG_DEBUG() << "Pre value:" << "0x" + QString::number(locationid,16) << bytestr;
+		//valstr == variable.
+		emit configRecieved(configlist[i],QVariant(valstr));
+	}
+	}
 	if (!verifyMemoryBlock(locationid,header,payload))
 	{
 		//QMessageBox::information(this,"Error","Flash Location ID 0x" + QString::number(locationid,16).toUpper() + " should be 1024 sized, but it is " + QString::number(payload.size()) + ". This should never happen");
@@ -862,4 +916,60 @@ QList<unsigned short> EmsData::getDuplicateTopLevelDeviceRamLocations()
 		}
 	}
 	return retval;
+}
+double EmsData::calcAxis(int val,QList<QPair<QString,double> > metadata)
+{
+	if (metadata.size() == 0)
+	{
+		return val;
+	}
+	double newval = val;
+	for (int j=0;j<metadata.size();j++)
+	{
+		if (metadata[j].first == "add")
+		{
+			newval += metadata[j].second;
+		}
+		else if (metadata[j].first == "sub")
+		{
+			newval -= metadata[j].second;
+		}
+		else if (metadata[j].first == "mult")
+		{
+			newval *= metadata[j].second;
+		}
+		else if (metadata[j].first == "div")
+		{
+			newval /= metadata[j].second;
+		}
+	}
+	return newval;
+}
+int EmsData::backConvertAxis(double val,QList<QPair<QString,double> > metadata)
+{
+	if (metadata.size() == 0)
+	{
+		return val;
+	}
+	double newval = val;
+	for (int j=metadata.size()-1;j>=0;j--)
+	{
+		if (metadata[j].first == "add")
+		{
+			newval -= metadata[j].second;
+		}
+		else if (metadata[j].first == "sub")
+		{
+			newval += metadata[j].second;
+		}
+		else if (metadata[j].first == "mult")
+		{
+			newval /= metadata[j].second;
+		}
+		else if (metadata[j].first == "div")
+		{
+			newval *= metadata[j].second;
+		}
+	}
+	return (int)newval;
 }

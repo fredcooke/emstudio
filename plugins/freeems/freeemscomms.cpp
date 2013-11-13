@@ -34,6 +34,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	qRegisterMetaType<QList<unsigned short> >("QList<unsigned short>");
 	qRegisterMetaType<QList<LocationIdFlags> >("QList<LocationIdFlags>");
 	qRegisterMetaType<SerialPortStatus>("SerialPortStatus");
+	qRegisterMetaType<ConfigBlock>("ConfigBlock");
 	//serialPort = new SerialPort(this);
 	//connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
 	m_isConnected = false;
@@ -113,6 +114,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	connect(&emsData,SIGNAL(ramBlockUpdateRequest(unsigned short,unsigned short,unsigned short,QByteArray)),this,SLOT(updateBlockInRam(unsigned short,unsigned short,unsigned short,QByteArray)));
 	connect(&emsData,SIGNAL(flashBlockUpdateRequest(unsigned short,unsigned short,unsigned short,QByteArray)),this,SLOT(updateBlockInFlash(unsigned short,unsigned short,unsigned short,QByteArray)));
 	connect(&emsData,SIGNAL(updateRequired(unsigned short)),this,SLOT(locationIdUpdate(unsigned short)));
+	connect(&emsData,SIGNAL(configRecieved(ConfigBlock,QVariant)),this,SIGNAL(configRecieved(ConfigBlock,QVariant)));
 
 
 	QFile dialogFile("menuconfig.json");

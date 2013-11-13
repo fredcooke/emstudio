@@ -1519,8 +1519,10 @@ void MainWindow::emsCommsConnected()
 	foreach (QString file,wizards.entryList(QDir::Files | QDir::NoDotAndDotDot))
 	{
 		WizardView *view = new WizardView();
+		connect(emsComms,SIGNAL(configRecieved(ConfigBlock,QVariant)),view,SLOT(configRecieved(ConfigBlock,QVariant)));
 		m_wizardList.append(view);
 		view->setFile(emsComms,wizards.absoluteFilePath(file));
+		view->passConfig(m_memoryMetaData->configMetaData());
 		view->setGeometry(0,0,400,300);
 		QAction *action = new QAction(this);
 		action->setText(file.mid(0,file.lastIndexOf(".")));

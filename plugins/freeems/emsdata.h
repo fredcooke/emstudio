@@ -23,6 +23,8 @@
 #define EMSDATA_H
 #include <QMap>
 #include <QList>
+#include <QVariant>
+
 #include "configblock.h"
 #include "memorylocation.h"
 #include "memorymetadata.h"
@@ -124,10 +126,14 @@ private:
 	QList<ReadOnlyRamData> m_readOnlyMetaData;
 	QMap<unsigned short,QString> m_errorMap;
 	bool verifyMemoryBlock(unsigned short locationid,QByteArray header,QByteArray payload);
+	double calcAxis(int val,QList<QPair<QString,double> > metadata);
+	int backConvertAxis(double val,QList<QPair<QString,double> > metadata);
+
 signals:
 	void updateRequired(unsigned short locationid);
 	void ramBlockUpdateRequest(unsigned short locationid,unsigned short offset,unsigned short size,QByteArray data);
 	void flashBlockUpdateRequest(unsigned short locationid,unsigned short offset,unsigned short size,QByteArray data);
+	void configRecieved(ConfigBlock,QVariant);
 public slots:
 	void ramBlockUpdate(unsigned short locationid, QByteArray header, QByteArray payload);
 	void flashBlockUpdate(unsigned short locationid, QByteArray header, QByteArray payload);

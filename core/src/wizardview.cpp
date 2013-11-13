@@ -12,8 +12,27 @@ void WizardView::setFile(EmsComms *comms,QString filename)
 	connect(comms->getDecoder(),SIGNAL(payloadDecoded(QVariantMap)),this,SLOT(decoderPayloadDecoded(QVariantMap)));
 	this->rootContext()->setContextProperty("decoder",this);
 	this->rootContext()->setContextProperty("emscomms",comms);
+
+	this->rootContext()->setContextProperty("propretyMap",&m_configPropertyMap);
 	setSource(QUrl::fromLocalFile(filename));
 	emscomms = comms;
+}
+void WizardView::passConfig(QMap<QString,QList<ConfigBlock> > config)
+{
+	m_configBlock = config;
+	for(QMap<QString,QList<ConfigBlock> >::const_iterator i=config.constBegin();i!=config.constEnd();i++)
+	{
+		for (int j=0;j<i.value().size();j++)
+		{
+			ConfigBlock b = i.value()[j];
+			m_configPropertyMap[b.name()] = 0;
+		}
+	}
+}
+void WizardView::configRecieved(ConfigBlock block,QVariant value)
+{
+	m_configPropertyMap[block.name()] = value.toString();
+	qDebug() << "Wizard Config recieved" << block.name() << value.toString();
 }
 
 void WizardView::updateTimerTick()

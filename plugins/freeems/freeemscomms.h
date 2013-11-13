@@ -186,6 +186,7 @@ signals:
 	void interrogationData(QMap<QString,QString> datamap);
 	void dataLogPayloadDecoded(QVariantMap data);
 	void resetDetected(int missedPackets);
+	void configRecieved(ConfigBlock,QVariant);
 public slots:
 	int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
 	int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
