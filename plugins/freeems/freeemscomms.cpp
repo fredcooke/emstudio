@@ -198,9 +198,13 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 void FreeEmsComms::writeAllRamToRam()
 {
 	QList<unsigned short> ramlist = emsData.getTopLevelDeviceRamLocations();
+
 	for (int i=0;i<ramlist.size();i++)
 	{
-		updateBlockInRam(ramlist[i],0,emsData.getDeviceRamBlock(ramlist[i]).size(),emsData.getDeviceRamBlock(ramlist[i]));
+		if (!emsData.isReadOnlyRamBlock(ramlist[i]))
+		{
+			updateBlockInRam(ramlist[i],0,emsData.getDeviceRamBlock(ramlist[i]).size(),emsData.getDeviceRamBlock(ramlist[i]));
+		}
 	}
 }
 
