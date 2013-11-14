@@ -1342,6 +1342,17 @@ void FreeEmsComms::run()
 			{
 				QLOG_ERROR() << "No retries left!";
 				emit commandTimedOut(m_currentWaitingRequest.sequencenumber);
+				if (m_interrogateInProgress)
+				{
+					if (m_interrogatePacketList.contains(m_currentWaitingRequest.sequencenumber))
+					{
+						//Interrogate command failed!!
+						emit interrogateTaskFail(m_currentWaitingRequest.sequencenumber);
+						m_interrogatePacketList.removeOne(m_currentWaitingRequest.sequencenumber);
+						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+						sendNextInterrogationPacket();
+					}
+				}
 				m_waitingForResponse = false;
 			}
 			else
@@ -1358,6 +1369,85 @@ void FreeEmsComms::run()
 	QLOG_DEBUG() << "Exiting FreeEMSComms Thread!!!!";
 	rxThread->stop();
 	rxThread->wait(500);
+}
+void FreeEmsComms::sendNextInterrogationPacket()
+{
+	if (m_interrogatePacketList.size() == 0)
+	{
+		if (!m_interrogateIdListComplete)
+		{
+			QLOG_DEBUG() << "Interrogation ID List complete" << m_locationIdList.size() << "entries";
+			if (m_locationIdList.size() == 0)
+			{
+				//Things have gone terribly wrong here.
+				//Throw out what we have, and allow interrogation to complete.
+				emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+				emit interrogationComplete();
+				emit interrogationData(m_interrogationMetaDataMap);
+				m_interrogateInProgress = false;
+				return;
+			}
+			m_interrogateIdListComplete = true;
+			m_interrogateTotalCount += m_locationIdList.size();
+			for (int i=0;i<m_locationIdList.size();i++)
+			{
+				int task = getLocationIdInfo(m_locationIdList[i]);
+				m_interrogatePacketList.append(task);
+				emit interrogateTaskStart("Location ID Info: 0x" + QString::number(m_locationIdList[i],16),task);
+				//void interrogateTaskStart(QString task, int sequence);
+				//void interrogateTaskFail(int sequence);
+			}
+			emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+		}
+		else if (!m_interrogateIdInfoComplete)
+		{
+			//Fill out the parent information for both device, and local ram.
+			emsData.populateDeviceRamAndFlashParents();
+			emsData.populateLocalRamAndFlash();
+			m_interrogateIdInfoComplete = true;
+			QList<unsigned short> ramlist = emsData.getTopLevelDeviceRamLocations();
+			QList<unsigned short> flashlist = emsData.getTopLevelDeviceFlashLocations();
+			m_interrogateTotalCount += ramlist.size() + flashlist.size();
+			if (ramlist.size() == 0 && flashlist.size() == 0)
+			{
+				//Things have gone terribly wrong here.
+				//Throw out what we have, and allow interrogation to complete.
+				emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+				emit interrogationComplete();
+				emit interrogationData(m_interrogationMetaDataMap);
+				m_interrogateInProgress = false;
+				return;
+			}
+			for (int i=0;i<ramlist.size();i++)
+			{
+				int task = retrieveBlockFromRam(ramlist[i],0,0);
+				m_interrogatePacketList.append(task);
+				emit interrogateTaskStart("Ram Location: 0x" + QString::number(ramlist[i],16),task);
+			}
+			for (int i=0;i<flashlist.size();i++)
+			{
+				int task = retrieveBlockFromFlash(flashlist[i],0,0);
+				m_interrogatePacketList.append(task);
+				emit interrogateTaskStart("Flash Location: 0x" + QString::number(flashlist[i],16),task);
+			}
+			emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+		}
+		else
+		{
+			QLOG_DEBUG() << "Interrogation complete";
+			//Interrogation complete.
+			emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
+			emit interrogationComplete();
+			m_interrogateInProgress = false;
+			QLOG_DEBUG() << "Interrogate in progress is now false";
+			for (int i=0;i<emsData.getUniqueLocationIdList().size();i++)
+			{
+				locationIdUpdate(emsData.getUniqueLocationIdList()[i]);
+			}
+			emit interrogationData(m_interrogationMetaDataMap);
+			//deviceDataUpdated(unsigned short)
+		}
+	}
 }
 
 bool FreeEmsComms::sendSimplePacket(unsigned short payloadid)
@@ -1387,68 +1477,16 @@ void FreeEmsComms::packetNakedRec(unsigned short payloadid,QByteArray header,QBy
 			if (m_interrogatePacketList.contains(m_currentWaitingRequest.sequencenumber))
 			{
 				//Interrogate command failed!!
-				/*emit interrogateTaskSucceed(m_currentWaitingRequest.sequencenumber);
+				emit interrogateTaskFail(m_currentWaitingRequest.sequencenumber);
 				m_interrogatePacketList.removeOne(m_currentWaitingRequest.sequencenumber);
 				emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
-				if (m_interrogatePacketList.size() == 0)
-				{
-					if (!m_interrogateIdListComplete)
-					{
-						m_interrogateIdListComplete = true;
-						m_interrogateTotalCount += m_locationIdList.size();
-						for (int i=0;i<m_locationIdList.size();i++)
-						{
-							int task = getLocationIdInfo(m_locationIdList[i]);
-							m_interrogatePacketList.append(task);
-							emit interrogateTaskStart("Location ID Info: 0x" + QString::number(m_locationIdList[i],16),task);
-							//void interrogateTaskStart(QString task, int sequence);
-							//void interrogateTaskFail(int sequence);
-						}
-						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
-					}
-					else if (!m_interrogateIdInfoComplete)
-					{
-						//Fill out the parent information for both device, and local ram.
-						emsData.populateDeviceRamAndFlashParents();
-						emsData.populateLocalRamAndFlash();
-						m_interrogateIdInfoComplete = true;
-						QList<unsigned short> ramlist = emsData.getTopLevelDeviceRamLocations();
-						QList<unsigned short> flashlist = emsData.getTopLevelDeviceFlashLocations();
-						m_interrogateTotalCount += ramlist.size() + flashlist.size();
-						for (int i=0;i<ramlist.size();i++)
-						{
-							int task = retrieveBlockFromRam(ramlist[i],0,0);
-							m_interrogatePacketList.append(task);
-							emit interrogateTaskStart("Ram Location: 0x" + QString::number(ramlist[i],16),task);
-						}
-						for (int i=0;i<flashlist.size();i++)
-						{
-							int task = retrieveBlockFromFlash(flashlist[i],0,0);
-							m_interrogatePacketList.append(task);
-							emit interrogateTaskStart("Flash Location: 0x" + QString::number(flashlist[i],16),task);
-						}
-						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
-					}
-					else
-					{
-						//Interrogation complete.
-						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
-						emit interrogationComplete();
-						m_interrogateInProgress = false;
-						for (int i=0;i<emsData.getUniqueLocationIdList().size();i++)
-						{
-							locationIdUpdate(emsData.getUniqueLocationIdList()[i]);
-						}
-						//deviceDataUpdated(unsigned short)
-					}
-				}
-				else
+				sendNextInterrogationPacket();
 				{
 					if (m_payloadWaitingForResponse == GET_LOCATION_ID_LIST)
 					{
 
 					}
-				}*/
+				}
 			}
 			else
 			{
@@ -1533,69 +1571,8 @@ void FreeEmsComms::packetAckedRec(unsigned short payloadid,QByteArray header,QBy
 				emit interrogateTaskSucceed(m_currentWaitingRequest.sequencenumber);
 				m_interrogatePacketList.removeOne(m_currentWaitingRequest.sequencenumber);
 				emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
-				if (m_interrogatePacketList.size() == 0)
-				{
-					if (!m_interrogateIdListComplete)
-					{
-						QLOG_DEBUG() << "Interrogation ID List complete" << m_locationIdList.size() << "entries";
-						m_interrogateIdListComplete = true;
-						m_interrogateTotalCount += m_locationIdList.size();
-						for (int i=0;i<m_locationIdList.size();i++)
-						{
-							int task = getLocationIdInfo(m_locationIdList[i]);
-							m_interrogatePacketList.append(task);
-							emit interrogateTaskStart("Location ID Info: 0x" + QString::number(m_locationIdList[i],16),task);
-							//void interrogateTaskStart(QString task, int sequence);
-							//void interrogateTaskFail(int sequence);
-						}
-						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
-					}
-					else if (!m_interrogateIdInfoComplete)
-					{
-						//Fill out the parent information for both device, and local ram.
-						emsData.populateDeviceRamAndFlashParents();
-						emsData.populateLocalRamAndFlash();
-						m_interrogateIdInfoComplete = true;
-						QList<unsigned short> ramlist = emsData.getTopLevelDeviceRamLocations();
-						QList<unsigned short> flashlist = emsData.getTopLevelDeviceFlashLocations();
-						m_interrogateTotalCount += ramlist.size() + flashlist.size();
-						for (int i=0;i<ramlist.size();i++)
-						{
-							int task = retrieveBlockFromRam(ramlist[i],0,0);
-							m_interrogatePacketList.append(task);
-							emit interrogateTaskStart("Ram Location: 0x" + QString::number(ramlist[i],16),task);
-						}
-						for (int i=0;i<flashlist.size();i++)
-						{
-							int task = retrieveBlockFromFlash(flashlist[i],0,0);
-							m_interrogatePacketList.append(task);
-							emit interrogateTaskStart("Flash Location: 0x" + QString::number(flashlist[i],16),task);
-						}
-						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
-					}
-					else
-					{
-						QLOG_DEBUG() << "Interrogation complete";
-						//Interrogation complete.
-						emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);
-						emit interrogationComplete();
-						m_interrogateInProgress = false;
-						QLOG_DEBUG() << "Interrogate in progress is now false";
-						for (int i=0;i<emsData.getUniqueLocationIdList().size();i++)
-						{
-							locationIdUpdate(emsData.getUniqueLocationIdList()[i]);
-						}
-						emit interrogationData(m_interrogationMetaDataMap);
-						//deviceDataUpdated(unsigned short)
-					}
-				}
-				else
-				{
-					if (m_payloadWaitingForResponse == GET_LOCATION_ID_LIST)
-					{
+				sendNextInterrogationPacket();
 
-					}
-				}
 			}
 			else
 			{

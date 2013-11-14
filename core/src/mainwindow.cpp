@@ -36,7 +36,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-
+	m_interrogationInProgress = false;
 	m_offlineMode = false;
 	m_checkEmsDataInUse = false;
 	m_currentEcuClock = -1;
@@ -888,13 +888,6 @@ void MainWindow::emsCommsDisconnected()
 {
 	ui.actionSave_Offline_Data->setEnabled(false);
 	ui.actionLoad_Offline_Data->setEnabled(false);
-	if (interrogateProgressMdiWindow)
-	{
-		delete interrogateProgressMdiWindow;
-		progressView = 0;
-		interrogateProgressMdiWindow = 0;
-	}
-	ui.actionInterrogation_Progress->setEnabled(false);
 
 	ui.actionConnect->setEnabled(true);
 	ui.actionDisconnect->setEnabled(false);
@@ -1200,6 +1193,13 @@ void MainWindow::menu_settingsClicked()
 
 void MainWindow::menu_connectClicked()
 {
+	if (interrogateProgressMdiWindow)
+	{
+		delete interrogateProgressMdiWindow;
+		progressView = 0;
+		interrogateProgressMdiWindow = 0;
+	}
+
 	if (!m_offlineMode)
 	{
 		//emsData->clearAllMemory();
@@ -1501,6 +1501,7 @@ void MainWindow::emsOperatingSystem(QString os)
 void MainWindow::emsCommsConnected()
 {
 	emsComms->startInterrogation();
+	m_interrogationFailureCount = 0;
 	ui.actionSave_Offline_Data->setEnabled(true);
 	ui.actionLoad_Offline_Data->setEnabled(true);
 	while (ui.menuWizards->actions().size() > 0)
@@ -1560,18 +1561,27 @@ void MainWindow::interrogationProgress(int current, int total)
 
 void MainWindow::interrogationComplete()
 {
+	m_interrogationInProgress = false;
 	if (progressView)
 	{
 		//progressView->hide();
 		QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>(progressView->parent());
-		if (win)
+		if (win && m_interrogationFailureCount == 0)
 		{
 			win->hide();
 		}
 		progressView->done();
 	}
 	QLOG_INFO() << "Interrogation complete";
-	emsMdiWindow->show();
+	if (m_interrogationFailureCount > 0)
+	{
+		QMessageBox::information(0,"Error","Something has gone serious wrong, one of the commands timed out during interrogation. This should be properly investigated before continuing");
+		emsComms->disconnectSerial();
+	}
+	else
+	{
+		emsMdiWindow->show();
+	}
 }
 void MainWindow::interrogateTaskStart(QString task, int sequence)
 {
@@ -1684,8 +1694,9 @@ void MainWindow::commandTimedOut(int sequencenumber)
 		progressView->taskFail(sequencenumber);
 		//If interrogation is in progress, we need to stop, since something has gone
 		//horribly wrong.
-		interrogateProgressViewCancelClicked();
-		QMessageBox::information(0,"Error","Something has gone serious wrong, one of the commands timed out during interrogation. This should be properly investigated before continuing");
+		//interrogateProgressViewCancelClicked();
+
+		m_interrogationFailureCount++;
 	}
 
 }
@@ -1874,13 +1885,16 @@ void MainWindow::guiUpdateTimerTick()
 }
 void MainWindow::ecuResetDetected(int missedpackets)
 {
-	if (QMessageBox::question(this,"Error","ECU Reset detected with " + QString::number(missedpackets) + " missed packets! Would you like to reflash data? If you do not, then EMStudio will continue with an INVALID idea of ECU memory, and you will lose any changes made",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+	if (!m_interrogationInProgress)
 	{
-		emsComms->writeAllRamToRam();
-	}
-	else
-	{
-		QMessageBox::information(this,"Warning","EMStudio will now continue with a corrupt version of ECU memory. The death of your engine is on your head now");
+		if (QMessageBox::question(this,"Error","ECU Reset detected with " + QString::number(missedpackets) + " missed packets! Would you like to reflash data? If you do not, then EMStudio will continue with an INVALID idea of ECU memory, and you will lose any changes made",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+		{
+			emsComms->writeAllRamToRam();
+		}
+		else
+		{
+			QMessageBox::information(this,"Warning","EMStudio will now continue with a corrupt version of ECU memory. The death of your engine is on your head now");
+		}
 	}
 }
 

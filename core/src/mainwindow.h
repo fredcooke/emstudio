@@ -156,6 +156,7 @@ private:
 	QList<WizardView*> m_wizardList;
 	bool m_debugLogs;
 	void createView(unsigned short locid,DataType type);
+	int m_interrogationFailureCount;
 	QList<int> m_locIdMsgList;
 	QList<int> m_locIdInfoMsgList;
 	void checkRamFlashSync();
