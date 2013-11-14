@@ -1062,7 +1062,7 @@ void MainWindow::createView(unsigned short locid,DataType type)
 
 		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 		win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
-		win->setGeometry(view->geometry());
+		win->setGeometry(0,0,((view->width() < this->width()-160) ? view->width() : this->width()-160),((view->height() < this->height()-100) ? view->height() : this->height()-100));
 		m_rawDataView[locid] = view;
 		win->show();
 		QApplication::postEvent(win, new QEvent(QEvent::Show));
@@ -1086,7 +1086,7 @@ void MainWindow::createView(unsigned short locid,DataType type)
 
 		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 		win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
-		win->setGeometry(view->geometry());
+		win->setGeometry(0,0,((view->width() < this->width()-160) ? view->width() : this->width()-160),((view->height() < this->height()-100) ? view->height() : this->height()-100));
 		m_rawDataView[locid] = view;
 		win->show();
 		QApplication::postEvent(win, new QEvent(QEvent::Show));
@@ -1102,7 +1102,7 @@ void MainWindow::createView(unsigned short locid,DataType type)
 
 		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
 		win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
-		win->setGeometry(view->geometry());
+		win->setGeometry(0,0,((view->width() < this->width()-160) ? view->width() : this->width()-160),((view->height() < this->height()-100) ? view->height() : this->height()-100));
 		m_rawDataView[locid] = view;
 		win->show();
 		QApplication::postEvent(win, new QEvent(QEvent::Show));

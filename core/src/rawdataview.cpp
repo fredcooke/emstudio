@@ -67,6 +67,10 @@ bool RawDataView::setData(unsigned short locationid,DataBlock *data)
 	m_locationId = locationid;
 	ui.hexEditor->setData(m_data->data());
 	ui.locationIdLabel->setText("0x" + QString::number(locationid,16).toUpper());
+	//We know that every 20 bytes is a line.
+	//int lines = m_data->data().size() / 20;
+	//Assume each line is 30 pixels?;
+	//this->setMinimumHeight(lines * 35 + 50);
 	return true;
 }
 void RawDataView::update()
