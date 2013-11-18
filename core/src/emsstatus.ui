@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>150</width>
+    <width>160</width>
     <height>411</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>150</width>
+    <width>160</width>
     <height>411</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>150</width>
+    <width>180</width>
     <height>411</height>
    </size>
   </property>
@@ -31,28 +31,24 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>178</width>
-      <height>163</height>
+      <width>161</width>
+      <height>225</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QPushButton" name="softResetPushButton">
-         <property name="text">
-          <string>Soft Reset</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="hardResetPushButton">
-         <property name="text">
-          <string>Hard Reset</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QPushButton" name="softResetPushButton">
+       <property name="text">
+        <string>Soft Reset</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="hardResetPushButton">
+       <property name="text">
+        <string>Hard Reset</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLineEdit" name="combustionSyncLineEdit">
