@@ -45,7 +45,10 @@ void SerialPort::setBaud(int baudrate)
 
 SerialPortStatus SerialPort::isSerialMonitor(QString portname)
 {
-	openPort(portname,115200,false);
+	if (openPort(portname,115200,false) < 0)
+	{
+		return NONE;
+	}
 	int retry = 0;
 
 	while (retry++ <= 3)
