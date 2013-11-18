@@ -1373,8 +1373,13 @@ void FreeEmsComms::run()
 		m_waitingInfoMutex.unlock();
 	}
 	QLOG_DEBUG() << "Exiting FreeEMSComms Thread!!!!";
-	rxThread->stop();
-	rxThread->wait(500);
+	if (rxThread)
+	{
+		rxThread->stop();
+		rxThread->wait(500);
+		delete rxThread;
+		rxThread = 0;
+	}
 }
 void FreeEmsComms::sendNextInterrogationPacket()
 {
