@@ -51,21 +51,20 @@
 #ifndef CONFIGDATA_H
 #define CONFIGDATA_H
 
-#include <QList>
+#include <QObject>
+#include <QVariant>
 #include <QString>
-#include <QPair>
 
-class ConfigData
+class ConfigData : public QObject
 {
+    Q_OBJECT
 public:
-    QString configTitle;
-    QString configDescription;
-    unsigned short locationId;
-    unsigned char offset;
-    unsigned char elementSize;
-    QList<QPair<QString,double> > elementCalc;
-    QString type;
-    unsigned char arraySize;
+	virtual void setData(QByteArray data)=0;
+	virtual QString name()=0;
+	virtual QVariant value()=0;
+	virtual void setValue(QVariant value)=0;
+signals:
+    void update();
 };
 
 #endif // CONFIGDATA_H

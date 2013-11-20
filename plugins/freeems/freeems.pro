@@ -71,7 +71,8 @@ HEADERS += datapacketdecoder.h \
 	   rawdata.h \
     ferawdata.h \
     packetdecoder.h \
-    packet.h
+    packet.h \
+    feconfigdata.h
 
 SOURCES += fedatapacketdecoder.cpp \
            fetable2ddata.cpp \
@@ -84,4 +85,5 @@ SOURCES += fedatapacketdecoder.cpp \
     memorylocation.cpp \
     emsdata.cpp \
     ferawdata.cpp \
-    packetdecoder.cpp
+    packetdecoder.cpp \
+    feconfigdata.cpp

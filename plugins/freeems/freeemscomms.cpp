@@ -25,8 +25,10 @@
 #include <QCoreApplication>
 #include <QXmlStreamReader>
 #include <qjson/parser.h>
+#include <qjson/serializer.h>
 #include "fetable2ddata.h"
 #include "fetable3ddata.h"
+#include "feconfigdata.h"
 #include "QsLog.h"
 
 FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
@@ -174,25 +176,43 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	for (int i=0;i<configlist.size();i++)
 	{
 		QVariantMap configitemmap = configlist[i].toMap();
-		ConfigBlock block;
-		block.setName(configitemmap["name"].toString());
-		block.setType(configitemmap["type"].toString());
-		block.setElementSize(configitemmap["sizeofelement"].toInt());
-		block.setSize(configitemmap["size"].toInt());
-		block.setOffset(configitemmap["offset"].toInt());
+		FEConfigData *block = new FEConfigData();
+		block->setName(configitemmap["name"].toString());
+		block->setType(configitemmap["type"].toString());
+		block->setElementSize(configitemmap["sizeofelement"].toInt());
+		block->setSize(configitemmap["size"].toInt());
+		block->setOffset(configitemmap["offset"].toInt());
 		//configitemmap["calc"];
-		block.setSizeOverride(configitemmap["sizeoverride"].toString());
+		block->setSizeOverride(configitemmap["sizeoverride"].toString());
 		bool ok = false;
-		block.setLocationId(configitemmap["locationid"].toString().toInt(&ok,16));
+		block->setLocationId(configitemmap["locationid"].toString().toInt(&ok,16));
 		QString locid = configitemmap["locationid"].toString();
-		if (!configmap.contains(locid.mid(2)))
+
+		unsigned short locidint = locid.mid(2).toInt(&ok,16);
+
+		if (!ok)
 		{
-			configmap[locid.mid(2)] = QList<ConfigBlock>();
+		    //Invalid location id conversion, bad JSON file?
 		}
-		configmap[locid.mid(2)].append(block);
+		else
+		{
+			if (!m_locIdToConfigListMap.contains(locidint))
+			{
+				m_locIdToConfigListMap[locidint] = QList<ConfigData*>();
+			}
+			m_locIdToConfigListMap[locidint].append(block);
+		}
+		if (m_configMap.contains(block->name()))
+		{
+		    //Block already exists!
+		}
+		else
+		{
+		    m_configMap[block->name()] = block;
+		}
 	}
 
-	m_metaDataParser->passConfigData(configmap);
+    //m_metaDataParser->passConfigData(configmap);
 	m_metaDataParser->setMenuMetaData(menu);
 
 
@@ -1456,6 +1476,30 @@ void FreeEmsComms::sendNextInterrogationPacket()
 				locationIdUpdate(emsData.getUniqueLocationIdList()[i]);
 			}
 			emit interrogationData(m_interrogationMetaDataMap);
+			QString json = "";
+			json += "{";
+			QJson::Serializer jsonSerializer;
+			QVariantMap top;
+			for (QMap<QString,QString>::const_iterator i=m_interrogationMetaDataMap.constBegin();i!=m_interrogationMetaDataMap.constEnd();i++)
+			{
+				top[i.key()] = i.value();
+			}
+			/*top["firmwareversion"] = emsinfo.firmwareVersion;
+			top["interfaceversion"] = emsinfo.interfaceVersion;
+			top["compilerversion"] = emsinfo.compilerVersion;
+			top["firmwarebuilddate"] = emsinfo.firmwareBuildDate;
+			top["decodername"] = emsinfo.decoderName;
+			top["operatingsystem"] = emsinfo.operatingSystem;
+			top["emstudiohash"] = emsinfo.emstudioHash;
+			top["emstudiocommit"] = emsinfo.emstudioCommit;*/
+
+			if (m_logsEnabled)
+			{
+				QFile *settingsFile = new QFile(m_logsDirectory + "/" + m_logsFilename + ".meta.json");
+				settingsFile->open(QIODevice::ReadWrite);
+				settingsFile->write(jsonSerializer.serialize(top));
+				settingsFile->close();
+			}
 			//deviceDataUpdated(unsigned short)
 		}
 	}
@@ -1527,6 +1571,13 @@ void FreeEmsComms::packetNakedRec(unsigned short payloadid,QByteArray header,QBy
 					m_rawDataMap[locid]->setData(locid,true,emsData.getLocalFlashBlock(locid));
 				}
 			}
+			if (m_locIdToConfigListMap.contains(locid))
+			{
+				for (int i=0;i<m_locIdToConfigListMap[locid].size();i++)
+				{
+					m_locIdToConfigListMap[locid][i]->setData(emsData.getLocalFlashBlock(locid));
+				}
+			}
 		}
 		if (m_waitingForRamWrite)
 		{
@@ -1550,6 +1601,13 @@ void FreeEmsComms::packetNakedRec(unsigned short payloadid,QByteArray header,QBy
 				else
 				{
 					m_rawDataMap[locid]->setData(locid,true,emsData.getLocalFlashBlock(locid));
+				}
+			}
+			if (m_locIdToConfigListMap.contains(locid))
+			{
+				for (int i=0;i<m_locIdToConfigListMap[locid].size();i++)
+				{
+					m_locIdToConfigListMap[locid][i]->setData(emsData.getLocalRamBlock(locid));
 				}
 			}
 		}
@@ -1668,6 +1726,19 @@ RawData* FreeEmsComms::getRawData(unsigned short locationid)
 	}
 	return m_rawDataMap[locationid];
 }
+ConfigData* FreeEmsComms::getConfigData(QString name)
+{
+    if (!m_configMap.contains(name))
+    {
+	return 0;
+    }
+    return m_configMap[name];
+}
+QList<QString> FreeEmsComms::getConfigList()
+{
+    return m_configMap.keys();
+}
+
 void FreeEmsComms::locationIdListRec(QList<unsigned short> locationidlist)
 {
 	m_locationIdList.clear();
@@ -1723,6 +1794,14 @@ void FreeEmsComms::locationIdUpdate(unsigned short locationid)
 				m_rawDataMap[updatelist[i]]->setData(updatelist[i],true,emsData.getLocalFlashBlock(updatelist[i]));
 			}
 		}
+
+		if (m_locIdToConfigListMap.contains(updatelist[i]))
+		{
+			for (int i=0;i<m_locIdToConfigListMap[updatelist[i]].size();i++)
+			{
+				m_locIdToConfigListMap[updatelist[i]][i]->setData(emsData.getLocalRamBlock(updatelist[i]));
+			}
+		}
 	}
 }
 void FreeEmsComms::copyFlashToRam(unsigned short locationid)
@@ -1745,6 +1824,14 @@ void FreeEmsComms::copyFlashToRam(unsigned short locationid)
 		else
 		{
 			m_rawDataMap[locationid]->setData(locationid,true,emsData.getLocalFlashBlock(locationid));
+		}
+	}
+
+	if (m_locIdToConfigListMap.contains(locationid))
+	{
+		for (int i=0;i<m_locIdToConfigListMap[locationid].size();i++)
+		{
+			m_locIdToConfigListMap[locationid][i]->setData(emsData.getLocalRamBlock(locationid));
 		}
 	}
 	updateBlockInRam(locationid,0,emsData.getLocalFlashBlock(locationid).size(),emsData.getLocalFlashBlock(locationid));

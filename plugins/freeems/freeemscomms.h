@@ -86,6 +86,8 @@ public:
 	Table2DData* get2DTableData(unsigned short locationid);
 	Table3DData* get3DTableData(unsigned short locationid);
 	RawData* getRawData(unsigned short locationid);
+    ConfigData* getConfigData(QString name);
+    QList<QString> getConfigList();
 	void writeAllRamToRam();
 protected:
 	void run();
@@ -152,6 +154,8 @@ private:
 	QMap<unsigned short,Table2DData*> m_2dTableMap;
 	QMap<unsigned short,Table3DData*> m_3dTableMap;
 	QMap<unsigned short,RawData*> m_rawDataMap;
+    QMap<unsigned short,QList<ConfigData*> > m_locIdToConfigListMap;
+    QMap<QString,ConfigData*> m_configMap;
 	PacketDecoder *m_packetDecoder;
 	QMap<QString,QString> m_interrogationMetaDataMap;
 	void sendNextInterrogationPacket();

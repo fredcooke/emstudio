@@ -1530,6 +1530,15 @@ void MainWindow::emsCommsConnected()
 		ui.menuWizards->addAction(action);
 		connect(action,SIGNAL(triggered(bool)),view,SLOT(setVisible(bool)));
 	}
+    //virtual QList<QString> getConfigList()=0;
+    for (int i=0;i<emsComms->getConfigList().size();i++)
+    {
+        parameterView->addConfig(emsComms->getConfigList()[i],emsComms->getConfigData(emsComms->getConfigList()[i]));
+        for (int j=0;j<m_wizardList.size();j++)
+        {
+            m_wizardList[i]->addConfig(emsComms->getConfigList()[i],emsComms->getConfigData(emsComms->getConfigList()[i]));
+        }
+    }
 	//New log and settings file here.
 	if (m_memoryInfoMap.size() == 0)
 	{

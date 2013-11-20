@@ -62,6 +62,7 @@
 #include "datapacketdecoder.h"
 #include "memorymetadata.h"
 #include "rawdata.h"
+#include "configdata.h"
 //#include "QsLog.h"
 
 namespace QsLogging
@@ -107,6 +108,8 @@ public:
 	virtual Table2DData* get2DTableData(unsigned short locationid)=0;
 	virtual Table3DData* get3DTableData(unsigned short locationid)=0;
 	virtual RawData* getRawData(unsigned short locationid)=0;
+    virtual ConfigData* getConfigData(QString name) = 0;
+    virtual QList<QString> getConfigList()=0;
 	//virtual void populateDataFields()=0;
 	virtual QByteArray generatePacket(QByteArray header,QByteArray payload)=0;
 	virtual int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)=0;

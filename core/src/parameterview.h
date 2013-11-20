@@ -5,6 +5,7 @@
 #include "ui_parameterview.h"
 #include "configblock.h"
 #include "parameterwidget.h"
+#include "configdata.h"
 #include "memorymetadata.h"
 #include "menusetup.h"
 class ParameterView : public QWidget
@@ -19,6 +20,7 @@ public:
 	void passMetaData(MemoryMetaData *metadata);
 	void updateValues();
 	double calcAxis(unsigned short val,QList<QPair<QString,double> > metadata);
+    void addConfig(QString name,ConfigData *data);
 private:
 	MemoryMetaData *m_metaData;
 	QList<ParameterWidget*> paramWidgetList;

@@ -18,6 +18,12 @@ void ParameterView::itemSelectionChanged()
 {
 	return;
 }
+void ParameterView::addConfig(QString name,ConfigData *data)
+{
+    Q_UNUSED(name)
+    Q_UNUSED(data)
+
+}
 
 void ParameterView::currentItemChanged(QTreeWidgetItem *current,QTreeWidgetItem *prev)
 {
