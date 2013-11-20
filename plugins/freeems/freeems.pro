@@ -54,6 +54,7 @@ unix {
 HEADERS += datapacketdecoder.h \
            table2ddata.h \
            table3ddata.h \
+            ../../lib/core/configdata.h \
 	   tabledata.h \
            emscomms.h \
            memorymetadata.h \

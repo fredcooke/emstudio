@@ -3,7 +3,7 @@
 FEConfigData::FEConfigData() : ConfigData()
 {
 }
-FEConfigData::FEConfigData(QString name,QString type, QString override,unsigned short locationid, unsigned short size,unsigned short elementsize,unsigned short offset, QList<QPair<QString,double> > calc)
+FEConfigData::FEConfigData(QString name,QString type, QString override,unsigned short locationid, unsigned short size,unsigned short elementsize,unsigned short offset, QList<QPair<QString,double> > calc) : ConfigData()
 {
     m_name = name;
     m_type = type;

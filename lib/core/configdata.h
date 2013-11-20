@@ -64,7 +64,7 @@ public:
 	virtual QVariant value()=0;
 	virtual void setValue(QVariant value)=0;
 signals:
-    void update();
+	void update();
 };
 
 #endif // CONFIGDATA_H
