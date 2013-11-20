@@ -286,7 +286,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	QLOG_INFO() << "Local settings file is:" << m_settingsFile;
 	QSettings settings(m_settingsFile,QSettings::IniFormat);
 	settings.beginGroup("comms");
+#if defined(Q_OS_WIN)
+	m_comPort = settings.value("port","COM4").toString();
+#elif defined(Q_OS_LINUX)
 	m_comPort = settings.value("port","/dev/ttyUSB0").toString();
+#else
+	m_comPort = settings.value("port","/dev/cu.usbmodem").toString();
+#endif
 	m_comBaud = settings.value("baud",115200).toInt();
 	m_comInterByte = settings.value("interbytedelay",0).toInt();
 	m_saveLogs = settings.value("savelogs",true).toBool();
