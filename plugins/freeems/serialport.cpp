@@ -96,6 +96,7 @@ void SerialPort::setInterByteSendDelay(int milliseconds)
 
 int SerialPort::readBytes(QByteArray *array, int maxlen,int timeout)
 {
+	QMutexLocker locker(m_serialLockMutex);
 	if (m_privBuffer.size() >= maxlen)
 	{
 		*array = m_privBuffer.mid(0,maxlen);
