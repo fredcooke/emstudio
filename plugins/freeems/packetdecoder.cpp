@@ -296,6 +296,13 @@ void PacketDecoder::parsePacket(Packet parsedPacket)
 					info.rawflags = test;
 					info.size = size;
 
+					info.propertymap.append(QPair<QString,QString>("parent","0x" + QString::number(parent,16).toUpper()));
+					info.propertymap.append(QPair<QString,QString>("rampage","0x" + QString::number(rampage,16).toUpper()));
+					info.propertymap.append(QPair<QString,QString>("flashpage","0x" + QString::number(flashpage,16).toUpper()));
+					info.propertymap.append(QPair<QString,QString>("ramaddress","0x" + QString::number(ramaddress,16).toUpper()));
+					info.propertymap.append(QPair<QString,QString>("flashaddress","0x" + QString::number(flashaddress,16).toUpper()));
+					info.propertymap.append(QPair<QString,QString>("size","0x" + QString::number(size,16).toUpper()));
+
 					if (flaglist.contains(BLOCK_IS_RAM))
 					{
 						info.isRam = true;
