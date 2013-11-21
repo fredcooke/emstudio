@@ -37,6 +37,7 @@ void EmsStatus::closeEvent(QCloseEvent *event)
 {
 	event->ignore();
 	this->hide();
+	emit windowHiding((QMdiSubWindow*)this->parent());
 }
 EmsStatus::~EmsStatus()
 {

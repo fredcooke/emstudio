@@ -24,6 +24,7 @@
 
 #include <QWidget>
 #include <QCloseEvent>
+#include <QMdiSubWindow>
 #include "ui_interrogateprogressview.h"
 #include "overviewprogressitemdelegate.h"
 class InterrogateProgressView : public QWidget
@@ -45,6 +46,7 @@ public:
 	int progress() { return ui.progressBar->value(); }
 protected:
 	void closeEvent(QCloseEvent *event);
+	void hideEvent(QHideEvent *event);
 private:
 	Ui::InterrogateProgressView ui;
 	QMap<int,int> m_typeToOverviewListMap;
@@ -52,6 +54,7 @@ private slots:
 	void cancelClickedSlot();
 signals:
 	void cancelClicked();
+	void windowHiding(QMdiSubWindow *parent);
 };
 
 #endif // INTERROGATEPROGRESSVIEW_H

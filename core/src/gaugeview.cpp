@@ -41,6 +41,7 @@ void GaugeView::closeEvent(QCloseEvent *event)
 {
 	event->ignore();
 	((QMdiSubWindow*)this->parent())->hide();
+	emit windowHiding((QMdiSubWindow*)this->parent());
 }
 void GaugeView::passData(QVariantMap data)
 {

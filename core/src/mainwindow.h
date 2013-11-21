@@ -164,7 +164,11 @@ private:
 	//EmsData *emsData;
 	//EmsData *checkEmsData;
 	int m_currentEcuClock;
+	QMap<QMdiSubWindow*,QAction*> m_mdiSubWindowToActionMap;
 private slots:
+	void windowHidden(QMdiSubWindow* window);
+	void bringToFrontAndShow();
+	void windowDestroyed(QObject *window);
 	void interrogationData(QMap<QString,QString> datamap);
 	void emsCommsSilence();
 	void emsCommsSilenceBroken();
@@ -232,6 +236,7 @@ private slots:
 	void interrogateTaskSucceed(int sequence);
 	void interrogateTaskFail(int sequence);
 	void locationIdList(QList<unsigned short> idlist);
+	void subMdiWindowActivated(QMdiSubWindow* window);
 
 };
 

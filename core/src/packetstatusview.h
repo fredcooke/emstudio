@@ -23,6 +23,7 @@
 #define PACKETSTATUSVIEW_H
 
 #include <QWidget>
+#include <QMdiSubWindow>
 #include "ui_packetstatusview.h"
 class PacketStatusView : public QWidget
 {
@@ -39,8 +40,11 @@ public slots:
 	void passDecoderFailure(QByteArray packet);
 protected:
 	void closeEvent(QCloseEvent *event);
+	void hideEvent(QHideEvent *event);
 private:
 	Ui::PacketStatusView ui;
+signals:
+	void windowHiding(QMdiSubWindow *parent);
 };
 
 #endif // PACKETSTATUSVIEW_H

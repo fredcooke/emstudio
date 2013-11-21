@@ -40,6 +40,8 @@ protected:
 	void closeEvent(QCloseEvent *event);
 private:
 	Ui::DataFlags ui;
+signals:
+	void windowHiding(QMdiSubWindow *parent);
 };
 
 #endif // DATAFLAGS_H

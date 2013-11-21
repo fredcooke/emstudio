@@ -34,6 +34,12 @@ void InterrogateProgressView::closeEvent(QCloseEvent *event)
 {
 	event->ignore();
 	((QMdiSubWindow*)this->parent())->hide();
+	emit windowHiding((QMdiSubWindow*)this->parent());
+}
+void InterrogateProgressView::hideEvent(QHideEvent *event)
+{
+	Q_UNUSED(event)
+	emit windowHiding((QMdiSubWindow*)this->parent());
 }
 void InterrogateProgressView::reset()
 {

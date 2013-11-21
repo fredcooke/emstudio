@@ -24,6 +24,7 @@
 
 #include <QWidget>
 #include <QCloseEvent>
+#include <QMdiSubWindow>
 #include "ui_datagauges.h"
 #include "gaugewidget.h"
 #include "datapacketdecoder.h"
@@ -49,6 +50,8 @@ protected:
 	void closeEvent(QCloseEvent *event);
 private slots:
 	void guiUpdateTimerTick();
+signals:
+	void windowHiding(QMdiSubWindow *parent);
 };
 
 #endif // GAUGEVIEW_H

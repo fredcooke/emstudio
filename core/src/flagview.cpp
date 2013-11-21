@@ -41,6 +41,7 @@ void FlagView::closeEvent(QCloseEvent *event)
 {
 	event->ignore();
 	((QMdiSubWindow*)this->parent())->hide();
+	emit windowHiding((QMdiSubWindow*)this->parent());
 }
 void FlagView::passData(QVariantMap data)
 {

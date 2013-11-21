@@ -43,6 +43,8 @@ private:
 	QString m_commit;
 	QString m_hash;
 	Ui::AboutView ui;
+signals:
+	void windowHiding(QWidget *parent);
 };
 
 #endif // ABOUTVIEW_H

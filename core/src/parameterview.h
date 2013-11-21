@@ -2,6 +2,7 @@
 #define PARAMETERVIEW_H
 
 #include <QWidget>
+#include <QMdiSubWindow>
 #include "ui_parameterview.h"
 #include "configblock.h"
 #include "parameterwidget.h"
@@ -30,8 +31,11 @@ private:
 	MenuSetup m_metaMenu;
 	QList<ConfigBlock> m_memoryConfigBlockList;
 	Ui::Form ui;
+protected:
+	void closeEvent(QCloseEvent *event);
 signals:
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
+	void windowHiding(QMdiSubWindow *parent);
 public slots:
 	void currentItemChanged(QTreeWidgetItem *current,QTreeWidgetItem *prev);
 	void itemSelectionChanged();

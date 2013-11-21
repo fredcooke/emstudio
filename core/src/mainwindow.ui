@@ -44,7 +44,7 @@
      <x>0</x>
      <y>0</y>
      <width>1525</width>
-     <height>27</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -79,6 +79,7 @@
     <addaction name="actionEMS_Status"/>
     <addaction name="actionInterrogation_Progress"/>
     <addaction name="actionParameter_View"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -91,9 +92,15 @@
      <string>Wizards</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuOpen_Windows">
+    <property name="title">
+     <string>Open Windows</string>
+    </property>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuWindows"/>
+   <addaction name="menuOpen_Windows"/>
    <addaction name="menuWizards"/>
    <addaction name="menuHelp"/>
   </widget>

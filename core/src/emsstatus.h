@@ -24,6 +24,7 @@
 
 #include <QDockWidget>
 #include <QCloseEvent>
+#include <QMdiSubWindow>
 #include "ui_emsstatus.h"
 
 class EmsStatus : public QDockWidget
@@ -40,6 +41,7 @@ protected:
 signals:
 	void hardResetRequest();
 	void softResetRequest();
+	void windowHiding(QMdiSubWindow *parent);
 private:
 	Ui::EmsStatus ui;
 };

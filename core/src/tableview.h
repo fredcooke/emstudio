@@ -25,6 +25,7 @@
 #include <QWidget>
 #include <QTimer>
 #include <QCloseEvent>
+#include <QMdiSubWindow>
 #include "ui_datatables.h"
 #include "datapacketdecoder.h"
 class TableView : public QWidget
@@ -46,6 +47,8 @@ protected:
 	void closeEvent(QCloseEvent *event);
 private slots:
 	void guiUpdateTimerTick();
+signals:
+	void windowHiding(QMdiSubWindow *parent);
 };
 
 #endif // DATATABLES_H

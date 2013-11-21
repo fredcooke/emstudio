@@ -24,6 +24,7 @@
 
 #include <QWidget>
 #include <QCloseEvent>
+#include <QMdiSubWindow>
 #include "memorylocationinfo.h"
 #include "datatype.h"
 #include "ui_emsinfo.h"
@@ -52,6 +53,7 @@ private:
 signals:
 	void displayLocationId(int locid, bool isram,DataType type);
 	void checkSync();
+	void windowHiding(QMdiSubWindow *parent);
 };
 
 #endif // EMSINFO_H

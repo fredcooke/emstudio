@@ -190,6 +190,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionParameter_View,SIGNAL(triggered()),this,SLOT(menu_windows_ParameterViewClicked()));
 	ui.actionInterrogation_Progress->setEnabled(false);
 
+
 	emsInfo=0;
 	dataTables=0;
 	dataFlags=0;
@@ -321,7 +322,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 
 	//ui.menuWizards
-
+	connect(ui.mdiArea,SIGNAL(subWindowActivated(QMdiSubWindow*)),this,SLOT(subMdiWindowActivated(QMdiSubWindow*)));
 
 }
 void MainWindow::menu_windows_interrogateProgressViewClicked()
@@ -1107,6 +1108,7 @@ void MainWindow::createView(unsigned short locid,DataType type)
 		view->setData(locid,data);
 
 		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+		connect(win,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 		win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper());
 		win->setGeometry(0,0,((view->width() < this->width()-160) ? view->width() : this->width()-160),((view->height() < this->height()-100) ? view->height() : this->height()-100));
 		m_rawDataView[locid] = view;
@@ -1163,8 +1165,14 @@ void MainWindow::rawDataViewDestroyed(QObject *object)
 			QMdiSubWindow *win = qobject_cast<QMdiSubWindow*>(object->parent());
 			if (!win)
 			{
-				return;
+				win = qobject_cast<QMdiSubWindow*>(object);
+				if (!win)
+				{
+					return;
+				}
 			}
+			ui.menuOpen_Windows->removeAction(m_mdiSubWindowToActionMap[win]);
+			m_mdiSubWindowToActionMap.remove(win);
 			win->hide();
 			ui.mdiArea->removeSubWindow(win);
 			return;
@@ -1561,6 +1569,7 @@ void MainWindow::emsCommsConnected()
 		progressView = new InterrogateProgressView();
 		connect(progressView,SIGNAL(destroyed(QObject*)),this,SLOT(interrogateProgressViewDestroyed(QObject*)));
 		interrogateProgressMdiWindow = ui.mdiArea->addSubWindow(progressView);
+		interrogateProgressMdiWindow->setWindowTitle(progressView->windowTitle());
 		interrogateProgressMdiWindow->setGeometry(progressView->geometry());
 		connect(progressView,SIGNAL(cancelClicked()),this,SLOT(interrogateProgressViewCancelClicked()));
 		progressView->setMaximum(0);
@@ -1949,6 +1958,59 @@ void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
 	Q_UNUSED(header)
 	Q_UNUSED(payload)
 	pidcount++;
+}
+void MainWindow::windowHidden(QMdiSubWindow* window)
+{
+	if (window && m_mdiSubWindowToActionMap.contains(window))
+	{
+		ui.menuOpen_Windows->removeAction(m_mdiSubWindowToActionMap[window]);
+		m_mdiSubWindowToActionMap.remove(window);
+	}
+}
+void MainWindow::windowDestroyed(QObject *window)
+{
+	if (window && m_mdiSubWindowToActionMap.contains((QMdiSubWindow*)window))
+	{
+		ui.menuOpen_Windows->removeAction(m_mdiSubWindowToActionMap[(QMdiSubWindow*)window]);
+		m_mdiSubWindowToActionMap.remove((QMdiSubWindow*)window);
+	}
+}
+
+void MainWindow::bringToFrontAndShow()
+{
+	for (QMap<QMdiSubWindow*,QAction*>::const_iterator i=m_mdiSubWindowToActionMap.constBegin();i!=m_mdiSubWindowToActionMap.constEnd();i++)
+	{
+		if (i.value() == sender())
+		{
+			i.key()->show();
+			QApplication::postEvent(i.key(), new QEvent(QEvent::Show));
+			QApplication::postEvent(i.key(), new QEvent(QEvent::WindowActivate));
+		}
+
+	}
+}
+
+void MainWindow::subMdiWindowActivated(QMdiSubWindow* window)
+{
+	if (window && !m_mdiSubWindowToActionMap.contains(window))
+	{
+		if (window->isVisible())
+		{
+		//connect(window,SIGNAL(windowStateChanged(Qt::WindowStates,Qt::WindowStates))
+		QAction *action = ui.menuOpen_Windows->addAction(window->windowTitle());
+		connect(action,SIGNAL(triggered()),this,SLOT(bringToFrontAndShow()));
+		connect(window->widget(),SIGNAL(windowHiding(QMdiSubWindow*)),this,SLOT(windowHidden(QMdiSubWindow*)));
+		connect(window,SIGNAL(destroyed(QObject*)),this,SLOT(windowDestroyed(QObject*)));
+		m_mdiSubWindowToActionMap[window] = action;
+		}
+		//connect(action,SIGNAL(triggered(bool)),window,SLOT(setVisible(bool)));
+		//connect(action,SIGNAL(triggered()),this,SLOT(bringToFrontAndShow()));
+		QLOG_DEBUG() << "Window Activated New:" << window->windowTitle();
+	}
+	else if (window)
+	{
+		QLOG_DEBUG() << "Window Activated Old:" << window->windowTitle();
+	}
 }
 
 MainWindow::~MainWindow()

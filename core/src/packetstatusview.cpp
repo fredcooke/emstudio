@@ -131,7 +131,14 @@ void PacketStatusView::closeEvent(QCloseEvent *event)
 {
 	event->ignore();
 	((QMdiSubWindow*)this->parent())->hide();
+	emit windowHiding((QMdiSubWindow*)this->parent());
 }
+void PacketStatusView::hideEvent(QHideEvent *event)
+{
+	Q_UNUSED(event)
+	emit windowHiding((QMdiSubWindow*)this->parent());
+}
+
 PacketStatusView::~PacketStatusView()
 {
 }

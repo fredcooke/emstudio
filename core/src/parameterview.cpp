@@ -3,6 +3,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QScrollArea>
+#include <QCloseEvent>
 #include <parameterwidget.h>
 #include "QsLog.h"
 
@@ -23,6 +24,12 @@ void ParameterView::addConfig(QString name,ConfigData *data)
     Q_UNUSED(name)
     Q_UNUSED(data)
 
+}
+void ParameterView::closeEvent(QCloseEvent *event)
+{
+	event->ignore();
+	((QMdiSubWindow*)this->parent())->hide();
+	emit windowHiding((QMdiSubWindow*)this->parent());
 }
 
 void ParameterView::currentItemChanged(QTreeWidgetItem *current,QTreeWidgetItem *prev)

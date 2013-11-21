@@ -51,4 +51,5 @@ void AboutView::closeEvent(QCloseEvent *event)
 {
 	event->ignore();
 	((QMdiSubWindow*)this->parent())->hide();
+	emit windowHiding((QMdiSubWindow*)this->parent());
 }
