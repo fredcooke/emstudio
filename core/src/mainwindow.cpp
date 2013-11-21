@@ -231,6 +231,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	aboutView = new AboutView();
 	aboutView->setHash(define2string(GIT_HASH));
 	aboutView->setCommit(define2string(GIT_COMMIT));
+	aboutView->setDate(define2string(GIT_DATE));
 	aboutMdiWindow = ui.mdiArea->addSubWindow(aboutView);
 	aboutMdiWindow->setGeometry(aboutView->geometry());
 	aboutMdiWindow->hide();

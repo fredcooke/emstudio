@@ -30,6 +30,7 @@ win32-x-g++ { #Linux based crossplatform 32bit build
 	LIBS += -L/home/michael/QtWin32/lib
 	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+        DEFINES += GIT_DATE=\""$$system(date)"\"
         QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 } else:win64-x-g++ { #Linux based crossplatform 64bit build
 	TARGET = ../../../core/plugins/freeemsplugin
@@ -40,6 +41,7 @@ win32-x-g++ { #Linux based crossplatform 32bit build
 	LIBS += -L/home/michael/QtWin64/lib
 	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+        DEFINES += GIT_DATE=\""$$system(date)"\"
         QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 } else:win32 { #Windows based mingw build
 	TARGET = ../../../core/plugins/freeemsplugin
@@ -55,6 +57,9 @@ unix {
 	TARGET = ../../core/plugins/freeemsplugin
 	target.path = /usr/share/emstudio/plugins
 	INSTALLS += target
+        DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
+        DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+        DEFINES += GIT_DATE=\""$$system(date)"\"
 }
 # Input
 HEADERS += datapacketdecoder.h \

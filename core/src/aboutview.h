@@ -37,6 +37,7 @@ public:
 	void setHash(QString hash);
 	void setVersionLabel(QString version);
 	void setCommit(QString commit);
+	void setDate(QString date);
 protected:
 	void closeEvent(QCloseEvent *event);
 private:

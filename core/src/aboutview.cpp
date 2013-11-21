@@ -40,12 +40,14 @@ void AboutView::setHash(QString hash)
 	m_hash = hash;
 	ui.commitHashLineEdit->setText(hash);
 }
-
+void AboutView::setDate(QString date)
+{
+	ui.dateLineEdit->setText(date);
+}
 void AboutView::setCommit(QString commit)
 {
 	m_commit = commit;
 	ui.commitIdLineEdit->setText(commit);
-
 }
 void AboutView::closeEvent(QCloseEvent *event)
 {

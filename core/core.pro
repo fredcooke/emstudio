@@ -32,6 +32,7 @@ win32-x-g++ { #Linux based crossplatform 32bit build
 	LIBS += -L/home/michael/QtWin32/lib
         DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+        DEFINES += GIT_DATE=\""$$system(date)"\"
         QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 } else:win64-x-g++ { #Linux based crossplatform 64bit build
         message("Building for win64-x-g++")
@@ -40,6 +41,7 @@ win32-x-g++ { #Linux based crossplatform 32bit build
         LIBS += -L/home/michael/QtWin64/lib
         DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+DEFINES += GIT_DATE=\""$$system(date)"\"
         QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 } else:win32 { #Windows based mingw build
 	message("Building for win32")
@@ -68,6 +70,7 @@ unix {
 	INCLUDEPATH += /usr/include/qwt
         DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+        DEFINES += GIT_DATE=\""$$system(date)"\"
 }
 mac {
 	QMAKE_CXXFLAGS += -Werror
