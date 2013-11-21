@@ -94,12 +94,17 @@ int main(int argc, char *argv[])
 		if (!appDir.cd("EMStudio"))
 		{
 			appDir.mkdir("EMStudio");
+			appDir.cd("EMStudio");
+		}
+		if (!appDir.cd("applogs"))
+		{
+			appDir.mkdir("applogs");
 		}
 	}
-	const QString sLogPath(QDir(appDataDir + "/EMStudio").filePath("log.txt"));
+	const QString sLogPath(QDir(appDataDir + "/EMStudio/applogs").filePath("log.txt"));
 
 	QsLogging::DestinationPtr fileDestination(
-	   QsLogging::DestinationFactory::MakeFileDestination(sLogPath, true, 0, 5) );
+	   QsLogging::DestinationFactory::MakeFileDestination(sLogPath, true, 0, 100) );
 	QsLogging::DestinationPtr debugDestination(
 	   QsLogging::DestinationFactory::MakeDebugOutputDestination() );
 	logger.addDestination(debugDestination);
