@@ -810,22 +810,28 @@ bool TableView2D::updateTable()
 		ui.tableWidget->setColumnCount(ui.tableWidget->columnCount()+1);
 		ui.tableWidget->setItem(0,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->axis()[i],'f',m_metaData.xDp)));
 		ui.tableWidget->setItem(1,ui.tableWidget->columnCount()-1,new QTableWidgetItem(QString::number(tableData->values()[i],'f',m_metaData.yDp)));
-
-		if ((tableData->values()[i] - tableData->minActualYAxis()) < (tableData->maxActualYAxis() - tableData->minActualYAxis())/4)
+		if (tableData->maxActualYAxis() == tableData->minActualYAxis())
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,(255*(((tableData->values()[i] - tableData->minActualYAxis()))/((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0))),255));
-		}
-		else if ((tableData->values()[i] - tableData->minActualYAxis()) < (((tableData->maxActualYAxis()-tableData->minActualYAxis())/4)*2))
-		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*(((tableData->values()[i] - tableData->minActualYAxis())-(((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0)))/((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0)))));
-		}
-		else if ((tableData->values()[i] - tableData->minActualYAxis()) < (((tableData->maxActualYAxis() - tableData->minActualYAxis())/4)*3))
-		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb((255*(((tableData->values()[i] - tableData->minActualYAxis())-(((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0)*2))/((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0))),255,0));
+			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,255,(255/2.0),255));
 		}
 		else
 		{
-			ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(255,255-(255*(((tableData->values()[i] - tableData->minActualYAxis())-(((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0)*3))/((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0))),0));
+			if ((tableData->values()[i] - tableData->minActualYAxis()) < (tableData->maxActualYAxis() - tableData->minActualYAxis())/4)
+			{
+				ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,(255*(((tableData->values()[i] - tableData->minActualYAxis()))/((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0))),255));
+			}
+			else if ((tableData->values()[i] - tableData->minActualYAxis()) < (((tableData->maxActualYAxis()-tableData->minActualYAxis())/4)*2))
+			{
+				ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*(((tableData->values()[i] - tableData->minActualYAxis())-(((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0)))/((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0)))));
+			}
+			else if ((tableData->values()[i] - tableData->minActualYAxis()) < (((tableData->maxActualYAxis() - tableData->minActualYAxis())/4)*3))
+			{
+				ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb((255*(((tableData->values()[i] - tableData->minActualYAxis())-(((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0)*2))/((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0))),255,0));
+			}
+			else
+			{
+				ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(255,255-(255*(((tableData->values()[i] - tableData->minActualYAxis())-(((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0)*3))/((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0))),0));
+			}
 		}
 		samples.append(QPointF(tableData->axis()[i],tableData->values()[i]));
 	}
