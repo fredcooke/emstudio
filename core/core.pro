@@ -16,6 +16,14 @@ CONFIG += console rtti exceptions
 
 INCLUDEPATH += $$PWD/../lib/core
 DEPENDPATH += $$PWD/../lib/core
+
+
+#Ensure the pro file gets touched at the end of the build, so the next build reruns qmake
+gittouch.commands = touch core.pro
+QMAKE_EXTRA_TARGETS += gittouch
+POST_TARGETDEPS += gittouch
+
+
 include(QsLog/QsLog.pri)
 win32-x-g++ { #Linux based crossplatform 32bit build
         message("Building for win32-x-g++")
@@ -58,8 +66,8 @@ unix {
 	INSTALLS += target config dashboard
 	LIBS += -lqwt -lqjson -lGL -lGLU -lglut
 	INCLUDEPATH += /usr/include/qwt
-	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
-	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+        DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
+        DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
 }
 mac {
 	QMAKE_CXXFLAGS += -Werror

@@ -15,6 +15,12 @@ include(../../serialport/apmserial.pri)
 QT -= gui
 INCLUDEPATH += $$PWD/../../lib/core
 DEPENDPATH += $$PWD/../../lib/core
+
+gittouch.commands = touch freeems.pro
+QMAKE_EXTRA_TARGETS += gittouch
+POST_TARGETDEPS += gittouch
+
+
 win32-x-g++ { #Linux based crossplatform 32bit build
 	TARGET = ../../../core/plugins/freeemsplugin
 	win32:QMAKE_LFLAGS += -shared
