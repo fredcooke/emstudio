@@ -45,7 +45,7 @@ private:
 	QString m_hash;
 	Ui::AboutView ui;
 signals:
-	void windowHiding(QWidget *parent);
+	void windowHiding(QMdiSubWindow *parent);
 };
 
 #endif // ABOUTVIEW_H

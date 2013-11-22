@@ -23,6 +23,7 @@
 #define COMSETTINGS_H
 
 #include <QWidget>
+#include <QMdiSubWindow>
 #include "ui_comsettings.h"
 
 class ComSettings : public QWidget
@@ -47,6 +48,8 @@ public:
 	void setBaud(int baud);
 	int getInterByteDelay();
 	void setInterByteDelay(int delay);
+protected:
+	void closeEvent(QCloseEvent *event);
 private slots:
 	void browseLogFolderClicked();
 private:
@@ -54,6 +57,7 @@ private:
 signals:
 	void saveClicked();
 	void cancelClicked();
+	void windowHiding(QMdiSubWindow *parent);
 };
 
 #endif // COMSETTINGS_H

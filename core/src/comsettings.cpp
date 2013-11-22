@@ -36,6 +36,12 @@ void ComSettings::setInterByteDelay(int delay)
 {
 	ui.interByteDelaySpinBox->setValue(delay);
 }
+void ComSettings::closeEvent(QCloseEvent *event)
+{
+	emit windowHiding((QMdiSubWindow*)this->parent());
+	QWidget::closeEvent(event);
+}
+
 void ComSettings::browseLogFolderClicked()
 {
 	QString dir = QFileDialog::getExistingDirectory(this,"Select Log Folder",".");

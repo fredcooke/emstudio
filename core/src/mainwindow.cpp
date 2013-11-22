@@ -1191,6 +1191,7 @@ void MainWindow::ui_saveDataButtonClicked()
 void MainWindow::menu_settingsClicked()
 {
 	ComSettings *settings = new ComSettings();
+	//connect(settings,SIGNAL(windowHiding(QMdiSubWindow*)),this,SLOT(windowHidden(QMdiSubWindow*)));
 	settings->setComPort(m_comPort);
 	settings->setBaud(m_comBaud);
 	settings->setSaveDataLogs(m_saveLogs);
@@ -1293,6 +1294,7 @@ void MainWindow::settingsSaveClicked()
 	settings.endGroup();
 	QMdiSubWindow *subwin = qobject_cast<QMdiSubWindow*>(comSettingsWidget->parent());
 	ui.mdiArea->removeSubWindow(subwin);
+	comSettingsWidget->close();
 	comSettingsWidget->deleteLater();
     if (emsComms)
     {
@@ -1356,6 +1358,7 @@ void MainWindow::settingsCancelClicked()
 	comSettingsWidget->hide();
 	QMdiSubWindow *subwin = qobject_cast<QMdiSubWindow*>(comSettingsWidget->parent());
 	ui.mdiArea->removeSubWindow(subwin);
+	comSettingsWidget->close();
 	comSettingsWidget->deleteLater();
 }
 void MainWindow::menu_windows_EmsStatusClicked()
