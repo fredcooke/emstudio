@@ -165,6 +165,7 @@ private:
 	//EmsData *checkEmsData;
 	int m_currentEcuClock;
 	QMap<QMdiSubWindow*,QAction*> m_mdiSubWindowToActionMap;
+	bool m_EcuResetPopup;
 private slots:
 	void windowHidden(QMdiSubWindow* window);
 	void bringToFrontAndShow();
