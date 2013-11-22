@@ -1562,6 +1562,7 @@ void MainWindow::emsCommsConnected()
 		action->setCheckable(true);
 		ui.menuWizards->addAction(action);
 		connect(action,SIGNAL(triggered(bool)),view,SLOT(setVisible(bool)));
+		connect(view,SIGNAL(visibilityChanged(bool)),action,SLOT(setChecked(bool)));
 	}
     //virtual QList<QString> getConfigList()=0;
 	for (int i=0;i<emsComms->getConfigList().size();i++)

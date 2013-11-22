@@ -25,8 +25,12 @@ private:
 	QVariantMap m_savedPayload;
 	EmsComms *emscomms;
     QList<QString> m_configRequestList;
+protected:
+    void showEvent(QShowEvent *event);
+    void hideEvent(QHideEvent *event);
 signals:
 	void payloadDecoded(QVariantMap data);
+	void visibilityChanged(bool visible);
 public slots:
 	void configRecieved(ConfigBlock,QVariant);
     void configUpdate();

@@ -81,3 +81,14 @@ void WizardView::setMemory(unsigned short locationid,unsigned short offset,unsig
 	}
 	emscomms->updateBlockInFlash(locationid,offset,length,data);
 }
+void WizardView::showEvent(QShowEvent *event)
+{
+	Q_UNUSED(event)
+	emit visibilityChanged(true);
+}
+
+void WizardView::hideEvent(QHideEvent *event)
+{
+	Q_UNUSED(event)
+	emit visibilityChanged(false);
+}
