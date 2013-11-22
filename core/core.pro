@@ -109,7 +109,8 @@ SOURCES += src/main.cpp\
     src/tablewidgetdelegate.cpp \
     src/parameterview.cpp \
     src/parameterwidget.cpp \
-    src/wizardview.cpp
+    src/wizardview.cpp \
+    src/firmwaremetadata.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -151,7 +152,8 @@ HEADERS  += src/mainwindow.h \
     datapacketdecoder.h \
     src/parameterview.h \
     src/parameterwidget.h \
-    src/wizardview.h
+    src/wizardview.h \
+    src/firmwaremetadata.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
@@ -169,7 +171,8 @@ FORMS    += src/mainwindow.ui \
     src/readonlyramview.ui \
     src/emsstatus.ui \
     src/configview.ui \
-    src/parameterview.ui
+    src/parameterview.ui \
+    src/firmwaremetadata.ui
 SUBDIRS += plugins
 OTHER_FILES += \
     README.md \

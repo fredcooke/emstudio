@@ -79,7 +79,7 @@
     <addaction name="actionEMS_Status"/>
     <addaction name="actionInterrogation_Progress"/>
     <addaction name="actionParameter_View"/>
-    <addaction name="separator"/>
+    <addaction name="actionFirmware_Metadata"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -203,6 +203,11 @@
   <action name="actionParameter_View">
    <property name="text">
     <string>Parameter View</string>
+   </property>
+  </action>
+  <action name="actionFirmware_Metadata">
+   <property name="text">
+    <string>Firmware Metadata</string>
    </property>
   </action>
  </widget>

@@ -44,6 +44,7 @@
 #include "aboutview.h"
 //#include "memorylocation.h"
 #include "interrogateprogressview.h"
+#include "firmwaremetadata.h"
 #include "table2ddata.h"
 #include "readonlyramview.h"
 #include "emsstatus.h"
@@ -111,11 +112,13 @@ private:
 	PacketStatusView *packetStatus;
 	AboutView *aboutView;
 	EmsStatus *statusView;
+	FirmwareMetaData *firmwareMetaData;
 	InterrogateProgressView *progressView;
 	QList<int> interrogationSequenceList;
 	QMap<unsigned short,QWidget*> m_rawDataView;
 	QMap<unsigned short,ConfigView*> m_configDataView;
 	QMdiSubWindow *tablesMdiWindow;
+	QMdiSubWindow *firmwareMetaMdiWindow;
 	QMdiSubWindow *interrogateProgressMdiWindow;
 	QMdiSubWindow *emsMdiWindow;
 	QMdiSubWindow *flagsMdiWindow;
@@ -197,6 +200,7 @@ private slots:
 	void menu_windows_PacketStatusClicked();
 	void menu_windows_interrogateProgressViewClicked();
 	void menu_windows_ParameterViewClicked();
+	void menu_windows_firmwareMetadataClicked();
 	void menu_settingsClicked();
 	void menu_connectClicked();
 	void menu_aboutClicked();

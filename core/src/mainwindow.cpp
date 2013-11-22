@@ -189,6 +189,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionEnable_Datalogs,SIGNAL(triggered()),this,SLOT(menu_enableDatalogsClicked()));
 	connect(ui.actionDisable_Datalog_Stream,SIGNAL(triggered()),this,SLOT(menu_disableDatalogsClicked()));
 	connect(ui.actionParameter_View,SIGNAL(triggered()),this,SLOT(menu_windows_ParameterViewClicked()));
+	connect(ui.actionFirmware_Metadata,SIGNAL(triggered()),this,SLOT(menu_windows_firmwareMetadataClicked()));
 	ui.actionInterrogation_Progress->setEnabled(false);
 
 
@@ -260,6 +261,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 		//Running with no install, but not src?? Still handle it.
 		dataGauges->setFile("gauges.qml");
 	}
+
+	firmwareMetaData = new FirmwareMetaData();
+	firmwareMetaMdiWindow = ui.mdiArea->addSubWindow(firmwareMetaData);
+	firmwareMetaMdiWindow->setGeometry(firmwareMetaData->geometry());
+	firmwareMetaMdiWindow->hide();
+	firmwareMetaMdiWindow->setWindowTitle(firmwareMetaData->windowTitle());
 
 	dataTables = new TableView();
 	tablesMdiWindow = ui.mdiArea->addSubWindow(dataTables);
@@ -338,6 +345,12 @@ void MainWindow::menu_windows_ParameterViewClicked()
 	parameterMdiWindow->show();
 	QApplication::postEvent(parameterMdiWindow, new QEvent(QEvent::Show));
 	QApplication::postEvent(parameterMdiWindow, new QEvent(QEvent::WindowActivate));
+}
+void MainWindow::menu_windows_firmwareMetadataClicked()
+{
+	firmwareMetaMdiWindow->show();
+	QApplication::postEvent(firmwareMetaMdiWindow, new QEvent(QEvent::Show));
+	QApplication::postEvent(firmwareMetaMdiWindow, new QEvent(QEvent::WindowActivate));
 }
 
 void MainWindow::menu_file_saveOfflineDataClicked()
@@ -1439,7 +1452,8 @@ void MainWindow::playLogButtonClicked()
 }
 void MainWindow::interrogationData(QMap<QString,QString> datamap)
 {
-	emsInfo->setInterrogationData(datamap);
+	firmwareMetaData->setInterrogationData(datamap);
+	//emsInfo->setInterrogationData(datamap);
 }
 
 void MainWindow::interfaceVersion(QString version)

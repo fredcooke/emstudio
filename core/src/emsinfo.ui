@@ -15,18 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_6">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,3">
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="2">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QTableWidget" name="tableWidget"/>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </item>
+    <layout class="QVBoxLayout" name="verticalLayout_2" stretch="3">
      <item>
       <widget class="QTableWidget" name="locationIdInfoTableWidget"/>
      </item>

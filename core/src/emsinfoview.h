@@ -37,7 +37,7 @@ public:
 	explicit EmsInfoView(QWidget *parent = 0);
 	~EmsInfoView();
 	void clear();
-	void setInterrogationData(QMap<QString,QString> datamap);
+
 protected:
 	void closeEvent(QCloseEvent *event);
 public slots:
