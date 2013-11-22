@@ -35,7 +35,6 @@ EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 	ui.tableWidget->horizontalHeader()->hide();
 	ui.tableWidget->verticalHeader()->hide();
 	connect(ui.locationIdInfoTableWidget,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(locationInfoWidgetDoubleClicked(int,int)));
-	connect(ui.checkSyncButton,SIGNAL(clicked()),this,SIGNAL(checkSync()));
 }
 void EmsInfoView::normalViewClicked()
 {
@@ -73,17 +72,6 @@ void EmsInfoView::hexViewClicked()
 	//displayLocationId(locid,true,1); //0 for normal view, 1 for hex view
 }
 
-void EmsInfoView::setLocalRam(bool dirty)
-{
-	if (dirty)
-	{
-		ui.localRamLineEdit->setText("Local changes not saved to RAM");
-	}
-	else
-	{
-		ui.localRamLineEdit->setText("Local changes in device RAM");
-	}
-}
 void EmsInfoView::clear()
 {
 	ui.locationIdInfoTableWidget->clearContents();
@@ -92,17 +80,6 @@ void EmsInfoView::clear()
 	ui.locationIdInfoTableWidget->setRowCount(0);
 }
 
-void EmsInfoView::setDeviceFlash(bool dirty)
-{
-	if (dirty)
-	{
-		ui.deviceFlashLineEdit->setText("Local changes not saved to FLASH");
-	}
-	else
-	{
-		ui.deviceFlashLineEdit->setText("Local changes in FLASH");
-	}
-}
 
 void EmsInfoView::locationInfoWidgetDoubleClicked(int row, int column)
 {

@@ -36,9 +36,6 @@ class EmsInfoView : public QWidget
 public:
 	explicit EmsInfoView(QWidget *parent = 0);
 	~EmsInfoView();
-	void setLocalRam(bool dirty);
-
-	void setDeviceFlash(bool dirty);
 	void clear();
 	void setInterrogationData(QMap<QString,QString> datamap);
 protected:
