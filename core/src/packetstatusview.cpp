@@ -44,6 +44,10 @@ PacketStatusView::PacketStatusView(QWidget *parent) : QWidget(parent)
 	ui.decoderFailureTableWidget->setColumnCount(1);
 	ui.decoderFailureTableWidget->setColumnWidth(0,1000);
 	ui.decoderFailureTableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("Failed Packet Bytes"));
+
+	ui.packetCountTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	ui.failedPacketTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	ui.decoderFailureTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 void PacketStatusView::clear()
 {

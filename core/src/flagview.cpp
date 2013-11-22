@@ -32,6 +32,7 @@ FlagView::FlagView(QWidget *parent) : QWidget(parent)
 	ui.flagsTableWidget->setColumnCount(1);
 	ui.flagsTableWidget->setColumnWidth(0,310);
 	//ui.flagsTableWidget->setColumnWidth(1,50);
+	ui.flagsTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 FlagView::~FlagView()

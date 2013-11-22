@@ -27,8 +27,8 @@ InterrogateProgressView::InterrogateProgressView(QWidget *parent) : QWidget(pare
 	ui.setupUi(this);
 	connect(ui.cancelPushButton,SIGNAL(clicked()),this,SLOT(cancelClickedSlot()));
 	reset();
-
-
+	ui.outputTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	ui.overviewTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 void InterrogateProgressView::closeEvent(QCloseEvent *event)
 {

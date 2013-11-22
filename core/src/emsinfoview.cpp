@@ -27,7 +27,7 @@
 EmsInfoView::EmsInfoView(QWidget *parent) : QWidget(parent)
 {
 	ui.setupUi(this);
-
+	ui.locationIdInfoTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	connect(ui.locationIdInfoTableWidget,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(locationInfoWidgetDoubleClicked(int,int)));
 }
 void EmsInfoView::normalViewClicked()
