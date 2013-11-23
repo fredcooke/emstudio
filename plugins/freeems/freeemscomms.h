@@ -39,6 +39,7 @@
 #include "ferawdata.h"
 #include "packet.h"
 #include "packetdecoder.h"
+#include "feconfigdata.h"
 
 class FreeEmsComms : public EmsComms
 {
@@ -154,8 +155,8 @@ private:
 	QMap<unsigned short,Table2DData*> m_2dTableMap;
 	QMap<unsigned short,Table3DData*> m_3dTableMap;
 	QMap<unsigned short,RawData*> m_rawDataMap;
-	QMap<unsigned short,QList<ConfigData*> > m_locIdToConfigListMap;
-	QMap<QString,ConfigData*> m_configMap;
+	QMap<unsigned short,QList<FEConfigData*> > m_locIdToConfigListMap;
+	QMap<QString,FEConfigData*> m_configMap;
 	PacketDecoder *m_packetDecoder;
 	QMap<QString,QString> m_interrogationMetaDataMap;
 	void sendNextInterrogationPacket();

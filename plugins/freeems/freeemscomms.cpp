@@ -177,11 +177,22 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	{
 		QVariantMap configitemmap = configlist[i].toMap();
 		FEConfigData *block = new FEConfigData();
+		//connect(data,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
+		connect(block,SIGNAL(saveSingleDataToFlash(unsigned short,unsigned short,unsigned short,QByteArray)),&emsData,SLOT(flashBytesLocalUpdate(unsigned short,unsigned short,unsigned short,QByteArray)));
 		block->setName(configitemmap["name"].toString());
 		block->setType(configitemmap["type"].toString());
 		block->setElementSize(configitemmap["sizeofelement"].toInt());
 		block->setSize(configitemmap["size"].toInt());
 		block->setOffset(configitemmap["offset"].toInt());
+		QList<QPair<QString,double> > parsedcalclist;
+		QVariantList calclist = configitemmap["calc"].toList();
+		for (int j=0;j<calclist.size();j++)
+		{
+			QVariantMap calcitemmap = calclist[j].toMap();
+			parsedcalclist.append(QPair<QString,double>(calcitemmap["type"].toString(),calcitemmap["value"].toDouble()));
+		}
+		block->setCalc(parsedcalclist);
+
 		//configitemmap["calc"];
 		block->setSizeOverride(configitemmap["sizeoverride"].toString());
 		bool ok = false;
@@ -198,7 +209,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 		{
 			if (!m_locIdToConfigListMap.contains(locidint))
 			{
-				m_locIdToConfigListMap[locidint] = QList<ConfigData*>();
+				m_locIdToConfigListMap[locidint] = QList<FEConfigData*>();
 			}
 			m_locIdToConfigListMap[locidint].append(block);
 		}
@@ -1797,9 +1808,9 @@ void FreeEmsComms::locationIdUpdate(unsigned short locationid)
 
 		if (m_locIdToConfigListMap.contains(updatelist[i]))
 		{
-			for (int i=0;i<m_locIdToConfigListMap[updatelist[i]].size();i++)
+			for (int j=0;j<m_locIdToConfigListMap[updatelist[i]].size();j++)
 			{
-				m_locIdToConfigListMap[updatelist[i]][i]->setData(emsData.getLocalRamBlock(updatelist[i]));
+				m_locIdToConfigListMap[updatelist[i]][j]->setData(emsData.getLocalFlashBlock(updatelist[i]));
 			}
 		}
 	}

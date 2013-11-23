@@ -24,7 +24,8 @@ private:
 	QTimer *updateTimer;
 	QVariantMap m_savedPayload;
 	EmsComms *emscomms;
-    QList<QString> m_configRequestList;
+	QList<QString> m_configRequestList;
+	QMap<QString,ConfigBlock*> m_configBlockMap;
 protected:
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);

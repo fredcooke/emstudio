@@ -1,7 +1,8 @@
 #include "feconfigdata.h"
-
+#include "QsLog.h"
 FEConfigData::FEConfigData() : ConfigData()
 {
+	m_value = QVariant((double)0);
 }
 FEConfigData::FEConfigData(QString name,QString type, QString override,unsigned short locationid, unsigned short size,unsigned short elementsize,unsigned short offset, QList<QPair<QString,double> > calc) : ConfigData()
 {
@@ -19,6 +20,7 @@ FEConfigData::FEConfigData(QString name,QString type, QString override,unsigned 
 }
 QVariant FEConfigData::value()
 {
+	QLOG_DEBUG() << "value requested:" << m_value;
 	return m_value;
 }
 void FEConfigData::setValue(QVariant value)
@@ -30,7 +32,7 @@ void FEConfigData::setValue(QVariant value)
 		QByteArray data;
 		for (int i=0;i<m_elementSize;i++)
 		{
-			data.append(usval << (((m_elementSize-1)-i)*8));
+			data.append(usval >> (((m_elementSize-1)-i)*8));
 		}
 		emit saveSingleDataToFlash(m_locationId,m_offset,m_elementSize,data);
 	}
@@ -44,16 +46,20 @@ void FEConfigData::setData(QByteArray data)
 {
     if (m_type == "value")
     {
-	if (data.size() < m_offset + m_elementSize)
+	if (data.size() >= (m_offset + m_elementSize))
 	{
 	    QByteArray newdata = data.mid(m_offset,m_elementSize);
 	    unsigned long val = 0;
 	    for (int i=0;i<m_elementSize;i++)
 	    {
-		val += newdata[i] << (((m_elementSize-1) - i) * 8);
+		val += ((unsigned char)newdata[i]) << (((m_elementSize-1) - i) * 8);
 	    }
 	    m_value = QVariant(calcAxis(val,m_calc));
 
+	}
+	else
+	{
+		//QLOG_DEBUG() << "Data size:" << data.size() << "Expected:" << m_offset + m_elementSize;
 	}
 
     }

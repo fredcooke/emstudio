@@ -1551,27 +1551,34 @@ void MainWindow::emsCommsConnected()
 	QDir wizards("Wizards");
 	foreach (QString file,wizards.entryList(QDir::Files | QDir::NoDotAndDotDot))
 	{
-		WizardView *view = new WizardView();
-		connect(emsComms,SIGNAL(configRecieved(ConfigBlock,QVariant)),view,SLOT(configRecieved(ConfigBlock,QVariant)));
-		m_wizardList.append(view);
-		view->setFile(emsComms,wizards.absoluteFilePath(file));
-		view->passConfig(m_memoryMetaData->configMetaData());
-		view->setGeometry(0,0,400,300);
-		QAction *action = new QAction(this);
-		action->setText(file.mid(0,file.lastIndexOf(".")));
-		action->setCheckable(true);
-		ui.menuWizards->addAction(action);
-		connect(action,SIGNAL(triggered(bool)),view,SLOT(setVisible(bool)));
-		connect(view,SIGNAL(visibilityChanged(bool)),action,SLOT(setChecked(bool)));
+		if (file.endsWith(".qml"))
+		{
+			WizardView *view = new WizardView();
+			connect(emsComms,SIGNAL(configRecieved(ConfigBlock,QVariant)),view,SLOT(configRecieved(ConfigBlock,QVariant)));
+			m_wizardList.append(view);
+			for (int i=0;i<emsComms->getConfigList().size();i++)
+			{
+				view->addConfig(emsComms->getConfigList()[i],emsComms->getConfigData(emsComms->getConfigList()[i]));
+			}
+			view->setFile(emsComms,wizards.absoluteFilePath(file));
+			view->passConfig(m_memoryMetaData->configMetaData());
+			view->setGeometry(0,0,400,300);
+			QAction *action = new QAction(this);
+			action->setText(file.mid(0,file.lastIndexOf(".")));
+			action->setCheckable(true);
+			ui.menuWizards->addAction(action);
+			connect(action,SIGNAL(triggered(bool)),view,SLOT(setVisible(bool)));
+			connect(view,SIGNAL(visibilityChanged(bool)),action,SLOT(setChecked(bool)));
+		}
 	}
     //virtual QList<QString> getConfigList()=0;
 	for (int i=0;i<emsComms->getConfigList().size();i++)
 	{
 		parameterView->addConfig(emsComms->getConfigList()[i],emsComms->getConfigData(emsComms->getConfigList()[i]));
-		for (int j=0;j<m_wizardList.size();j++)
+		/*for (int j=0;j<m_wizardList.size();j++)
 		{
 			m_wizardList[j]->addConfig(emsComms->getConfigList()[i],emsComms->getConfigData(emsComms->getConfigList()[i]));
-		}
+		}*/
 	}
 	//New log and settings file here.
 	if (m_memoryInfoMap.size() == 0)

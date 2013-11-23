@@ -61,8 +61,8 @@ class ConfigData : public QObject
 public:
 	virtual void setData(QByteArray data)=0;
 	virtual QString name()=0;
-	virtual QVariant value()=0;
-	virtual void setValue(QVariant value)=0;
+	virtual Q_INVOKABLE QVariant value()=0;
+	virtual Q_INVOKABLE void setValue(QVariant value)=0;
 signals:
 	void update();
 };

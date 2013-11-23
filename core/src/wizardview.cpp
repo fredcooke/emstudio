@@ -36,17 +36,22 @@ void WizardView::passConfig(QMap<QString,QList<ConfigBlock> > config)
 }
 void WizardView::addConfig(QString name,ConfigData *config)
 {
-    if (!m_configRequestList.contains(name))
-    {
+	if (!m_configRequestList.contains(name))
+	{
         //Throw away, we don't care
-        return;
-    }
-    //We don't actually need to hold on to this object (*config), it is garunteed to live for the life
-    //of the application. Simply connect the signals/slots, and ignore it otherwise.
-    connect(config,SIGNAL(update()),this,SLOT(configUpdate()));
+//        return;
+	}
+	//m_configBlockMap[name] = config;
+	//We don't actually need to hold on to this object (*config), it is garunteed to live for the life
+	//of the application. Simply connect the signals/slots, and ignore it otherwise.
+	connect(config,SIGNAL(update()),this,SLOT(configUpdate()));
+	rootContext()->setContextProperty(name,config);
 }
 void WizardView::configUpdate()
 {
+	for (QMap<QString,ConfigBlock*>::const_iterator i=m_configBlockMap.constBegin();i!=m_configBlockMap.constEnd();i++)
+	{
+	}
     //Config block got updated.
     //ConfigData *data = qobject_cast<ConfigData*>(sender());
     //if (!data)
