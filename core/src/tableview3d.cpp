@@ -1314,9 +1314,12 @@ void TableView3D::passDatalog(QVariantMap data)
 			{
 				if (!ui.tableWidget->item(lowerrow,highercolumn)->isSelected())
 				{
-					m_highlightItemList.append(QPair<int,int>(lowerrow,highercolumn));
-					ui.tableWidget->item(lowerrow,highercolumn)->setData(Qt::UserRole+1,true);
-					ui.tableWidget->item(lowerrow,highercolumn)->setData(Qt::UserRole+2,lowercolumnratio);
+					if (lowercolumnratio != uppercolumnratio)
+					{
+					}
+					//m_highlightItemList.append(QPair<int,int>(lowerrow,highercolumn));
+					//ui.tableWidget->item(lowerrow,highercolumn)->setData(Qt::UserRole+1,true);
+					//ui.tableWidget->item(lowerrow,highercolumn)->setData(Qt::UserRole+2,lowercolumnratio);
 				}
 			}
 
@@ -1325,9 +1328,9 @@ void TableView3D::passDatalog(QVariantMap data)
 			{
 				if (!ui.tableWidget->item(higherrow,highercolumn)->isSelected())
 				{
-					m_highlightItemList.append(QPair<int,int>(higherrow,highercolumn));
-					ui.tableWidget->item(higherrow,highercolumn)->setData(Qt::UserRole+1,true);
-					ui.tableWidget->item(higherrow,highercolumn)->setData(Qt::UserRole+2,uppercolumnratio);
+					//m_highlightItemList.append(QPair<int,int>(higherrow,highercolumn));
+					//ui.tableWidget->item(higherrow,highercolumn)->setData(Qt::UserRole+1,true);
+					//ui.tableWidget->item(higherrow,highercolumn)->setData(Qt::UserRole+2,uppercolumnratio);
 				}
 			}
 			/*if (ui.tableWidget->item(m_oldYLoc,m_oldXLoc))
