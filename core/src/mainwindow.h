@@ -89,6 +89,7 @@ public:
 	void setPlugin(QString plugin);
 	void connectToEms();
 private:
+	void loadWizards(QString dir);
 	QList<unsigned short> m_locationIdList;
 	bool m_checkEmsDataInUse;
 	bool m_offlineMode;

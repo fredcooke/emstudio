@@ -1530,25 +1530,9 @@ void MainWindow::emsOperatingSystem(QString os)
 {
 	emsinfo.operatingSystem = os;
 }
-
-void MainWindow::emsCommsConnected()
+void MainWindow::loadWizards(QString dir)
 {
-	emsComms->startInterrogation();
-	m_interrogationFailureCount = 0;
-	ui.actionSave_Offline_Data->setEnabled(true);
-	ui.actionLoad_Offline_Data->setEnabled(true);
-	while (ui.menuWizards->actions().size() > 0)
-	{
-		QAction *action = ui.menuWizards->actions().takeFirst();
-		ui.menuWizards->removeAction(action);
-		delete action;
-	}
-	for (int i=0;i<m_wizardList.size();i++)
-	{
-		delete m_wizardList[i];
-	}
-	m_wizardList.clear();
-	QDir wizards("Wizards");
+	QDir wizards(dir);
 	foreach (QString file,wizards.entryList(QDir::Files | QDir::NoDotAndDotDot))
 	{
 		if (file.endsWith(".qml"))
@@ -1571,6 +1555,30 @@ void MainWindow::emsCommsConnected()
 			connect(view,SIGNAL(visibilityChanged(bool)),action,SLOT(setChecked(bool)));
 		}
 	}
+}
+
+void MainWindow::emsCommsConnected()
+{
+	emsComms->startInterrogation();
+	m_interrogationFailureCount = 0;
+	ui.actionSave_Offline_Data->setEnabled(true);
+	ui.actionLoad_Offline_Data->setEnabled(true);
+	while (ui.menuWizards->actions().size() > 0)
+	{
+		QAction *action = ui.menuWizards->actions().takeFirst();
+		ui.menuWizards->removeAction(action);
+		delete action;
+	}
+	for (int i=0;i<m_wizardList.size();i++)
+	{
+		delete m_wizardList[i];
+	}
+	m_wizardList.clear();
+	//m_defaultsDir
+	QDir defaultsdir(m_defaultsDir);
+	loadWizards(defaultsdir.absolutePath() + "/wizards");
+	loadWizards("wizards");
+	loadWizards(m_localHomeDir + "/wizards");
     //virtual QList<QString> getConfigList()=0;
 	for (int i=0;i<emsComms->getConfigList().size();i++)
 	{
