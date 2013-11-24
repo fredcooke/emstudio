@@ -637,6 +637,54 @@ int FreeEmsComms::echoPacket(QByteArray packet)
 	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
+int FreeEmsComms::startBenchTest(unsigned char eventspercycle,unsigned short numcycles,unsigned short ticksperevent,QVariantList pineventmask,QVariantList pinmode)
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = BENCHTEST;
+	req.addArg(0x01,sizeof(char));
+	req.addArg(eventspercycle,sizeof(eventspercycle));
+	req.addArg(numcycles,sizeof(numcycles));
+	req.addArg(ticksperevent,sizeof(ticksperevent));
+	for (int i=0;i<pineventmask.size();i++)
+	{
+		req.addArg((unsigned char)pineventmask[i].toInt(),1);
+	}
+	for (int i=0;i<pinmode.size();i++)
+	{
+		req.addArg((unsigned short)pinmode[i].toInt(),2);
+	}
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+int FreeEmsComms::stopBenchTest()
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = BENCHTEST;
+	req.addArg(0x00,sizeof(char));
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
+}
+int FreeEmsComms::bumpBenchTest(unsigned char cyclenum)
+{
+	m_reqListMutex.lock();
+	RequestClass req;
+	req.type = BENCHTEST;
+	req.addArg(0x02,sizeof(char));
+	req.addArg(cyclenum,sizeof(cyclenum));
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	m_reqListMutex.unlock();
+}
+
 int FreeEmsComms::getLocationIdInfo(unsigned short locationid)
 {
 	m_reqListMutex.lock();
@@ -755,11 +803,11 @@ bool FreeEmsComms::sendPacket(unsigned short payloadid,QList<QVariant> arglist,Q
 		header.append((char)((payloadid) & 0xFF));
 	}
 	QLOG_TRACE() << "About to send packet";
-    if (serialPort->writeBytes(generatePacket(header,payload)) < 0)
+	if (serialPort->writeBytes(generatePacket(header,payload)) < 0)
 	{
 		return false;
 	}
-	QLOG_TRACE() << "Sent packet" << "0x" + QString::number(payloadid,16).toUpper();
+	QLOG_TRACE() << "Sent packet" << "0x" + QString::number(payloadid,16).toUpper() <<  header.size() << payload.size();
 	emit packetSent(payloadid,header,payload);
 	return true;
 }
@@ -1322,6 +1370,24 @@ void FreeEmsComms::run()
 					}
 					m_threadReqList.removeAt(i);
 					i--;
+				}
+				m_waitingInfoMutex.unlock();
+			}
+			else if (m_threadReqList[i].type == BENCHTEST)
+			{
+				m_waitingInfoMutex.lock();
+				if (!m_waitingForResponse)
+				{
+					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = BENCHTEST;
+					if (!sendPacket(m_threadReqList[i],true))
+					{
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
+						return;
+					}
+					m_threadReqList.removeAt(i);
 				}
 				m_waitingInfoMutex.unlock();
 			}

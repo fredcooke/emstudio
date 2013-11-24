@@ -63,6 +63,7 @@ unix {
 	target.path = /usr/bin
 	dashboard.path = /usr/share/EMStudio/dashboards
 	dashboard.files += src/gauges.qml
+        dashboard.files += Wizards/BenchTest.qml
 	config.path = /usr/share/EMStudio/definitions
 	config.files += freeems.config.json
 	INSTALLS += target config dashboard
@@ -176,4 +177,4 @@ FORMS    += src/mainwindow.ui \
 SUBDIRS += plugins
 OTHER_FILES += \
     README.md \
-    wizard.qml
+    Wizards/BenchTest.qml

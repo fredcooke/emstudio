@@ -1562,7 +1562,7 @@ void MainWindow::emsCommsConnected()
 			}
 			view->setFile(emsComms,wizards.absoluteFilePath(file));
 			view->passConfig(m_memoryMetaData->configMetaData());
-			view->setGeometry(0,0,400,300);
+			view->setGeometry(0,0,800,600);
 			QAction *action = new QAction(this);
 			action->setText(file.mid(0,file.lastIndexOf(".")));
 			action->setCheckable(true);
@@ -1635,6 +1635,21 @@ void MainWindow::interrogationComplete()
 	{
 		emsMdiWindow->show();
 	}
+	QList<unsigned char> list;
+	QList<unsigned short> list2;
+	list.append(0);
+	list.append(2);
+	list.append(4);
+	list.append(6);
+	list.append(8);
+	list.append(10);
+	list2.append(50000);
+	list2.append(50000);
+	list2.append(50000);
+	list2.append(50000);
+	list2.append(50000);
+	list2.append(50000);
+	//emsComms->startBenchTest(12,4000,10000,list,list2);
 }
 void MainWindow::interrogateTaskStart(QString task, int sequence)
 {

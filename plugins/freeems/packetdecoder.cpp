@@ -430,8 +430,8 @@ void PacketDecoder::parsePacket(Packet parsedPacket)
 		{
 			if (parsedPacket.isNAK)
 			{
-				unsigned short errornum = parsedPacket.payload[0] << 8;
-				errornum += parsedPacket.payload[1];
+				unsigned short errornum = ((unsigned char)parsedPacket.payload[0]) << 8;
+				errornum += ((unsigned char)parsedPacket.payload[1]);
 				emit packetNaked(payloadid,parsedPacket.header,parsedPacket.payload,errornum);
 				return;
 			}

@@ -69,6 +69,9 @@ public:
 	int getCompilerVersion();
 	int getOperatingSystem();
 	int echoPacket(QByteArray packet);
+	Q_INVOKABLE int startBenchTest(unsigned char eventspercycle,unsigned short numcycles,unsigned short ticksperevent,QVariantList pineventmask,QVariantList pinmode);
+	Q_INVOKABLE int stopBenchTest();
+	Q_INVOKABLE int bumpBenchTest(unsigned char cyclenum);
 	int getLocationIdList(unsigned char listtype, unsigned short listmask);
 	int softReset();
 	int hardReset();
