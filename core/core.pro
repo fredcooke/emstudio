@@ -63,10 +63,13 @@ unix {
 	target.path = /usr/bin
 	dashboard.path = /usr/share/EMStudio/dashboards
 	dashboard.files += src/gauges.qml
-        dashboard.files += Wizards/BenchTest.qml
+	wizards.path = /usr/share/EMStudio/wizards
+	wizards.files += wizards/BenchTest.qml
+	wizards.files += wizards/DecoderOffset.qml
+	wizards.files += wizards/wizard.qml
 	config.path = /usr/share/EMStudio/definitions
 	config.files += freeems.config.json
-	INSTALLS += target config dashboard
+	INSTALLS += target config dashboard wizards
 	LIBS += -lqwt -lqjson -lGL -lGLU -lglut
 	INCLUDEPATH += /usr/include/qwt
         DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
@@ -177,4 +180,6 @@ FORMS    += src/mainwindow.ui \
 SUBDIRS += plugins
 OTHER_FILES += \
     README.md \
-    Wizards/BenchTest.qml
+    wizards/BenchTest.qml \
+    wizards/DecoderOffset.qml \
+    wizards/wizard.qml

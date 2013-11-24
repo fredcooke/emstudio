@@ -56,6 +56,10 @@ Section "EMStudio (Required)" ;No components page, name is not important
   File "core/decodersettings.json"
   SetOutPath "$INSTDIR\dashboards"
   File "core/src/gauges.qml"
+  SetOutPath "$INSTDIR\wizards"
+  File "core/src/wizards/BenchTest.qml"
+  File "core/src/wizards/DecoderOffset.qml"
+  File "core/src/wizards/wizard.qml"
   SetOutPath "$INSTDIR\plugins"
 !ifndef PLUGIN
   File "core/plugins/libfreeemsplugin.a"
