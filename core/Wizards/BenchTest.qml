@@ -10,383 +10,415 @@ Item {
         width: 800
         height: 600
         color: "grey"
-        Text {
-            x:10
-            y:240
+
+        Rectangle {
+            id: inforect
+            x: 0
+            y: 0
+            radius:5
+            width:800
+            height:250
             color: "white"
-            text: "Events Per Cycle (1-255):"
-        }
-        Rectangle {
-            x:250
-            y:240
-            width:100
-            height:30
-            color:"white"
             Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: eventspercycletext
-                    anchors.fill:parent
-                    color: "white"
-                    text:"12"
-                }
-            }
-        }
-        Text {
-            x:370
-            y:240
-            color: "white"
-            text: "Number Of Cycles (0-65535):"
-        }
-        Rectangle {
-            x:600
-            y:240
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: numberofcyclestext
-                    anchors.fill:parent
-                    color: "white"
-                    text:"50"
-                }
-            }
-        }
-        Text {
-            x:10
-            y:280
-            color: "white"
-            text: "Ticks Per Event (0-65535):"
-        }
-        Rectangle {
-            x:250
-            y:280
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: tickspereventtext
-                    anchors.fill:parent
-                    color: "white"
-                    text:"10000"
-                }
-            }
-        }
-        Text {
-            x:10
-            y:340
-            color: "white"
-            text: "Events to Fire From (0-255):"
-        }
-        Rectangle {
-            x:250
-            y:340
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: eventstofirefrom1
-                    anchors.fill:parent
-                    color: "white"
-                    text:"0"
-                }
-            }
-        }
-
-        Rectangle {
-            x:250
-            y:370
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: eventstofirefrom2
-                    anchors.fill:parent
-                    color: "white"
-                    text:"2"
-                }
-            }
-        }
-
-        Rectangle {
-            x:250
-            y:400
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: eventstofirefrom3
-                    anchors.fill:parent
-                    color: "white"
-                    text:"4"
-                }
-            }
-        }
-
-        Rectangle {
-            x:250
-            y:430
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: eventstofirefrom4
-                    anchors.fill:parent
-                    color: "white"
-                    text:"6"
-                }
-            }
-        }
-
-        Rectangle {
-            x:250
-            y:460
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: eventstofirefrom5
-                    anchors.fill:parent
-                    color: "white"
-                    text:"8"
-                }
-            }
-        }
-
-        Rectangle {
-            x:250
-            y:490
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: eventstofirefrom6
-                    anchors.fill:parent
-                    color: "white"
-                    text:"10"
-                }
-            }
-        }
-
-
-        Text {
-            x:370
-            y:290
-            color: "white"
-            text: "PW Source OR value (0-65535):"
-        }
-        Rectangle {
-            x:600
-            y:290
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: sourcetext1
-                    anchors.fill:parent
-                    color: "white"
-                    text:"50000"
-                }
-            }
-        }
-        Rectangle {
-            x:600
-            y:320
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: sourcetext2
-                    anchors.fill:parent
-                    color: "white"
-                    text:"50000"
-                }
-            }
-        }
-        Rectangle {
-            x:600
-            y:350
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: sourcetext3
-                    anchors.fill:parent
-                    color: "white"
-                    text:"50000"
-                }
-            }
-        }
-        Rectangle {
-            x:600
-            y:380
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: sourcetext4
-                    anchors.fill:parent
-                    color: "white"
-                    text:"50000"
-                }
-            }
-        }
-        Rectangle {
-            x:600
-            y:410
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: sourcetext5
-                    anchors.fill:parent
-                    color: "white"
-                    text:"50000"
-                }
-            }
-        }
-        Rectangle {
-            x:600
-            y:440
-            width:100
-            height:30
-            color:"white"
-            Rectangle {
-                x:2
-                y:2
-                width:96
-                height:26
-                color:"grey"
-                TextEdit {
-                    id: sourcetext6
-                    anchors.fill:parent
-                    color: "white"
-                    text:"50000"
-                }
-            }
-        }
-
-
-            Rectangle {
-                x: 10
-                y: 10
+                x:5
+                y:5
+                width:790
+                height:240
                 radius:5
-                width:780
-                height:220
-                color: "white"
-                Rectangle {
+                color: "grey"
+                Text {
                     x:5
                     y:5
-                    width:770
-                    height:210
-                    radius:5
-                    color: "grey"
-                    Text {
-                        x:5
-                        y:5
-                        width:760
-                        height:200
-                        color:"white"
-                        wrapMode: Text.WordWrap
-                        //horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        text: "* Once you hit start, the ONLY way to stop the test is to clikc the \"Stop Test\" button.
+                    width:780
+                    height:230
+                    color:"white"
+                    wrapMode: Text.WordWrap
+                    //horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    text: "* Once you hit start, click the \"Stop Test\" button to stop the test, or bump to increase the duration.
 * To determine how long your test will run, simply multiply the first three values together!
 * To determine the duty cycle, divide the PW (if chosen explicitly) by the result of multiplying the \"Event Per \n\tCycle\" by \"Time Per Event\" together.
-* Events To Fire equals to, or in excess of Events Per Cycle are considered off
+* Events To Fire equal to, or in excess of, \"Events Per Cycle\" are considered off.
 * PW Source OR Value values have special meanings, 0 = OFF, 1 = RefPW, 2 = Dwell, higher = a literal PW.
-* Time and PW literals are in 0.8us ticks, divide by 1250 for ms.
+* Time and PW literals are in 0.8us ticks, divide by 1250 for milliseconds.
 * PW = Pulse Width
-* Please select appropriate values for your coils and/or injectors, then click start."
-                    }
+* Please select appropriate values for your coils and/or injectors, then click start.
+* To use this to test outputs on a board with a multimeter or LED, rather than a high speed scope, set the PW high (at least 50,000), and the period high (65535) and number of events high (255)"
                 }
             }
+        }
 
+        Row
+        {
+            id: inputlayout
+            anchors.top: inforect.bottom
+            width: 800
+            //height:350
+            spacing: 50
+            Row
+            {
+                spacing: 20
+                Column {
+                    spacing: 5
+                    Text {
+                     //   x:10
+                //           y:240
+                        color: "white"
+                        text: "Events Per Cycle (1-255):"
+                    }
+                    Text {
+                        //x:370
+                        //y:240
+                        color: "white"
+                        text: "Number Of Cycles (0-65535):"
+                    }
+                    Text {
+                        //x:10
+                        //y:280
+                        color: "white"
+                        text: "Ticks Per Event (0-65535):"
+                    }
+                    Text {
+                        //x:10
+                        //y:340
+                        color: "white"
+                        text: "Events to Fire From (0-255):"
+                    }
+
+                }
+                Column {
+                    spacing: 5
+                    Rectangle {
+                       // x:250
+                       // y:240
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: eventspercycletext
+                                anchors.fill:parent
+                                color: "white"
+                                text:"12"
+                            }
+                        }
+                    }
+                    Rectangle {
+                        //x:600
+                        //y:240
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: numberofcyclestext
+                                anchors.fill:parent
+                                color: "white"
+                                text:"50"
+                            }
+                        }
+                    }
+                    Rectangle {
+                        //x:250
+                        //y:280
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: tickspereventtext
+                                anchors.fill:parent
+                                color: "white"
+                                text:"10000"
+                            }
+                        }
+                    }
+                    Rectangle {
+                        //x:250
+                        //y:340
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: eventstofirefrom1
+                                anchors.fill:parent
+                                color: "white"
+                                text:"0"
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        //x:250
+                        //y:370
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: eventstofirefrom2
+                                anchors.fill:parent
+                                color: "white"
+                                text:"2"
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        //x:250
+                        //y:400
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: eventstofirefrom3
+                                anchors.fill:parent
+                                color: "white"
+                                text:"4"
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        //x:250
+                        //y:430
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: eventstofirefrom4
+                                anchors.fill:parent
+                                color: "white"
+                                text:"6"
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        //x:250
+                        //y:460
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: eventstofirefrom5
+                                anchors.fill:parent
+                                color: "white"
+                                text:"8"
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        //x:250
+                        //y:490
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: eventstofirefrom6
+                                anchors.fill:parent
+                                color: "white"
+                                text:"10"
+                            }
+                        }
+                    }
+                } //Column
+                Column {
+                    spacing: 5
+                    Text {
+                        //x:370
+                        //y:290
+                        color: "white"
+                        text: "PW Source OR value (0-65535):"
+                    }
+                }
+
+                Column {
+                    spacing: 5
+                    Rectangle {
+                        //x:600
+                        //y:290
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: sourcetext1
+                                anchors.fill:parent
+                                color: "white"
+                                text:"50000"
+                            }
+                        }
+                    }
+                    Rectangle {
+                        //x:600
+                        //y:320
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: sourcetext2
+                                anchors.fill:parent
+                                color: "white"
+                                text:"50000"
+                            }
+                        }
+                    }
+                    Rectangle {
+                        //x:600
+                        //y:350
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: sourcetext3
+                                anchors.fill:parent
+                                color: "white"
+                                text:"50000"
+                            }
+                        }
+                    }
+                    Rectangle {
+                        //x:600
+                        //y:380
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: sourcetext4
+                                anchors.fill:parent
+                                color: "white"
+                                text:"50000"
+                            }
+                        }
+                    }
+                    Rectangle {
+                        //x:600
+                        //y:410
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: sourcetext5
+                                anchors.fill:parent
+                                color: "white"
+                                text:"50000"
+                            }
+                        }
+                    }
+                    Rectangle {
+                        //x:600
+                        //y:440
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            TextEdit {
+                                id: sourcetext6
+                                anchors.fill:parent
+                                color: "white"
+                                text:"50000"
+                            }
+                        }
+                    }
+
+
+
+
+                } //Item (second column)
+            } //Row (First Column)
+        } //Column
+        Row {
+            anchors.top: inputlayout.bottom
+            spacing: 5
             Rectangle {
-                x:10
-                y:550
+                //x:10
+                //y:550
                 width:200
                 height:30
                 radius:5
@@ -428,8 +460,8 @@ Item {
                 }
             }
             Rectangle {
-                x:210
-                y:550
+                //x:210
+                //y:550
                 width:200
                 height:30
                 radius:5
@@ -456,8 +488,8 @@ Item {
                 }
             }
             Rectangle {
-                x:440
-                y:550
+                //x:440
+                //y:550
                 width:100
                 height:30
                 radius:5
@@ -484,8 +516,8 @@ Item {
                 }
             }
             Rectangle {
-                x:560
-                y:550
+                //x:560
+                //y:550
                 width:100
                 height:30
                 color:"white"
@@ -503,5 +535,6 @@ Item {
                     }
                 }
             }
-    }
-}
+        } //Row (bottom button bar)
+    } //Rectangle
+} //Item
