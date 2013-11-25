@@ -213,7 +213,6 @@ private slots:
 	void dataLogRead(QByteArray buffer);
 	void parseEverything(QByteArray buffer);
 	//Packet parseBuffer(QByteArray buffer);
-	void parsePacket(Packet parsedPacket);
 	void locationIdUpdate(unsigned short locationid);
 	void copyFlashToRam(unsigned short locationid);
 	void copyRamToFlash(unsigned short locationid);
