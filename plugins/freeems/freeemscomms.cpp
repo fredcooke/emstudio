@@ -37,6 +37,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	qRegisterMetaType<QList<LocationIdFlags> >("QList<LocationIdFlags>");
 	qRegisterMetaType<SerialPortStatus>("SerialPortStatus");
 	qRegisterMetaType<ConfigBlock>("ConfigBlock");
+	rxThread = 0;
 	//serialPort = new SerialPort(this);
 	//connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
 	m_isConnected = false;
