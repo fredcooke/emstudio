@@ -57,9 +57,9 @@ Section "EMStudio (Required)" ;No components page, name is not important
   SetOutPath "$INSTDIR\dashboards"
   File "core/src/gauges.qml"
   SetOutPath "$INSTDIR\wizards"
-  File "core/src/wizards/BenchTest.qml"
-  File "core/src/wizards/DecoderOffset.qml"
-  File "core/src/wizards/wizard.qml"
+  File "core/wizards/BenchTest.qml"
+  File "core/wizards/DecoderOffset.qml"
+  File "core/wizards/wizard.qml"
   SetOutPath "$INSTDIR\plugins"
 !ifndef PLUGIN
   File "core/plugins/libfreeemsplugin.a"
