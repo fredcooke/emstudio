@@ -123,7 +123,7 @@ int SerialPort::writeBytes(QByteArray packet)
 	{
 		for (int i=0;i<packet.size();i++)
 		{
-			char c = packet.data()[i];
+			//char c = packet.data()[i];
 
 			//if (write(m_portHandle,&c,1)<0)
 			if (m_serialPort->write(QByteArray().append(packet.at(i))) == -1)
@@ -146,6 +146,7 @@ int SerialPort::writeBytes(QByteArray packet)
 		}
 		m_serialPort->waitForBytesWritten(1); //Verify.
 	}
+	return packet.size();
 
 }
 

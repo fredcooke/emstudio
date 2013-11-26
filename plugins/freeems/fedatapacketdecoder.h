@@ -39,7 +39,7 @@ public:
 private:
 	void loadDataFieldsFromValues();
 	QList<DataField> m_dataFieldList;
-	unsigned char m_currentEcuClock;
+	short m_currentEcuClock;
 signals:
 	void payloadDecoded(QVariantMap data);
 	void resetDetected(int missedPackets);

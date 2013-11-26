@@ -509,7 +509,12 @@ Item {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: {
-                                emscomms.bumpBenchTest(benchtestbumpvaltext.text);
+                                if (benchtestbumpvaltext.text > 255) {
+                                    console.log("Bench Test Bump value too high, valid range from 1-255");
+                                }
+                                else {
+                                    emscomms.bumpBenchTest(benchtestbumpvaltext.text);
+                                }
                             }
                         }
                     }

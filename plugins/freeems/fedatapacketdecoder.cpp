@@ -32,6 +32,7 @@ FEDataPacketDecoder::FEDataPacketDecoder() : DataPacketDecoder()
 
 void FEDataPacketDecoder::decodePayloadPacket(QByteArray header,QByteArray payload)
 {
+	Q_UNUSED(header)
 	decodePayload(payload);
 }
 

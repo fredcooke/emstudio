@@ -304,21 +304,19 @@ FreeEmsComms::~FreeEmsComms()
 
 void FreeEmsComms::disconnectSerial()
 {
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = SERIAL_DISCONNECT;
-	m_reqListMutex.lock();
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 }
 void FreeEmsComms::startInterrogation()
 {
 	if (!m_interrogateInProgress)
 	{
+		QMutexLocker locker(&m_reqListMutex);
 		RequestClass req;
 		req.type = INTERROGATE_START;
-		m_reqListMutex.lock();
 		m_reqList.append(req);
-		m_reqListMutex.unlock();
 		m_interrogatePacketList.clear();
 		m_interrogateInProgress = true;
 		m_interrogateIdListComplete = false;
@@ -355,13 +353,12 @@ void FreeEmsComms::openLogs()
 
 void FreeEmsComms::connectSerial(QString port,int baud)
 {
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = SERIAL_CONNECT;
 	req.addArg(port);
 	req.addArg(baud,sizeof(baud));
-	m_reqListMutex.lock();
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 }
 
 void FreeEmsComms::loadLog(QString filename)
@@ -437,16 +434,18 @@ void FreeEmsComms::setLogDirectory(QString dir)
 
 void FreeEmsComms::setPort(QString portname)
 {
+	Q_UNUSED(portname)
 	//serialPort->setPort(portname);
 }
 
 void FreeEmsComms::setBaud(int baudrate)
 {
+	Q_UNUSED(baudrate)
 	//serialPort->setBaud(baudrate);
 }
 int FreeEmsComms::burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size)
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = BURN_BLOCK_FROM_RAM_TO_FLASH;
 	req.addArg(location,sizeof(location));
@@ -455,12 +454,11 @@ int FreeEmsComms::burnBlockFromRamToFlash(unsigned short location,unsigned short
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::enableDatalogStream()
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = UPDATE_BLOCK_IN_RAM;
 	req.addArg(0x9000,2);
@@ -470,13 +468,12 @@ int FreeEmsComms::enableDatalogStream()
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 
 int FreeEmsComms::disableDatalogStream()
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = UPDATE_BLOCK_IN_RAM;
 	req.addArg(0x9000,2);
@@ -486,13 +483,12 @@ int FreeEmsComms::disableDatalogStream()
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 
 int FreeEmsComms::updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = UPDATE_BLOCK_IN_RAM;
 	req.addArg(location,sizeof(location));
@@ -502,12 +498,11 @@ int FreeEmsComms::updateBlockInRam(unsigned short location,unsigned short offset
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = UPDATE_BLOCK_IN_FLASH;
 	req.addArg(location,sizeof(location));
@@ -517,57 +512,52 @@ int FreeEmsComms::updateBlockInFlash(unsigned short location,unsigned short offs
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 
 int FreeEmsComms::getDecoderName()
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = GET_DECODER_NAME;
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::getFirmwareBuildDate()
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = GET_FIRMWARE_BUILD_DATE;
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::getCompilerVersion()
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = GET_COMPILER_VERSION;
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::getOperatingSystem()
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = GET_OPERATING_SYSTEM;
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size)
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = RETRIEVE_BLOCK_IN_FLASH;
 	req.addArg(location,sizeof(location));
@@ -576,12 +566,11 @@ int FreeEmsComms::retrieveBlockFromFlash(unsigned short location, unsigned short
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size)
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = RETRIEVE_BLOCK_IN_RAM;
 	req.addArg(location,sizeof(location));
@@ -590,57 +579,52 @@ int FreeEmsComms::retrieveBlockFromRam(unsigned short location, unsigned short o
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::getInterfaceVersion()
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = GET_INTERFACE_VERSION;
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::getFirmwareVersion()
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = GET_FIRMWARE_VERSION;
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::getMaxPacketSize()
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = GET_MAX_PACKET_SIZE;
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::echoPacket(QByteArray packet)
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = ECHO_PACKET;
 	req.sequencenumber = m_sequenceNumber;
 	req.addArg(packet);
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::startBenchTest(unsigned char eventspercycle,unsigned short numcycles,unsigned short ticksperevent,QVariantList pineventmask,QVariantList pinmode)
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = BENCHTEST;
 	req.addArg(0x01,sizeof(char));
@@ -649,33 +633,39 @@ int FreeEmsComms::startBenchTest(unsigned char eventspercycle,unsigned short num
 	req.addArg(ticksperevent,sizeof(ticksperevent));
 	for (int i=0;i<pineventmask.size();i++)
 	{
+		if ((pineventmask[i].toInt() > 255) || (pineventmask[i].toInt() < 0))
+		{
+			return -1;
+		}
 		req.addArg((unsigned char)pineventmask[i].toInt(),1);
 	}
 	for (int i=0;i<pinmode.size();i++)
 	{
+		if ((pinmode[i].toInt() < 0) || (pinmode[i].toInt() > 65535))
+		{
+			return -1;
+		}
 		req.addArg((unsigned short)pinmode[i].toInt(),2);
 	}
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::stopBenchTest()
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = BENCHTEST;
 	req.addArg(0x00,sizeof(char));
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::bumpBenchTest(unsigned char cyclenum)
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = BENCHTEST;
 	req.addArg(0x02,sizeof(char));
@@ -683,25 +673,24 @@ int FreeEmsComms::bumpBenchTest(unsigned char cyclenum)
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
+	return m_sequenceNumber-1;
 }
 
 int FreeEmsComms::getLocationIdInfo(unsigned short locationid)
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = GET_LOCATION_ID_INFO;
 	req.sequencenumber = m_sequenceNumber;
 	req.addArg(locationid,sizeof(locationid));
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 
 int FreeEmsComms::getLocationIdList(unsigned char listtype, unsigned short listmask)
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = GET_LOCATION_ID_LIST;
 	req.sequencenumber = m_sequenceNumber;
@@ -709,30 +698,27 @@ int FreeEmsComms::getLocationIdList(unsigned char listtype, unsigned short listm
 	req.addArg(listmask,sizeof(listmask));
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 
 int FreeEmsComms::softReset()
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = SOFT_RESET;
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::hardReset()
 {
-	m_reqListMutex.lock();
+	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = HARD_RESET;
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	m_reqListMutex.unlock();
 	return m_sequenceNumber-1;
 }
 bool FreeEmsComms::sendPacket(RequestClass request,bool haslength)
@@ -876,6 +862,7 @@ QByteArray FreeEmsComms::generatePacket(QByteArray header,QByteArray payload)
 }
 void FreeEmsComms::setInterByteSendDelay(int milliseconds)
 {
+	Q_UNUSED(milliseconds)
 	//serialPort->setInterByteSendDelay(milliseconds);
 }
 
@@ -1389,6 +1376,7 @@ void FreeEmsComms::run()
 						return;
 					}
 					m_threadReqList.removeAt(i);
+					i--;
 				}
 				m_waitingInfoMutex.unlock();
 			}
