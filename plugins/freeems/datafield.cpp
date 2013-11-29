@@ -66,27 +66,28 @@ DataField::DataField(QString shortname,QString description,int offset,int size,d
 	m_isFlags = isFlags;
 	m_bit = bit;
 }
-bool DataField::flagValue(QByteArray *payload)
+bool DataField::flagValue(QByteArray *payload, bool *value)
 {
 	if (!m_isFlags)
 	{
 		return false;
 	}
-	if (payload->size() > m_offset+m_size)
+	if (payload->size() >= m_offset+m_size)
 	{
 		unsigned int val = 0;
 		for (int i=0;i<m_size;i++)
 		{
 			val += ((unsigned char)payload->at(m_offset+i)) << (8*(m_size-(i+1)));
 		}
-		return (m_bit & val);
+		*value = (m_bit & val);
+		return true;
 	}
 	return false;
 }
 
-float DataField::getValue(QByteArray *payload,bool translatebeforescale)
+bool DataField::getValue(QByteArray *payload,double *value,bool translatebeforescale)
 {
-	if (payload->size() > m_offset+m_size)
+	if (payload->size() >= m_offset+m_size)
 	{
 		float val = 0;
 		for (int i=0;i<m_size;i++)
@@ -95,12 +96,14 @@ float DataField::getValue(QByteArray *payload,bool translatebeforescale)
 		}
 		if (translatebeforescale)
 		{
-			return (val + m_addoffset) * m_div;
+			*value = (val + m_addoffset) * m_div;
+			return true;
 		}
 		else
 		{
-			return (val / m_div) + m_addoffset;
+			*value = (val / m_div) + m_addoffset;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }

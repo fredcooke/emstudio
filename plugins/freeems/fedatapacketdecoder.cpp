@@ -43,13 +43,31 @@ void FEDataPacketDecoder::decodePayload(QByteArray payload)
 	{
 		if (m_dataFieldList[i].isFlag())
 		{
-			bool value = m_dataFieldList[i].flagValue(&payload);
-			m_valueMap[m_dataFieldList[i].name()] = value;
+			bool value = false;
+			if (m_dataFieldList[i].flagValue(&payload,&value))
+			{
+				m_valueMap[m_dataFieldList[i].name()] = value;
+			}
+			else
+			{
+				//Invalid datalog packet.
+				int stopper = 1;
+				return;
+			}
 		}
 		else
 		{
-			double value = m_dataFieldList[i].getValue(&payload);
-			m_valueMap[m_dataFieldList[i].name()] = value;
+			double value = 0;
+			if (m_dataFieldList[i].getValue(&payload,&value))
+			{
+				m_valueMap[m_dataFieldList[i].name()] = value;
+			}
+			else
+			{
+				//Invalid datalog packet.
+				int stopper = 1;
+				return;
+			}
 		}
 	}
 	if (m_valueMap.contains("tempClock"))

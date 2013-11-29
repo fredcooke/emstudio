@@ -56,11 +56,11 @@ class DataField
 public:
 	DataField();
 	DataField(QString shortname,QString description,int offset,int size,double div,double addoffset=0,double min=0,double max=0,bool isFlags=false,int bit=0);
-	float getValue(QByteArray *payload,bool translatebeforescale = false);
+	bool getValue(QByteArray *payload,double *value,bool translatebeforescale = false);
 	QString description() { return m_description; }
 	QString name() { return m_name; }
 	bool isFlag() { return m_isFlags; }
-	bool flagValue(QByteArray *payload);
+	bool flagValue(QByteArray *payload, bool *value);
 	int offset() { return m_offset; }
 	int size() { return m_size; }
 private:
