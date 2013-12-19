@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 #else
 	QString appDataDir = getenv("HOME");
 #endif
-    QDir appDir(appDataDir);
+	QDir appDir(appDataDir);
 	if (appDir.exists())
 	{
 		if (!appDir.cd("EMStudio"))
@@ -103,10 +103,8 @@ int main(int argc, char *argv[])
 	}
 	const QString sLogPath(QDir(appDataDir + "/EMStudio/applogs").filePath("log.txt"));
 
-	QsLogging::DestinationPtr fileDestination(
-	   QsLogging::DestinationFactory::MakeFileDestination(sLogPath, true, 0, 100) );
-	QsLogging::DestinationPtr debugDestination(
-	   QsLogging::DestinationFactory::MakeDebugOutputDestination() );
+	QsLogging::DestinationPtr fileDestination(QsLogging::DestinationFactory::MakeFileDestination(sLogPath, true, 0, 100));
+	QsLogging::DestinationPtr debugDestination(QsLogging::DestinationFactory::MakeDebugOutputDestination());
 	logger.addDestination(debugDestination);
 	logger.addDestination(fileDestination);
 
@@ -151,6 +149,7 @@ int main(int argc, char *argv[])
 	}
 	if (plugin == "")
 	{
+		//If no plugin is specified, load some reasonable defaults.
 		if (QFile::exists("plugins/libfreeemsplugin.so"))
 		{
 			plugin = "plugins/libfreeemsplugin.so";
@@ -158,19 +157,27 @@ int main(int argc, char *argv[])
 		else if (QFile::exists("/usr/share/emstudio/plugins/libfreeemsplugin.so"))
 		{
 			plugin = "/usr/share/emstudio/plugins/libfreeemsplugin.so";
-        }
-        else if (QFile::exists("plugins/freeemsplugin.lib"))
-        {
-            plugin = "plugins/freeemsplugin.lib";
-        }
-        else if (QFile::exists("plugins/libfreeemsplugin.a"))
-        {
-            plugin = "plugins/libfreeemsplugin.a";
-        }
-        else if (QFile::exists("plugins/freeemsplugin.dll"))
-        {
-            plugin = "plugins/freeemsplugin.dll";
-        }
+		}
+		else if (QFile::exists("plugins/freeemsplugin.lib"))
+		{
+			plugin = "plugins/freeemsplugin.lib";
+		}
+		else if (QFile::exists("plugins/libfreeemsplugin.a"))
+		{
+			plugin = "plugins/libfreeemsplugin.a";
+		}
+		else if (QFile::exists("plugins/freeemsplugin.dll"))
+		{
+			plugin = "plugins/freeemsplugin.dll";
+		}
+		else if (QFile::exists("../../../plugins/libfreeemsplugin.dylib"))
+		{
+			plugin = "../../../plugins/libfreeemsplugin.dylib";
+		}
+		else if (QFile::exists("/usr/share/emstudio/plugins/libfreeemsplugin.dylib"))
+		{
+			plugin = "/usr/share/emstudio/plugins/libfreeemsplugin.dylib";
+		}
 	}
 	w.setPlugin(plugin);
 	if (autoconnect)

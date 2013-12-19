@@ -24,6 +24,7 @@
 #include <QByteArray>
 #include <qjson/parser.h>
 #include <QVariant>
+#include <QStringList>
 #include "QsLog.h"
 
 FEMemoryMetaData::FEMemoryMetaData()
@@ -227,8 +228,21 @@ bool FEMemoryMetaData::parseMetaData(QString json)
 	return true;
 }
 
-bool FEMemoryMetaData::loadMetaDataFromFile(QString filestr)
+bool FEMemoryMetaData::loadMetaDataFromFile(QStringList searchpaths)
 {
+	QString filestr = "";
+	for (int i=0;i<searchpaths.size();i++)
+	{
+		if (QFile::exists(searchpaths[i] + "/freeems.config.json"))
+		{
+			filestr = searchpaths[i] + "/freeems.config.json";
+			i = searchpaths.size();
+		}
+	}
+	if (filestr == "")
+	{
+		return false;
+	}
 	//QLOG_DEBUG() << "Loading config file from:" << filestr;
 	QFile file(filestr);
 	if (!file.open(QIODevice::ReadOnly))

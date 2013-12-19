@@ -946,25 +946,14 @@ void MainWindow::setPlugin(QString plugin)
 		exit(-1);
 	}
 	emsComms->passLogger(&QsLogging::Logger::instance());
-	QString filestr = "";
-	if (QFile::exists(m_settingsDir + "/" + "definitions/freeems.config.json"))
-	{
-		filestr = m_settingsDir + "/" + "definitions/freeems.config.json";
-	}
-	else if (QFile::exists(m_defaultsDir + "/definitions/freeems.config.json"))
-	{
-		filestr = m_defaultsDir + "/definitions/freeems.config.json";
-	}
-	else if (QFile::exists("freeems.config.json"))
-	{
-		filestr = "freeems.config.json";
-	}
-	else
-	{
-		QMessageBox::information(0,"Error","Error: No freeems.config.json file found!");
-	}
+
+	QStringList searchpaths;
+	searchpaths.append(m_settingsDir + "/" + "definitions");
+	searchpaths.append(m_defaultsDir + "/definitions");
+	searchpaths.append("."); //Local
+	searchpaths.append("../../.."); //OSX local
 	m_memoryMetaData = emsComms->getMetaParser();
-	m_memoryMetaData->loadMetaDataFromFile(filestr);
+	m_memoryMetaData->loadMetaDataFromFile(searchpaths); //Changed to trigger a load from a file found internally.
 	//emsData->setMetaData(m_memoryMetaData);
 	parameterView->passConfigBlockList(m_memoryMetaData->configMetaData());
 	parameterView->passMenuList(m_memoryMetaData->menuMetaData());

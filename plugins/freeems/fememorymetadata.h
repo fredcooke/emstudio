@@ -35,7 +35,7 @@ class FEMemoryMetaData : public MemoryMetaData
 {
 public:
 	FEMemoryMetaData();
-	bool loadMetaDataFromFile(QString filestr);
+	bool loadMetaDataFromFile(QStringList searchpaths);
 	const QMap<unsigned short,QString> errorMap() { return m_errorMap; }
 	void setMenuMetaData(MenuSetup menu) { m_menuMetaData = menu; }
 	void passConfigData(QMap<QString,QList<ConfigBlock> > block) { m_configMetaData = block; }
