@@ -17,7 +17,11 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="3">
      <item>
-      <widget class="QTableWidget" name="locationIdInfoTableWidget"/>
+      <widget class="QTableWidget" name="locationIdInfoTableWidget">
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
