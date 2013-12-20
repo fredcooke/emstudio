@@ -1728,13 +1728,13 @@ void MainWindow::ecuResetDetected(int missedpackets)
 	if (!m_interrogationInProgress && !m_EcuResetPopup)
 	{
 		m_EcuResetPopup = true;
-		if (QMessageBox::question(this,"Error","ECU Reset detected with " + QString::number(missedpackets) + " missed packets! Would you like to reflash data? If you do not, then EMStudio will continue with an INVALID idea of ECU memory, and you will lose any changes made",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+		if (QMessageBox::question(this,"Error","ECU Reset detected with " + QString::number(missedpackets) + " missed packets! Would you like to reflash data? If you do not, then EMStudio will continue with an INVALID idea of ECU memory, and you will lose any changes made.",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
 		{
 			emsComms->writeAllRamToRam();
 		}
 		else
 		{
-			QMessageBox::information(this,"Warning","EMStudio will now continue with a corrupt version of ECU memory. The death of your engine is on your head now");
+			QMessageBox::information(this,"Warning","EMStudio will now continue with a corrupt version of ECU memory. The death of your engine is on your head now.");
 		}
 		m_EcuResetPopup = false;
 	}
