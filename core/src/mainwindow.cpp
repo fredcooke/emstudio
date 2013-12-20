@@ -90,8 +90,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	{
 		QDir(m_localHomeDir).mkpath(m_localHomeDir + "/logs");
 	}
-    //Settings file should ALWAYS be the one in the settings dir. No reason to have it anywhere else.
-    m_settingsFile = m_settingsDir + "/EMStudio-config.ini";
+	//Settings file should ALWAYS be the one in the settings dir. No reason to have it anywhere else.
+	m_settingsFile = m_settingsDir + "/EMStudio-config.ini";
 
 	QString decoderfilestr = "";
 	if (QFile::exists(m_settingsDir + "/" + "definitions/decodersettings.json"))
@@ -104,7 +104,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	}
 	else if (QFile::exists("decodersettings.json"))
 	{
-        //decoderfilestr = "decodersettings.json";
+		//decoderfilestr = "decodersettings.json";
 	}
 	else
 	{
@@ -332,6 +332,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	//ui.menuWizards
 	connect(ui.mdiArea,SIGNAL(subWindowActivated(QMdiSubWindow*)),this,SLOT(subMdiWindowActivated(QMdiSubWindow*)));
+	QSettings windowsettings;
+	windowsettings.beginGroup("general");
+	this->restoreGeometry(windowsettings.value("location").toByteArray());
+	if (windowsettings.value("isMaximized",false).toBool())
+	{
+		this->showMaximized();
+	}
+
+	windowsettings.endGroup();
+
 
 }
 void MainWindow::menu_windows_interrogateProgressViewClicked()
@@ -792,8 +802,8 @@ void MainWindow::createView(unsigned short locid,DataType type)
 		QApplication::postEvent(win, new QEvent(QEvent::Show));
 		QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
 	}
-    else
-    {
+	else
+	{
 		//Unhandled data type. Show it as a hex view.
 		RawData *data = emsComms->getRawData(locid);
 		RawDataView *view = new RawDataView(!data->isFlashOnly(),true);
@@ -809,7 +819,7 @@ void MainWindow::createView(unsigned short locid,DataType type)
 		QApplication::postEvent(win, new QEvent(QEvent::Show));
 		QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
 
-    }
+	}
 }
 
 
@@ -987,12 +997,12 @@ void MainWindow::settingsSaveClicked()
 	ui.mdiArea->removeSubWindow(subwin);
 	comSettingsWidget->close();
 	comSettingsWidget->deleteLater();
-    if (emsComms)
-    {
-        emsComms->setInterByteSendDelay(m_comInterByte);
-        emsComms->setlogsDebugEnabled(m_debugLogs);
-        emsComms->setLogDirectory(m_logDirectory);
-    }
+	if (emsComms)
+	{
+		emsComms->setInterByteSendDelay(m_comInterByte);
+		emsComms->setlogsDebugEnabled(m_debugLogs);
+		emsComms->setLogDirectory(m_logDirectory);
+	}
 
 }
 void MainWindow::locationIdInfo(unsigned short locationid,MemoryLocationInfo info)
@@ -1257,7 +1267,6 @@ void MainWindow::emsCommsConnected()
 	loadWizards(defaultsdir.absolutePath() + "/wizards");
 	loadWizards("wizards");
 	loadWizards(m_localHomeDir + "/wizards");
-    //virtual QList<QString> getConfigList()=0;
 	for (int i=0;i<emsComms->getConfigList().size();i++)
 	{
 		parameterView->addConfig(emsComms->getConfigList()[i],emsComms->getConfigData(emsComms->getConfigList()[i]));
@@ -1316,11 +1325,104 @@ void MainWindow::interrogationComplete()
 	{
 		QMessageBox::information(0,"Error","Something has gone serious wrong, one of the commands timed out during interrogation. This should be properly investigated before continuing");
 		emsComms->disconnectSerial();
+	return;
 	}
 	else
 	{
 		emsMdiWindow->show();
 	}
+	QSettings windowsettings;
+	int size = windowsettings.beginReadArray("rawwindows");
+	for (int i=0;i<size;i++)
+	{
+		//createView()
+		windowsettings.setArrayIndex(i);
+		unsigned short locid = windowsettings.value("window").toInt();
+		QString type = windowsettings.value("type").toString();
+		if (type == "TableView2D")
+		{
+			createView(locid,DATA_TABLE_2D);
+			QWidget *parent = (QWidget*)m_rawDataView[locid]->parent();
+			parent->restoreGeometry(windowsettings.value("location").toByteArray());
+		}
+		else if (type == "TableView3D")
+		{
+			createView(locid,DATA_TABLE_3D);
+			QWidget *parent = (QWidget*)m_rawDataView[locid]->parent();
+			parent->restoreGeometry(windowsettings.value("location").toByteArray());
+		}
+		else if (type == "tablesMdiWindow")
+		{
+			tablesMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+			tablesMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+
+		}
+		else if (type == "firmwareMetaMdiWindow")
+		{
+			firmwareMetaMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+			firmwareMetaMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+		}
+		else if (type == "interrogateProgressMdiWindow")
+		{
+			// interrogateProgressMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+			// interrogateProgressMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+		}
+		else if (type == "emsMdiWindow")
+		{
+			emsMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+			emsMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+		}
+		else if (type == "flagsMdiWindow")
+		{
+			flagsMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+			flagsMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+		}
+		else if (type == "gaugesMdiWindow")
+		{
+			gaugesMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+			gaugesMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+		}
+		else if (type == "packetStatusMdiWindow")
+		{
+			packetStatusMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+			packetStatusMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+		}
+		else if (type == "aboutMdiWindow")
+		{
+			aboutMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+			aboutMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+		}
+		else if (type == "emsStatusMdiWindow")
+		{
+
+		}
+		else
+		{
+			qDebug() << "Unknown type:" << type;
+		}
+
+	}
+	/*	QMdiSubWindow *tablesMdiWindow;
+	QMdiSubWindow *firmwareMetaMdiWindow;
+	QMdiSubWindow *interrogateProgressMdiWindow;
+	QMdiSubWindow *emsMdiWindow;
+	QMdiSubWindow *flagsMdiWindow;
+	QMdiSubWindow *gaugesMdiWindow;
+	QMdiSubWindow *packetStatusMdiWindow;
+	QMdiSubWindow *aboutMdiWindow;
+	QMdiSubWindow *emsStatusMdiWindow;*/
+	windowsettings.endArray();
+	/*for (QMap<unsigned short,QWidget*>::const_iterator i=m_rawDataView.constBegin();i!=m_rawDataView.constEnd();i++)
+	{
+		windowsettings.setArrayIndex(val++);
+		windowsettings.value("window",i.key());
+		QMdiSubWindow *subwin = qobject_cast<QMdiSubWindow*>(i.value()->parent());
+		windowsettings.value("location",subwin->saveGeometry());
+		windowsettings.value("hidden",subwin->isHidden());
+		windowsettings.value("type",i.value()->metaObject()->className());
+
+	}
+	windowsettings.endArray();*/
 }
 void MainWindow::interrogateTaskStart(QString task, int sequence)
 {
@@ -1730,6 +1832,97 @@ void MainWindow::subMdiWindowActivated(QMdiSubWindow* window)
 
 MainWindow::~MainWindow()
 {
+	//Save the window state.
+	/*	QMap<unsigned short,QWidget*> m_rawDataView;
+	QMap<unsigned short,ConfigView*> m_configDataView;
+	QMdiSubWindow *tablesMdiWindow;
+	QMdiSubWindow *firmwareMetaMdiWindow;
+	QMdiSubWindow *interrogateProgressMdiWindow;
+	QMdiSubWindow *emsMdiWindow;
+	QMdiSubWindow *flagsMdiWindow;
+	QMdiSubWindow *gaugesMdiWindow;
+	QMdiSubWindow *packetStatusMdiWindow;
+	QMdiSubWindow *aboutMdiWindow;
+	QMdiSubWindow *emsStatusMdiWindow;
+
+	ParameterView *parameterView;
+	QMdiSubWindow *parameterMdiWindow;*/
+	QSettings windowsettings;
+	windowsettings.beginWriteArray("rawwindows");
+	int val = 0;
+	for (QMap<unsigned short,QWidget*>::const_iterator i=m_rawDataView.constBegin();i!=m_rawDataView.constEnd();i++)
+	{
+		windowsettings.setArrayIndex(val++);
+		windowsettings.setValue("window",i.key());
+		QMdiSubWindow *subwin = qobject_cast<QMdiSubWindow*>(i.value()->parent());
+		windowsettings.setValue("location",subwin->saveGeometry());
+		windowsettings.setValue("hidden",subwin->isHidden());
+		windowsettings.setValue("type",i.value()->metaObject()->className());
+
+	}
+
+	//tablesMdiWindow
+	windowsettings.setArrayIndex(val++);
+	windowsettings.setValue("location",tablesMdiWindow->saveGeometry());
+	windowsettings.setValue("hidden",tablesMdiWindow->isHidden());
+	windowsettings.setValue("type","tablesMdiWindow");
+
+	//firmwareMetaMdiWindow
+	windowsettings.setArrayIndex(val++);
+	windowsettings.setValue("location",firmwareMetaMdiWindow->saveGeometry());
+	windowsettings.setValue("hidden",firmwareMetaMdiWindow->isHidden());
+	windowsettings.setValue("type","firmwareMetaMdiWindow");
+
+	//interrogateProgressMdiWindow
+	windowsettings.setArrayIndex(val++);
+	windowsettings.setValue("location",interrogateProgressMdiWindow->saveGeometry());
+	windowsettings.setValue("hidden",interrogateProgressMdiWindow->isHidden());
+	windowsettings.setValue("type","interrogateProgressMdiWindow");
+
+	//emsMdiWindow
+	windowsettings.setArrayIndex(val++);
+	windowsettings.setValue("location",emsMdiWindow->saveGeometry());
+	windowsettings.setValue("hidden",emsMdiWindow->isHidden());
+	windowsettings.setValue("type","emsMdiWindow");
+
+	//flagsMdiWindow
+	windowsettings.setArrayIndex(val++);
+	windowsettings.setValue("location",flagsMdiWindow->saveGeometry());
+	windowsettings.setValue("hidden",flagsMdiWindow->isHidden());
+	windowsettings.setValue("type","flagsMdiWindow");
+
+	//gaugesMdiWindow
+	windowsettings.setArrayIndex(val++);
+	windowsettings.setValue("location",gaugesMdiWindow->saveGeometry());
+	windowsettings.setValue("hidden",gaugesMdiWindow->isHidden());
+	windowsettings.setValue("type","gaugesMdiWindow");
+
+	//packetStatusMdiWindow
+	windowsettings.setArrayIndex(val++);
+	windowsettings.setValue("location",packetStatusMdiWindow->saveGeometry());
+	windowsettings.setValue("hidden",packetStatusMdiWindow->isHidden());
+	windowsettings.setValue("type","packetStatusMdiWindow");
+
+	//aboutMdiWindow
+	windowsettings.setArrayIndex(val++);
+	windowsettings.setValue("location",aboutMdiWindow->saveGeometry());
+	windowsettings.setValue("hidden",aboutMdiWindow->isHidden());
+	windowsettings.setValue("type","aboutMdiWindow");
+
+	//emsStatusMdiWindow
+	//windowsettings.setArrayIndex(val++);
+	//windowsettings.setValue("location",emsStatusMdiWindow->saveGeometry());
+	////windowsettings.setValue("hidden",emsStatusMdiWindow->isHidden());
+	//windowsettings.setValue("type","emsStatusMdiWindow");
+
+
+	windowsettings.endArray();
+	windowsettings.beginGroup("general");
+	windowsettings.setValue("location",this->saveGeometry());
+	windowsettings.setValue("isMaximized",this->isMaximized());
+	windowsettings.endGroup();
+	windowsettings.sync();
+
 	emsComms->stop();
 	emsComms->wait(1000);
 	delete emsComms;
