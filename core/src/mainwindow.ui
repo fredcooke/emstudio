@@ -44,7 +44,7 @@
      <x>0</x>
      <y>0</y>
      <width>1525</width>
-     <height>29</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -192,12 +192,12 @@
   </action>
   <action name="actionEnable_Datalogs">
    <property name="text">
-    <string>Enable Datalog Stream</string>
+    <string>Enable Live Data Stream</string>
    </property>
   </action>
   <action name="actionDisable_Datalog_Stream">
    <property name="text">
-    <string>Disable Datalog Stream</string>
+    <string>Disable Live Data Stream</string>
    </property>
   </action>
   <action name="actionParameter_View">
