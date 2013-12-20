@@ -56,9 +56,15 @@ DEFINES += GIT_DATE=\""$$system(date)"\"
 	#CONFIG(release, debug|release) {
 	#	LIBS += =lqwt
 	#}
-}
-
-unix {
+} else:mac {
+        QMAKE_CXXFLAGS += -Werror
+        INCLUDEPATH += /opt/local/include
+        INCLUDEPATH += /opt/local/include/qwt
+        LIBS += -L/opt/local/lib -lqjson -lqwt
+        DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
+        DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+        DEFINES += GIT_DATE=\""$$system(date)"\"
+} else:unix {
 	QMAKE_CXXFLAGS += -Werror
 	target.path = /usr/bin
 	dashboard.path = /usr/share/EMStudio/dashboards
@@ -76,11 +82,7 @@ unix {
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
         DEFINES += GIT_DATE=\""$$system(date)"\"
 }
-mac {
-	QMAKE_CXXFLAGS += -Werror
-	INCLUDEPATH += /opt/local/include
-	INCLUDEPATH += /opt/local/include/qwt
-}
+
 SOURCES += src/main.cpp\
 	src/mainwindow.cpp \
     src/logloader.cpp \

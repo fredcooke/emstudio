@@ -21,8 +21,13 @@
 
 #include "tablemap3d.h"
 #include <QPainter>
+#if defined(Q_OS_MAC)
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 //This is required for some windows builds
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D

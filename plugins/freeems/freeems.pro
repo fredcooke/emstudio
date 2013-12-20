@@ -52,8 +52,15 @@ win32-x-g++ { #Linux based crossplatform 32bit build
 	DEFINES += GIT_COMMIT=$$system(\"c:/program files (x86)/git/bin/git.exe\" describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(\"c:/program files (x86)/git/bin/git.exe\" log -n 1 --pretty=format:%H)
         QMAKE_LFLAGS += -static-libgcc -static-libstdc++
-}
-unix {
+} else:mac {
+        TARGET = ../../core/plugins/freeemsplugi
+        INCLUDEPATH += /opt/local/include
+        INCLUDEPATH += /opt/local/include/qwt
+        LIBS += -L/opt/local/lib -lqjson
+        DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
+        DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
+        DEFINES += GIT_DATE=\""$$system(date)"\"
+} else:unix {
 	TARGET = ../../core/plugins/freeemsplugin
 	target.path = /usr/share/emstudio/plugins
 	INSTALLS += target
@@ -61,6 +68,7 @@ unix {
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
         DEFINES += GIT_DATE=\""$$system(date)"\"
 }
+
 # Input
 HEADERS += datapacketdecoder.h \
            table2ddata.h \
