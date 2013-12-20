@@ -666,32 +666,31 @@ void MainWindow::setPlugin(QString plugin)
 	m_logFileName = QDateTime::currentDateTime().toString("yyyy.MM.dd-hh.mm.ss");
 	emsComms->setLogFileName(m_logFileName);
 	emsComms->setLogDirectory(m_logDirectory);
-	connect(emsComms,SIGNAL(resetDetected(int)),this,SLOT(ecuResetDetected(int)));
-	connect(emsComms,SIGNAL(dataLogPayloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)));
-	connect(emsComms,SIGNAL(interrogationProgress(int,int)),this,SLOT(interrogationProgress(int,int)));
-	connect(emsComms,SIGNAL(interrogationComplete()),this,SLOT(interrogationComplete()));
-	connect(emsComms,SIGNAL(interrogateTaskStart(QString,int)),this,SLOT(interrogateTaskStart(QString,int)));
-	connect(emsComms,SIGNAL(interrogateTaskSucceed(int)),this,SLOT(interrogateTaskSucceed(int)));
-	connect(emsComms,SIGNAL(interrogateTaskFail(int)),this,SLOT(interrogateTaskFail(int)));
-	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()));
-	connect(emsComms,SIGNAL(emsSilenceStarted()),this,SLOT(emsCommsSilence()));
-	connect(emsComms,SIGNAL(emsSilenceBroken()),this,SLOT(emsCommsSilenceBroken()));
-	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)));
-	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)));
-
-	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()));
-	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)));
+	connect(emsComms,SIGNAL(resetDetected(int)),this,SLOT(ecuResetDetected(int)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(dataLogPayloadDecoded(QVariantMap)),this,SLOT(dataLogDecoded(QVariantMap)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(interrogationProgress(int,int)),this,SLOT(interrogationProgress(int,int)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(interrogationComplete()),this,SLOT(interrogationComplete()),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(interrogateTaskStart(QString,int)),this,SLOT(interrogateTaskStart(QString,int)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(interrogateTaskSucceed(int)),this,SLOT(interrogateTaskSucceed(int)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(interrogateTaskFail(int)),this,SLOT(interrogateTaskFail(int)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(emsSilenceStarted()),this,SLOT(emsCommsSilence()),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(emsSilenceBroken()),this,SLOT(emsCommsSilenceBroken()),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(disconnected()),this,SLOT(emsCommsDisconnected()),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(logPayloadReceived(QByteArray,QByteArray)),Qt::QueuedConnection);
 	connect(emsComms,SIGNAL(locationIdList(QList<unsigned short>)),this,SLOT(locationIdList(QList<unsigned short>)),Qt::QueuedConnection);
-	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)));
-	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)));
-	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)));
-	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)));
-	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)));
-	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)));
-	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)));
-	connect(emsComms,SIGNAL(interrogationData(QMap<QString,QString>)),this,SLOT(interrogationData(QMap<QString,QString>)));
+	connect(emsComms,SIGNAL(unknownPacket(QByteArray,QByteArray)),this,SLOT(unknownPacket(QByteArray,QByteArray)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(commandSuccessful(int)),this,SLOT(commandSuccessful(int)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(commandTimedOut(int)),this,SLOT(commandTimedOut(int)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(commandFailed(int,unsigned short)),this,SLOT(commandFailed(int,unsigned short)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(locationIdInfo(unsigned short,MemoryLocationInfo)),this,SLOT(locationIdInfo(unsigned short,MemoryLocationInfo)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(packetSent(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketSent(unsigned short,QByteArray,QByteArray)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(packetAcked(unsigned short,QByteArray,QByteArray)),packetStatus,SLOT(passPacketAck(unsigned short,QByteArray,QByteArray)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(interrogationData(QMap<QString,QString>)),this,SLOT(interrogationData(QMap<QString,QString>)),Qt::QueuedConnection);
 	emsComms->setBaud(m_comBaud);
 	emsComms->setPort(m_comPort);
 	emsComms->setLogsEnabled(m_saveLogs);
@@ -1226,7 +1225,7 @@ void MainWindow::loadWizards(QString dir)
 		if (file.endsWith(".qml"))
 		{
 			WizardView *view = new WizardView();
-			connect(emsComms,SIGNAL(configRecieved(ConfigBlock,QVariant)),view,SLOT(configRecieved(ConfigBlock,QVariant)));
+			connect(emsComms,SIGNAL(configRecieved(ConfigBlock,QVariant)),view,SLOT(configRecieved(ConfigBlock,QVariant)),Qt::QueuedConnection);
 			m_wizardList.append(view);
 			for (int i=0;i<emsComms->getConfigList().size();i++)
 			{

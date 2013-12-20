@@ -627,7 +627,7 @@ int FreeEmsComms::startBenchTest(unsigned char eventspercycle,unsigned short num
 	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = BENCHTEST;
-	req.addArg(0x01,sizeof(char));
+	req.addArg(0x08,sizeof(char)); //Was 0x01, changed to 0x08 for testing command failures.
 	req.addArg(eventspercycle,sizeof(eventspercycle));
 	req.addArg(numcycles,sizeof(numcycles));
 	req.addArg(ticksperevent,sizeof(ticksperevent));
@@ -938,8 +938,8 @@ void FreeEmsComms::run()
 				}
 				QLOG_INFO() << "Serial connected!";
 				rxThread = new SerialRXThread();
-				connect(rxThread,SIGNAL(incomingPacket(QByteArray)),this,SLOT(parseEverything(QByteArray)));
-				connect(rxThread,SIGNAL(dataRead(QByteArray)),this,SLOT(dataLogRead(QByteArray)));
+				connect(rxThread,SIGNAL(incomingPacket(QByteArray)),this,SLOT(parseEverything(QByteArray)),Qt::DirectConnection);
+				connect(rxThread,SIGNAL(dataRead(QByteArray)),this,SLOT(dataLogRead(QByteArray)),Qt::DirectConnection);
 
 				//Before we finish emitting the fact that we are connected, let's verify this is a freeems system we are talking to.
 				if (!sendPacket(GET_FIRMWARE_VERSION))
@@ -1426,7 +1426,7 @@ void FreeEmsComms::run()
 		}
 
 		m_waitingInfoMutex.lock();
-		if (QDateTime::currentDateTime().currentMSecsSinceEpoch() - m_timeoutMsecs > 500 && m_waitingForResponse)
+		if (((QDateTime::currentDateTime().currentMSecsSinceEpoch() - m_timeoutMsecs) > 500) && m_waitingForResponse)
 		{
 			//5 seconds
 			QLOG_WARN() << "TIMEOUT waiting for response to payload:" << "0x" + QString::number(m_payloadWaitingForResponse,16).toUpper() << "Sequence:" << m_currentWaitingRequest.sequencenumber;
@@ -1591,6 +1591,7 @@ bool FreeEmsComms::sendSimplePacket(unsigned short payloadid)
 
 void FreeEmsComms::packetNakedRec(unsigned short payloadid,QByteArray header,QByteArray payload,unsigned short errornum)
 {
+	QMutexLocker locker(&m_waitingInfoMutex);
 	if (m_waitingForResponse)
 	{
 		if (m_interrogateInProgress)
@@ -1697,6 +1698,7 @@ void FreeEmsComms::packetNakedRec(unsigned short payloadid,QByteArray header,QBy
 
 void FreeEmsComms::packetAckedRec(unsigned short payloadid,QByteArray header,QByteArray payload)
 {
+	QMutexLocker locker(&m_waitingInfoMutex);
 	if (m_waitingForResponse)
 	{
 		if (m_interrogateInProgress)
