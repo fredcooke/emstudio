@@ -59,10 +59,17 @@ class ConfigData : public QObject
 {
     Q_OBJECT
 public:
+	enum Type
+	{
+		ARRAY,
+		VALUE
+	};
+
 	virtual void setData(QByteArray data)=0;
 	virtual QString name()=0;
 	virtual Q_INVOKABLE QVariant value()=0;
 	virtual Q_INVOKABLE void setValue(QVariant value)=0;
+	virtual Q_INVOKABLE int elements()=0;
 signals:
 	void update();
 };

@@ -5,8 +5,8 @@ Item {
     Rectangle {
         x:0
         y:0
-        width: 400
-        height: 300
+        width: 500
+        height: 400
         color: "grey"
         Text {
             x:10
@@ -32,18 +32,54 @@ Item {
 		y:150
 		color: "white"
 	}
-	Text {
-		x:10
-		y:170
-		color: "white"
-		text: "injections Per Cyle (Per Injector)"
-	}
-	TextEdit {
-		id: configinjectionspercycle
-		x:250
-		y:170
-		color: "white"
-	}
+    Text {
+        x:10
+        y:170
+        color: "white"
+        text: "injections Per Cyle (Per Injector)"
+    }
+    TextEdit {
+        id: configinjectionspercycle
+        x:250
+        y:170
+        color: "white"
+    }
+    Text {
+        x:10
+        y:190
+        color: "white"
+        text: "Angles of TDC"
+    }
+    TextEdit {
+        id: configanglesoftdc
+        x:250
+        y:190
+        color: "white"
+    }
+    Text {
+        x:10
+        y:210
+        color: "white"
+        text: "Output Pin Numbers"
+    }
+    TextEdit {
+        id: configoutputpinnumbers
+        x:250
+        y:210
+        color: "white"
+    }
+    Text {
+        x:10
+        y:230
+        color: "white"
+        text: "Scheduling Bits"
+    }
+    TextEdit {
+        id: configschedulingbits
+        x:250
+        y:230
+        color: "white"
+    }
         Rectangle {
             x: 10
             y: 10
@@ -73,7 +109,7 @@ Item {
 
         Rectangle {
             x:10
-            y:230
+            y:260
             width:200
             height:30
             radius:5
@@ -94,41 +130,112 @@ Item {
                         anchors.fill: parent
                         onClicked: {
                             console.log("Capture Clicked");
-				numberOfConfiguredOutputEvents.setValue(configoutputeventstext.text);
-				numberOfInjectionsPerEngineCycle.setValue(configinjectionspercycle.text);
-				decoderEngineOffset.setValue(tpstext.text);
-				
+                            numberOfConfiguredOutputEvents.setValue(configoutputeventstext.text);
+                            numberOfInjectionsPerEngineCycle.setValue(configinjectionspercycle.text);
+                            decoderEngineOffset.setValue(tpstext.text);
+                            var retval = new Array();
+                            var split = configanglesoftdc.text.split(",");
+                            for (var i = 0; i < numberOfConfiguredOutputEvents.value(); i++) {
+                                retval[i] = parseFloat(split[i]);
+                            }
+                            anglesOfTDC.setValue(retval);
 
+                            var retval1 = new Array();
+                            var split1 = configoutputpinnumbers.text.split(",");
+                            for (var i = 0; i < numberOfConfiguredOutputEvents.value(); i++) {
+                                retval1[i] = parseFloat(split1[i]);
+                            }
+                            outputEventPinNumbers.setValue(retval1);
+
+                            var retval2 = new Array();
+                            var split2 = configschedulingbits.text.split(",");
+                            for (var i = 0; i < numberOfConfiguredOutputEvents.value(); i++) {
+                                retval2[i] = parseFloat(split2[i]);
+                            }
+                            schedulingConfigurationBits.setValue(retval2);
                         }
                     }
                 }
             }
         }
-    Component.onCompleted: {
-        decoder.payloadDecoded.connect(decode);
-	decoderEngineOffset.update.connect(offsetupdate);
-	numberOfConfiguredOutputEvents.update.connect(outputeventupdate);
-	numberOfInjectionsPerEngineCycle.update.connect(injectionspercycleupdate);
+        Component.onCompleted: {
+            decoder.payloadDecoded.connect(decode);
+            decoderEngineOffset.update.connect(offsetupdate);
+            numberOfConfiguredOutputEvents.update.connect(outputeventupdate);
+            numberOfInjectionsPerEngineCycle.update.connect(injectionspercycleupdate);
+            anglesOfTDC.update.connect(anglesoftdcupdate);
+            outputEventPinNumbers.update.connect(outputeventpinsupdate);
+            schedulingConfigurationBits.update.connect(configschedulingbitsupdate);
 
-	tpstext.text = decoderEngineOffset.value();
-	configoutputeventstext.text = numberOfConfiguredOutputEvents.value();
-	configinjectionspercycle.text = numberOfInjectionsPerEngineCycle.value();
 
+            anglesoftdcupdate();
+
+            tpstext.text = decoderEngineOffset.value();
+            configoutputeventstext.text = numberOfConfiguredOutputEvents.value();
+            configinjectionspercycle.text = numberOfInjectionsPerEngineCycle.value();
+
+        }
+        function offsetupdate() {
+        console.log("Offset update");
+            tpstext.text = decoderEngineOffset.value();
+        }
+        function outputeventupdate() {
+            configoutputeventstext.text = numberOfConfiguredOutputEvents.value();
+        }
+        function injectionspercycleupdate() {
+            configinjectionspercycle.text = numberOfInjectionsPerEngineCycle.value();
+        }
+        function decode(map){
+        //console.log("Decoded");
+    //        tpstext.text = map["TPS"];
+        }
+        function anglesoftdcupdate() {
+            //anglesOfTDC.value()  - An array of doubles.
+            var mymap = anglesOfTDC.value();
+            console.log("Elements:" + anglesOfTDC.elements());
+
+            configanglesoftdc.text = "";
+            for (var i = 0; i < numberOfConfiguredOutputEvents.value(); ++i) {
+                if (i == numberOfConfiguredOutputEvents.value()-1)
+                {
+                    configanglesoftdc.text += mymap[i].toString();
+                }
+                else
+                {
+                    configanglesoftdc.text += mymap[i].toString() + ",";
+                }
+
+                console.log("Value:" + mymap[i].toString());
+            }
+        }
+        function outputeventpinsupdate() {
+            var mymap = outputEventPinNumbers.value();
+            configoutputpinnumbers.text = "";
+            for (var i = 0; i < numberOfConfiguredOutputEvents.value(); i++) {
+                if (i == numberOfConfiguredOutputEvents.value()-1)
+                {
+                    configoutputpinnumbers.text += mymap[i].toString();
+                }
+                else
+                {
+                    configoutputpinnumbers.text += mymap[i].toString() + ",";
+                }
+            }
+
+        }
+        function configschedulingbitsupdate() {
+            var mymap = schedulingConfigurationBits.value();
+            configschedulingbits.text = "";
+            for (var i = 0; i < numberOfConfiguredOutputEvents.value(); i++) {
+                if (i == numberOfConfiguredOutputEvents.value()-1)
+                {
+                    configschedulingbits.text += mymap[i].toString();
+                }
+                else
+                {
+                    configschedulingbits.text += mymap[i].toString() + ",";
+                }
+            }
+        }
     }
-	function offsetupdate() {
-	console.log("Offset update");
-		tpstext.text = decoderEngineOffset.value();
-	}
-	function outputeventupdate() {
-		configoutputeventstext.text = numberOfConfiguredOutputEvents.value();
-	}
-	function injectionspercycleupdate() {
-		configinjectionspercycle.text = numberOfInjectionsPerEngineCycle.value();
-	}
-    function decode(map){
-    //console.log("Decoded");
-//        tpstext.text = map["TPS"];
-    }
-
-}
 }

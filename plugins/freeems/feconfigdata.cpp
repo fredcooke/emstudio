@@ -20,7 +20,7 @@ FEConfigData::FEConfigData(QString name,QString type, QString override,unsigned 
 }
 QVariant FEConfigData::value()
 {
-	QLOG_DEBUG() << "value requested:" << m_value;
+	QLOG_DEBUG() << "value requested for" << m_name << ":" << m_value;
 	return m_value;
 }
 void FEConfigData::setValue(QVariant value)
@@ -38,7 +38,23 @@ void FEConfigData::setValue(QVariant value)
 	}
 	else if (m_type == "array")
 	{
-
+		//It will be a list of doubles?
+		QVariantList list = value.toList();
+		QByteArray data;
+		for (int i=0;i<list.size();i++)
+		{
+			double dval = list[i].toDouble();
+			unsigned short usval = reverseCalcAxis(dval,m_calc);
+			for (int j=0;j<m_elementSize;j++)
+			{
+				data.append(usval >> (((m_elementSize-1)-j)*8));
+			}
+		}
+		if (data.size() < m_size)
+		{
+			//We're only editing the first part of the array.
+		}
+		emit saveSingleDataToFlash(m_locationId,m_offset,data.size(),data);
 	}
 }
 
@@ -65,6 +81,20 @@ void FEConfigData::setData(QByteArray data)
     }
     else if (m_type == "array")
     {
+	    qDebug() << "Array type";
+	    QByteArray newdata = data.mid(m_offset,m_size);
+	    QVariantList valuelist;
+	    for (int i=0;i<m_size;i+=m_elementSize)
+	    {
+		    unsigned long val = 0;
+		    for (int j=0;j<m_elementSize;j++)
+		    {
+			val += ((unsigned char)newdata[i+j]) << (((m_elementSize-1) - j) * 8);
+		    }
+		    double properval = calcAxis(val,m_calc);
+		    valuelist.append(properval);
+	    }
+	    m_value = valuelist;
     }
     emit update();
 }

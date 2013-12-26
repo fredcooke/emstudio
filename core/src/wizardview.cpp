@@ -41,6 +41,7 @@ void WizardView::addConfig(QString name,ConfigData *config)
         //Throw away, we don't care
 //        return;
 	}
+	qDebug() << "Config recieved:" << name;
 	//m_configBlockMap[name] = config;
 	//We don't actually need to hold on to this object (*config), it is garunteed to live for the life
 	//of the application. Simply connect the signals/slots, and ignore it otherwise.
