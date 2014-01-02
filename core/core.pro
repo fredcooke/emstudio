@@ -184,4 +184,6 @@ OTHER_FILES += \
     README.md \
     wizards/BenchTest.qml \
     wizards/DecoderOffset.qml \
-    wizards/wizard.qml
+    wizards/wizard.qml \
+    wizards/EngineConfig.qml \
+    wizards/ActualDecoderOffset.qml

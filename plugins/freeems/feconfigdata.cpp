@@ -20,7 +20,7 @@ FEConfigData::FEConfigData(QString name,QString type, QString override,unsigned 
 }
 QVariant FEConfigData::value()
 {
-	QLOG_DEBUG() << "value requested for" << m_name << ":" << m_value;
+	//QLOG_DEBUG() << "value requested for" << m_name << ":" << m_value;
 	return m_value;
 }
 void FEConfigData::setValue(QVariant value)

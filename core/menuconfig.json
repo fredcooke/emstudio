@@ -85,6 +85,60 @@
       "offset" : "99",
       "calc" : [ ],
       "locationid" : "0xC003"
+    },
+    {
+      "name" : "perCylinderVolume",
+      "type" : "value",
+      "sizeofelement":"2",
+      "size" : "1",
+      "offset" : "0",
+      "calc" : [ { "type":"div","value":"65536.0"},{"type":"mult","value":"2000.0"} ],
+      "locationid" : "0xC000"
+    },
+    {
+      "name" : "injectorFlow",
+      "type" : "value",
+      "sizeofelement":"2",
+      "size" : "1",
+      "offset" : "2",
+      "calc" : [ { "type":"div","value":"65536.0"},{"type":"mult","value":"3840"} ],
+      "locationid" : "0xC000"
+    },
+    {
+      "name" : "InjectionRPMDisableThreshold",
+      "type" : "value",
+      "sizeofelement":"2",
+      "size" : "1",
+      "offset" : "0",
+      "calc" : [ { "type":"div","value":"2.0"} ],
+      "locationid" : "0xC004"
+    },
+    {
+      "name" : "InjectionRPMEnableThreshold",
+      "type" : "value",
+      "sizeofelement":"2",
+      "size" : "1",
+      "offset" : "2",
+      "calc" : [ { "type":"div","value":"2.0"} ],
+      "locationid" : "0xC004"
+    },
+    {
+      "name" : "IgnitionRPMDisableThreshold",
+      "type" : "value",
+      "sizeofelement":"2",
+      "size" : "1",
+      "offset" : "4",
+      "calc" : [ { "type":"div","value":"2.0"} ],
+      "locationid" : "0xC004"
+    },
+    {
+      "name" : "IgnitionRPMEnableThreshold",
+      "type" : "value",
+      "sizeofelement":"2",
+      "size" : "1",
+      "offset" : "6",
+      "calc" : [ { "type":"div","value":"2.0"} ],
+      "locationid" : "0xC004"
     }
   ]
 }

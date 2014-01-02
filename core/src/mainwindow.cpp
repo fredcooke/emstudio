@@ -1233,7 +1233,7 @@ void MainWindow::loadWizards(QString dir)
 			}
 			view->setFile(emsComms,wizards.absoluteFilePath(file));
 			view->passConfig(m_memoryMetaData->configMetaData());
-			view->setGeometry(0,0,800,600);
+			//view->setGeometry(0,0,800,600);
 			QAction *action = new QAction(this);
 			action->setText(file.mid(0,file.lastIndexOf(".")));
 			action->setCheckable(true);
