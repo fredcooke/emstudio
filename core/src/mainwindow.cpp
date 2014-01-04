@@ -1246,7 +1246,7 @@ void MainWindow::loadWizards(QString dir)
 
 void MainWindow::emsCommsConnected()
 {
-	emsComms->startInterrogation();
+
 	m_interrogationFailureCount = 0;
 	ui.actionSave_Offline_Data->setEnabled(true);
 	ui.actionLoad_Offline_Data->setEnabled(true);
@@ -1299,6 +1299,7 @@ void MainWindow::emsCommsConnected()
 	progressView->show();
 	interrogateProgressMdiWindow->show();
 	progressView->addOutput("Connected to EMS");
+	emsComms->startInterrogation();
 }
 void MainWindow::interrogationProgress(int current, int total)
 {
