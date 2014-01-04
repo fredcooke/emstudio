@@ -1330,6 +1330,7 @@ void MainWindow::interrogationComplete()
 	{
 		emsMdiWindow->show();
 	}
+	bool oneShown = false; //Check to see if at least one window is visisble.
 	QSettings windowsettings;
 	int size = windowsettings.beginReadArray("rawwindows");
 	for (int i=0;i<size;i++)
@@ -1353,13 +1354,23 @@ void MainWindow::interrogationComplete()
 		else if (type == "tablesMdiWindow")
 		{
 			tablesMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			tablesMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+			bool hidden = windowsettings.value("hidden",true).toBool();
+			if (!hidden)
+			{
+				oneShown = true;
+			}
+			tablesMdiWindow->setHidden(hidden);
 
 		}
 		else if (type == "firmwareMetaMdiWindow")
 		{
 			firmwareMetaMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			firmwareMetaMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+			bool hidden = windowsettings.value("hidden",true).toBool();
+			if (!hidden)
+			{
+				oneShown = true;
+			}
+			firmwareMetaMdiWindow->setHidden(hidden);
 		}
 		else if (type == "interrogateProgressMdiWindow")
 		{
@@ -1369,27 +1380,52 @@ void MainWindow::interrogationComplete()
 		else if (type == "emsMdiWindow")
 		{
 			emsMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			emsMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+			bool hidden = windowsettings.value("hidden",true).toBool();
+			if (!hidden)
+			{
+				oneShown = true;
+			}
+			emsMdiWindow->setHidden(hidden);
 		}
 		else if (type == "flagsMdiWindow")
 		{
 			flagsMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			flagsMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+			bool hidden = windowsettings.value("hidden",true).toBool();
+			if (!hidden)
+			{
+				oneShown = true;
+			}
+			flagsMdiWindow->setHidden(hidden);
 		}
 		else if (type == "gaugesMdiWindow")
 		{
 			gaugesMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			gaugesMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+			bool hidden = windowsettings.value("hidden",true).toBool();
+			if (!hidden)
+			{
+				oneShown = true;
+			}
+			gaugesMdiWindow->setHidden(hidden);
 		}
 		else if (type == "packetStatusMdiWindow")
 		{
 			packetStatusMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			packetStatusMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+			bool hidden = windowsettings.value("hidden",true).toBool();
+			if (!hidden)
+			{
+				oneShown = true;
+			}
+			packetStatusMdiWindow->setHidden(hidden);
 		}
 		else if (type == "aboutMdiWindow")
 		{
 			aboutMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			aboutMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+			bool hidden = windowsettings.value("hidden",true).toBool();
+			if (!hidden)
+			{
+				oneShown = true;
+			}
+			aboutMdiWindow->setHidden(hidden);
 		}
 		else if (type == "emsStatusMdiWindow")
 		{
@@ -1400,6 +1436,11 @@ void MainWindow::interrogationComplete()
 			qDebug() << "Unknown type:" << type;
 		}
 
+	}
+	if (!oneShown)
+	{
+		//No windows are currently shown. Show the emsMdiWindow
+		emsMdiWindow->setHidden(false);
 	}
 	/*	QMdiSubWindow *tablesMdiWindow;
 	QMdiSubWindow *firmwareMetaMdiWindow;
