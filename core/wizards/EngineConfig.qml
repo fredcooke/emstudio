@@ -2,6 +2,8 @@
 import QtQuick 1.1
 
 Item {
+    width: 600
+    height: 400
     Rectangle {
         x:0
         y:0
