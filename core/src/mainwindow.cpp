@@ -342,6 +342,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	windowsettings.endGroup();
 
+	this->setAttribute(Qt::WA_DeleteOnClose,true);
+
 
 }
 void MainWindow::menu_windows_interrogateProgressViewClicked()
@@ -1963,6 +1965,14 @@ MainWindow::~MainWindow()
 	windowsettings.setValue("isMaximized",this->isMaximized());
 	windowsettings.endGroup();
 	windowsettings.sync();
+
+	//Remove all WizardView windows
+	for (int i=0;i<m_wizardList.size();i++)
+	{
+		m_wizardList[i]->close();
+		delete m_wizardList[i];
+	}
+	m_wizardList.clear();
 
 	emsComms->stop();
 	emsComms->wait(1000);
