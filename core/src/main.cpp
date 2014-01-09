@@ -142,10 +142,10 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	MainWindow w;
+	MainWindow *w = new MainWindow();
 	if (port != "")
 	{
-		w.setDevice(port);
+		w->setDevice(port);
 	}
 	if (plugin == "")
 	{
@@ -179,11 +179,11 @@ int main(int argc, char *argv[])
 			plugin = "/usr/share/emstudio/plugins/libfreeemsplugin.dylib";
 		}
 	}
-	w.setPlugin(plugin);
+	w->setPlugin(plugin);
 	if (autoconnect)
 	{
-		w.connectToEms();
+		w->connectToEms();
 	}
-	w.show();
+	w->show();
 	return a.exec();
 }
