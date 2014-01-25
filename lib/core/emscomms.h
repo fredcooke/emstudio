@@ -110,6 +110,8 @@ public:
 	virtual void startInterrogation()=0;
 	virtual Table2DData* get2DTableData(unsigned short locationid)=0;
 	virtual Table3DData* get3DTableData(unsigned short locationid)=0;
+	virtual Table2DData* get2DTableData(QString locationname)=0;
+	virtual Table3DData* get3DTableData(QString locationname)=0;
 	virtual RawData* getRawData(unsigned short locationid)=0;
     virtual ConfigData* getConfigData(QString name) = 0;
     virtual QList<QString> getConfigList()=0;

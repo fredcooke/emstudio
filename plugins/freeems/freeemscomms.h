@@ -89,6 +89,8 @@ public:
 	int disableDatalogStream();
 	Table2DData* get2DTableData(unsigned short locationid);
 	Table3DData* get3DTableData(unsigned short locationid);
+	Table2DData* get2DTableData(QString locationname);
+	Table3DData* get3DTableData(QString locationname);
 	RawData* getRawData(unsigned short locationid);
 	ConfigData* getConfigData(QString name);
 	QList<QString> getConfigList();

@@ -1785,6 +1785,36 @@ Table3DData* FreeEmsComms::get3DTableData(unsigned short locationid)
 	}
 	return m_3dTableMap[locationid];
 }
+Table2DData* FreeEmsComms::get2DTableData(QString locationname)
+{
+	bool ok = false;
+	unsigned short locid = locationname.toInt(&ok,16);
+	if (!ok)
+	{
+		return 0;
+	}
+	if (!m_2dTableMap.contains(locid))
+	{
+		return 0;
+	}
+	return m_2dTableMap.value(locid);
+}
+
+Table3DData* FreeEmsComms::get3DTableData(QString locationname)
+{
+	bool ok = false;
+	unsigned short locid = locationname.toInt(&ok,16);
+	if (!ok)
+	{
+		return 0;
+	}
+	if (!m_3dTableMap.contains(locid))
+	{
+		return 0;
+	}
+	return m_3dTableMap.value(locid);
+}
+
 RawData* FreeEmsComms::getRawData(unsigned short locationid)
 {
 	if (!m_rawDataMap.contains(locationid))

@@ -91,7 +91,7 @@ void FlagView::passData(QVariantMap data)
 		}
 		else
 		{
-			QLOG_TRACE() << "unknown value type:" << i.value().typeName();
+			//QLOG_TRACE() << "unknown value type:" << i.value().typeName();
 		}
 		i++;
 	}

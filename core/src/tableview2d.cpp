@@ -68,6 +68,7 @@ TableView2D::TableView2D(QWidget *parent)
 	grid->setPen(QPen(QColor::fromRgb(100,100,100)));
 	grid->attach(ui.plot);
 
+
 	//curve->setData()
 	//QwtSeriesData<QwtIntervalSample> series;
 	/*if (!isram)
@@ -750,6 +751,24 @@ bool TableView2D::setData(unsigned short locationid,DataBlock *data)
 	m_locationid = locationid;
 	return updateTable();
 }
+bool TableView2D::setData(QString name,DataBlock *data)
+{
+	if (!metaDataValid)
+	{
+		m_metaData = Table2DMetaData();
+	}
+	if (tableData == 0)
+	{
+		tableData = dynamic_cast<Table2DData*>(data);
+		connect(tableData,SIGNAL(update()),this,SLOT(updateTable()));
+	}
+	if (tableData == 0)
+	{
+		return false;
+	}
+	QLOG_DEBUG() << "TableView2D::passData" << name;
+	return updateTable();
+}
 bool TableView2D::updateTable()
 {
 	samples.clear();
@@ -793,7 +812,7 @@ bool TableView2D::updateTable()
 			{
 				//Out of order table axis.
 				QLOG_ERROR() << "2D Table axis is out of order!";
-				return false;
+				//return false;
 			}
 		}
 		else if (order == 2)
@@ -802,7 +821,7 @@ bool TableView2D::updateTable()
 			{
 				//Out of order table axis.
 				QLOG_ERROR() << "2D Table axis is out of order!";
-				return false;
+				//return false;
 			}
 		}
 		first = tableData->axis()[i];
@@ -844,6 +863,9 @@ bool TableView2D::updateTable()
 	{
 		ui.tableWidget->item(selectedlist[i].first,selectedlist[i].second)->setSelected(true);
 	}
+	ui.plot->setAxisTitle(QwtPlot::xBottom,tableData->axisLabel());
+	ui.plot->setAxisTitle(QwtPlot::yLeft,tableData->valueLabel());
+
 
 	selectedlist.clear();
 	//ui.tableWidget->resizeColumnsToContents();

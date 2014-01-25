@@ -225,6 +225,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	emsMdiWindow->setWindowTitle(emsInfo->windowTitle());
 
 	parameterView = new ParameterView();
+	connect(parameterView,SIGNAL(showTable(QString)),this,SLOT(showTable(QString)));
 	parameterMdiWindow = ui.mdiArea->addSubWindow(parameterView);
 	parameterMdiWindow->setGeometry(parameterView->geometry());
 	parameterMdiWindow->hide();
@@ -748,6 +749,31 @@ void MainWindow::menu_windows_PacketStatusClicked()
 	packetStatusMdiWindow->show();
 	QApplication::postEvent(packetStatusMdiWindow, new QEvent(QEvent::Show));
 	QApplication::postEvent(packetStatusMdiWindow, new QEvent(QEvent::WindowActivate));
+}
+void MainWindow::showTable(QString table)
+{
+	Table2DData *data = emsComms->get2DTableData(table);
+	TableView2D *view = new TableView2D();
+	connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+	QString title;
+	//Table2DMetaData metadata = m_memoryMetaData->get2DMetaData(locid);
+	//view->setMetaData(metadata);
+	DataBlock *block = dynamic_cast<DataBlock*>(data);
+	if (!view->setData(table,block))
+	{
+		return;
+	}
+	//title = metadata.tableTitle;
+	connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+
+	QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+	//win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
+	win->setWindowTitle("Ram Location " + table);
+	win->setGeometry(0,0,((view->width() < this->width()-160) ? view->width() : this->width()-160),((view->height() < this->height()-100) ? view->height() : this->height()-100));
+	//m_rawDataView[locid] = view;
+	win->show();
+	QApplication::postEvent(win, new QEvent(QEvent::Show));
+	QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
 }
 
 void MainWindow::createView(unsigned short locid,DataType type)

@@ -36,6 +36,7 @@ protected:
 signals:
 	void saveSingleData(unsigned short locationid,QByteArray data, unsigned short offset, unsigned short size);
 	void windowHiding(QMdiSubWindow *parent);
+	void showTable(QString table);
 public slots:
 	void currentItemChanged(QTreeWidgetItem *current,QTreeWidgetItem *prev);
 	void itemSelectionChanged();

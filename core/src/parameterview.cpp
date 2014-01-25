@@ -57,6 +57,7 @@ void ParameterView::currentItemChanged(QTreeWidgetItem *current,QTreeWidgetItem 
 					if (!m_metaMenu.menulist[i].subMenuList[j].is_seperator)
 					{
 						QLOG_DEBUG() << "Variable:" << m_metaMenu.menulist[i].subMenuList[j].variable;
+						emit showTable(m_metaMenu.menulist[i].subMenuList[j].variable);
 						for (int k=0;k<m_metaMenu.dialoglist.size();k++)
 						{
 							if (m_metaMenu.dialoglist[k].variable == m_metaMenu.menulist[i].subMenuList[j].variable)

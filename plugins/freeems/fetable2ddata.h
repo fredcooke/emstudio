@@ -45,6 +45,8 @@ public:
 	double maxCalcedYAxis();
 	double minCalcedXAxis();
 	double minCalcedYAxis();
+	QString axisLabel() { return ""; }
+	QString valueLabel() { return ""; }
 
 	QList<double> axis();
 	QList<double> values();
@@ -75,8 +77,8 @@ private:
 	unsigned short m_locationId;
 	QList<double> m_axis;
 	QList<double> m_values;
-	QString axisLabel;
-	QString valuesLabel;
+	QString m_axisLabel;
+	QString m_valuesLabel;
 	void reCalcAxisData();
 signals:
 	void saveSingleDataToFlash(unsigned short locationid,unsigned short offset, unsigned short size,QByteArray data);

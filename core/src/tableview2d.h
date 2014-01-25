@@ -44,6 +44,7 @@ public:
 	//bool setData(unsigned short locationid,QByteArray rawdata);
 	void setMetaData(Table2DMetaData metadata);
 	bool setData(unsigned short locationid,DataBlock *data);
+	bool setData(QString name,DataBlock *data);
 	//void passData(unsigned short locationid,Table2DData data);
 	void passDatalog(QVariantMap data);
 private:

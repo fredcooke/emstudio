@@ -171,6 +171,7 @@ private:
 	QMap<QMdiSubWindow*,QAction*> m_mdiSubWindowToActionMap;
 	bool m_EcuResetPopup;
 private slots:
+	void showTable(QString table);
 	void windowHidden(QMdiSubWindow* window);
 	void bringToFrontAndShow();
 	void windowDestroyed(QObject *window);
