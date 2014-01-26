@@ -116,7 +116,11 @@ SOURCES += src/main.cpp\
     src/parameterview.cpp \
     src/parameterwidget.cpp \
     src/wizardview.cpp \
-    src/firmwaremetadata.cpp
+    src/firmwaremetadata.cpp \
+    src/abstractgaugeitem.cpp \
+    src/bargaugeitem.cpp \
+    src/gaugeutil.cpp \
+    src/roundgaugeitem.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -159,7 +163,12 @@ HEADERS  += src/mainwindow.h \
     src/parameterview.h \
     src/parameterwidget.h \
     src/wizardview.h \
-    src/firmwaremetadata.h
+    src/firmwaremetadata.h \
+    src/abstractgaugeitem.h \
+    src/bargaugeitem.h \
+    src/gaugeutil.h \
+    src/roundgaugeitem.h \
+    src/gaugeutil.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \

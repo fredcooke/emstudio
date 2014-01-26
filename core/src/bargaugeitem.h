@@ -3,6 +3,7 @@
  * Copyright (C) 2013  Michael Carpenter (malcom2073@gmail.com)                     *
  *                                                                                  *
  * This file is a part of EMStudio                                                  *
+ * Author: Ari "MrOnion" Karhu (ari@baboonplanet.com)                               *
  *                                                                                  *
  * EMStudio is free software; you can redistribute it and/or                        *
  * modify it under the terms of the GNU Lesser General Public                       *
@@ -19,49 +20,38 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA   *
  ************************************************************************************/
 
-#include "gaugewidget.h"
-#include "roundgaugeitem.h"
-#include "bargaugeitem.h"
+#ifndef BARGAUGEITEM_H
+#define BARGAUGEITEM_H
 
-#include <QMetaType>
-#include <QDeclarativeContext>
-#include <QFile>
-#include <QDir>
-GaugeWidget::GaugeWidget(QWidget *parent) : QDeclarativeView(parent)
-{
-	qmlRegisterType<GaugeItem>("GaugeImage",0,1,"GaugeImage");
-	qmlRegisterType<RoundGaugeItem>("AviatorGauges", 0, 1, "RoundGauge");
-	qmlRegisterType<BarGaugeItem>("AviatorGauges", 0, 1, "BarGauge");
-	this->rootContext()->setContextProperty("propertyMap",&propertyMap);
-	/*if (QFile::exists("gauges.qml"))
-	{
-		setSource(QUrl("gauges.qml"));
-	}
-	else if (QFile::exists("src/gauges.qml"))
-	{
-		setSource(QUrl("src/gauges.qml"));
-	}
-	else if (QFile::exists("/etc/emstudio/gauges.qml"))
-	{
-		setSource(QUrl("/etc/emstudio/gauges.qml"));
-	}
-	else
-	{
-	}*/
-}
+#include <QPen>
+#include <QPainter>
+#include <QTimer>
 
-void GaugeWidget::setFile(QString file)
+#include "gaugeutil.h"
+#include "abstractgaugeitem.h"
+
+class BarGaugeItem : public AbstractGaugeItem
 {
-	setSource(QUrl::fromLocalFile(file));
-	if (rootObject())
-	{
-		for (int i=0;i<rootObject()->childItems().size();i++)
-		{
-			QGraphicsObject *obj = qobject_cast<QGraphicsObject*>(rootObject()->childItems()[i]);
-			if (obj)
-			{
-				propertylist.append(obj->property("propertyMapProperty").toString());
-			}
-		}
-	}
-}
+public:
+    explicit BarGaugeItem(QWidget *parent = 0);
+
+private:
+    void init();
+    void drawBackground();
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *style , QWidget *w);
+
+    int m_size;
+    int m_barSize;
+    int m_padding;
+    double m_range;
+    int m_gap;
+
+    QPen m_penBar;
+    QPen m_penNeedle;
+    QFont m_fontValue;
+    QFont m_fontTitle;
+    QFont m_fontUnit;
+
+};
+
+#endif // BARGAUGEITEM_H

@@ -3,6 +3,7 @@
  * Copyright (C) 2013  Michael Carpenter (malcom2073@gmail.com)                     *
  *                                                                                  *
  * This file is a part of EMStudio                                                  *
+ * Author: Ari "MrOnion" Karhu (ari@baboonplanet.com)                               *
  *                                                                                  *
  * EMStudio is free software; you can redistribute it and/or                        *
  * modify it under the terms of the GNU Lesser General Public                       *
@@ -19,49 +20,63 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA   *
  ************************************************************************************/
 
-#include "gaugewidget.h"
-#include "roundgaugeitem.h"
-#include "bargaugeitem.h"
+#ifndef ROUNDGAUGEITEM_H
+#define ROUNDGAUGEITEM_H
 
-#include <QMetaType>
-#include <QDeclarativeContext>
-#include <QFile>
-#include <QDir>
-GaugeWidget::GaugeWidget(QWidget *parent) : QDeclarativeView(parent)
-{
-	qmlRegisterType<GaugeItem>("GaugeImage",0,1,"GaugeImage");
-	qmlRegisterType<RoundGaugeItem>("AviatorGauges", 0, 1, "RoundGauge");
-	qmlRegisterType<BarGaugeItem>("AviatorGauges", 0, 1, "BarGauge");
-	this->rootContext()->setContextProperty("propertyMap",&propertyMap);
-	/*if (QFile::exists("gauges.qml"))
-	{
-		setSource(QUrl("gauges.qml"));
-	}
-	else if (QFile::exists("src/gauges.qml"))
-	{
-		setSource(QUrl("src/gauges.qml"));
-	}
-	else if (QFile::exists("/etc/emstudio/gauges.qml"))
-	{
-		setSource(QUrl("/etc/emstudio/gauges.qml"));
-	}
-	else
-	{
-	}*/
-}
+#include <QPen>
+#include <QPainter>
+#include <QTimer>
 
-void GaugeWidget::setFile(QString file)
+#include "gaugeutil.h"
+#include "abstractgaugeitem.h"
+
+class RoundGaugeItem : public AbstractGaugeItem
 {
-	setSource(QUrl::fromLocalFile(file));
-	if (rootObject())
-	{
-		for (int i=0;i<rootObject()->childItems().size();i++)
-		{
-			QGraphicsObject *obj = qobject_cast<QGraphicsObject*>(rootObject()->childItems()[i]);
-			if (obj)
-			{
-				propertylist.append(obj->property("propertyMapProperty").toString());
-			}
-		}
-	}
-}
+
+public:
+    explicit RoundGaugeItem(QWidget *parent = 0);
+
+private:
+    void init();
+    void drawBackground();
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *style , QWidget *w);
+
+    static const int arcSize = 3600; //225 * 16;
+    static const int arcStart = 2160; //135 * 16;
+
+    int m_size;
+    float m_halfsize;
+    double m_range;
+    int m_gap;
+
+    int m_locationXY;
+    int m_locationHighlightXY;
+    int m_sizeXY;
+    int m_sizeHighlightXY;
+    QFont m_fontValue;
+    QFont m_fontTitle;
+    QFont m_fontUnit;
+    QPen m_penArc;
+    QPen m_penNeedle;
+
+    /*
+    int m_degreesLowDanger;
+    int m_degreesLowWarning;
+    int m_degreesHighDanger;
+    int m_degreesHighWarning;
+    int m_valueDeg;
+    */
+
+    QRectF m_arcLowDanger;
+    QRectF m_arcLowWarning;
+    QRectF m_arcHighDanger;
+    QRectF m_arcHighWarning;
+    QRectF m_arcValue;
+
+signals:
+    
+public slots:
+
+};
+
+#endif // ROUNDGAUGEITEM_H

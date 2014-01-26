@@ -240,6 +240,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	aboutMdiWindow->hide();
 	aboutMdiWindow->setWindowTitle(aboutView->windowTitle());
 
+	//newDataGauges = new CustomGaugeView();
+	//newDataGauges->setFile("src/oniongauges.qml");
+	//newDataGauges->show();
 	dataGauges = new GaugeView();
 	//connect(dataGauges,SIGNAL(destroyed()),this,SLOT(dataGaugesDestroyed()));
 	gaugesMdiWindow = ui.mdiArea->addSubWindow(dataGauges);
