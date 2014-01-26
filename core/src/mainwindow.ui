@@ -44,7 +44,7 @@
      <x>0</x>
      <y>0</y>
      <width>1525</width>
-     <height>25</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -97,10 +97,16 @@
      <string>Open Windows</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuDashboards">
+    <property name="title">
+     <string>Dashboards</string>
+    </property>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuWindows"/>
    <addaction name="menuOpen_Windows"/>
+   <addaction name="menuDashboards"/>
    <addaction name="menuWizards"/>
    <addaction name="menuHelp"/>
   </widget>

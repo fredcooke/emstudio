@@ -90,6 +90,8 @@ public:
 	void connectToEms();
 private:
 	void loadWizards(QString dir);
+	void loadDashboards(QString dir);
+	QList<GaugeView*> m_dashboardList;
 	QList<unsigned short> m_locationIdList;
 	bool m_checkEmsDataInUse;
 	bool m_offlineMode;

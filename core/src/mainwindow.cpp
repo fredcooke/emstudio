@@ -247,6 +247,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	gaugesMdiWindow->hide();
 	gaugesMdiWindow->setWindowTitle(dataGauges->windowTitle());
 
+	loadDashboards("src/");
+	loadDashboards(".");
+	loadDashboards(m_defaultsDir + "/" + "dashboards");
+
 	if (QFile::exists(m_defaultsDir + "/" + "dashboards/gauges.qml"))
 	{
 		//qml file is in the program files directory, or in /usr/share
@@ -1245,6 +1249,28 @@ void MainWindow::emsOperatingSystem(QString os)
 {
 	emsinfo.operatingSystem = os;
 }
+void MainWindow::loadDashboards(QString dir)
+{
+	QDir dashboards(dir);
+	foreach (QString file,dashboards.entryList(QDir::Files | QDir::NoDotAndDotDot))
+	{
+		if (file.endsWith(".qml"))
+		{
+			GaugeView *view = new GaugeView();
+			QMdiSubWindow *mdiView = ui.mdiArea->addSubWindow(view);
+			mdiView->setGeometry(view->geometry());
+			mdiView->hide();
+			mdiView->setWindowTitle(view->windowTitle());
+			view->setFile(dashboards.absoluteFilePath(file));
+			QAction *action = new QAction(this);
+			action->setText(file.mid(0,file.lastIndexOf(".")));
+			action->setCheckable(true);
+			ui.menuDashboards->addAction(action);
+			connect(action,SIGNAL(triggered(bool)),mdiView,SLOT(setVisible(bool)));
+			m_dashboardList.append(view);
+		}
+	}
+}
 void MainWindow::loadWizards(QString dir)
 {
 	QDir wizards(dir);
@@ -1836,6 +1862,10 @@ void MainWindow::dataLogDecoded(QVariantMap data)
 		{
 			dview->passDatalog(data);
 		}
+	}
+	for (int i=0;i<m_dashboardList.size();i++)
+	{
+		m_dashboardList[i]->passData(data);
 	}
 }
 void MainWindow::logPayloadReceived(QByteArray header,QByteArray payload)
