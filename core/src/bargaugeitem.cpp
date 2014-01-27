@@ -71,13 +71,13 @@ void BarGaugeItem::drawBackground() {
     m_penBar.setColor(colorDanger);
     painter.setPen(m_penBar);
 
-    if (m_lowDanger) {
+    if (m_lowDangerSet) {
 	lengthLowDanger = ((m_lowDanger - m_low) / m_range) * m_barSize;
         painter.drawLine(m_padding, locationY, lengthLowDanger + m_padding - m_gap, locationY);
         barNormalStart += lengthLowDanger;
     }
 
-    if (m_highDanger) {
+    if (m_highDangerSet) {
 	lengthHighDanger = ((m_high - m_highDanger) / m_range) * m_barSize;
         painter.drawLine(m_padding + m_barSize - lengthHighDanger + m_gap, locationY, m_padding + m_barSize, locationY);
         barNormalEnd -= lengthHighDanger;
@@ -87,13 +87,13 @@ void BarGaugeItem::drawBackground() {
     m_penBar.setColor(colorWarning);
     painter.setPen(m_penBar);
 
-    if (m_lowWarning) {
+    if (m_lowWarningSet) {
 	int lengthLowWarning = ((m_lowWarning - m_low) / m_range) * m_barSize;
         painter.drawLine(m_padding + lengthLowDanger, locationY, lengthLowWarning + m_padding - m_gap, locationY);
         barNormalStart += (lengthLowWarning - lengthLowDanger);
     }
 
-    if (m_highWarning) {
+    if (m_highWarningSet) {
 	int lengthHighWarning = ((m_high - m_highWarning) / m_range) * m_barSize;
         painter.drawLine(m_padding + m_barSize - lengthHighWarning + m_gap, locationY, m_padding + m_barSize - lengthHighDanger, locationY);
         barNormalEnd -= (lengthHighWarning - lengthHighDanger);

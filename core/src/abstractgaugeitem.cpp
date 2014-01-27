@@ -35,6 +35,10 @@ AbstractGaugeItem::AbstractGaugeItem(QDeclarativeItem *parent) :
     m_low = 0;
     m_high = 0;
     m_decimal = 0;
+    m_lowDangerSet = false;
+    m_lowWarningSet = false;
+    m_highDangerSet = false;
+    m_highWarningSet = false;
 }
 
 double AbstractGaugeItem::getLow() {
@@ -59,6 +63,7 @@ double AbstractGaugeItem::getLowWarning() {
 
 void AbstractGaugeItem::setLowWarning(double lowWarning) {
     m_lowWarning = lowWarning;
+    m_lowWarningSet = true;
 }
 
 double AbstractGaugeItem::getLowDanger() {
@@ -67,6 +72,8 @@ double AbstractGaugeItem::getLowDanger() {
 
 void AbstractGaugeItem::setLowDanger(double lowDanger) {
     m_lowDanger = lowDanger;
+    m_lowDangerSet = true;
+
 }
 
 double AbstractGaugeItem::getHighWarning() {
@@ -75,6 +82,7 @@ double AbstractGaugeItem::getHighWarning() {
 
 void AbstractGaugeItem::setHighWarning(double highWarning) {
     m_highWarning = highWarning;
+    m_highWarningSet = true;
 }
 
 double AbstractGaugeItem::getHighDanger() {
@@ -83,6 +91,7 @@ double AbstractGaugeItem::getHighDanger() {
 
 void AbstractGaugeItem::setHighDanger(double highDanger) {
     m_highDanger = highDanger;
+    m_highDangerSet = true;
 }
 
 QString AbstractGaugeItem::getTitle() {

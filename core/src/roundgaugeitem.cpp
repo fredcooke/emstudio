@@ -74,13 +74,13 @@ void RoundGaugeItem::drawBackground() {
     m_penArc.setColor(colorDanger);
     painter.setPen(m_penArc);
 
-    if (m_lowDanger) {
+    if (m_lowDangerSet) {
 	degreesLowDanger = (int ((m_lowDanger - m_low) * arcSize / m_range));
         painter.drawArc(m_locationXY, m_locationXY, m_sizeXY, m_sizeXY, (arcSize - degreesLowDanger + m_gap), (degreesLowDanger - m_gap));
         degreesNormalSize -= degreesLowDanger;
     }
 
-    if (m_highDanger) {
+    if (m_highDangerSet) {
 	degreesHighDanger = (int ((m_high - m_highDanger - m_low) * arcSize / m_range));
         painter.drawArc(m_locationXY, m_locationXY, m_sizeXY, m_sizeXY, 0, degreesHighDanger - m_gap);
         degreesNormalSize -= degreesHighDanger;
@@ -91,13 +91,13 @@ void RoundGaugeItem::drawBackground() {
     m_penArc.setColor(colorWarning);
     painter.setPen(m_penArc);
 
-    if (m_lowWarning) {
+    if (m_lowWarningSet) {
 	int degreesLowWarning = (int ((m_lowWarning - m_low) * arcSize / m_range));
         painter.drawArc(m_locationXY, m_locationXY, m_sizeXY, m_sizeXY, (arcSize - degreesLowWarning + m_gap), (degreesLowWarning - degreesLowDanger - m_gap));
         degreesNormalSize -= (degreesLowWarning - degreesLowDanger);
     }
 
-    if (m_highWarning) {
+    if (m_highWarningSet) {
 	int degreesHighWarning = (int ((m_high - m_highWarning - m_low) * arcSize / m_range));
         painter.drawArc(m_locationXY, m_locationXY, m_sizeXY, m_sizeXY, degreesHighDanger, (degreesHighWarning - degreesHighDanger - m_gap));
         degreesNormalSize -= (degreesHighWarning - degreesHighDanger);
