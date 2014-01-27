@@ -759,28 +759,57 @@ void MainWindow::menu_windows_PacketStatusClicked()
 }
 void MainWindow::showTable(QString table)
 {
-	Table2DData *data = emsComms->get2DTableData(table);
-	TableView2D *view = new TableView2D();
-	connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
-	QString title;
-	//Table2DMetaData metadata = m_memoryMetaData->get2DMetaData(locid);
-	//view->setMetaData(metadata);
-	DataBlock *block = dynamic_cast<DataBlock*>(data);
-	if (!view->setData(table,block))
+	Table2DData *data2d = emsComms->get2DTableData(table);
+	Table3DData *data3d = emsComms->get3DTableData(table);
+	if (data2d)
 	{
-		return;
-	}
-	//title = metadata.tableTitle;
-	connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+		TableView2D *view = new TableView2D();
+		connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+		QString title;
+		//Table2DMetaData metadata = m_memoryMetaData->get2DMetaData(locid);
+		//view->setMetaData(metadata);
+		DataBlock *block = dynamic_cast<DataBlock*>(data2d);
+		if (!view->setData(table,block))
+		{
+			return;
+		}
+		//title = metadata.tableTitle;
+		connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
 
-	QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
-	//win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
-	win->setWindowTitle("Ram Location " + table);
-	win->setGeometry(0,0,((view->width() < this->width()-160) ? view->width() : this->width()-160),((view->height() < this->height()-100) ? view->height() : this->height()-100));
-	//m_rawDataView[locid] = view;
-	win->show();
-	QApplication::postEvent(win, new QEvent(QEvent::Show));
-	QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+		//win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
+		win->setWindowTitle("Ram Location " + table);
+		win->setGeometry(0,0,((view->width() < this->width()-160) ? view->width() : this->width()-160),((view->height() < this->height()-100) ? view->height() : this->height()-100));
+		//m_rawDataView[locid] = view;
+		win->show();
+		QApplication::postEvent(win, new QEvent(QEvent::Show));
+		QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+	}
+	else if (data3d)
+	{
+		TableView3D *view = new TableView3D();
+		connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+		QString title;
+		//Table2DMetaData metadata = m_memoryMetaData->get2DMetaData(locid);
+		//view->setMetaData(metadata);
+		DataBlock *block = dynamic_cast<DataBlock*>(data3d);
+		if (!view->setData(table,block))
+		{
+			return;
+		}
+		//title = metadata.tableTitle;
+		connect(view,SIGNAL(destroyed(QObject*)),this,SLOT(rawDataViewDestroyed(QObject*)));
+
+		QMdiSubWindow *win = ui.mdiArea->addSubWindow(view);
+		//win->setWindowTitle("Ram Location 0x" + QString::number(locid,16).toUpper() + " " + title);
+		win->setWindowTitle("Ram Location " + table);
+		win->setGeometry(0,0,((view->width() < this->width()-160) ? view->width() : this->width()-160),((view->height() < this->height()-100) ? view->height() : this->height()-100));
+		//m_rawDataView[locid] = view;
+		win->show();
+		QApplication::postEvent(win, new QEvent(QEvent::Show));
+		QApplication::postEvent(win, new QEvent(QEvent::WindowActivate));
+	}
+
 }
 
 void MainWindow::createView(unsigned short locid,DataType type)

@@ -38,6 +38,7 @@ public:
 	~TableView3D();
 	void setMetaData(Table3DMetaData metadata);
 	bool setData(unsigned short locationid,DataBlock *data);
+	bool setData(QString name,DataBlock *data);
 	void passDatalog(QVariantMap data);
 private:
 	void reColorTable(int rownum,int colnum);

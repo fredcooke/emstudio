@@ -1031,6 +1031,21 @@ void TableView3D::setMetaData(Table3DMetaData metadata)
 	m_metaData = metadata;
 	metaDataValid = true;
 }
+bool TableView3D::setData(QString name,DataBlock *data)
+{
+	Q_UNUSED(name)
+	if (tableData == 0)
+	{
+		tableData = dynamic_cast<Table3DData*>(data);
+		connect(tableData,SIGNAL(update()),this,SLOT(updateTable()));
+		//connect(tableData,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
+	}
+	else
+	{
+	}
+	//m_locationId = locationid;
+	return updateTable();
+}
 
 bool TableView3D::setData(unsigned short locationid,DataBlock *data)
 {
