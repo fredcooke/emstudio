@@ -14,6 +14,7 @@ ParameterView::ParameterView(QWidget *parent) : QWidget(parent)
 	ui.setupUi(this);
 	connect(ui.parameterTreeWidget,SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),this,SLOT(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
 	connect(ui.parameterTreeWidget,SIGNAL(itemSelectionChanged()),this,SLOT(itemSelectionChanged()));
+	ui.parameterTreeWidget->setColumnCount(2);
 }
 void ParameterView::itemSelectionChanged()
 {
@@ -51,7 +52,7 @@ void ParameterView::currentItemChanged(QTreeWidgetItem *current,QTreeWidgetItem 
 			//This is our menu!
 			for (int j=0;j<m_metaMenu.menulist[i].subMenuList.size();j++)
 			{
-				if (m_metaMenu.menulist[i].subMenuList[j].title == current->text(0))
+				if (m_metaMenu.menulist[i].subMenuList[j].variable == current->text(1))
 				{
 					//This is our current item!
 					if (!m_metaMenu.menulist[i].subMenuList[j].is_seperator)
@@ -165,7 +166,7 @@ void ParameterView::passMenuList(MenuSetup menu)
 			//{
 			//	item->addChild(new QTreeWidgetItem(QStringList() << menu.menulist[i].second[j]));
 			//}
-			item->addChild(new QTreeWidgetItem(QStringList() << menu.menulist[i].subMenuList[j].title));
+			item->addChild(new QTreeWidgetItem(QStringList() << menu.menulist[i].subMenuList[j].title << menu.menulist[i].subMenuList[j].variable));
 		}
 	}
 }

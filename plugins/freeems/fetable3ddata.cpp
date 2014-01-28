@@ -41,13 +41,13 @@ void FETable3DData::setData(unsigned short locationid,bool isflashonly, QByteArr
 	QLOG_DEBUG() << "YAxis:" << yaxissize;
 
 
-	m_maxXAxis = calcAxis(65535,m_metaData.xAxisCalc);
-	m_maxYAxis = calcAxis(65535,m_metaData.yAxisCalc);
-	m_maxZAxis = calcAxis(65535,m_metaData.zAxisCalc);
+	m_maxCalcedXAxis = calcAxis(65535,m_metaData.xAxisCalc);
+	m_maxCalcedYAxis = calcAxis(65535,m_metaData.yAxisCalc);
+	m_maxCalcedValue = calcAxis(65535,m_metaData.zAxisCalc);
 
-	m_minXAxis = calcAxis(0,m_metaData.xAxisCalc);
-	m_minYAxis = calcAxis(0,m_metaData.yAxisCalc);
-	m_minZAxis = calcAxis(0,m_metaData.zAxisCalc);
+	m_minCalcedXAxis = calcAxis(0,m_metaData.xAxisCalc);
+	m_minCalcedYAxis = calcAxis(0,m_metaData.yAxisCalc);
+	m_minCalcedValue = calcAxis(0,m_metaData.zAxisCalc);
 
 	for (int i=0;i<xaxissize*2;i+=2)
 	{
@@ -80,39 +80,75 @@ void FETable3DData::setData(unsigned short locationid,bool isflashonly,QByteArra
 	m_isFlashOnly = isflashonly;
 	setData(locationid,isflashonly,data);
 }
-double FETable3DData::maxXAxis()
+double FETable3DData::maxCalcedXAxis()
 {
 	QMutexLocker locker(m_acccessMutex);
-	return m_maxXAxis;
+	return m_maxCalcedXAxis;
 }
 
-double FETable3DData::maxYAxis()
+double FETable3DData::maxCalcedYAxis()
 {
 	QMutexLocker locker(m_acccessMutex);
-	return m_maxYAxis;
+	return m_maxCalcedYAxis;
 }
 
-double FETable3DData::maxZAxis()
+double FETable3DData::maxCalcedValue()
 {
 	QMutexLocker locker(m_acccessMutex);
-	return m_maxZAxis;
+	return m_maxCalcedValue;
 }
-double FETable3DData::minXAxis()
+double FETable3DData::minCalcedXAxis()
 {
 	QMutexLocker locker(m_acccessMutex);
-	return m_minXAxis;
-}
-
-double FETable3DData::minYAxis()
-{
-	QMutexLocker locker(m_acccessMutex);
-	return m_minYAxis;
+	return m_minCalcedXAxis;
 }
 
-double FETable3DData::minZAxis()
+double FETable3DData::minCalcedYAxis()
 {
 	QMutexLocker locker(m_acccessMutex);
-	return m_minZAxis;
+	return m_minCalcedYAxis;
+}
+
+double FETable3DData::minCalcedValue()
+{
+	QMutexLocker locker(m_acccessMutex);
+	return m_minCalcedValue;
+}
+
+
+double FETable3DData::maxActualXAxis()
+{
+	QMutexLocker locker(m_acccessMutex);
+	return m_maxActualXAxis;
+}
+
+double FETable3DData::maxActualYAxis()
+{
+	QMutexLocker locker(m_acccessMutex);
+	return m_maxActualYAxis;
+}
+
+double FETable3DData::maxActualValue()
+{
+	QMutexLocker locker(m_acccessMutex);
+	return m_maxActualValue;
+}
+double FETable3DData::minActualXAxis()
+{
+	QMutexLocker locker(m_acccessMutex);
+	return m_minActualXAxis;
+}
+
+double FETable3DData::minActualYAxis()
+{
+	QMutexLocker locker(m_acccessMutex);
+	return m_minActualYAxis;
+}
+
+double FETable3DData::minActualValue()
+{
+	QMutexLocker locker(m_acccessMutex);
+	return m_minActualValue;
 }
 void FETable3DData::setXAxis(int index,double val)
 {

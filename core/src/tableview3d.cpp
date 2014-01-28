@@ -176,16 +176,16 @@ void TableView3D::setValue(int row, int column,double value,bool ignoreselection
 		if (row == ui.tableWidget->rowCount()-1)
 		{
 			setSilentValue(row,column,formatNumber(tempValue,m_metaData.xDp));
-			if (tempValue > tableData->maxXAxis())
+			if (tempValue > tableData->maxCalcedXAxis())
 			{
-				QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+				QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minCalcedXAxis()) + "-" + QString::number(tableData->maxCalcedXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
 				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
 				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 				return;
 			}
-			else if (tempValue < tableData->minXAxis())
+			else if (tempValue < tableData->minCalcedXAxis())
 			{
-				QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minXAxis()) + "-" + QString::number(tableData->maxXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+				QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minCalcedXAxis()) + "-" + QString::number(tableData->maxCalcedXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
 				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
 				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 				return;
@@ -197,16 +197,16 @@ void TableView3D::setValue(int row, int column,double value,bool ignoreselection
 		else if (column == 0)
 		{
 			setSilentValue(row,column,formatNumber(tempValue,m_metaData.yDp));
-			if (tempValue > tableData->maxYAxis())
+			if (tempValue > tableData->maxCalcedYAxis())
 			{
-				QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minYAxis()) + "-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+				QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minCalcedYAxis()) + "-" + QString::number(tableData->maxCalcedYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
 				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.yDp));
 				return;
 			}
-			else if (tempValue < tableData->minYAxis())
+			else if (tempValue < tableData->minCalcedYAxis())
 			{
-				QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minYAxis()) + "-" + QString::number(tableData->maxYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+				QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minCalcedYAxis()) + "-" + QString::number(tableData->maxCalcedYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
 				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.yDp));
 				return;
@@ -217,16 +217,16 @@ void TableView3D::setValue(int row, int column,double value,bool ignoreselection
 		else
 		{
 			setSilentValue(row,column,formatNumber(tempValue,m_metaData.zDp));
-			if (tempValue > tableData->maxZAxis())
+			if (tempValue > tableData->maxCalcedValue())
 			{
-				QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+				QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minCalcedValue()) + "-" + QString::number(tableData->maxCalcedValue()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
 				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
 				return;
 			}
-			if (tempValue < tableData->minZAxis())
+			if (tempValue < tableData->minCalcedValue())
 			{
-				QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minZAxis()) + "-" + QString::number(tableData->maxZAxis()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
+				QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minCalcedValue()) + "-" + QString::number(tableData->maxCalcedValue()) + ". Entered value:") + ui.tableWidget->item(row,column)->text());
 				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
 				return;
@@ -258,15 +258,15 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
 			double maxval = 0;
 			if (ui.tableWidget->selectedItems()[i]->row() == ui.tableWidget->rowCount()-1)
 			{
-				maxval = tableData->maxXAxis();
+				maxval = tableData->maxCalcedXAxis();
 			}
 			else if (ui.tableWidget->selectedItems()[i]->column() == 0)
 			{
-				maxval = tableData->maxYAxis();
+				maxval = tableData->maxCalcedYAxis();
 			}
 			else
 			{
-				maxval = tableData->maxZAxis();
+				maxval = tableData->maxCalcedValue();
 			}
 			if (modifier & Qt::ShiftModifier)
 			{
@@ -309,18 +309,18 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifiers modifier)
 			double maxval = 0;
 			if (ui.tableWidget->selectedItems()[i]->row() == ui.tableWidget->rowCount()-1)
 			{
-				maxval = tableData->maxXAxis();
-				minval = tableData->minXAxis();
+				maxval = tableData->maxCalcedXAxis();
+				minval = tableData->minCalcedXAxis();
 			}
 			else if (ui.tableWidget->selectedItems()[i]->column() == 0)
 			{
-				maxval = tableData->maxYAxis();
-				minval = tableData->minYAxis();
+				maxval = tableData->maxCalcedYAxis();
+				minval = tableData->minCalcedYAxis();
 			}
 			else
 			{
-				maxval = tableData->maxZAxis();
-				minval = tableData->minZAxis();
+				maxval = tableData->maxCalcedValue();
+				minval = tableData->minCalcedValue();
 			}
 			if (modifier & Qt::ShiftModifier)
 			{
@@ -513,33 +513,33 @@ QString TableView3D::verifyValue(int row,int column,QString item)
 
 	if (row == ui.tableWidget->rowCount()-1)
 	{
-		if (tempValue > tableData->maxXAxis())
+		if (tempValue > tableData->maxCalcedXAxis())
 		{
 			return "Axis value entered too large!";
 		}
-		else if (tempValue < tableData->minXAxis())
+		else if (tempValue < tableData->minCalcedXAxis())
 		{
 			return "Axis value entered too small";
 		}
 	}
 	else if (column == 0)
 	{
-		if (tempValue > tableData->maxYAxis())
+		if (tempValue > tableData->maxCalcedYAxis())
 		{
 			return "Axis value too large";
 		}
-		else if (tempValue < tableData->minYAxis())
+		else if (tempValue < tableData->minCalcedYAxis())
 		{
 			return  "Axis value too small";
 		}
 	}
 	else
 	{
-		if (tempValue > tableData->maxZAxis())
+		if (tempValue > tableData->maxCalcedValue())
 		{
 			return "Value too large for table";
 		}
-		if (tempValue < tableData->minZAxis())
+		if (tempValue < tableData->minCalcedValue())
 		{
 			return "Value too small for table";
 		}
@@ -990,21 +990,21 @@ bool TableView3D::updateTable()
 		{
 			double val = tableData->values()[row][col];
 			ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
-			if (val < tableData->maxZAxis()/4)
+			if (val < tableData->maxCalcedValue()/4)
 			{
-				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxZAxis()/4.0))),255));
+				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxCalcedValue()/4.0))),255));
 			}
-			else if (val < ((tableData->maxZAxis()/4)*2))
+			else if (val < ((tableData->maxCalcedValue()/4)*2))
 			{
-				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((tableData->maxZAxis()/4.0)))/(tableData->maxZAxis()/4.0)))));
+				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((tableData->maxCalcedValue()/4.0)))/(tableData->maxCalcedValue()/4.0)))));
 			}
-			else if (val < ((tableData->maxZAxis()/4)*3))
+			else if (val < ((tableData->maxCalcedValue()/4)*3))
 			{
-				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((tableData->maxZAxis()/4.0)*2))/(tableData->maxZAxis()/4.0))),255,0));
+				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((tableData->maxCalcedValue()/4.0)*2))/(tableData->maxCalcedValue()/4.0))),255,0));
 			}
 			else
 			{
-				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxZAxis()/4.0)*3))/(tableData->maxZAxis()/4.0))),0));
+				ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxCalcedValue()/4.0)*3))/(tableData->maxCalcedValue()/4.0))),0));
 			}
 		}
 	}
@@ -1081,21 +1081,21 @@ void TableView3D::reColorTable(int rownum,int colnum)
 			{
 				double val = tableData->values()[row][col];
 				//ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
-				if (val < tableData->maxZAxis()/4)
+				if (val < tableData->maxCalcedValue()/4)
 				{
-					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxZAxis()/4.0))),255));
+					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxCalcedValue()/4.0))),255));
 				}
-				else if (val < ((tableData->maxZAxis()/4)*2))
+				else if (val < ((tableData->maxCalcedValue()/4)*2))
 				{
-					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((tableData->maxZAxis()/4.0)))/(tableData->maxZAxis()/4.0)))));
+					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((tableData->maxCalcedValue()/4.0)))/(tableData->maxCalcedValue()/4.0)))));
 				}
-				else if (val < ((tableData->maxZAxis()/4)*3))
+				else if (val < ((tableData->maxCalcedValue()/4)*3))
 				{
-					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((tableData->maxZAxis()/4.0)*2))/(tableData->maxZAxis()/4.0))),255,0));
+					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((tableData->maxCalcedValue()/4.0)*2))/(tableData->maxCalcedValue()/4.0))),255,0));
 				}
 				else
 				{
-					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxZAxis()/4.0)*3))/(tableData->maxZAxis()/4.0))),0));
+					ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxCalcedValue()/4.0)*3))/(tableData->maxCalcedValue()/4.0))),0));
 				}
 			}
 		}
@@ -1127,21 +1127,21 @@ void TableView3D::reColorTable(int rownum,int colnum)
 		//QLOG_DEBUG() << "Value:" << val;
 
 		//ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
-		if (val < tableData->maxZAxis()/4)
+		if (val < tableData->maxCalcedValue()/4)
 		{
-			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxZAxis()/4.0))),255));
+			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxCalcedValue()/4.0))),255));
 		}
-		else if (val < ((tableData->maxZAxis()/4)*2))
+		else if (val < ((tableData->maxCalcedValue()/4)*2))
 		{
-			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((tableData->maxZAxis()/4.0)))/(tableData->maxZAxis()/4.0)))));
+			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((tableData->maxCalcedValue()/4.0)))/(tableData->maxCalcedValue()/4.0)))));
 		}
-		else if (val < ((tableData->maxZAxis()/4)*3))
+		else if (val < ((tableData->maxCalcedValue()/4)*3))
 		{
-			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb((255*((val-((tableData->maxZAxis()/4.0)*2))/(tableData->maxZAxis()/4.0))),255,0));
+			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb((255*((val-((tableData->maxCalcedValue()/4.0)*2))/(tableData->maxCalcedValue()/4.0))),255,0));
 		}
 		else
 		{
-			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxZAxis()/4.0)*3))/(tableData->maxZAxis()/4.0))),0));
+			ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxCalcedValue()/4.0)*3))/(tableData->maxCalcedValue()/4.0))),0));
 		}
 		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
 		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));

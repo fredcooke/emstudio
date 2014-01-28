@@ -44,12 +44,18 @@ public:
 	void setCell(int row, int column,double val);
 	void setXAxis(int column,double val);
 	void setYAxis(int row,double val);
-	double maxXAxis();
-	double maxYAxis();
-	double maxZAxis();
-	double minXAxis();
-	double minYAxis();
-	double minZAxis();
+	double maxActualXAxis();
+	double maxActualYAxis();
+	double maxActualValue();
+	double minActualYAxis();
+	double minActualXAxis();
+	double minActualValue();
+	double maxCalcedXAxis();
+	double maxCalcedYAxis();
+	double maxCalcedValue();
+	double minCalcedXAxis();
+	double minCalcedYAxis();
+	double minCalcedValue();
 	void setWritesEnabled(bool enabled);
 	void writeWholeLocation(bool ram);
 	bool isRam() { return !m_isFlashOnly; }
@@ -66,12 +72,21 @@ private:
 	QString xAxisLabel;
 	QString yAxisLabel;
 	QString valuesLabel;
-	double m_maxXAxis;
-	double m_maxYAxis;
-	double m_maxZAxis;
-	double m_minXAxis;
-	double m_minYAxis;
-	double m_minZAxis;
+	double m_maxCalcedXAxis;
+	double m_maxCalcedYAxis;
+	double m_maxCalcedValue;
+
+	double m_minCalcedXAxis;
+	double m_minCalcedYAxis;
+	double m_minCalcedValue;
+
+	double m_maxActualXAxis;
+	double m_maxActualYAxis;
+	double m_maxActualValue;
+
+	double m_minActualXAxis;
+	double m_minActualYAxis;
+	double m_minActualValue;
 	Table3DMetaData m_metaData;
 signals:
 	void saveSingleDataToFlash(unsigned short locationid,unsigned short offset, unsigned short size,QByteArray data);
