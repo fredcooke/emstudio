@@ -701,6 +701,8 @@ void MainWindow::setPlugin(QString plugin)
 	connect(emsComms,SIGNAL(packetNaked(unsigned short,QByteArray,QByteArray,unsigned short)),packetStatus,SLOT(passPacketNak(unsigned short,QByteArray,QByteArray,unsigned short)),Qt::QueuedConnection);
 	connect(emsComms,SIGNAL(decoderFailure(QByteArray)),packetStatus,SLOT(passDecoderFailure(QByteArray)),Qt::QueuedConnection);
 	connect(emsComms,SIGNAL(interrogationData(QMap<QString,QString>)),this,SLOT(interrogationData(QMap<QString,QString>)),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(memoryDirty()),statusView,SLOT(setEmsMemoryDirty()));
+	connect(emsComms,SIGNAL(memoryClean()),statusView,SLOT(setEmsMemoryClean()));
 	emsComms->setBaud(m_comBaud);
 	emsComms->setPort(m_comPort);
 	emsComms->setLogsEnabled(m_saveLogs);
@@ -2065,4 +2067,13 @@ MainWindow::~MainWindow()
 	emsComms->stop();
 	emsComms->wait(1000);
 	delete emsComms;
+}
+void MainWindow::emsMemoryDirty()
+{
+
+}
+
+void MainWindow::emsMemoryClean()
+{
+
 }

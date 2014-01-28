@@ -22,6 +22,7 @@
 #include "emsstatus.h"
 #include <QVariant>
 #include <QDebug>
+#include <QTimer>
 EmsStatus::EmsStatus(QWidget *parent) : QDockWidget(parent)
 {
 	ui.setupUi(this);
@@ -32,6 +33,12 @@ EmsStatus::EmsStatus(QWidget *parent) : QDockWidget(parent)
 	setFlag(ui.camSyncLineEdit,false);
 	setFlag(ui.lastPeriodValidLineEdit,false);
 	setFlag(ui.lastTimeValidLineEdit,false);
+	emsMemoryTimer = new QTimer(this);
+	connect(emsMemoryTimer,SIGNAL(timeout()),this,SLOT(emsMemoryTimerTick()));
+	ui.memoryCleanLineEdit->setText("NO BURN REQUIRED");
+	QPalette pal = ui.memoryCleanLineEdit->palette();
+	pal.setColor(QPalette::Base,QColor::fromRgb(100,255,100));
+	ui.memoryCleanLineEdit->setPalette(pal);
 }
 void EmsStatus::closeEvent(QCloseEvent *event)
 {
@@ -74,4 +81,33 @@ void EmsStatus::passData(QVariantMap data)
 	setFlag(ui.lastPeriodValidLineEdit,decoderFlags & 0x08);
 	setFlag(ui.lastTimeValidLineEdit,decoderFlags & 0x010);
 
+}
+void EmsStatus::setEmsMemoryDirty()
+{
+	ui.memoryCleanLineEdit->setText("BURN REQUIRED");
+	emsMemoryTimer->start(500);
+}
+
+void EmsStatus::setEmsMemoryClean()
+{
+	ui.memoryCleanLineEdit->setText("NO BURN REQUIRED");
+	emsMemoryTimer->stop();
+	QPalette pal = ui.memoryCleanLineEdit->palette();
+	pal.setColor(QPalette::Base,QColor::fromRgb(100,255,100));
+	ui.memoryCleanLineEdit->setPalette(pal);
+}
+void EmsStatus::emsMemoryTimerTick()
+{
+	if (ui.memoryCleanLineEdit->palette().color(QPalette::Base).green() == 170)
+	{
+		QPalette pal = ui.memoryCleanLineEdit->palette();
+		pal.setColor(QPalette::Base,QColor::fromRgb(255,50,50));
+		ui.memoryCleanLineEdit->setPalette(pal);
+	}
+	else
+	{
+		QPalette pal = ui.memoryCleanLineEdit->palette();
+		pal.setColor(QPalette::Base,QColor::fromRgb(255,170,0));
+		ui.memoryCleanLineEdit->setPalette(pal);
+	}
 }

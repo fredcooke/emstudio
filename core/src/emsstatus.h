@@ -25,7 +25,10 @@
 #include <QDockWidget>
 #include <QCloseEvent>
 #include <QMdiSubWindow>
+
 #include "ui_emsstatus.h"
+
+class QTimer;
 
 class EmsStatus : public QDockWidget
 {
@@ -36,6 +39,11 @@ public:
 	~EmsStatus();
 	void passData(QVariantMap data);
 	void setFlag(QLineEdit *edit,bool green);
+public slots:
+	void setEmsMemoryDirty();
+	void setEmsMemoryClean();
+private slots:
+	void emsMemoryTimerTick();
 protected:
 	void closeEvent(QCloseEvent *event);
 signals:
@@ -44,6 +52,7 @@ signals:
 	void windowHiding(QMdiSubWindow *parent);
 private:
 	Ui::EmsStatus ui;
+	QTimer *emsMemoryTimer;
 };
 
 #endif // EMSSTATUS_H

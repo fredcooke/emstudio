@@ -454,6 +454,14 @@ int FreeEmsComms::burnBlockFromRamToFlash(unsigned short location,unsigned short
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
+	if (m_dirtyLocationIds.contains(location))
+	{
+		m_dirtyLocationIds.removeOne(location);
+		if (m_dirtyLocationIds.size() == 0)
+		{
+			emit memoryClean();
+		}
+	}
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::enableDatalogStream()
@@ -498,6 +506,11 @@ int FreeEmsComms::updateBlockInRam(unsigned short location,unsigned short offset
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
+	if (!m_dirtyLocationIds.contains(location))
+	{
+		m_dirtyLocationIds.append(location);
+		emit memoryDirty();
+	}
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)
@@ -566,6 +579,14 @@ int FreeEmsComms::retrieveBlockFromFlash(unsigned short location, unsigned short
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
+	if (m_dirtyLocationIds.contains(location))
+	{
+		m_dirtyLocationIds.removeOne(location);
+		if (m_dirtyLocationIds.size() == 0)
+		{
+			emit memoryClean();
+		}
+	}
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size)
@@ -1933,6 +1954,14 @@ void FreeEmsComms::copyFlashToRam(unsigned short locationid)
 		}
 	}
 	updateBlockInRam(locationid,0,emsData.getLocalFlashBlock(locationid).size(),emsData.getLocalFlashBlock(locationid));
+	if (m_dirtyLocationIds.contains(locationid))
+	{
+		m_dirtyLocationIds.removeOne(locationid);
+		if (m_dirtyLocationIds.size() == 0)
+		{
+			emit memoryClean();
+		}
+	}
 }
 
 void FreeEmsComms::copyRamToFlash(unsigned short locationid)

@@ -32,7 +32,7 @@
       <x>0</x>
       <y>0</y>
       <width>161</width>
-      <height>225</height>
+      <height>292</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -47,6 +47,13 @@
       <widget class="QPushButton" name="hardResetPushButton">
        <property name="text">
         <string>Hard Reset</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="memoryCleanLineEdit">
+       <property name="text">
+        <string>Memory Status</string>
        </property>
       </widget>
      </item>

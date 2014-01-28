@@ -165,6 +165,7 @@ private:
 	PacketDecoder *m_packetDecoder;
 	QMap<QString,QString> m_interrogationMetaDataMap;
 	void sendNextInterrogationPacket();
+	QList<unsigned short> m_dirtyLocationIds;
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);
 	void packetAcked(unsigned short locationid,QByteArray header,QByteArray payload);
@@ -197,6 +198,8 @@ signals:
 	void dataLogPayloadDecoded(QVariantMap data);
 	void resetDetected(int missedPackets);
 	void configRecieved(ConfigBlock,QVariant);
+	void memoryDirty();
+	void memoryClean();
 public slots:
 	int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
 	int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);

@@ -246,6 +246,8 @@ private slots:
 	void interrogateTaskFail(int sequence);
 	void locationIdList(QList<unsigned short> idlist);
 	void subMdiWindowActivated(QMdiSubWindow* window);
+	void emsMemoryDirty();
+	void emsMemoryClean();
 
 };
 
