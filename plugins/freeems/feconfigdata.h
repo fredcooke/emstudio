@@ -38,6 +38,12 @@ public:
     void setValue(QVariant value);
     double calcAxis(unsigned short val,QList<QPair<QString,double> > metadata);
     unsigned short reverseCalcAxis(double val,QList<QPair<QString,double> > metadata);
+    QStringList getEnumValues();
+    void setEnumValues(QStringList values);
+    void setEnumBits(int min,int max);
+    int getMinEnumBit();
+    int getMaxEnumBit();
+    void saveToFlash();
 private:
     QVariant m_value;
     QString m_name;

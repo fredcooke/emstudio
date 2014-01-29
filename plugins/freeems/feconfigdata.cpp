@@ -98,6 +98,36 @@ void FEConfigData::setData(QByteArray data)
     }
     emit update();
 }
+QStringList FEConfigData::getEnumValues()
+{
+	return QStringList();
+}
+
+void FEConfigData::setEnumValues(QStringList values)
+{
+	Q_UNUSED(values)
+}
+
+void FEConfigData::setEnumBits(int min,int max)
+{
+	Q_UNUSED(min)
+	Q_UNUSED(max)
+}
+
+int FEConfigData::getMinEnumBit()
+{
+	return 0;
+}
+
+int FEConfigData::getMaxEnumBit()
+{
+	return 0;
+}
+
+void FEConfigData::saveToFlash()
+{
+
+}
 
 double FEConfigData::calcAxis(unsigned short val,QList<QPair<QString,double> > metadata)
 {
