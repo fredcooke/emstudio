@@ -9,6 +9,7 @@
 #include "configdata.h"
 #include "memorymetadata.h"
 #include "menusetup.h"
+#include "emscomms.h"
 class ParameterView : public QWidget
 {
 	Q_OBJECT
@@ -21,8 +22,10 @@ public:
 	void passMetaData(MemoryMetaData *metadata);
 	void updateValues();
 	double calcAxis(unsigned short val,QList<QPair<QString,double> > metadata);
-    void addConfig(QString name,ConfigData *data);
+	void addConfig(QString name,ConfigData *data);
+	void setActiveComms(EmsComms* comms);
 private:
+	EmsComms *m_emsComms;
 	MemoryMetaData *m_metaData;
 	QList<ParameterWidget*> paramWidgetList;
 	QMap<QLineEdit*,ConfigBlock> lineEditToConfigBlockMap;

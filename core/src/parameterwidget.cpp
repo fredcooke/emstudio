@@ -4,27 +4,38 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include "QsLog.h"
+#include "configdata.h"
 
 ParameterWidget::ParameterWidget(QWidget *parent) : QWidget(parent)
 {
-	scrollArea = new QScrollArea(this);
-	QPushButton *saveButton = new QPushButton(this);
-	connect(saveButton,SIGNAL(clicked()),this,SLOT(saveButtonClicked()));
-	saveButton->setText("Save");
+	ui.setupUi(this);
+	connect(ui.savePushButton,SIGNAL(clicked()),this,SLOT(saveButtonClicked()));
 	//scrollWidget = new QWidget();
 	//scrollWidget->setLayout(new QVBoxLayout());
 	//scrollArea->setWidget(scrollWidget);
-	scrollArea->setLayout(new QVBoxLayout());
-	mainLayout = new QVBoxLayout();
-	this->setLayout(mainLayout);
-	mainLayout->addWidget(scrollArea);
-	mainLayout->addWidget(saveButton);
-	scrollArea->show();
+	//scrollArea->setWidget(new QWidget());
+	ui.scrollArea->widget()->setLayout(new QVBoxLayout());
+	ui.scrollArea->widget()->layout()->setSizeConstraint(QLayout::SetMinAndMaxSize);
+	//scrollArea->setLayout(new QVBoxLayout());
+	//mainLayout = new QVBoxLayout();
+	//this->setLayout(mainLayout);
+	//mainLayout->addWidget(scrollArea);
+	//mainLayout->addWidget(saveButton);
+	//scrollArea->show();
 	//scrollWidget->show();
 	//scrollArea->show();
 }
 void ParameterWidget::saveButtonClicked()
 {
+	for (int i=0;i<m_scalarParamList.size();i++)
+	{
+		m_scalarParamList[i]->saveValue();
+	}
+	for (int i=0;i<m_comboParamList.size();i++)
+	{
+		m_comboParamList[i]->saveValue();
+	}
+	return;
 	for (int i=0;i<m_fieldConfigList.size();i++)
 	{
 		QLineEdit *edit = m_nameToLineEditMap[m_fieldConfigList[i].first.variable];
@@ -111,8 +122,45 @@ void ParameterWidget::updateValue(unsigned short locationid,QByteArray block)
 		}
 	}
 }
+void ParameterWidget::addParam(QString title,DialogField field,ConfigData* data)
+{
+	Q_UNUSED(title)
+	Q_UNUSED(field)
+	//QHBoxLayout *layout = new QHBoxLayout();
+	//QLabel *label = new QLabel(scrollArea);
+	//label->show();
+	//label->setText(field.title);
+	//layout->addWidget(label);
+	//QLineEdit *edit = new QLineEdit(scrollArea);
+	//m_nameToLineEditMap[field.variable] = edit;
+	//edit->show();
+	//layout->addWidget(edit);
+	if (data->type() == ConfigData::VALUE)
+	{
+		ScalarParam *param = new ScalarParam(ui.scrollArea->widget());
+		param->show();
+		param->setName(field.title);
+		param->setConfig(data);
+		QHBoxLayout *layout = new QHBoxLayout();
+		layout->addWidget(param);
+		ui.scrollArea->widget()->layout()->addItem(layout);
+		m_scalarParamList.append(param);
+	}
+	else if (data->type() == ConfigData::ENUM)
+	{
+		ComboParam *param = new ComboParam(ui.scrollArea->widget());
+		param->show();
+		param->setName(field.title);
+		param->setConfig(data);
+		QHBoxLayout *layout = new QHBoxLayout();
+		layout->addWidget(param);
+		ui.scrollArea->widget()->layout()->addItem(layout);
+		//m_scalarParamList.append(param);
+		m_comboParamList.append(param);
+	}
+}
 
-void ParameterWidget::addParam(QString title,DialogField field,ConfigBlock block)
+/*void ParameterWidget::addParam(QString title,DialogField field,ConfigBlock block)
 {
 	QLOG_DEBUG() << "Title:" << title;
 	QLOG_DEBUG() << "Field:" << field.title << field.variable;
@@ -135,7 +183,7 @@ void ParameterWidget::addParam(QString title,DialogField field,ConfigBlock block
 		//lineEditToConfigBlockMap[edit] = m_memoryConfigBlockList[j];
 	}
 	//fieldlist[i].condition
-}
+}*/
 double ParameterWidget::calcAxis(int val,QList<QPair<QString,double> > metadata)
 {
 	if (metadata.size() == 0)

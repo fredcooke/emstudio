@@ -14,7 +14,7 @@ public:
     FEConfigData(QString name,QString type, QString override,unsigned short locationid, unsigned short size,unsigned short elementsize,unsigned short offset, QList<QPair<QString,double> > calc);
 
     void setName(QString name) { m_name = name; }
-    void setType(QString type) { m_type = type; }
+    void setType(QString type) { m_typeString = type; }
     void setSizeOverride(QString override) { m_sizeOverride = override; }
     void setSizeOverrideMult(double mult) { m_sizeOverrideMult = mult; }
     void setLocationId(unsigned short locationid) { m_locationId = locationid; }
@@ -23,7 +23,8 @@ public:
     void setOffset(unsigned short offset) { m_offset = offset; }
     void setCalc(QList<QPair<QString,double> > calc) { m_calc = calc; }
     QString name() { return m_name; }
-    QString type() { return m_type; }
+    QString typeString() { return m_typeString; }
+    Type type() { return VALUE; }
     QString sizeOverride() { return m_sizeOverride; }
     double sizeOverrideMult() { return m_sizeOverrideMult; }
     unsigned short locationId() { return m_locationId; }
@@ -40,7 +41,7 @@ public:
 private:
     QVariant m_value;
     QString m_name;
-    QString m_type;
+    QString m_typeString;
     QString m_sizeOverride;
     double m_sizeOverrideMult;
     unsigned short m_locationId;

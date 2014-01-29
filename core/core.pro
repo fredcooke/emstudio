@@ -120,7 +120,9 @@ SOURCES += src/main.cpp\
     src/abstractgaugeitem.cpp \
     src/bargaugeitem.cpp \
     src/gaugeutil.cpp \
-    src/roundgaugeitem.cpp
+    src/roundgaugeitem.cpp \
+    src/scalarparam.cpp \
+    src/comboparam.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -168,7 +170,9 @@ HEADERS  += src/mainwindow.h \
     src/bargaugeitem.h \
     src/gaugeutil.h \
     src/roundgaugeitem.h \
-    src/gaugeutil.h
+    src/gaugeutil.h \
+    src/scalarparam.h \
+    src/comboparam.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
@@ -187,7 +191,10 @@ FORMS    += src/mainwindow.ui \
     src/emsstatus.ui \
     src/configview.ui \
     src/parameterview.ui \
-    src/firmwaremetadata.ui
+    src/firmwaremetadata.ui \
+    src/scalarparam.ui \
+    src/comboparam.ui \
+    src/parameterwidget.ui
 SUBDIRS += plugins
 OTHER_FILES += \
     README.md \

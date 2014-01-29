@@ -26,6 +26,11 @@ void ParameterView::addConfig(QString name,ConfigData *data)
     Q_UNUSED(data)
 
 }
+void ParameterView::setActiveComms(EmsComms* comms)
+{
+	m_emsComms = comms;
+}
+
 void ParameterView::closeEvent(QCloseEvent *event)
 {
 	event->ignore();
@@ -85,7 +90,15 @@ void ParameterView::generateDialog(QString title,QList<DialogField> fieldlist)
 	for (int i=0;i<fieldlist.size();i++)
 	{
 		QLOG_DEBUG() << "Field:" << fieldlist[i].title << fieldlist[i].variable;
-		for (int j=0;j<m_memoryConfigBlockList.size();j++)
+		if (m_emsComms->getConfigList().contains(fieldlist[i].variable))
+		{
+			widget->addParam(title,fieldlist[i],m_emsComms->getConfigData(fieldlist[i].variable));
+		}
+		else
+		{
+			qDebug() << "Bad Variable:" << fieldlist[i].variable;
+		}
+		/*for (int j=0;j<m_memoryConfigBlockList.size();j++)
 		{
 			//QLOG_DEBUG() << "Config block:" << m_memoryConfigBlockList[j].type();
 			if (m_memoryConfigBlockList[j].name() == fieldlist[i].variable)
@@ -106,19 +119,8 @@ void ParameterView::generateDialog(QString title,QList<DialogField> fieldlist)
 						}
 					}
 				}
-/*				if (m_emsData)
-				{
-					if (m_emsData->hasLocalFlashBlock(m_memoryConfigBlockList[j].locationId()))
-					{
-						widget->updateValue(m_memoryConfigBlockList[j].locationId(),m_emsData->getLocalFlashBlock(m_memoryConfigBlockList[j].locationId()));
-					}
-					else if (m_emsData->hasLocalRamBlock(m_memoryConfigBlockList[j].locationId()))
-					{
-						widget->updateValue(m_memoryConfigBlockList[j].locationId(),m_emsData->getLocalRamBlock(m_memoryConfigBlockList[j].locationId()));
-					}
-				}*/
 			}
-		}
+		}*/
 		//fieldlist[i].condition
 	}
 }

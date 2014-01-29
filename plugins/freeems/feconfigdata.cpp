@@ -7,7 +7,7 @@ FEConfigData::FEConfigData() : ConfigData()
 FEConfigData::FEConfigData(QString name,QString type, QString override,unsigned short locationid, unsigned short size,unsigned short elementsize,unsigned short offset, QList<QPair<QString,double> > calc) : ConfigData()
 {
     m_name = name;
-    m_type = type;
+    m_typeString = type;
     m_sizeOverride = override;
     m_locationId = locationid;
     m_size = size;
@@ -25,7 +25,7 @@ QVariant FEConfigData::value()
 }
 void FEConfigData::setValue(QVariant value)
 {
-	if (m_type == "value")
+	if (m_typeString == "value")
 	{
 		double dval = value.toDouble();
 		unsigned short usval = reverseCalcAxis(dval,m_calc);
@@ -36,7 +36,7 @@ void FEConfigData::setValue(QVariant value)
 		}
 		emit saveSingleDataToFlash(m_locationId,m_offset,m_elementSize,data);
 	}
-	else if (m_type == "array")
+	else if (m_typeString == "array")
 	{
 		//It will be a list of doubles?
 		QVariantList list = value.toList();
@@ -60,7 +60,7 @@ void FEConfigData::setValue(QVariant value)
 
 void FEConfigData::setData(QByteArray data)
 {
-    if (m_type == "value")
+    if (m_typeString == "value")
     {
 	if (data.size() >= (m_offset + m_elementSize))
 	{
@@ -79,7 +79,7 @@ void FEConfigData::setData(QByteArray data)
 	}
 
     }
-    else if (m_type == "array")
+    else if (m_typeString == "array")
     {
 	    qDebug() << "Array type";
 	    QByteArray newdata = data.mid(m_offset,m_size);

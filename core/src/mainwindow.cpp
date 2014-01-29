@@ -1552,6 +1552,7 @@ void MainWindow::interrogationComplete()
 
 	}
 	windowsettings.endArray();*/
+	parameterView->setActiveComms(emsComms);
 }
 void MainWindow::interrogateTaskStart(QString task, int sequence)
 {
