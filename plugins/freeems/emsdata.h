@@ -106,6 +106,7 @@ public:
 	}
 	QList<unsigned short> getTopLevelUniqueLocationIdList();
 	QList<unsigned short> getUniqueLocationIdList();
+	MemoryLocation* getLocalRamBlockInfo(unsigned short locationid);
 
 private:
 	bool m_checkEmsDataInUse;

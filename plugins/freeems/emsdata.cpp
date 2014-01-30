@@ -973,3 +973,13 @@ int EmsData::backConvertAxis(double val,QList<QPair<QString,double> > metadata)
 	}
 	return (int)newval;
 }
+MemoryLocation* EmsData::getLocalRamBlockInfo(unsigned short locationid)
+{
+	for (int i=0;i<m_ramMemoryList.size();i++)
+	{
+		if (m_ramMemoryList[i]->locationid == locationid)
+		{
+			return m_ramMemoryList[i];
+		}
+	}
+}

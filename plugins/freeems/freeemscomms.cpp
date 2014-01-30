@@ -454,14 +454,26 @@ int FreeEmsComms::burnBlockFromRamToFlash(unsigned short location,unsigned short
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	if (m_dirtyLocationIds.contains(location))
+
+	for (int i=emsData.getLocalRamBlockInfo(location)->ramAddress + offset;i<emsData.getLocalRamBlockInfo(location)->ramAddress+offset+size;i++)
+	{
+		if (m_dirtyRamAddresses.contains(i))
+		{
+			m_dirtyRamAddresses.removeOne(i);
+		}
+	}
+	if (m_dirtyRamAddresses.size() == 0)
+	{
+		emit memoryClean();
+	}
+	/*if (m_dirtyLocationIds.contains(location))
 	{
 		m_dirtyLocationIds.removeOne(location);
 		if (m_dirtyLocationIds.size() == 0)
 		{
 			emit memoryClean();
 		}
-	}
+	}*/
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::enableDatalogStream()
@@ -506,11 +518,21 @@ int FreeEmsComms::updateBlockInRam(unsigned short location,unsigned short offset
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	if (!m_dirtyLocationIds.contains(location))
+
+	unsigned short ramaddress = emsData.getLocalRamBlockInfo(location)->ramAddress;
+	for (int i=ramaddress+offset;i<ramaddress+offset+size;i++)
+	{
+		if (!m_dirtyRamAddresses.contains(i))
+		{
+			m_dirtyRamAddresses.append(i);
+		}
+	}
+	emit memoryDirty();
+	/*if (!m_dirtyLocationIds.contains(location))
 	{
 		m_dirtyLocationIds.append(location);
 		emit memoryDirty();
-	}
+	}*/
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)
@@ -579,13 +601,20 @@ int FreeEmsComms::retrieveBlockFromFlash(unsigned short location, unsigned short
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
-	if (m_dirtyLocationIds.contains(location))
+	//This gets us the range of effected values.
+	//emsData.getLocalRamBlockInfo(location)->size;
+	//emsData.getLocalRamBlockInfo(location)->ramAddress;
+
+	for (int i=emsData.getLocalRamBlockInfo(location)->ramAddress + offset;i<emsData.getLocalRamBlockInfo(location)->ramAddress+offset+size;i++)
 	{
-		m_dirtyLocationIds.removeOne(location);
-		if (m_dirtyLocationIds.size() == 0)
+		if (m_dirtyRamAddresses.contains(i))
 		{
-			emit memoryClean();
+			m_dirtyRamAddresses.removeOne(i);
 		}
+	}
+	if (m_dirtyRamAddresses.size() == 0)
+	{
+		emit memoryClean();
 	}
 	return m_sequenceNumber-1;
 }
@@ -1954,13 +1983,17 @@ void FreeEmsComms::copyFlashToRam(unsigned short locationid)
 		}
 	}
 	updateBlockInRam(locationid,0,emsData.getLocalFlashBlock(locationid).size(),emsData.getLocalFlashBlock(locationid));
-	if (m_dirtyLocationIds.contains(locationid))
+
+	for (int i=emsData.getLocalRamBlockInfo(locationid)->ramAddress;i<emsData.getLocalRamBlockInfo(locationid)->ramAddress+emsData.getLocalRamBlockInfo(locationid)->size;i++)
 	{
-		m_dirtyLocationIds.removeOne(locationid);
-		if (m_dirtyLocationIds.size() == 0)
+		if (m_dirtyRamAddresses.contains(i))
 		{
-			emit memoryClean();
+			m_dirtyRamAddresses.removeOne(i);
 		}
+	}
+	if (m_dirtyRamAddresses.size() == 0)
+	{
+		emit memoryClean();
 	}
 }
 

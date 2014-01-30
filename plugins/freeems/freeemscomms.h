@@ -165,7 +165,7 @@ private:
 	PacketDecoder *m_packetDecoder;
 	QMap<QString,QString> m_interrogationMetaDataMap;
 	void sendNextInterrogationPacket();
-	QList<unsigned short> m_dirtyLocationIds;
+	QList<unsigned int> m_dirtyRamAddresses;
 signals:
 	void packetSent(unsigned short locationid,QByteArray header,QByteArray payload);
 	void packetAcked(unsigned short locationid,QByteArray header,QByteArray payload);
