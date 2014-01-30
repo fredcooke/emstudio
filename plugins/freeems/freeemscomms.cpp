@@ -519,20 +519,18 @@ int FreeEmsComms::updateBlockInRam(unsigned short location,unsigned short offset
 	m_sequenceNumber++;
 	m_reqList.append(req);
 
-	unsigned short ramaddress = emsData.getLocalRamBlockInfo(location)->ramAddress;
-	for (int i=ramaddress+offset;i<ramaddress+offset+size;i++)
+	if (emsData.getLocalRamBlockInfo(location)->isFlash)
 	{
-		if (!m_dirtyRamAddresses.contains(i))
+		unsigned short ramaddress = emsData.getLocalRamBlockInfo(location)->ramAddress;
+		for (int i=ramaddress+offset;i<ramaddress+offset+size;i++)
 		{
-			m_dirtyRamAddresses.append(i);
+			if (!m_dirtyRamAddresses.contains(i))
+			{
+				m_dirtyRamAddresses.append(i);
+			}
 		}
-	}
-	emit memoryDirty();
-	/*if (!m_dirtyLocationIds.contains(location))
-	{
-		m_dirtyLocationIds.append(location);
 		emit memoryDirty();
-	}*/
+	}
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)
