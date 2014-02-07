@@ -1295,13 +1295,19 @@ void MainWindow::loadDashboards(QString dir)
 			mdiView->setGeometry(view->geometry());
 			mdiView->hide();
 			mdiView->setWindowTitle(view->windowTitle());
-			view->setFile(dashboards.absoluteFilePath(file));
+			QString plugincompat = view->setFile(dashboards.absoluteFilePath(file));
 			QAction *action = new QAction(this);
 			action->setText(file.mid(0,file.lastIndexOf(".")));
 			action->setCheckable(true);
 			ui.menuDashboards->addAction(action);
 			connect(action,SIGNAL(triggered(bool)),mdiView,SLOT(setVisible(bool)));
 			m_dashboardList.append(view);
+			if (!m_gaugeActionMap.contains(plugincompat))
+			{
+				m_gaugeActionMap[plugincompat] = QList<QAction*>();
+			}
+			m_gaugeActionMap[plugincompat].append(action);
+
 		}
 	}
 }
@@ -1362,6 +1368,24 @@ void MainWindow::emsCommsConnected()
 			m_wizardList[j]->addConfig(emsComms->getConfigList()[i],emsComms->getConfigData(emsComms->getConfigList()[i]));
 		}*/
 	}
+	if (m_gaugeActionMap.contains(emsComms->getPluginCompat()))
+	{
+		for (int i=0;i<ui.menuDashboards->actions().size();i++)
+		{
+			if (!m_gaugeActionMap[emsComms->getPluginCompat()].contains(ui.menuDashboards->actions()[i]))
+			{
+				ui.menuDashboards->actions()[i]->setVisible(false);
+
+			}
+		}
+	}
+	else if (emsComms->getPluginCompat() != "")
+	{
+		for (int i=0;i<ui.menuDashboards->actions().size();i++)
+		{
+			ui.menuDashboards->actions()[i]->setVisible(false);
+		}
+	}
 	//New log and settings file here.
 	if (m_memoryInfoMap.size() == 0)
 	{
@@ -1421,110 +1445,117 @@ void MainWindow::interrogationComplete()
 	}
 	bool oneShown = false; //Check to see if at least one window is visisble.
 	QSettings windowsettings;
-	int size = windowsettings.beginReadArray("rawwindows");
-	for (int i=0;i<size;i++)
+	QString compat = emsComms->getPluginCompat();
+	QString savecompat = windowsettings.value("plugincompat","").toString();
+	if (compat == savecompat)
 	{
-		//createView()
-		windowsettings.setArrayIndex(i);
-		unsigned short locid = windowsettings.value("window").toInt();
-		QString type = windowsettings.value("type").toString();
-		if (type == "TableView2D")
+		windowsettings.sync();
+		int size = windowsettings.beginReadArray("rawwindows");
+		for (int i=0;i<size;i++)
 		{
-			createView(locid,DATA_TABLE_2D);
-			QWidget *parent = (QWidget*)m_rawDataView[locid]->parent();
-			parent->restoreGeometry(windowsettings.value("location").toByteArray());
-		}
-		else if (type == "TableView3D")
-		{
-			createView(locid,DATA_TABLE_3D);
-			QWidget *parent = (QWidget*)m_rawDataView[locid]->parent();
-			parent->restoreGeometry(windowsettings.value("location").toByteArray());
-		}
-		else if (type == "tablesMdiWindow")
-		{
-			tablesMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			bool hidden = windowsettings.value("hidden",true).toBool();
-			if (!hidden)
+			//createView()
+			windowsettings.setArrayIndex(i);
+			unsigned short locid = windowsettings.value("window").toInt();
+			QString type = windowsettings.value("type").toString();
+			if (type == "TableView2D")
 			{
-				oneShown = true;
+				createView(locid,DATA_TABLE_2D);
+				QWidget *parent = (QWidget*)m_rawDataView[locid]->parent();
+				parent->restoreGeometry(windowsettings.value("location").toByteArray());
 			}
-			tablesMdiWindow->setHidden(hidden);
+			else if (type == "TableView3D")
+			{
+				createView(locid,DATA_TABLE_3D);
+				QWidget *parent = (QWidget*)m_rawDataView[locid]->parent();
+				parent->restoreGeometry(windowsettings.value("location").toByteArray());
+			}
+			else if (type == "tablesMdiWindow")
+			{
+				tablesMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+				bool hidden = windowsettings.value("hidden",true).toBool();
+				if (!hidden)
+				{
+					oneShown = true;
+				}
+				tablesMdiWindow->setHidden(hidden);
+
+			}
+			else if (type == "firmwareMetaMdiWindow")
+			{
+				firmwareMetaMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+				bool hidden = windowsettings.value("hidden",true).toBool();
+				if (!hidden)
+				{
+					oneShown = true;
+				}
+				firmwareMetaMdiWindow->setHidden(hidden);
+			}
+			else if (type == "interrogateProgressMdiWindow")
+			{
+				// interrogateProgressMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+				// interrogateProgressMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
+			}
+			else if (type == "emsMdiWindow")
+			{
+				emsMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+				bool hidden = windowsettings.value("hidden",true).toBool();
+				if (!hidden)
+				{
+					oneShown = true;
+				}
+				emsMdiWindow->setHidden(hidden);
+			}
+			else if (type == "flagsMdiWindow")
+			{
+				flagsMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+				bool hidden = windowsettings.value("hidden",true).toBool();
+				if (!hidden)
+				{
+					oneShown = true;
+				}
+				flagsMdiWindow->setHidden(hidden);
+			}
+			else if (type == "gaugesMdiWindow")
+			{
+				gaugesMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+				bool hidden = windowsettings.value("hidden",true).toBool();
+				if (!hidden)
+				{
+					oneShown = true;
+				}
+				gaugesMdiWindow->setHidden(hidden);
+			}
+			else if (type == "packetStatusMdiWindow")
+			{
+				packetStatusMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+				bool hidden = windowsettings.value("hidden",true).toBool();
+				if (!hidden)
+				{
+					oneShown = true;
+				}
+				packetStatusMdiWindow->setHidden(hidden);
+			}
+			else if (type == "aboutMdiWindow")
+			{
+				aboutMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
+				bool hidden = windowsettings.value("hidden",true).toBool();
+				if (!hidden)
+				{
+					oneShown = true;
+				}
+				aboutMdiWindow->setHidden(hidden);
+			}
+			else if (type == "emsStatusMdiWindow")
+			{
+
+			}
+			else
+			{
+				qDebug() << "Unknown type:" << type;
+			}
 
 		}
-		else if (type == "firmwareMetaMdiWindow")
-		{
-			firmwareMetaMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			bool hidden = windowsettings.value("hidden",true).toBool();
-			if (!hidden)
-			{
-				oneShown = true;
-			}
-			firmwareMetaMdiWindow->setHidden(hidden);
-		}
-		else if (type == "interrogateProgressMdiWindow")
-		{
-			// interrogateProgressMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			// interrogateProgressMdiWindow->setHidden(windowsettings.value("hidden",true).toBool());
-		}
-		else if (type == "emsMdiWindow")
-		{
-			emsMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			bool hidden = windowsettings.value("hidden",true).toBool();
-			if (!hidden)
-			{
-				oneShown = true;
-			}
-			emsMdiWindow->setHidden(hidden);
-		}
-		else if (type == "flagsMdiWindow")
-		{
-			flagsMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			bool hidden = windowsettings.value("hidden",true).toBool();
-			if (!hidden)
-			{
-				oneShown = true;
-			}
-			flagsMdiWindow->setHidden(hidden);
-		}
-		else if (type == "gaugesMdiWindow")
-		{
-			gaugesMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			bool hidden = windowsettings.value("hidden",true).toBool();
-			if (!hidden)
-			{
-				oneShown = true;
-			}
-			gaugesMdiWindow->setHidden(hidden);
-		}
-		else if (type == "packetStatusMdiWindow")
-		{
-			packetStatusMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			bool hidden = windowsettings.value("hidden",true).toBool();
-			if (!hidden)
-			{
-				oneShown = true;
-			}
-			packetStatusMdiWindow->setHidden(hidden);
-		}
-		else if (type == "aboutMdiWindow")
-		{
-			aboutMdiWindow->restoreGeometry(windowsettings.value("location").toByteArray());
-			bool hidden = windowsettings.value("hidden",true).toBool();
-			if (!hidden)
-			{
-				oneShown = true;
-			}
-			aboutMdiWindow->setHidden(hidden);
-		}
-		else if (type == "emsStatusMdiWindow")
-		{
-
-		}
-		else
-		{
-			qDebug() << "Unknown type:" << type;
-		}
-
+		windowsettings.endArray();
 	}
 	if (!oneShown)
 	{
@@ -1540,7 +1571,7 @@ void MainWindow::interrogationComplete()
 	QMdiSubWindow *packetStatusMdiWindow;
 	QMdiSubWindow *aboutMdiWindow;
 	QMdiSubWindow *emsStatusMdiWindow;*/
-	windowsettings.endArray();
+
 	/*for (QMap<unsigned short,QWidget*>::const_iterator i=m_rawDataView.constBegin();i!=m_rawDataView.constEnd();i++)
 	{
 		windowsettings.setArrayIndex(val++);
@@ -2056,6 +2087,13 @@ MainWindow::~MainWindow()
 	windowsettings.setValue("isMaximized",this->isMaximized());
 	windowsettings.endGroup();
 	windowsettings.sync();
+
+	if (emsComms)
+	{
+		QString compat = emsComms->getPluginCompat();
+		windowsettings.setValue("plugincompat",compat);
+		windowsettings.sync();
+	}
 
 	//Remove all WizardView windows
 	for (int i=0;i<m_wizardList.size();i++)

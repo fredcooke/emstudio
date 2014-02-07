@@ -37,7 +37,7 @@ public:
 	~GaugeView();
 	void passData(QVariantMap data);
 	void passDecoder(DataPacketDecoder *decoder);
-	void setFile(QString file);
+	QString setFile(QString file);
 private:
 	QList<QString> propertiesInUse;
 	QString file;

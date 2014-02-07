@@ -48,6 +48,7 @@ class FreeEmsComms : public EmsComms
 public:
 	FreeEmsComms(QObject *parent = 0);
 	~FreeEmsComms();
+	QString getPluginCompat() { return QString("FREEEMS"); }
 	DataPacketDecoder *getDecoder();
 	MemoryMetaData *getMetaParser();
 	Table3DData *getNew3DTableData();

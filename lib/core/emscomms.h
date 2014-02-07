@@ -75,6 +75,7 @@ class EmsComms : public QThread
 	Q_OBJECT
 public:
 	EmsComms(QObject *parent) : QThread(parent) {}
+	virtual QString getPluginCompat()=0;
 	virtual void passLogger(QsLogging::Logger *log)=0;
 	virtual void stop()=0;
 	virtual void setLogsEnabled(bool enabled)=0;

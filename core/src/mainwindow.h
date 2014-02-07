@@ -172,6 +172,7 @@ private:
 	int m_currentEcuClock;
 	QMap<QMdiSubWindow*,QAction*> m_mdiSubWindowToActionMap;
 	bool m_EcuResetPopup;
+	QMap<QString,QList<QAction*> > m_gaugeActionMap;
 private slots:
 	void showTable(QString table);
 	void windowHidden(QMdiSubWindow* window);

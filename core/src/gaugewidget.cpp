@@ -22,7 +22,7 @@
 #include "gaugewidget.h"
 #include "roundgaugeitem.h"
 #include "bargaugeitem.h"
-
+#include "QsLog.h"
 #include <QMetaType>
 #include <QDeclarativeContext>
 #include <QFile>
@@ -50,7 +50,7 @@ GaugeWidget::GaugeWidget(QWidget *parent) : QDeclarativeView(parent)
 	}*/
 }
 
-void GaugeWidget::setFile(QString file)
+QString GaugeWidget::setFile(QString file)
 {
 	setSource(QUrl::fromLocalFile(file));
 	if (rootObject())
@@ -63,5 +63,12 @@ void GaugeWidget::setFile(QString file)
 				propertylist.append(obj->property("propertyMapProperty").toString());
 			}
 		}
+		if (rootObject()->property("plugincompat").isValid())
+		{
+			QString plugincompat = rootObject()->property("plugincompat").toString();
+			QLOG_DEBUG() << "Plugin compatability:" << plugincompat;
+			return plugincompat;
+		}
 	}
+	return "";
 }

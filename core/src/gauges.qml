@@ -7,6 +7,7 @@ Rectangle {
 	width: 1280
 	height: 900
 	color: "black"
+    property string plugincompat: "FREEEMS"
 
 	GaugeImage {
 		x:0

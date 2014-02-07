@@ -47,10 +47,11 @@ void GaugeView::passData(QVariantMap data)
 {
 	m_valueMap = data;
 }
-void GaugeView::setFile(QString file)
+QString GaugeView::setFile(QString file)
 {
-	widget->setFile(file);
+	QString result = widget->setFile(file);
 	propertiesInUse = widget->getPropertiesInUse();
+	return result;
 }
 
 void GaugeView::passDecoder(DataPacketDecoder *decoder)
