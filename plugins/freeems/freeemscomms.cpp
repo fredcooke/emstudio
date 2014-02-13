@@ -603,16 +603,19 @@ int FreeEmsComms::retrieveBlockFromFlash(unsigned short location, unsigned short
 	//emsData.getLocalRamBlockInfo(location)->size;
 	//emsData.getLocalRamBlockInfo(location)->ramAddress;
 
-	for (int i=emsData.getLocalRamBlockInfo(location)->ramAddress + offset;i<emsData.getLocalRamBlockInfo(location)->ramAddress+offset+size;i++)
+	if (emsData.getLocalRamBlockInfo(location))
 	{
-		if (m_dirtyRamAddresses.contains(i))
+		for (int i=emsData.getLocalRamBlockInfo(location)->ramAddress + offset;i<emsData.getLocalRamBlockInfo(location)->ramAddress+offset+size;i++)
 		{
-			m_dirtyRamAddresses.removeOne(i);
+			if (m_dirtyRamAddresses.contains(i))
+			{
+				m_dirtyRamAddresses.removeOne(i);
+			}
 		}
-	}
-	if (m_dirtyRamAddresses.size() == 0)
-	{
-		emit memoryClean();
+		if (m_dirtyRamAddresses.size() == 0)
+		{
+			emit memoryClean();
+		}
 	}
 	return m_sequenceNumber-1;
 }
