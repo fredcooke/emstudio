@@ -202,4 +202,5 @@ OTHER_FILES += \
     wizards/DecoderOffset.qml \
     wizards/wizard.qml \
     wizards/EngineConfig.qml \
-    wizards/ActualDecoderOffset.qml
+    wizards/ActualDecoderOffset.qml \
+    src/WarningLabel/WarningLabel.qml

@@ -1,6 +1,6 @@
 import Qt 4.7
 import GaugeImage 0.1
-
+import "WarningLabel"
 Rectangle {
 	x:0
 	y:0
@@ -178,4 +178,20 @@ Rectangle {
 			}
 		}
 	}
+    Component.onCompleted: {
+
+    }
+
+    WarningLabel {
+        id: warning;
+        x: (parent.width / 2.0) - 200
+        width:200
+        y: (parent.height / 2.0) - 100
+        height:100
+        propertyMapProperty: "CHT";
+        conditiontype: "over";
+        conditionval: 215;
+        conditionvalue: propertyMap["CHT"];
+        message: "Warning!\nEngine is overheating!!!!!";
+    }
 }
