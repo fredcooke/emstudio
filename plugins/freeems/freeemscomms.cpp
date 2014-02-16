@@ -455,6 +455,11 @@ int FreeEmsComms::burnBlockFromRamToFlash(unsigned short location,unsigned short
 	m_sequenceNumber++;
 	m_reqList.append(req);
 
+	if (size == 0)
+	{
+		size = emsData.getLocalRamBlock(location).size();
+	}
+
 	for (int i=emsData.getLocalRamBlockInfo(location)->ramAddress + offset;i<emsData.getLocalRamBlockInfo(location)->ramAddress+offset+size;i++)
 	{
 		if (m_dirtyRamAddresses.contains(i))
@@ -1728,6 +1733,22 @@ void FreeEmsComms::packetNakedRec(unsigned short payloadid,QByteArray header,QBy
 					m_locIdToConfigListMap[locid][i]->setData(emsData.getLocalRamBlock(locid));
 				}
 			}
+
+			unsigned short offset = m_currentWaitingRequest.args[1].toUInt();
+			unsigned short size = m_currentWaitingRequest.args[2].toUInt();
+			unsigned short ramaddress = emsData.getLocalRamBlockInfo(locid)->ramAddress;
+			for (int i=ramaddress+offset;i<ramaddress+offset+size;i++)
+			{
+				if (m_dirtyRamAddresses.contains(i))
+				{
+					m_dirtyRamAddresses.removeOne(i);
+				}
+			}
+			if (m_dirtyRamAddresses.size() == 0)
+			{
+				emit memoryClean();
+			}
+
 		}
 		if (payloadid == m_payloadWaitingForResponse+1)
 		{
