@@ -415,6 +415,21 @@ void PacketDecoder::parsePacket(Packet parsedPacket)
 				emit ramBlockUpdatePacket(parsedPacket.header,parsedPacket.payload);
 			}
 		}
+		else if (payloadid == BENCHTEST+1)
+		{
+			if (!parsedPacket.isNAK)
+			{
+				if (parsedPacket.payload.size() == 3)
+				{
+					unsigned short count = 0;
+					count += ((unsigned char)parsedPacket.payload.at(0)) << 8;
+					count += ((unsigned char)parsedPacket.payload.at(1));
+					unsigned char event = 0;
+					event = ((unsigned char)parsedPacket.payload.at(2));
+					emit benchTestReply(count,event);
+				}
+			}
+		}
 		else
 		{
 			emit unknownPacket(parsedPacket.header,parsedPacket.payload);

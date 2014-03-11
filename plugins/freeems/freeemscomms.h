@@ -201,6 +201,7 @@ signals:
 	void configRecieved(ConfigBlock,QVariant);
 	void memoryDirty();
 	void memoryClean();
+	void benchTestReply(unsigned short countRemaining,unsigned char currentEvent);
 public slots:
 	int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
 	int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);

@@ -34,6 +34,7 @@ signals:
 	void locationIdInfo(MemoryLocationInfo info);
 	void flashBlockUpdatePacket(QByteArray header,QByteArray payload);
 	void ramBlockUpdatePacket(QByteArray header,QByteArray payload);
+	void benchTestReply(unsigned short countRemaining,unsigned char currentEvent);
 };
 
 #endif // PACKETDECODER_H

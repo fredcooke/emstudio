@@ -63,24 +63,33 @@ Item {
                     Text {
                      //   x:10
                 //           y:240
+
+                        width:200
+                        height:30
                         color: "white"
                         text: "Events Per Cycle (1-255):"
                     }
                     Text {
                         //x:370
                         //y:240
+                        width:100
+                        height:30
                         color: "white"
                         text: "Number Of Cycles (0-65535):"
                     }
                     Text {
                         //x:10
                         //y:280
+                        width:100
+                        height:30
                         color: "white"
                         text: "Ticks Per Event (0-65535):"
                     }
                     Text {
                         //x:10
                         //y:340
+                        width:100
+                        height:30
                         color: "white"
                         text: "Events to Fire From (0-255):"
                     }
@@ -279,8 +288,67 @@ Item {
                     Text {
                         //x:370
                         //y:290
+
+                        width:200
+                        height:30
                         color: "white"
                         text: "PW Source OR value (0-65535):"
+                    }
+                    Text {
+                        //x:370
+                        //y:290
+                        width:100
+                        height:30
+                        color: "white"
+                        text: "PW Source OR value (0-65535):"
+                    }
+                    Text {
+                        //x:370
+                        //y:290
+                        width:100
+                        height:30
+                        color: "white"
+                        text: "PW Source OR value (0-65535):"
+                    }
+                    Text {
+                        //x:370
+                        //y:290
+                        width:100
+                        height:30
+                        color: "white"
+                        text: "PW Source OR value (0-65535):"
+                    }
+                    Text {
+                        //x:370
+                        //y:290
+                        width:100
+                        height:30
+                        color: "white"
+                        text: "PW Source OR value (0-65535):"
+                    }
+                    Text {
+                        //x:370
+                        //y:290
+                        width:100
+                        height:30
+                        color: "white"
+                        text: "PW Source OR value (0-65535):"
+                    }
+                    Text {
+                        //x:370
+                        //y:290
+                        width:100
+                        height:30
+                        color: "white"
+                        text: "Events remaining"
+                    }
+                    Text {
+                        //x:370
+                        //y:290
+                        width:100
+                        height:30
+                        color: "white"
+                        text: "Current Event"
                     }
                 }
 
@@ -406,6 +474,40 @@ Item {
                             }
                         }
                     }
+                    Rectangle {
+                        width: 100
+                        height: 30
+                        color: "white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            Text {
+                                id: eventsRemaining
+                                anchors.fill:parent
+                                color:"white"
+                            }
+                        }
+                    }
+                    Rectangle {
+                        width:100
+                        height:30
+                        color:"white"
+                        Rectangle {
+                            x:2
+                            y:2
+                            width:96
+                            height:26
+                            color:"grey"
+                            Text {
+                                id:currentEvent
+                                anchors.fill:parent
+                                color:"white"
+                            }
+                        }
+                    }
 
 
 
@@ -453,12 +555,19 @@ Item {
                                 a2dArray2[3] = sourcetext4.text;
                                 a2dArray2[4] = sourcetext5.text;
                                 a2dArray2[5] = sourcetext6.text;
+                                emscomms.benchTestReply.connect(benchTestReply);
                                 emscomms.startBenchTest(eventspercycletext.text,numberofcyclestext.text,tickspereventtext.text,a2dArray,a2dArray2);
                             }
                         }
                     }
                 }
             }
+            function benchTestReply(remaining,current)
+            {
+                currentEvent.text = current;
+                eventsRemaining.text = remaining;
+            }
+
             Rectangle {
                 //x:210
                 //y:550
