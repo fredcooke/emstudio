@@ -982,4 +982,5 @@ MemoryLocation* EmsData::getLocalRamBlockInfo(unsigned short locationid)
 			return m_ramMemoryList[i];
 		}
 	}
+	return 0;
 }
