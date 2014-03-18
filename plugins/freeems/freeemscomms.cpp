@@ -684,7 +684,7 @@ int FreeEmsComms::startBenchTest(unsigned char eventspercycle,unsigned short num
 	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = BENCHTEST;
-	req.addArg(0x08,sizeof(char)); //Was 0x01, changed to 0x08 for testing command failures.
+	req.addArg(0x01,sizeof(char));
 	req.addArg(eventspercycle,sizeof(eventspercycle));
 	req.addArg(numcycles,sizeof(numcycles));
 	req.addArg(ticksperevent,sizeof(ticksperevent));

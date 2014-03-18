@@ -4,6 +4,10 @@ import QtQuick 1.1
 Item {
 	width:800
 	height:600
+    function benchTestReplyFunc(remaining,current) {
+        currentEvent.text = current;
+        eventsRemaining.text = remaining;
+    }
     Rectangle {
         x:0
         y:0
@@ -555,17 +559,12 @@ Item {
                                 a2dArray2[3] = sourcetext4.text;
                                 a2dArray2[4] = sourcetext5.text;
                                 a2dArray2[5] = sourcetext6.text;
-                                emscomms.benchTestReply.connect(benchTestReply);
+                                emscomms.benchTestReply.connect(benchTestReplyFunc);
                                 emscomms.startBenchTest(eventspercycletext.text,numberofcyclestext.text,tickspereventtext.text,a2dArray,a2dArray2);
                             }
                         }
                     }
                 }
-            }
-            function benchTestReply(remaining,current)
-            {
-                currentEvent.text = current;
-                eventsRemaining.text = remaining;
             }
 
             Rectangle {
