@@ -30,12 +30,15 @@
 #include "logloader.h"
 #include "QsLog.h"
 #include "wizardview.h"
-
+#include "tableviewnew3d.h"
 #define define2string_p(x) #x
 #define define2string(x) define2string_p(x)
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+    TableViewNew3D *table = new TableViewNew3D();
+    table->setGeometry(100,100,800,600);
+    table->show();
 	m_interrogationInProgress = false;
 	m_offlineMode = false;
 	m_checkEmsDataInUse = false;

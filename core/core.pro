@@ -122,7 +122,8 @@ SOURCES += src/main.cpp\
     src/gaugeutil.cpp \
     src/roundgaugeitem.cpp \
     src/scalarparam.cpp \
-    src/comboparam.cpp
+    src/comboparam.cpp \
+    src/tableviewnew3d.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -172,7 +173,8 @@ HEADERS  += src/mainwindow.h \
     src/roundgaugeitem.h \
     src/gaugeutil.h \
     src/scalarparam.h \
-    src/comboparam.h
+    src/comboparam.h \
+    src/tableviewnew3d.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \
