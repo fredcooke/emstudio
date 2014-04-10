@@ -594,6 +594,26 @@ int FreeEmsComms::getOperatingSystem()
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
 }
+int FreeEmsComms::getSupportEmail()
+{
+	QMutexLocker locker(&m_reqListMutex);
+	RequestClass req;
+	req.type = GET_SUPPORT_EMAIL;
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	return m_sequenceNumber-1;
+}
+int FreeEmsComms::getBuiltByName()
+{
+	QMutexLocker locker(&m_reqListMutex);
+	RequestClass req;
+	req.type = GET_BUILT_BY_NAME;
+	req.sequencenumber = m_sequenceNumber;
+	m_sequenceNumber++;
+	m_reqList.append(req);
+	return m_sequenceNumber-1;
+}
 int FreeEmsComms::retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size)
 {
 	QMutexLocker locker(&m_reqListMutex);
@@ -1120,6 +1140,14 @@ void FreeEmsComms::run()
 				emit interrogateTaskStart("Ecu Info Operating System",seq);
 				m_interrogatePacketList.append(seq);
 
+				seq = getBuiltByName();
+				emit interrogateTaskStart("Ecu Info Built By Name",seq);
+				m_interrogatePacketList.append(seq);
+
+				seq = getSupportEmail();
+				emit interrogateTaskStart("Ecu Info Support Email",seq);
+				m_interrogatePacketList.append(seq);
+
 				seq = getLocationIdList(0x00,0x00);
 				emit interrogateTaskStart("Ecu Info Location ID List",seq);
 				m_interrogatePacketList.append(seq);
@@ -1197,6 +1225,44 @@ void FreeEmsComms::run()
 					m_currentWaitingRequest = m_threadReqList[i];
 					m_payloadWaitingForResponse = 0xEEF2;
 					if (!sendPacket(GET_COMPILER_VERSION))
+					{
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
+						return;
+					}
+					m_threadReqList.removeAt(i);
+					i--;
+				}
+				m_waitingInfoMutex.unlock();
+			}
+			else if (m_threadReqList[i].type == GET_BUILT_BY_NAME)
+			{
+				m_waitingInfoMutex.lock();
+				if (!m_waitingForResponse)
+				{
+					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = GET_BUILT_BY_NAME;
+					if (!sendPacket(GET_BUILT_BY_NAME))
+					{
+						QLOG_FATAL() << "Error writing packet. Quitting thread";
+						return;
+					}
+					m_threadReqList.removeAt(i);
+					i--;
+				}
+				m_waitingInfoMutex.unlock();
+			}
+			else if (m_threadReqList[i].type == GET_SUPPORT_EMAIL)
+			{
+				m_waitingInfoMutex.lock();
+				if (!m_waitingForResponse)
+				{
+					m_waitingForResponse = true;
+					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+					m_currentWaitingRequest = m_threadReqList[i];
+					m_payloadWaitingForResponse = GET_SUPPORT_EMAIL;
+					if (!sendPacket(GET_SUPPORT_EMAIL))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
 						return;
