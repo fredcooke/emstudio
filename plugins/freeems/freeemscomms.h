@@ -68,6 +68,8 @@ public:
 	int getDecoderName();
 	int getFirmwareBuildDate();
 	int getCompilerVersion();
+	int getSupportEmail();
+	int getBuiltByName();
 	int getOperatingSystem();
 	int echoPacket(QByteArray packet);
 	Q_INVOKABLE int startBenchTest(unsigned char eventspercycle,unsigned short numcycles,unsigned short ticksperevent,QVariantList pineventmask,QVariantList pinmode);
