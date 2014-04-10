@@ -1,0 +1,3 @@
+[submodule "plugins/ms"]
+	path = plugins/ms
+	url = ssh://mikesshop.net:2270/home/michael/emstudio.o5e.git
