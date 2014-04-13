@@ -25,6 +25,8 @@ signals:
 	void dataLogPayloadReceived(QByteArray header,QByteArray payload);
 	void interfaceVersion(QString version);
 	void firmwareVersion(QString version);
+	void builtByName(QString name);
+	void supportEmail(QString email);
 	void unknownPacket(QByteArray header,QByteArray payload);
 	void commandSuccessful(int sequencenum);
 	void commandFailed(int sequencenum,unsigned short errornum);

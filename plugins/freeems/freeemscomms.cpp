@@ -37,6 +37,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	qRegisterMetaType<QList<LocationIdFlags> >("QList<LocationIdFlags>");
 	qRegisterMetaType<SerialPortStatus>("SerialPortStatus");
 	qRegisterMetaType<ConfigBlock>("ConfigBlock");
+	qRegisterMetaType<QMap<QString,QString> >("QMap<QString,QString>");
 	rxThread = 0;
 	//serialPort = new SerialPort(this);
 	//connect(serialPort,SIGNAL(dataWritten(QByteArray)),this,SLOT(dataLogWrite(QByteArray)));
@@ -62,6 +63,8 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	connect(m_packetDecoder,SIGNAL(firmwareVersion(QString)),this,SLOT(firmwareVersion(QString)));
 	connect(m_packetDecoder,SIGNAL(interfaceVersion(QString)),this,SLOT(interfaceVersion(QString)));
 	connect(m_packetDecoder,SIGNAL(operatingSystem(QString)),this,SLOT(operatingSystem(QString)));
+	connect(m_packetDecoder,SIGNAL(builtByName(QString)),this,SLOT(builtByName(QString)));
+	connect(m_packetDecoder,SIGNAL(supportEmail(QString)),this,SLOT(supportEmail(QString)));
 	connect(m_packetDecoder,SIGNAL(benchTestReply(unsigned short,unsigned char)),this,SIGNAL(benchTestReply(unsigned short,unsigned char)));
 
 	m_lastdatalogTimer = new QTimer(this);
@@ -271,6 +274,15 @@ void FreeEmsComms::interfaceVersion(QString version)
 void FreeEmsComms::firmwareVersion(QString version)
 {
 	m_interrogationMetaDataMap["Firmware Version"] = version;
+}
+void FreeEmsComms::builtByName(QString name)
+{
+	m_interrogationMetaDataMap["Built By"] = name;
+}
+
+void FreeEmsComms::supportEmail(QString email)
+{
+	m_interrogationMetaDataMap["Support Email"] = email;
 }
 
 void FreeEmsComms::passLogger(QsLogging::Logger *log)

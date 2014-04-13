@@ -195,6 +195,22 @@ void PacketDecoder::parsePacket(Packet parsedPacket)
 				emit operatingSystem(QString(parsedPacket.payload));
 			}
 		}
+		else if (payloadid == 0xEEF7)
+		{
+			//Built By Name
+			if (!(parsedPacket.isNAK))
+			{
+				emit builtByName(QString(parsedPacket.payload));
+			}
+		}
+		else if (payloadid == 0xEEF9)
+		{
+			//Support Email
+			if (!(parsedPacket.isNAK))
+			{
+				emit supportEmail(QString(parsedPacket.payload));
+			}
+		}
 		else if (payloadid == 0xDA5F)
 		{
 			//Location ID List

@@ -231,6 +231,8 @@ private slots:
 	void operatingSystem(QString os);
 	void interfaceVersion(QString version);
 	void firmwareVersion(QString version);
+	void builtByName(QString name);
+	void supportEmail(QString email);
 
 
 };
