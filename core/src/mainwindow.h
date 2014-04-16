@@ -249,6 +249,7 @@ private slots:
 	void subMdiWindowActivated(QMdiSubWindow* window);
 	void emsMemoryDirty();
 	void emsMemoryClean();
+	void datalogDescriptor(QString data);
 
 };
 

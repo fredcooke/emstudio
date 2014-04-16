@@ -47,6 +47,7 @@ protected:
 	void closeEvent(QCloseEvent *event);
 private slots:
 	void guiUpdateTimerTick();
+	void dataFormatChanged();
 signals:
 	void windowHiding(QMdiSubWindow *parent);
 };

@@ -703,6 +703,7 @@ void MainWindow::setPlugin(QString plugin)
 	connect(emsComms,SIGNAL(interrogationData(QMap<QString,QString>)),this,SLOT(interrogationData(QMap<QString,QString>)),Qt::QueuedConnection);
 	connect(emsComms,SIGNAL(memoryDirty()),statusView,SLOT(setEmsMemoryDirty()));
 	connect(emsComms,SIGNAL(memoryClean()),statusView,SLOT(setEmsMemoryClean()));
+	connect(emsComms,SIGNAL(datalogDescriptor(QString)),this,SLOT(datalogDescriptor(QString)));
 	emsComms->setBaud(m_comBaud);
 	emsComms->setPort(m_comPort);
 	emsComms->setLogsEnabled(m_saveLogs);
@@ -2115,4 +2116,8 @@ void MainWindow::emsMemoryDirty()
 void MainWindow::emsMemoryClean()
 {
 
+}
+void MainWindow::datalogDescriptor(QString data)
+{
+	Q_UNUSED(data)
 }
