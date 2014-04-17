@@ -3,4 +3,7 @@
 ######################################################################
 
 TEMPLATE = subdirs
-SUBDIRS += freeems
+isEmpty(SUBDIR_LIST) {
+SUBDIR_LIST = freeems
+}
+SUBDIRS += $$SUBDIR_LIST
