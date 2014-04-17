@@ -32,6 +32,74 @@ TableViewNew3D::TableViewNew3D(QWidget *parent) : QWidget(parent)
 	}
 
 }
+void TableViewNew3D::clear()
+{
+	//Clear everything out
+	yaxis.clear();
+	m_highlightList.clear();
+	values.clear();
+	xaxis.clear();
+}
+void TableViewNew3D::rebuildTable()
+{
+	yaxis.clear();
+	m_highlightList.clear();
+	values.clear();
+	xaxis.clear();
+	for (int y=0;y<m_rowCount;y++)
+	{
+		yaxis.append(0);
+		QList<double> row;
+		QList<int> highlightrow;
+		highlightrow.append(0); //For the Y column
+		for (int x=0;x<m_columnCount;x++)
+		{
+			xaxis.append(0);
+			row.append(0);
+			highlightrow.append(0);
+		}
+		m_highlightList.append(highlightrow);
+		if (y == 0)
+		{
+			m_highlightList.append(highlightrow); //Double add it for the last row
+		}
+		highlightrow.clear();
+		values.append(row);
+	}
+
+}
+
+void TableViewNew3D::setRowCount(int count)
+{
+	if (count < m_rowCount)
+	{
+		//Reducing the number of rows
+	}
+	else if (count > m_rowCount)
+	{
+
+	}
+	else
+	{
+		//Row count stays the same
+		return;
+	}
+	//Assume row count is changing from 0 to whatever
+	m_rowCount = count;
+	rebuildTable();
+}
+void TableViewNew3D::setItem(int row,int column,QString text)
+{
+	values[row][column] = text.toDouble();
+	update();
+}
+
+void TableViewNew3D::setColumnCount(int count)
+{
+	m_columnCount = count;
+	rebuildTable();
+}
+
 void TableViewNew3D::paintEvent (QPaintEvent *evt)
 {
 	Q_UNUSED(evt)

@@ -8,6 +8,12 @@ class TableViewNew3D : public QWidget
 	Q_OBJECT
 public:
 	explicit TableViewNew3D(QWidget *parent = 0);
+	void clear();
+	void setRowCount(int count);
+	void setColumnCount(int count);
+	void setItem(int row,int column,QString text);
+	void rebuildTable();
+
 private:
 	void paintEvent (QPaintEvent *evt);
 	QList<double> xaxis;
@@ -23,10 +29,13 @@ private:
 	QPoint currentCell;
 	QPoint startSelectCell;
 	bool multiSelect;
+	int m_rowCount;
+	int m_columnCount;
+	void rebuildtable();
 signals:
 	
 public slots:
 	
 };
 
-#endif // TABLEVIEWNEW3D_H
+#endif // TABLEVIEWNEW3D_
