@@ -1178,7 +1178,7 @@ void FreeEmsComms::run()
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					emit debugVerbose("GET_LOCATION_ID_LIST");
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0xDA5E;
+					m_payloadWaitingForResponse = GET_LOCATION_ID_LIST;
 					if (!sendPacket(m_threadReqList[i],true))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
@@ -1197,7 +1197,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0xEEEE;
+					m_payloadWaitingForResponse = GET_DECODER_NAME;
 					if (!sendPacket(GET_DECODER_NAME))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
@@ -1216,7 +1216,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0xEEF0;
+					m_payloadWaitingForResponse = GET_FIRMWARE_BUILD_DATE;
 					if (!sendPacket(GET_FIRMWARE_BUILD_DATE))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
@@ -1235,7 +1235,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0xEEF2;
+					m_payloadWaitingForResponse = GET_COMPILER_VERSION;
 					if (!sendPacket(GET_COMPILER_VERSION))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
@@ -1292,7 +1292,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0xEEF4;
+					m_payloadWaitingForResponse = GET_OPERATING_SYSTEM;
 					if (!sendPacket(GET_OPERATING_SYSTEM))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
@@ -1311,7 +1311,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0x0108;
+					m_payloadWaitingForResponse = BURN_BLOCK_FROM_RAM_TO_FLASH;
 					if (!sendPacket(m_threadReqList[i],false))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
@@ -1330,7 +1330,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0xF8E0;
+					m_payloadWaitingForResponse = GET_LOCATION_ID_INFO;
 					if (!sendPacket(m_threadReqList[i],false))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
@@ -1349,7 +1349,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0x0100;
+					m_payloadWaitingForResponse = UPDATE_BLOCK_IN_RAM;
 					m_waitingForRamWrite = true;
 					if (!sendPacket(m_threadReqList[i],true))
 					{
@@ -1370,7 +1370,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0x0104;
+					m_payloadWaitingForResponse = RETRIEVE_BLOCK_IN_RAM;
 					if (!sendPacket(m_threadReqList[i],false))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
@@ -1389,7 +1389,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0x0102;
+					m_payloadWaitingForResponse = UPDATE_BLOCK_IN_FLASH;
 					m_waitingForFlashWrite = true;
 					if (!sendPacket(m_threadReqList[i],true))
 					{
@@ -1409,7 +1409,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0x0106;
+					m_payloadWaitingForResponse = RETRIEVE_BLOCK_IN_FLASH;
 					if (!sendPacket(m_threadReqList[i],false))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
@@ -1428,7 +1428,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0x0000;
+					m_payloadWaitingForResponse = GET_INTERFACE_VERSION;
 					if (!sendPacket(GET_INTERFACE_VERSION))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
@@ -1447,7 +1447,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0x0002;
+					m_payloadWaitingForResponse = GET_FIRMWARE_VERSION;
 					if (!sendPacket(GET_FIRMWARE_VERSION))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
@@ -1466,7 +1466,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0x0004;
+					m_payloadWaitingForResponse = GET_MAX_PACKET_SIZE;
 					if (!sendPacket(GET_MAX_PACKET_SIZE))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
@@ -1485,7 +1485,7 @@ void FreeEmsComms::run()
 					m_waitingForResponse = true;
 					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = 0x0006;
+					m_payloadWaitingForResponse = ECHO_PACKET;
 					if (!sendPacket(m_threadReqList[i],true))
 					{
 						QLOG_FATAL() << "Error writing packet. Quitting thread";
