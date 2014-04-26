@@ -464,6 +464,8 @@ int FreeEmsComms::burnBlockFromRamToFlash(unsigned short location,unsigned short
 	req.addArg(location,sizeof(location));
 	req.addArg(offset,sizeof(offset));
 	req.addArg(size,sizeof(size));
+	req.sentRequest = true;
+	req.hasReply = true;
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
@@ -504,6 +506,9 @@ int FreeEmsComms::enableDatalogStream()
 	req.addArg(1,2);
 	req.addArg(QByteArray().append((char)0x01));
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
+	req.hasLength = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -519,6 +524,8 @@ int FreeEmsComms::disableDatalogStream()
 	req.addArg(1,2);
 	req.addArg(QByteArray().append((char)0x00));
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -534,6 +541,8 @@ int FreeEmsComms::updateBlockInRam(unsigned short location,unsigned short offset
 	req.addArg(size,sizeof(size));
 	req.addArg(data);
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 
@@ -561,6 +570,9 @@ int FreeEmsComms::updateBlockInFlash(unsigned short location,unsigned short offs
 	req.addArg(size,sizeof(size));
 	req.addArg(data);
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
+	req.hasLength = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -571,6 +583,8 @@ int FreeEmsComms::getDecoderName()
 	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
 	req.type = GET_DECODER_NAME;
+	req.sentRequest = true;
+	req.hasReply = true;
 	req.sequencenumber = m_sequenceNumber;
 	m_sequenceNumber++;
 	m_reqList.append(req);
@@ -582,6 +596,8 @@ int FreeEmsComms::getFirmwareBuildDate()
 	RequestClass req;
 	req.type = GET_FIRMWARE_BUILD_DATE;
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -592,6 +608,8 @@ int FreeEmsComms::getCompilerVersion()
 	RequestClass req;
 	req.type = GET_COMPILER_VERSION;
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -602,6 +620,8 @@ int FreeEmsComms::getOperatingSystem()
 	RequestClass req;
 	req.type = GET_OPERATING_SYSTEM;
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -612,6 +632,8 @@ int FreeEmsComms::getSupportEmail()
 	RequestClass req;
 	req.type = GET_SUPPORT_EMAIL;
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -622,6 +644,8 @@ int FreeEmsComms::getBuiltByName()
 	RequestClass req;
 	req.type = GET_BUILT_BY_NAME;
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -635,6 +659,8 @@ int FreeEmsComms::retrieveBlockFromFlash(unsigned short location, unsigned short
 	req.addArg(offset,sizeof(offset));
 	req.addArg(size,sizeof(size));
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	//This gets us the range of effected values.
@@ -666,6 +692,8 @@ int FreeEmsComms::retrieveBlockFromRam(unsigned short location, unsigned short o
 	req.addArg(offset,sizeof(offset));
 	req.addArg(size,sizeof(size));
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -676,6 +704,8 @@ int FreeEmsComms::getInterfaceVersion()
 	RequestClass req;
 	req.type = GET_INTERFACE_VERSION;
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -686,6 +716,8 @@ int FreeEmsComms::getFirmwareVersion()
 	RequestClass req;
 	req.type = GET_FIRMWARE_VERSION;
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -696,6 +728,8 @@ int FreeEmsComms::getMaxPacketSize()
 	RequestClass req;
 	req.type = GET_MAX_PACKET_SIZE;
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -706,6 +740,9 @@ int FreeEmsComms::echoPacket(QByteArray packet)
 	RequestClass req;
 	req.type = ECHO_PACKET;
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
+	req.hasLength = true;
 	req.addArg(packet);
 	m_sequenceNumber++;
 	m_reqList.append(req);
@@ -737,6 +774,9 @@ int FreeEmsComms::startBenchTest(unsigned char eventspercycle,unsigned short num
 		req.addArg((unsigned short)pinmode[i].toInt(),2);
 	}
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
+	req.hasLength = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -748,6 +788,9 @@ int FreeEmsComms::stopBenchTest()
 	req.type = BENCHTEST;
 	req.addArg(0x00,sizeof(char));
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
+	req.hasLength = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -760,6 +803,9 @@ int FreeEmsComms::bumpBenchTest(unsigned char cyclenum)
 	req.addArg(0x02,sizeof(char));
 	req.addArg(cyclenum,sizeof(cyclenum));
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
+	req.hasReply = true;
+	req.hasLength = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -772,6 +818,8 @@ int FreeEmsComms::getLocationIdInfo(unsigned short locationid)
 	req.type = GET_LOCATION_ID_INFO;
 	req.sequencenumber = m_sequenceNumber;
 	req.addArg(locationid,sizeof(locationid));
+	req.sentRequest = true;
+	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -785,6 +833,9 @@ int FreeEmsComms::getLocationIdList(unsigned char listtype, unsigned short listm
 	req.sequencenumber = m_sequenceNumber;
 	req.addArg(listtype,sizeof(listtype));
 	req.addArg(listmask,sizeof(listmask));
+	req.sentRequest = true;
+	req.hasReply = true;
+	req.hasLength = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -796,6 +847,7 @@ int FreeEmsComms::softReset()
 	RequestClass req;
 	req.type = SOFT_RESET;
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
@@ -806,18 +858,32 @@ int FreeEmsComms::hardReset()
 	RequestClass req;
 	req.type = HARD_RESET;
 	req.sequencenumber = m_sequenceNumber;
+	req.sentRequest = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
 }
-bool FreeEmsComms::sendPacket(RequestClass request,bool haslength)
+bool FreeEmsComms::sendPacket(RequestClass request)
 {
-	if (!sendPacket(request.type,request.args,request.argsize,haslength))
+	if (!request.hasReply)
 	{
-		QLOG_ERROR() << "sendPacket failed";
-		return false;
+		return sendPacket(request.type,request.args,request.argsize,request.hasLength);
 	}
-	return true;
+	QMutexLocker locker(&m_waitingInfoMutex);
+	if (!m_waitingForResponse)
+	{
+		m_waitingForResponse = true;
+		m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
+		m_currentWaitingRequest = request;
+		m_payloadWaitingForResponse = request.type;
+		if (!sendPacket(request.type,request.args,request.argsize,request.hasLength))
+		{
+			return false;
+		}
+		return true;
+	}
+	return false;
+
 }
 
 bool FreeEmsComms::sendPacket(unsigned short payloadid,QList<QVariant> arglist,QList<int> argsizelist,bool haslength)
@@ -969,7 +1035,20 @@ void FreeEmsComms::run()
 		m_reqListMutex.unlock();
 		for (int i=0;i<m_threadReqList.size();i++)
 		{
-			if (m_threadReqList[i].type == SERIAL_CONNECT)
+			if (m_threadReqList[i].sentRequest)
+			{
+				//Request to be directly sent to the ECU
+				if (!sendPacket(m_threadReqList[i]))
+				{
+					//return;
+				}
+				else
+				{
+					m_threadReqList.removeAt(i);
+					i--;
+				}
+			}
+			else if (m_threadReqList[i].type == SERIAL_CONNECT)
 			{
 				SerialPortStatus errortype = serialPort->isSerialMonitor(m_threadReqList[i].args[0].toString());
 				if (errortype != NONE)
@@ -1168,386 +1247,6 @@ void FreeEmsComms::run()
 				m_threadReqList.removeAt(i);
 				i--;
 				continue;
-			}
-			else if (m_threadReqList[i].type == GET_LOCATION_ID_LIST)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					emit debugVerbose("GET_LOCATION_ID_LIST");
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = GET_LOCATION_ID_LIST;
-					if (!sendPacket(m_threadReqList[i],true))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == GET_DECODER_NAME)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = GET_DECODER_NAME;
-					if (!sendPacket(GET_DECODER_NAME))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == GET_FIRMWARE_BUILD_DATE)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = GET_FIRMWARE_BUILD_DATE;
-					if (!sendPacket(GET_FIRMWARE_BUILD_DATE))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == GET_COMPILER_VERSION)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = GET_COMPILER_VERSION;
-					if (!sendPacket(GET_COMPILER_VERSION))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == GET_BUILT_BY_NAME)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = GET_BUILT_BY_NAME;
-					if (!sendPacket(GET_BUILT_BY_NAME))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == GET_SUPPORT_EMAIL)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = GET_SUPPORT_EMAIL;
-					if (!sendPacket(GET_SUPPORT_EMAIL))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == GET_OPERATING_SYSTEM)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = GET_OPERATING_SYSTEM;
-					if (!sendPacket(GET_OPERATING_SYSTEM))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == BURN_BLOCK_FROM_RAM_TO_FLASH)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = BURN_BLOCK_FROM_RAM_TO_FLASH;
-					if (!sendPacket(m_threadReqList[i],false))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == GET_LOCATION_ID_INFO)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = GET_LOCATION_ID_INFO;
-					if (!sendPacket(m_threadReqList[i],false))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == UPDATE_BLOCK_IN_RAM)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = UPDATE_BLOCK_IN_RAM;
-					m_waitingForRamWrite = true;
-					if (!sendPacket(m_threadReqList[i],true))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-
-			}
-			else if (m_threadReqList[i].type == RETRIEVE_BLOCK_IN_RAM)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = RETRIEVE_BLOCK_IN_RAM;
-					if (!sendPacket(m_threadReqList[i],false))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == UPDATE_BLOCK_IN_FLASH)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = UPDATE_BLOCK_IN_FLASH;
-					m_waitingForFlashWrite = true;
-					if (!sendPacket(m_threadReqList[i],true))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == RETRIEVE_BLOCK_IN_FLASH)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = RETRIEVE_BLOCK_IN_FLASH;
-					if (!sendPacket(m_threadReqList[i],false))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == GET_INTERFACE_VERSION)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = GET_INTERFACE_VERSION;
-					if (!sendPacket(GET_INTERFACE_VERSION))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == GET_FIRMWARE_VERSION)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = GET_FIRMWARE_VERSION;
-					if (!sendPacket(GET_FIRMWARE_VERSION))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == GET_MAX_PACKET_SIZE)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = GET_MAX_PACKET_SIZE;
-					if (!sendPacket(GET_MAX_PACKET_SIZE))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == ECHO_PACKET)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = ECHO_PACKET;
-					if (!sendPacket(m_threadReqList[i],true))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == BENCHTEST)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_waitingForResponse = true;
-					m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
-					m_currentWaitingRequest = m_threadReqList[i];
-					m_payloadWaitingForResponse = BENCHTEST;
-					if (!sendPacket(m_threadReqList[i],true))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == SOFT_RESET)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_currentWaitingRequest = m_threadReqList[i];
-					if (!sendPacket(SOFT_RESET))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-					emit packetSent(SOFT_RESET,QByteArray(),QByteArray());
-				}
-				m_waitingInfoMutex.unlock();
-			}
-			else if (m_threadReqList[i].type == HARD_RESET)
-			{
-				m_waitingInfoMutex.lock();
-				if (!m_waitingForResponse)
-				{
-					m_currentWaitingRequest = m_threadReqList[i];
-					if (!sendPacket(HARD_RESET))
-					{
-						QLOG_FATAL() << "Error writing packet. Quitting thread";
-						return;
-					}
-					m_threadReqList.removeAt(i);
-					i--;
-					emit packetSent(HARD_RESET,QByteArray(),QByteArray());
-				}
-				m_waitingInfoMutex.unlock();
 			}
 			else if (false)
 			{
@@ -1856,6 +1555,7 @@ void FreeEmsComms::packetAckedRec(unsigned short payloadid,QByteArray header,QBy
 		{
 			if (m_interrogatePacketList.contains(m_currentWaitingRequest.sequencenumber))
 			{
+				QLOG_DEBUG() << "Sending next interrogation packet";
 				emit interrogateTaskSucceed(m_currentWaitingRequest.sequencenumber);
 				m_interrogatePacketList.removeOne(m_currentWaitingRequest.sequencenumber);
 				emit interrogationProgress(m_interrogateTotalCount - m_interrogatePacketList.size(),m_interrogateTotalCount);

@@ -111,9 +111,15 @@ private:
 		RequestClass()
 		{
 			retryCount=0;
+			hasLength = false;
+			hasReply = false;
+			sentRequest = false;
 		}
+		bool sentRequest; //If the request can be directly passed to attemptSendPacket to be sent to the ECU.
 
 		unsigned char retryCount;
+		bool hasLength;
+		bool hasReply;
 		RequestType type;
 		QList<QVariant> args;
 		QList<int> argsize;
@@ -132,7 +138,7 @@ private:
 	bool m_terminateLoop;
 	QMutex m_waitingInfoMutex;
 	SerialRXThread *rxThread;
-	bool sendPacket(RequestClass request,bool haslength);
+	bool sendPacket(RequestClass request);
 	qint64 m_timeoutMsecs;
 	QList<LocationIdFlags> m_blockFlagList;
 	int m_sequenceNumber;
