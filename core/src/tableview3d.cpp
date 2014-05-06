@@ -79,6 +79,8 @@ TableView3D::TableView3D(QWidget *parent)
 		//Is both ram and flash
 	}*/
 	//ui.importPushButton->setVisible(false);
+	ui.tracingCheckBox->setVisible(false);
+	ui.tracingCheckBox->setEnabled(false);
 	connect(ui.showMapPushButton,SIGNAL(clicked()),this,SLOT(showMapClicked()));
 }
 void TableView3D::tracingCheckBoxStateChanged(int newstate)
