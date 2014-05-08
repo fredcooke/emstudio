@@ -59,9 +59,9 @@ Rectangle {
 		y:300
 		width:300
 		height:300
-		minimum:0
-		maximum:250
-		numLabels:5
+		minimum:-20
+		maximum:120
+		numLabels:7
 		startAngle:45
 		endAngle:315
 		text: "Coolant"
@@ -90,8 +90,8 @@ Rectangle {
 		width:300
 		height:300
 		minimum:0
-		maximum:600
-		numLabels:6
+		maximum:250
+		numLabels:5
 		startAngle:45
 		endAngle:315
 		text: "MAP"
