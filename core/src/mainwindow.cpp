@@ -65,6 +65,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	//TODO: Figure out proper directory names
 #ifdef Q_OS_WIN
 	QString appDataDir = getenv("%AppData%");
+	if (appDataDir == "")
+	{
+		appDataDir = getenv("%UserProfile%");
+	}
 	appDataDir = appDataDir.replace("\\","/");
 	if (!QDir(appDataDir).exists("EMStudio"))
 	{
