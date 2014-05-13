@@ -1108,6 +1108,7 @@ void FreeEmsComms::run()
 				rxThread = new SerialRXThread();
 				connect(rxThread,SIGNAL(incomingPacket(QByteArray)),this,SLOT(parseEverything(QByteArray)),Qt::DirectConnection);
 				connect(rxThread,SIGNAL(dataRead(QByteArray)),this,SLOT(dataLogRead(QByteArray)),Qt::DirectConnection);
+				connect(rxThread,SIGNAL(portGone()),this,SLOT(rxThreadPortGone()),Qt::DirectConnection);
 
 				//Before we finish emitting the fact that we are connected, let's verify this is a freeems system we are talking to.
 				if (!sendPacket(GET_FIRMWARE_VERSION))
@@ -1301,6 +1302,12 @@ void FreeEmsComms::run()
 		rxThread = 0;
 	}
 }
+void FreeEmsComms::rxThreadPortGone()
+{
+	disconnectSerial();
+	emit error("Serial port has disappeared. Save your tune (File->Save tune) then ensure the device is still connected and powered, then reconnect");
+}
+
 void FreeEmsComms::sendNextInterrogationPacket()
 {
 	if (m_interrogatePacketList.size() == 0)

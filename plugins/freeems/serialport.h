@@ -57,6 +57,7 @@ public:
     int readBytes(QByteArray *array, int maxlen,int timeout=0);
     int bufferSize() { return m_queuedMessages.size(); }
     void setInterByteSendDelay(int milliseconds);
+    QString portName() { return m_portName; }
 private:
     QSerialPort *m_serialPort;
     QByteArray m_privBuffer;

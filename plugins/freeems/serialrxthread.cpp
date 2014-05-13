@@ -21,6 +21,7 @@
 
 #include "serialrxthread.h"
 #include <QDateTime>
+#include <qserialportinfo.h>
 #include "QsLog.h"
 
 SerialRXThread::SerialRXThread(QObject *parent) : QThread(parent)
@@ -143,6 +144,7 @@ QByteArray SerialRXThread::readSinglePacket(SerialPort *port)
 
 void SerialRXThread::run()
 {
+	qint64 msecs = QDateTime::currentMSecsSinceEpoch();
 	QString byteoutofpacket;
 	QByteArray qbuffer;
 	//unsigned char buffer[10240];
@@ -153,6 +155,25 @@ void SerialRXThread::run()
 	int readlen=0;
 	while (!m_terminate)
 	{
+		if (QDateTime::currentMSecsSinceEpoch() - msecs > 1500)
+		{
+			//Every second, check that the port still exists.
+			msecs = QDateTime::currentMSecsSinceEpoch();
+			bool found = false;
+			foreach(QSerialPortInfo info,QSerialPortInfo::availablePorts())
+			{
+				if (m_serialPort->portName().contains(info.portName()))
+				{
+					found = true;
+				}
+			}
+			if (!found)
+			{
+				emit portGone();
+				return;
+			}
+
+		}
 		readlen = m_serialPort->readBytes(&buffer,100);
 		if (readlen < 0)
 		{

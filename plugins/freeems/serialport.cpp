@@ -162,6 +162,7 @@ int SerialPort::openPort(QString portName,int baudrate,bool oddparity)
 {
 	//QLOG_DEBUG() << "SerialPort::openPort thread:" << QThread::currentThread();
 	//m_serialPort = new QSerialPort();
+	m_portName = portName;
 	m_serialPort->setPortName(portName);
 	if (!m_serialPort->open(QIODevice::ReadWrite))
 	{

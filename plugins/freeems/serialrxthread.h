@@ -48,6 +48,7 @@ protected:
 signals:
 	void incomingPacket(QByteArray packet);
 	void dataRead(QByteArray data);
+	void portGone();
 public slots:
 	
 };
