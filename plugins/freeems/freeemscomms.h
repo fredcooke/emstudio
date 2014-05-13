@@ -98,6 +98,8 @@ public:
 	ConfigData* getConfigData(QString name);
 	QList<QString> getConfigList();
 	void writeAllRamToRam();
+	void acceptLocalChanges();
+	void rejectLocalChanges();
 protected:
 	void run();
 private:
@@ -210,15 +212,20 @@ signals:
 	void memoryDirty();
 	void memoryClean();
 	void benchTestReply(unsigned short countRemaining,unsigned char currentEvent);
+	void flashLocationDirty(unsigned short locationid);
+	void ramLocationDirty(unsigned short locationid);
 public slots:
 	int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
 	int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data);
-	int retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size);
-	int retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size);
+	int retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size,bool mark=true);
+	int retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size,bool mark=true);
 	int burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size);
 private slots:
+	void dataLogPayloadReceivedRec(QByteArray header,QByteArray payload);
 	void ramBlockUpdateRec(QByteArray header,QByteArray payload);
 	void rxThreadPortGone();
+	void ramLocationMarkedDirty(unsigned short locationid);
+	void flashLocationMarkedDirty(unsigned short locationid);
 	void flashBlockUpdateRec(QByteArray header,QByteArray payload);
 	void packetNakedRec(unsigned short payloadid,QByteArray header,QByteArray payload,unsigned short errornum);
 	void packetAckedRec(unsigned short payloadid,QByteArray header,QByteArray payload);

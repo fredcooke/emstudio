@@ -49,8 +49,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	QLOG_INFO() << "Full hash:" << define2string(GIT_HASH);
 	progressView=0;
 	emsComms=0;
+	ramDiffWindow=0;
 	m_interrogationInProgress = false;
 	m_debugLogs = false;
+	emsSilenceTimer = new QTimer(this);
+	connect(emsSilenceTimer,SIGNAL(timeout()),this,SLOT(emsCommsSilenceTimerTick()));
 
 //	emsData = new EmsData();
 //	connect(emsData,SIGNAL(updateRequired(unsigned short)),this,SLOT(updateDataWindows(unsigned short)));
@@ -607,12 +610,33 @@ void MainWindow::emsCommsSilence()
 {
 	//This is called when the ems has been silent for 5 seconds, when it was previously talking.
 	QLOG_WARN() << "EMS HAS GONE SILENT";
+	ui.statusLabel->setStyleSheet("background-color: rgb(255, 0, 0);");
+	ui.statusLabel->setText("EMS SILENT");
+	emsSilenceTimer->start(250);
+	QMessageBox::information(this,"Warning","ECU has gone silent. If this is unintentional, it may be a sign that something is wrong...");
+
+}
+void MainWindow::emsCommsSilenceTimerTick()
+{
+	if (m_emsSilenceLabelIsRed)
+	{
+		m_emsSilenceLabelIsRed = false;
+		ui.statusLabel->setStyleSheet("color: rgb(255, 255, 0);\nbackground-color: rgb(255, 85, 0);");
+	}
+	else
+	{
+		m_emsSilenceLabelIsRed = true;
+		ui.statusLabel->setStyleSheet("color: rgb(255, 255, 0);\nbackground-color: rgb(255, 0, 0);");
+	}
 }
 
 void MainWindow::emsCommsSilenceBroken()
 {
 	//This is called when ems had previously been talking, gone silent, then started talking again.
+	ui.statusLabel->setText("<font bgcolor=\"#00FF00\">Status Normal</font>");
+	emsSilenceTimer->stop();
 	QLOG_WARN() << "EMS HAS GONE NOISEY";
+	ui.statusLabel->setStyleSheet("");
 }
 
 void MainWindow::emsCommsDisconnected()
@@ -623,6 +647,7 @@ void MainWindow::emsCommsDisconnected()
 	ui.actionConnect->setEnabled(true);
 	ui.actionDisconnect->setEnabled(false);
 	m_offlineMode = true;
+	ui.statusLabel->setText("<font bgcolor=\"#FF0000\">DISCONNECTED</font>");
 }
 
 void MainWindow::setPlugin(QString plugin)
@@ -704,6 +729,8 @@ void MainWindow::setPlugin(QString plugin)
 	connect(emsComms,SIGNAL(memoryDirty()),statusView,SLOT(setEmsMemoryDirty()));
 	connect(emsComms,SIGNAL(memoryClean()),statusView,SLOT(setEmsMemoryClean()));
 	connect(emsComms,SIGNAL(datalogDescriptor(QString)),this,SLOT(datalogDescriptor(QString)));
+	connect(emsComms,SIGNAL(ramLocationDirty(unsigned short)),this,SLOT(ramLocationDirty(unsigned short)));
+	connect(emsComms,SIGNAL(flashLocationDirty(unsigned short)),this,SLOT(flashLocationDirty(unsigned short)));
 	emsComms->setBaud(m_comBaud);
 	emsComms->setPort(m_comPort);
 	emsComms->setLogsEnabled(m_saveLogs);
@@ -1342,6 +1369,7 @@ void MainWindow::loadWizards(QString dir)
 void MainWindow::emsCommsConnected()
 {
 
+	ui.statusLabel->setText("<font bgcolor=\"#FF0000\">Connected</font>");
 	m_interrogationFailureCount = 0;
 	ui.actionSave_Offline_Data->setEnabled(true);
 	ui.actionLoad_Offline_Data->setEnabled(true);
@@ -2120,4 +2148,29 @@ void MainWindow::emsMemoryClean()
 void MainWindow::datalogDescriptor(QString data)
 {
 	Q_UNUSED(data)
+}
+void MainWindow::ramLocationDirty(unsigned short locationid)
+{
+	if (!ramDiffWindow)
+	{
+		ramDiffWindow = new RamDiffWindow();
+		connect(ramDiffWindow,SIGNAL(acceptLocalChanges()),this,SLOT(dirtyRamAcceptLocalChanges()));
+		connect(ramDiffWindow,SIGNAL(rejectLocalChanges()),this,SLOT(dirtyRamRejectLocalChanges()));
+		ramDiffWindow->show();
+	}
+	ramDiffWindow->setDirtyLocation(locationid);
+	//QMessageBox::information(0,"Error","Ram location dirty 0x" + QString::number(locationid,16));
+}
+void MainWindow::dirtyRamAcceptLocalChanges()
+{
+	emsComms->acceptLocalChanges();
+}
+void MainWindow::dirtyRamRejectLocalChanges()
+{
+	emsComms->rejectLocalChanges();
+}
+
+void MainWindow::flashLocationDirty(unsigned short locationid)
+{
+	QMessageBox::information(0,"Error","Flash location dirty 0x" + QString::number(locationid,16));
 }

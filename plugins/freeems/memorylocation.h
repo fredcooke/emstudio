@@ -48,8 +48,12 @@ public:
 	void childChanged(MemoryLocation *child,QByteArray data);
 	QByteArray data(MemoryLocation *child);
 	QByteArray data();
+	void setByteDirty(unsigned short offset);
+	void setByteClean(unsigned short offset);
+	bool isDirty();
 private:
 	QByteArray m_data;
+	QList<unsigned short> m_dirty;
 	QList<MemoryLocation*> m_childList;
 	MemoryLocation *m_parent;
 signals:

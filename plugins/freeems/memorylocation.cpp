@@ -53,6 +53,34 @@ void MemoryLocation::childChanged(MemoryLocation *child,QByteArray data)
 	}
 	m_data.replace(childinparent,data.length(),data);
 }
+void MemoryLocation::setByteDirty(unsigned short offset)
+{
+	if (!m_dirty.contains(offset))
+	{
+		m_dirty.append(offset);
+	}
+}
+
+void MemoryLocation::setByteClean(unsigned short offset)
+{
+	if (m_dirty.contains(offset))
+	{
+		m_dirty.removeOne(offset);
+	}
+}
+
+bool MemoryLocation::MemoryLocation::isDirty()
+{
+	if (m_dirty.size() == 0)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
 QByteArray MemoryLocation::data(MemoryLocation *child)
 {
 	unsigned short childinparent=0;

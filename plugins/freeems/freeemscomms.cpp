@@ -57,6 +57,7 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	connect(m_packetDecoder,SIGNAL(flashBlockUpdatePacket(QByteArray,QByteArray)),this,SLOT(flashBlockUpdateRec(QByteArray,QByteArray)));
 	connect(m_packetDecoder,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)));
 	connect(m_packetDecoder,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),dataPacketDecoder,SLOT(decodePayloadPacket(QByteArray,QByteArray)));
+	connect(m_packetDecoder,SIGNAL(dataLogPayloadReceived(QByteArray,QByteArray)),this,SLOT(dataLogPayloadReceivedRec(QByteArray,QByteArray)));
 	connect(m_packetDecoder,SIGNAL(compilerVersion(QString)),this,SLOT(compilerVersion(QString)));
 	connect(m_packetDecoder,SIGNAL(decoderName(QString)),this,SLOT(decoderName(QString)));
 	connect(m_packetDecoder,SIGNAL(firmwareBuild(QString)),this,SLOT(firmwareBuild(QString)));
@@ -122,6 +123,8 @@ FreeEmsComms::FreeEmsComms(QObject *parent) : EmsComms(parent)
 	connect(&emsData,SIGNAL(flashBlockUpdateRequest(unsigned short,unsigned short,unsigned short,QByteArray)),this,SLOT(updateBlockInFlash(unsigned short,unsigned short,unsigned short,QByteArray)));
 	connect(&emsData,SIGNAL(updateRequired(unsigned short)),this,SLOT(locationIdUpdate(unsigned short)));
 	connect(&emsData,SIGNAL(configRecieved(ConfigBlock,QVariant)),this,SIGNAL(configRecieved(ConfigBlock,QVariant)));
+	connect(&emsData,SIGNAL(localRamLocationDirty(unsigned short)),this,SLOT(ramLocationMarkedDirty(unsigned short)));
+	connect(&emsData,SIGNAL(localFlashLocationDirty(unsigned short)),this,SLOT(flashLocationMarkedDirty(unsigned short)));
 
 
 	QFile dialogFile("menuconfig.json");
@@ -546,6 +549,8 @@ int FreeEmsComms::updateBlockInRam(unsigned short location,unsigned short offset
 	m_sequenceNumber++;
 	m_reqList.append(req);
 
+	emsData.markLocalRamLocationDirty(location,offset,size);
+
 	if (emsData.getLocalRamBlockInfo(location)->isFlash)
 	{
 		unsigned short ramaddress = emsData.getLocalRamBlockInfo(location)->ramAddress;
@@ -575,6 +580,8 @@ int FreeEmsComms::updateBlockInFlash(unsigned short location,unsigned short offs
 	req.hasLength = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
+	emsData.markLocalFlashLocationDirty(location,offset,size);
+
 	return m_sequenceNumber-1;
 }
 
@@ -650,7 +657,7 @@ int FreeEmsComms::getBuiltByName()
 	m_reqList.append(req);
 	return m_sequenceNumber-1;
 }
-int FreeEmsComms::retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size)
+int FreeEmsComms::retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size,bool mark)
 {
 	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
@@ -667,8 +674,16 @@ int FreeEmsComms::retrieveBlockFromFlash(unsigned short location, unsigned short
 	//emsData.getLocalRamBlockInfo(location)->size;
 	//emsData.getLocalRamBlockInfo(location)->ramAddress;
 
-	if (emsData.getLocalRamBlockInfo(location))
+	//We mark it dirty, so it will be silently replaced.
+	if (mark)
 	{
+		emsData.markLocalFlashLocationDirty(location,offset,size);
+	}
+
+	/*if (emsData.getLocalRamBlockInfo(location))
+	{
+		emsData.markLocalRamLocationClean(location,offset,size);
+
 		for (int i=emsData.getLocalRamBlockInfo(location)->ramAddress + offset;i<emsData.getLocalRamBlockInfo(location)->ramAddress+offset+size;i++)
 		{
 			if (m_dirtyRamAddresses.contains(i))
@@ -680,10 +695,10 @@ int FreeEmsComms::retrieveBlockFromFlash(unsigned short location, unsigned short
 		{
 			emit memoryClean();
 		}
-	}
+	}*/
 	return m_sequenceNumber-1;
 }
-int FreeEmsComms::retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size)
+int FreeEmsComms::retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size,bool mark)
 {
 	QMutexLocker locker(&m_reqListMutex);
 	RequestClass req;
@@ -696,6 +711,10 @@ int FreeEmsComms::retrieveBlockFromRam(unsigned short location, unsigned short o
 	req.hasReply = true;
 	m_sequenceNumber++;
 	m_reqList.append(req);
+	if (mark)
+	{
+		emsData.markLocalRamLocationDirty(location,offset,size);
+	}
 	return m_sequenceNumber-1;
 }
 int FreeEmsComms::getInterfaceVersion()
@@ -1358,13 +1377,13 @@ void FreeEmsComms::sendNextInterrogationPacket()
 			}
 			for (int i=0;i<ramlist.size();i++)
 			{
-				int task = retrieveBlockFromRam(ramlist[i],0,0);
+				int task = retrieveBlockFromRam(ramlist[i],0,0,false);
 				m_interrogatePacketList.append(task);
 				emit interrogateTaskStart("Ram Location: 0x" + QString::number(ramlist[i],16),task);
 			}
 			for (int i=0;i<flashlist.size();i++)
 			{
-				int task = retrieveBlockFromFlash(flashlist[i],0,0);
+				int task = retrieveBlockFromFlash(flashlist[i],0,0,false);
 				m_interrogatePacketList.append(task);
 				emit interrogateTaskStart("Flash Location: 0x" + QString::number(flashlist[i],16),task);
 			}
@@ -1602,6 +1621,7 @@ void FreeEmsComms::packetAckedRec(unsigned short payloadid,QByteArray header,QBy
 			QLOG_ERROR() << "ERROR! Invalid packet:" << "0x" + QString::number(payloadid,16).toUpper();
 		}
 	}
+
 }
 
 void FreeEmsComms::setLogFileName(QString filename)
@@ -1615,9 +1635,9 @@ void FreeEmsComms::datalogTimerTimeout()
 		return;
 	}
 	quint64 current = QDateTime::currentMSecsSinceEpoch() - m_lastDatalogTime;
-	if (current > 5000)
+	if (current > 1500)
 	{
-		//It's been 5 seconds since our last datalog. We've likely either reset, or stopped responding.
+		//It's been 1.5 seconds since our last datalog. We've likely either reset, or stopped responding.
 		m_isSilent = true;
 		m_lastDatalogUpdateEnabled = false;
 		emit emsSilenceStarted();
@@ -1917,6 +1937,40 @@ void FreeEmsComms::locationIdInfoRec(MemoryLocationInfo info)
 		connect(data,SIGNAL(requestBlockFromRam(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromRam(unsigned short,unsigned short,unsigned short)));
 		connect(data,SIGNAL(requestBlockFromFlash(unsigned short,unsigned short,unsigned short)),this,SLOT(retrieveBlockFromFlash(unsigned short,unsigned short,unsigned short)));
 		m_rawDataMap[locationid] = data;
+	}
+}
+void FreeEmsComms::ramLocationMarkedDirty(unsigned short locationid)
+{
+	emit ramLocationDirty(locationid);
+}
+
+void FreeEmsComms::flashLocationMarkedDirty(unsigned short locationid)
+{
+	emit flashLocationDirty(locationid);
+
+}
+void FreeEmsComms::acceptLocalChanges()
+{
+	for (int i=0;i<emsData.getDirtyRamLocations().size();i++)
+	{
+		updateBlockInRam(emsData.getDirtyRamLocations().at(i).first,0,emsData.getDirtyRamLocations().at(i).second.size(),emsData.getDirtyRamLocations().at(i).second);
+	}
+	emsData.clearDirtyRamLocations();
+}
+
+void FreeEmsComms::rejectLocalChanges()
+{
+	emsData.clearDirtyRamLocations();
+
+}
+void FreeEmsComms::dataLogPayloadReceivedRec(QByteArray header,QByteArray payload)
+{
+	//Incoming datalogpacket, reset the timer.
+	m_lastDatalogTime = QDateTime::currentMSecsSinceEpoch();
+	if (!m_lastDatalogUpdateEnabled)
+	{
+		m_lastDatalogUpdateEnabled = true;
+		emit emsSilenceBroken();
 	}
 }
 

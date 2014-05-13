@@ -53,7 +53,9 @@
 #include "serialportstatus.h"
 #include <QPluginLoader>
 #include "parameterview.h"
+#include "ramdiffwindow.h"
 #include "wizardview.h"
+
 class RawDataBlock
 {
 public:
@@ -129,6 +131,8 @@ private:
 	QMdiSubWindow *packetStatusMdiWindow;
 	QMdiSubWindow *aboutMdiWindow;
 	QMdiSubWindow *emsStatusMdiWindow;
+	RamDiffWindow *ramDiffWindow;
+	QTimer *emsSilenceTimer;
 
 	ParameterView *parameterView;
 	QMdiSubWindow *parameterMdiWindow;
@@ -137,6 +141,7 @@ private:
 	void checkMessageCounters(int sequencenumber);
 	DataPacketDecoder *dataPacketDecoder;
 	void populateDataFields();
+	bool m_emsSilenceLabelIsRed;
 
 	Ui::MainWindow ui;
 	QString m_pluginFileName;
@@ -250,6 +255,11 @@ private slots:
 	void emsMemoryDirty();
 	void emsMemoryClean();
 	void datalogDescriptor(QString data);
+	void ramLocationDirty(unsigned short locationid);
+	void flashLocationDirty(unsigned short locationid);
+	void dirtyRamAcceptLocalChanges();
+	void dirtyRamRejectLocalChanges();
+	void emsCommsSilenceTimerTick();
 
 };
 

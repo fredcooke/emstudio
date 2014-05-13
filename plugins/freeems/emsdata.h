@@ -107,6 +107,19 @@ public:
 	QList<unsigned short> getTopLevelUniqueLocationIdList();
 	QList<unsigned short> getUniqueLocationIdList();
 	MemoryLocation* getLocalRamBlockInfo(unsigned short locationid);
+	MemoryLocation* getLocalFlashBlockInfo(unsigned short locationid);
+
+	void markLocalFlashLocationDirty(unsigned short location,unsigned short offset,unsigned short size);
+	void markLocalFlashLocationClean(unsigned short locationid);
+	void markLocalRamLocationDirty(unsigned short location,unsigned short offset,unsigned short size);
+	void markLocalRamLocationClean(unsigned short locationid);
+	bool isLocalRamDirty(unsigned short locationid);
+	bool isLocalFlashDirty(unsigned short locationid);
+	QList<QPair<unsigned short,QByteArray> > getDirtyFlashLocations() { return m_dirtyLocalFlashMemoryList; }
+	QList<QPair<unsigned short,QByteArray> > getDirtyRamLocations() { return m_dirtyLocalRamMemoryList; }
+	void clearDirtyRamLocations() { m_dirtyLocalRamMemoryList.clear(); }
+	void clearDirtyFlashLocations() { m_dirtyLocalFlashMemoryList.clear(); }
+
 
 private:
 	bool m_checkEmsDataInUse;
@@ -126,6 +139,8 @@ private:
 	QList<ConfigData*> m_configMetaData;
 	QList<ReadOnlyRamData> m_readOnlyMetaData;
 	QMap<unsigned short,QString> m_errorMap;
+	QList<QPair<unsigned short,QByteArray> > m_dirtyLocalFlashMemoryList;
+	QList<QPair<unsigned short,QByteArray> > m_dirtyLocalRamMemoryList;
 	bool verifyMemoryBlock(unsigned short locationid,QByteArray header,QByteArray payload);
 	double calcAxis(int val,QList<QPair<QString,double> > metadata);
 	int backConvertAxis(double val,QList<QPair<QString,double> > metadata);
@@ -135,6 +150,8 @@ signals:
 	void ramBlockUpdateRequest(unsigned short locationid,unsigned short offset,unsigned short size,QByteArray data);
 	void flashBlockUpdateRequest(unsigned short locationid,unsigned short offset,unsigned short size,QByteArray data);
 	void configRecieved(ConfigBlock,QVariant);
+	void localFlashLocationDirty(unsigned short locationid);
+	void localRamLocationDirty(unsigned short locationid);
 public slots:
 	void ramBlockUpdate(unsigned short locationid, QByteArray header, QByteArray payload);
 	void flashBlockUpdate(unsigned short locationid, QByteArray header, QByteArray payload);

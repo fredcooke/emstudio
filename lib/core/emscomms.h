@@ -120,14 +120,16 @@ public:
 	virtual QByteArray generatePacket(QByteArray header,QByteArray payload)=0;
 	virtual int updateBlockInRam(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)=0;
 	virtual int updateBlockInFlash(unsigned short location,unsigned short offset, unsigned short size,QByteArray data)=0;
-	virtual int retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size)=0;
-	virtual int retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size)=0;
+	virtual int retrieveBlockFromRam(unsigned short location, unsigned short offset, unsigned short size,bool mark=true)=0;
+	virtual int retrieveBlockFromFlash(unsigned short location, unsigned short offset, unsigned short size,bool mark=true)=0;
 	virtual int burnBlockFromRamToFlash(unsigned short location,unsigned short offset, unsigned short size)=0;
 	virtual void setInterByteSendDelay(int milliseconds)=0;
 	virtual void setlogsDebugEnabled(bool enabled)=0;
 	virtual int enableDatalogStream()=0;
 	virtual int disableDatalogStream()=0;
 	virtual void writeAllRamToRam()=0;
+	virtual void acceptLocalChanges()=0;
+	virtual void rejectLocalChanges()=0;
 };
 Q_DECLARE_INTERFACE(EmsComms,"EmsComms/1.0")
 #endif // EMSCOMMS_H
