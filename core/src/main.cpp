@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 	QsLogging::Logger& logger = QsLogging::Logger::instance();
 	logger.setLoggingLevel(QsLogging::TraceLevel);
 #ifdef Q_OS_WIN
-	QString appDataDir = QString(getenv("USERPROFILE")).replace("\\","/");
+	QString appDataDir = QString(getenv("%USERPROFILE%")).replace("\\","/");
 #else
 	QString appDataDir = getenv("HOME");
 #endif
