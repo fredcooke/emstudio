@@ -606,7 +606,7 @@ void MainWindow::menu_file_loadOfflineDataClicked()
 		data->setData(locid,true,bytearray);
 	}
 }
-void MainWindow::emsCommsSilence()
+void MainWindow::emsCommsSilence(qint64 lasttime)
 {
 	//This is called when the ems has been silent for 5 seconds, when it was previously talking.
 	QLOG_WARN() << "EMS HAS GONE SILENT";
@@ -614,6 +614,7 @@ void MainWindow::emsCommsSilence()
 	ui.statusLabel->setText("EMS SILENT");
 	emsSilenceTimer->start(250);
 	QMessageBox::information(this,"Warning","ECU has gone silent. If this is unintentional, it may be a sign that something is wrong...");
+	m_emsSilentLastTime = lasttime;
 
 }
 void MainWindow::emsCommsSilenceTimerTick()
@@ -635,7 +636,7 @@ void MainWindow::emsCommsSilenceBroken()
 	//This is called when ems had previously been talking, gone silent, then started talking again.
 	ui.statusLabel->setText("<font bgcolor=\"#00FF00\">Status Normal</font>");
 	emsSilenceTimer->stop();
-	QLOG_WARN() << "EMS HAS GONE NOISEY";
+	QLOG_WARN() << "EMS HAS GONE NOISEY" << QDateTime::currentMSecsSinceEpoch() - m_emsSilentLastTime << "milliseconds of silence";
 	ui.statusLabel->setStyleSheet("");
 }
 
@@ -709,7 +710,7 @@ void MainWindow::setPlugin(QString plugin)
 	connect(emsComms,SIGNAL(interrogateTaskSucceed(int)),this,SLOT(interrogateTaskSucceed(int)),Qt::QueuedConnection);
 	connect(emsComms,SIGNAL(interrogateTaskFail(int)),this,SLOT(interrogateTaskFail(int)),Qt::QueuedConnection);
 	connect(emsComms,SIGNAL(connected()),this,SLOT(emsCommsConnected()),Qt::QueuedConnection);
-	connect(emsComms,SIGNAL(emsSilenceStarted()),this,SLOT(emsCommsSilence()),Qt::QueuedConnection);
+	connect(emsComms,SIGNAL(emsSilenceStarted(qint64)),this,SLOT(emsCommsSilence(qint64)),Qt::QueuedConnection);
 	connect(emsComms,SIGNAL(emsSilenceBroken()),this,SLOT(emsCommsSilenceBroken()),Qt::QueuedConnection);
 	connect(emsComms,SIGNAL(error(QString)),this,SLOT(error(QString)),Qt::QueuedConnection);
 	connect(emsComms,SIGNAL(error(SerialPortStatus,QString)),this,SLOT(error(SerialPortStatus,QString)),Qt::QueuedConnection);

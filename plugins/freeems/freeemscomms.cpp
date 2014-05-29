@@ -1640,7 +1640,7 @@ void FreeEmsComms::datalogTimerTimeout()
 		//It's been 1.5 seconds since our last datalog. We've likely either reset, or stopped responding.
 		m_isSilent = true;
 		m_lastDatalogUpdateEnabled = false;
-		emit emsSilenceStarted();
+		emit emsSilenceStarted(m_lastDatalogTime);
 	}
 }
 Table2DData* FreeEmsComms::get2DTableData(unsigned short locationid)

@@ -178,13 +178,14 @@ private:
 	QMap<QMdiSubWindow*,QAction*> m_mdiSubWindowToActionMap;
 	bool m_EcuResetPopup;
 	QMap<QString,QList<QAction*> > m_gaugeActionMap;
+	qint64 m_emsSilentLastTime;
 private slots:
 	void showTable(QString table);
 	void windowHidden(QMdiSubWindow* window);
 	void bringToFrontAndShow();
 	void windowDestroyed(QObject *window);
 	void interrogationData(QMap<QString,QString> datamap);
-	void emsCommsSilence();
+	void emsCommsSilence(qint64 lasttime);
 	void emsCommsSilenceBroken();
 	void locationIdInfo(unsigned short locationid,MemoryLocationInfo info);
 	void tableview3d_show3DTable(unsigned short locationid,Table3DData *data);

@@ -197,7 +197,7 @@ signals:
 	void commandSuccessful(int sequencenumber);
 	void commandFailed(int sequencenumber,unsigned short errornum);
 	void commandTimedOut(int sequencenumber);
-	void emsSilenceStarted();
+	void emsSilenceStarted(qint64 lastdatalogtime);
 	void emsSilenceBroken();
 	void interrogateTaskStart(QString task, int sequence);
 	void interrogateTaskSucceed(int sequence);
