@@ -347,7 +347,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	//ui.menuWizards
 	connect(ui.mdiArea,SIGNAL(subWindowActivated(QMdiSubWindow*)),this,SLOT(subMdiWindowActivated(QMdiSubWindow*)));
-	QSettings windowsettings;
+	QSettings windowsettings(m_settingsFile,QSettings::IniFormat);
 	windowsettings.beginGroup("general");
 	this->restoreGeometry(windowsettings.value("location").toByteArray());
 	if (windowsettings.value("isMaximized",false).toBool())
@@ -1478,7 +1478,7 @@ void MainWindow::interrogationComplete()
 		emsMdiWindow->show();
 	}
 	bool oneShown = false; //Check to see if at least one window is visisble.
-	QSettings windowsettings;
+	QSettings windowsettings(m_settingsFile,QSettings::IniFormat);
 	QString compat = emsComms->getPluginCompat();
 	QString savecompat = windowsettings.value("plugincompat","").toString();
 	if (compat == savecompat)
@@ -2046,7 +2046,7 @@ MainWindow::~MainWindow()
 
 	ParameterView *parameterView;
 	QMdiSubWindow *parameterMdiWindow;*/
-	QSettings windowsettings;
+	QSettings windowsettings(m_settingsFile,QSettings::IniFormat);
 	windowsettings.beginWriteArray("rawwindows");
 	int val = 0;
 	for (QMap<unsigned short,QWidget*>::const_iterator i=m_rawDataView.constBegin();i!=m_rawDataView.constEnd();i++)
