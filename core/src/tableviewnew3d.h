@@ -13,12 +13,25 @@ public:
 	void setColumnCount(int count);
 	void setItem(int row,int column,QString text);
 	void rebuildTable();
+	int rowCount() { return m_rowCount; }
+	int columnCount() { return m_columnCount; }
+	QList<QPoint> selectedItems() { QList<QPoint> l; l.append(currentCell); return l; }
+	QString item(int row,int column);
+	void setXAxis(int index,QString number);
+	void setYAxis(int index,QString number);
+	QString xAxis(int index);
+	QString yAxis(int index);
+	void addHotkey(int key,Qt::KeyboardModifier modifier);
 
 private:
+	QList<QPair<int,Qt::KeyboardModifier> > m_hotkeyMap;
+	double m_itemHeight;
+	double m_itemWidth;
+	void resizeEvent(QResizeEvent *evt);
 	void paintEvent (QPaintEvent *evt);
-	QList<double> xaxis;
-	QList<double> yaxis;
-	QList<QList<double> > values;
+	QList<QString> xaxis;
+	QList<QString> yaxis;
+	QList<QList<QString> > values;
 	void mouseMoveEvent(QMouseEvent *evt);
 	void mousePressEvent(QMouseEvent *evt);
 	void mouseReleaseEvent(QMouseEvent *evt);
@@ -33,7 +46,7 @@ private:
 	int m_columnCount;
 	void rebuildtable();
 signals:
-	
+	void hotKeyPressed(int key,Qt::KeyboardModifier modifier);
 public slots:
 	
 };

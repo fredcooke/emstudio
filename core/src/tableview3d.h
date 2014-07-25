@@ -81,7 +81,7 @@ private slots:
 	void importClicked();
 	void exportJson(QString filename);
 	void showMapClicked();
-	void hotKeyPressed(int key,Qt::KeyboardModifiers modifier);
+	void hotKeyPressed(int key,Qt::KeyboardModifier modifier);
 signals:
 	void show3DTable(unsigned short locationid,Table3DData *data);
 	void saveToFlash(unsigned short locationid);

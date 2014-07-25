@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="TableWidget" name="tableWidget"/>
+    <widget class="TableViewNew3D" name="tableWidget" native="true"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -91,9 +91,10 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TableWidget</class>
-   <extends>QTableWidget</extends>
-   <header>tablewidget.h</header>
+   <class>TableViewNew3D</class>
+   <extends>QWidget</extends>
+   <header>tableviewnew3d.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

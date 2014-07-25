@@ -36,9 +36,6 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-    TableViewNew3D *table = new TableViewNew3D();
-    table->setGeometry(100,100,800,600);
-    table->show();
 	m_interrogationInProgress = false;
 	m_offlineMode = false;
 	m_checkEmsDataInUse = false;
