@@ -21,8 +21,6 @@
 
 #include "tableview2d.h"
 #include <QMessageBox>
-#include <qwt_plot_grid.h>
-#include <qwt_plot_curve.h>
 #include <qjson/serializer.h>
 #include <qjson/parser.h>
 #include <QFileDialog>
@@ -58,19 +56,20 @@ TableView2D::TableView2D(QWidget *parent)
 	ui.tableWidget->addHotkey(Qt::Key_Equal,Qt::NoModifier);
 	ui.tableWidget->setItemDelegate(new TableWidgetDelegate());
 
-	QPalette pal = ui.plot->palette();
-	pal.setColor(QPalette::Background,QColor::fromRgb(0,0,0));
-	ui.plot->setPalette(pal);
-	curve = new QwtPlotCurve("Test");
-	curve->attach(ui.plot);
-	curve->setPen(QPen(QColor::fromRgb(255,0,0),3));
-	QwtPlotGrid *grid = new QwtPlotGrid();
-	grid->setPen(QPen(QColor::fromRgb(100,100,100)));
-	grid->attach(ui.plot);
+	ui.plot->setInteraction(QCP::iRangeDrag, false);
+	ui.plot->setInteraction(QCP::iRangeZoom, false);
+	ui.plot->plotLayout()->clear();
+	m_wideAxisRect = new QCPAxisRect(ui.plot);
+	m_wideAxisRect->setupFullAxesBox(true);
+	m_wideAxisRect->axis(QCPAxis::atRight, 0)->setTickLabels(false);
+	//m_wideAxisRect->removeAxis(m_wideAxisRect->axis(QCPAxis::atLeft,0));
+	//m_wideAxisRect->removeAxis(m_wideAxisRect->axis(QCPAxis::atBottom,0));
+	ui.plot->plotLayout()->addElement(0, 0, m_wideAxisRect);
+	ui.plot->addGraph(m_wideAxisRect->axis(QCPAxis::atBottom), m_wideAxisRect->axis(QCPAxis::atLeft,0));
+
 
 
 	//curve->setData()
-	//QwtSeriesData<QwtIntervalSample> series;
 	/*if (!isram)
 	{
 		//Is only flash
@@ -317,10 +316,6 @@ void TableView2D::setValue(int row, int column,double value)
 
 	//This is to make sure we round the value properly. So value displayed == value sent.
 	//New value has been accepted. Let's write it.
-	if (samples.size() <= column)
-	{
-		return;
-	}
 	//unsigned short newval = ui.tableWidget->item(row,column)->text().toInt();
 	//currentvalue = newval;
 	if (row == 0)
@@ -344,12 +339,6 @@ void TableView2D::setValue(int row, int column,double value)
 
 		currentvalue = oldValue;
 		//tableData->setCell(0,column,currentvalue);
-
-
-		samples.replace(column,QPointF(ui.tableWidget->item(row,column)->text().toInt(),samples.at(column).y()));
-		curve->setSamples(samples);
-		//ui.plot->replot();
-		ui.plot->autoRefresh();
 	}
 	else if (row == 1)
 	{
@@ -370,13 +359,11 @@ void TableView2D::setValue(int row, int column,double value)
 		}
 		//tableData->setXAxis(column,currentvalue);
 		currentvalue = oldValue;
-		samples.replace(column,QPointF(samples.at(column).x(),ui.tableWidget->item(row,column)->text().toInt()));
-		curve->setSamples(samples);
-		//ui.plot->replot();
-		ui.plot->autoRefresh();
+		//samples.replace(column,QPointF(samples.at(column).x(),ui.tableWidget->item(row,column)->text().toInt()));
 	}
 	//New value has been accepted. Let's write it.
 	tableData->setCell(row,column,oldValue); //This will emit saveSingleData
+	updateTable();
 	//ui.tableWidget->resizeColumnsToContents();
 	resizeColumnWidths();
 }
@@ -767,12 +754,12 @@ bool TableView2D::setData(QString name,DataBlock *data)
 		return false;
 	}
 	QLOG_DEBUG() << "TableView2D::passData" << name;
+	m_wideAxisRect->axis(QCPAxis::atLeft)->setLabel(tableData->axisLabel());
+	m_wideAxisRect->axis(QCPAxis::atBottom)->setLabel(tableData->valueLabel());
 	return updateTable();
 }
 bool TableView2D::updateTable()
 {
-	samples.clear();
-
 	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
 	QList<QPair<int,int> > selectedlist;
 	if (ui.tableWidget->selectedItems().size() > 0)
@@ -793,6 +780,8 @@ bool TableView2D::updateTable()
 	}
 	double first = tableData->axis()[0];
 	int order = 0;
+	QVector<double> keys;
+	QVector<double> values;
 	for (int i=0;i<tableData->columns();i++)
 	{
 		if (i == 1)
@@ -852,10 +841,17 @@ bool TableView2D::updateTable()
 				ui.tableWidget->item(1,ui.tableWidget->columnCount()-1)->setBackgroundColor(QColor::fromRgb(255,255-(255*(((tableData->values()[i] - tableData->minActualYAxis())-(((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0)*3))/((tableData->maxActualYAxis() - tableData->minActualYAxis())/4.0))),0));
 			}
 		}
-		samples.append(QPointF(tableData->axis()[i],tableData->values()[i]));
+		keys.append(tableData->axis()[i]);
+		values.append(tableData->values()[i]);
 	}
+	QCPGraph *graph = ui.plot->graph(0);
+	graph->setData(keys,values);
+	graph->rescaleAxes();
+	//m_wideAxisRect->axis(QCPAxis::atLeft)->setLabel(tableData->axisLabel());
+
+	//m_wideAxisRect->axis(QCPAxis::atBottom)->setLabel(tableData->valueLabel());
 	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-	curve->setSamples(samples);
+//	curve->setSamples(samples);
 	ui.plot->replot();
 	ui.tableWidget->setCurrentCell(m_currRow,m_currCol);
 		resizeColumnWidths();
@@ -863,8 +859,6 @@ bool TableView2D::updateTable()
 	{
 		ui.tableWidget->item(selectedlist[i].first,selectedlist[i].second)->setSelected(true);
 	}
-	ui.plot->setAxisTitle(QwtPlot::xBottom,tableData->axisLabel());
-	ui.plot->setAxisTitle(QwtPlot::yLeft,tableData->valueLabel());
 
 
 	selectedlist.clear();

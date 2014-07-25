@@ -93,7 +93,6 @@ Section "Qt Components"
   File /home/michael/QtWin64/lib/QtSql4.dll
   File /home/michael/QtWin64/lib/QtXml4.dll
   File /home/michael/QtWin64/lib/QtXmlPatterns4.dll
-  File /home/michael/QtWin64/libs/qwt/bin/qwt.dll
   File /home/michael/QtWin64/libs/qjson/bin/qjson.dll
   File /home/michael/QtWin64/lib/libstdc++-6.dll
   File /home/michael/QtWin64/lib/libgcc_s_sjlj-1.dll

@@ -29,8 +29,6 @@
 #include <table2ddata.h>
 #include <QPair>
 #include "ui_tableview2d.h"
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
 #include "dataview.h"
 class TableView2D : public DataView
 {
@@ -55,8 +53,6 @@ private:
 	Table2DData *tableData;
 	void setSilentValue(int row,int column,QString value);
 	Table2DMetaData m_metaData;
-	QwtPlotCurve *curve;
-	QVector<QPointF> samples;
 	Ui::TableView2D ui;
 	unsigned short m_locationid;
 	int m_physicalid;
@@ -73,6 +69,7 @@ private:
 	QString formatNumber(double num,int prec);
 	QString verifyValue(int row,int column,QString item);
 	void reColorTable(int rownum,int colnum);
+	QCPAxisRect *m_wideAxisRect;
 protected:
 	void resizeEvent(QResizeEvent *evt);
 	void keyPressEvent(QKeyEvent *event);

@@ -15,9 +15,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="10,6,0">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,6,0">
      <item>
-      <widget class="QwtPlot" name="plot"/>
+      <widget class="QCustomPlot" name="plot" native="true"/>
      </item>
      <item>
       <widget class="TableWidget" name="tableWidget">
@@ -104,15 +104,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QwtPlot</class>
-   <extends>QFrame</extends>
-   <header>qwt_plot.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>TableWidget</class>
    <extends>QTableWidget</extends>
    <header>tablewidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -27,17 +27,19 @@ POST_TARGETDEPS += gittouch
 include(QsLog/QsLog.pri)
 win32-x-g++ { #Linux based crossplatform 32bit build
         message("Building for win32-x-g++")
-	INCLUDEPATH += /home/michael/QtWin32/libs/qwt/include /home/michael/QtWin32/libs/qjson/include
-	LIBS += -L/home/michael/QtWin32/libs/qwt/lib -lqwt -L/home/michael/QtWin32/libs/qjson/lib -lqjson
+	DEFINES += WindowsBuild
+        INCLUDEPATH += /home/michael/QtWin32/libs/qjson/include
+        LIBS += -L/home/michael/QtWin32/libs/qjson/lib -lqjson
 	LIBS += -L/home/michael/QtWin32/lib
         DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
         DEFINES += GIT_DATE=\""$$system(date)"\"
         QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 } else:win64-x-g++ { #Linux based crossplatform 64bit build
-        message("Building for win64-x-g++")
-        INCLUDEPATH += /home/michael/QtWin64/libs/qwt/include /home/michael/QtWin64/libs/qjson/include
-        LIBS += -L/home/michael/QtWin64/libs/qwt/lib -lqwt -L/home/michael/QtWin64/libs/qjson/lib -lqjson
+	message("Building for win64-x-g++")
+	DEFINES += WindowsBuild
+        INCLUDEPATH += /home/michael/QtWin64/libs/qjson/include
+        LIBS += -L/home/michael/QtWin64/libs/qjson/lib -lqjson
         LIBS += -L/home/michael/QtWin64/lib
         DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
@@ -45,22 +47,15 @@ DEFINES += GIT_DATE=\""$$system(date)"\"
         QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 } else:win32 { #Windows based mingw build
 	message("Building for win32")
-	INCLUDEPATH += C:/libs/qwt/include C:/libs/qjson/include
-	LIBS += -LC:/libs/qwt/lib -LC:/libs/qjson/lib -lqjson.dll
+        INCLUDEPATH += C:/libs/qjson/include
+	LIBS += -LC:/libs/qjson/lib -lqjson.dll
 	DEFINES += GIT_COMMIT=$$system(\"c:/program files (x86)/git/bin/git.exe\" describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(\"c:/program files (x86)/git/bin/git.exe\" log -n 1 --pretty=format:%H)
         QMAKE_LFLAGS += -static-libgcc -static-libstdc++
-	#CONFIG(debug, debug|release) {
-		LIBS += -lqwtd
-	#}
-	#CONFIG(release, debug|release) {
-	#	LIBS += =lqwt
-	#}
 } else:mac {
         QMAKE_CXXFLAGS += -Werror
         INCLUDEPATH += /opt/local/include
-        INCLUDEPATH += /opt/local/include/qwt
-        LIBS += -L/opt/local/lib -lqjson -lqwt
+        LIBS += -L/opt/local/lib -lqjson
         DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
         DEFINES += GIT_DATE=\""$$system(date)"\"
@@ -76,8 +71,7 @@ DEFINES += GIT_DATE=\""$$system(date)"\"
 	config.path = /usr/share/EMStudio/definitions
 	config.files += freeems.config.json
 	INSTALLS += target config dashboard wizards
-	LIBS += -lqwt -lqjson -lGL -lGLU -lglut
-	INCLUDEPATH += /usr/include/qwt
+        LIBS += -lqjson -lGL -lGLU -lglut
         DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
         DEFINES += GIT_DATE=\""$$system(date)"\"
@@ -123,7 +117,9 @@ SOURCES += src/main.cpp\
     src/roundgaugeitem.cpp \
     src/scalarparam.cpp \
     src/comboparam.cpp \
-    src/ramdiffwindow.cpp
+    src/ramdiffwindow.cpp \
+    src/pluginmanager.cpp \
+    src/qcustomplot.cpp
 
 
 HEADERS  += src/mainwindow.h \
@@ -174,7 +170,9 @@ HEADERS  += src/mainwindow.h \
     src/gaugeutil.h \
     src/scalarparam.h \
     src/comboparam.h \
-    src/ramdiffwindow.h
+    src/ramdiffwindow.h \
+    src/pluginmanager.h \
+    src/qcustomplot.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \

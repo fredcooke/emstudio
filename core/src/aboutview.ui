@@ -159,9 +159,9 @@ applicable license for these libraries.</string>
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-387</y>
-          <width>473</width>
-          <height>568</height>
+          <y>-189</y>
+          <width>474</width>
+          <height>472</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -349,21 +349,21 @@ applicable license for these libraries.</string>
                 </size>
                </property>
                <property name="text">
-                <string>&lt;h2&gt;Qwt&lt;/h2&gt;</string>
+                <string>&lt;h2&gt;QCustomPlot&lt;/h2&gt;</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QLabel" name="label_18">
                <property name="text">
-                <string>Copyright (C) 1997 Josef Wilgen and 2002 Uwe Rathmann</string>
+                <string>Copyright (C) 2011, 2012, 2013 Emanuel Eichhammer</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QLabel" name="label_19">
                <property name="text">
-                <string>Licensed: &lt;a href=&quot;http://qwt.sourceforge.net/qwtlicense.html&quot;&gt;Qwt License Version 1.0&lt;/a&gt;</string>
+                <string>Licensed: &lt;a href=&quot;http://www.gnu.org/licenses/gpl.html&quot;&gt;GPLv3+&lt;/a&gt;</string>
                </property>
                <property name="openExternalLinks">
                 <bool>true</bool>
@@ -373,7 +373,7 @@ applicable license for these libraries.</string>
              <item>
               <widget class="QLabel" name="label_20">
                <property name="text">
-                <string>Website: &lt;a href=&quot;http://qwt.sf.net&quot;&gt;http://qwt.sf.net&lt;/a&gt;</string>
+                <string>Website: &lt;a href=&quot;http://www.qcustomplot.com/&quot;&gt;http://www.qcustomplot.com/&lt;/a&gt;</string>
                </property>
                <property name="openExternalLinks">
                 <bool>true</bool>

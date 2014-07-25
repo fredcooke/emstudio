@@ -25,8 +25,8 @@ win32-x-g++ { #Linux based crossplatform 32bit build
 	TARGET = ../../../core/plugins/freeemsplugin
 	win32:QMAKE_LFLAGS += -shared
 	message("Building for win32-x-g++")
-	INCLUDEPATH += /home/michael/QtWin32/libs/qwt/include /home/michael/QtWin32/libs/qjson/include
-	LIBS += -L/home/michael/QtWin32/libs/qwt/lib -lqwt -L/home/michael/QtWin32/libs/qjson/lib -lqjson
+        INCLUDEPATH += /home/michael/QtWin32/libs/qjson/include
+        LIBS += -L/home/michael/QtWin32/libs/qjson/lib -lqjson
 	LIBS += -L/home/michael/QtWin32/lib
 	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
@@ -36,8 +36,8 @@ win32-x-g++ { #Linux based crossplatform 32bit build
 	TARGET = ../../../core/plugins/freeemsplugin
 	win32:QMAKE_LFLAGS += -shared
 	message("Building for win64-x-g++")
-	INCLUDEPATH += /home/michael/QtWin64/libs/qwt/include /home/michael/QtWin64/libs/qjson/include
-	LIBS += -L/home/michael/QtWin64/libs/qwt/lib -lqwt -L/home/michael/QtWin64/libs/qjson/lib -lqjson
+        INCLUDEPATH += /home/michael/QtWin64/libs/qjson/include
+        LIBS += -L/home/michael/QtWin64/libs/qjson/lib -lqjson
 	LIBS += -L/home/michael/QtWin64/lib
 	DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
@@ -47,15 +47,14 @@ win32-x-g++ { #Linux based crossplatform 32bit build
 	TARGET = ../../../core/plugins/freeemsplugin
 	win32:QMAKE_LFLAGS += -shared
 	message("Building for win32-g++")
-	INCLUDEPATH += C:/libs/qwt/include C:/libs/qjson/include
-	LIBS += -LC:/libs/qwt/lib -lqwt -LC:/libs/qjson/lib -lqjson.dll
+        INCLUDEPATH += C:/libs/qjson/include
+	LIBS += -LC:/libs/qjson/lib -lqjson.dll
 	DEFINES += GIT_COMMIT=$$system(\"c:/program files (x86)/git/bin/git.exe\" describe --dirty=-DEV --always)
 	DEFINES += GIT_HASH=$$system(\"c:/program files (x86)/git/bin/git.exe\" log -n 1 --pretty=format:%H)
         QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 } else:mac {
         TARGET = ../../core/plugins/freeemsplugi
         INCLUDEPATH += /opt/local/include
-        INCLUDEPATH += /opt/local/include/qwt
         LIBS += -L/opt/local/lib -lqjson
         DEFINES += GIT_COMMIT=$$system(git describe --dirty=-DEV --always)
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
