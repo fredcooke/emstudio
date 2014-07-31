@@ -82,7 +82,15 @@ TableView3D::TableView3D(QWidget *parent)
 	//ui.tracingCheckBox->setVisible(false);
 	//ui.tracingCheckBox->setEnabled(false);
 	connect(ui.showMapPushButton,SIGNAL(clicked()),this,SLOT(showMapClicked()));
+	m_inputTimer = new QTimer(this);
+	connect(m_inputTimer,SIGNAL(timeout()),this,SLOT(inputTimerTimeout()));
 }
+void TableView3D::inputTimerTimeout()
+{
+	setRange(m_queuedValList);
+	m_inputTimer->stop();
+}
+
 void TableView3D::tracingCheckBoxStateChanged(int newstate)
 {
 	if (newstate == Qt::Checked)
@@ -245,6 +253,8 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifier modifier)
 			return;
 		}
 		QList<QPair<QPair<int,int>,double> > vallist;
+		QList<QString> invalidreasons;
+		bool valid = true;
 		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
 		{
 
@@ -287,13 +297,41 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifier modifier)
 				//Value
 				formattednumber = formatNumber(textd,m_metaData.zDp);
 			}
-			ui.tableWidget->setItem(ui.tableWidget->selectedItems()[i].y(),ui.tableWidget->selectedItems()[i].x(),formattednumber);
+			QString verifystr = verifyValue(ui.tableWidget->selectedItems()[i].y(),ui.tableWidget->selectedItems()[i].x(),formattednumber);
+			if (verifystr != "GOOD")
+			{
+				invalidreasons.append(verifystr);
+				valid = false;
+			}
+			else
+			{
+				ui.tableWidget->setItem(ui.tableWidget->selectedItems()[i].y(),ui.tableWidget->selectedItems()[i].x(),formattednumber);
+			}
 
 			//ui.tableWidget->selectedItems()[0]->setText(formatNumber(textd,m_metaData.zDp));
 			//setValue(ui.tableWidget->selectedItems()[i]->row(),ui.tableWidget->selectedItems()[i]->column(),textd);
 
 		}
-		setRange(vallist);
+		if (!valid)
+		{
+			//We had an error.
+			m_inputTimer->stop();
+			QMessageBox::information(0,"Error setting value: ",invalidreasons.at(0));
+			setRange(m_queuedValList);
+		}
+		if (m_inputTimer->isActive())
+		{
+			//Timer is already active, too soon!
+			//Let the table continue to increment... but don't fire off
+			m_queuedValList = vallist;
+			m_inputTimer->stop();
+			m_inputTimer->start(250);
+		}
+		else
+		{
+			m_inputTimer->start(250);
+			setRange(vallist);
+		}
 	}
 	else if (key == Qt::Key_Minus || key == Qt::Key_Underscore)
 	{
@@ -302,6 +340,8 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifier modifier)
 			return;
 		}
 		QList<QPair<QPair<int,int>,double> > vallist;
+		QList<QString> invalidreasons;
+		bool valid = true;
 		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
 		{
 			QString text = "";
@@ -345,13 +385,41 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifier modifier)
 				//Value
 				formattednumber = formatNumber(textd,m_metaData.zDp);
 			}
-			ui.tableWidget->setItem(ui.tableWidget->selectedItems()[i].y(),ui.tableWidget->selectedItems()[i].x(),formattednumber);
+			QString verifystr = verifyValue(ui.tableWidget->selectedItems()[i].y(),ui.tableWidget->selectedItems()[i].x(),formattednumber);
+			if (verifystr != "GOOD")
+			{
+				invalidreasons.append(verifystr);
+				valid = false;
+			}
+			else
+			{
+				ui.tableWidget->setItem(ui.tableWidget->selectedItems()[i].y(),ui.tableWidget->selectedItems()[i].x(),formattednumber);
+			}
 
 
 			//ui.tableWidget->selectedItems()[0]->setText(formatNumber(textd,m_metaData.zDp));
 			//setValue(ui.tableWidget->selectedItems()[0]->row(),ui.tableWidget->selectedItems()[0]->column(),textd);
 		}
-		setRange(vallist);
+		if (!valid)
+		{
+			//We had an error.
+			m_inputTimer->stop();
+			QMessageBox::information(0,"Error setting value: ",invalidreasons.at(0));
+			setRange(m_queuedValList);
+		}
+		if (m_inputTimer->isActive())
+		{
+			//Timer is already active, too soon!
+			//Let the table continue to increment... but don't fire off
+			m_queuedValList = vallist;
+			m_inputTimer->stop();
+			m_inputTimer->start(250);
+		}
+		else
+		{
+			m_inputTimer->start(250);
+			setRange(vallist);
+		}
 	}
 }
 
@@ -445,8 +513,6 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 		}
 
 		//Disable signals, so we can write the table all at once
-		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
-		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
 		//bool valid = true;
 		QMap<int,QMap<int,QString> > tmpvaluemap;
 		QStringList invalidreasons;
@@ -507,8 +573,6 @@ void TableView3D::keyPressEvent(QKeyEvent *event)
 
 			QMessageBox::information(0,"Error",errorstr);
 		}*/
-		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	}
 }
 QString TableView3D::verifyValue(int row,int column,QString item)
@@ -558,8 +622,6 @@ QString TableView3D::verifyValue(int row,int column,QString item)
 //Data is arranged as a
 void TableView3D::setRange(QList<QPair<QPair<int,int>,double> > data)
 {
-	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
-	ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
 	QMap<int,QMap<int,QString> > tmpvaluemap;
 	bool valid = true;
 	QList<QString> invalidreasons;
@@ -608,8 +670,6 @@ void TableView3D::setRange(QList<QPair<QPair<int,int>,double> > data)
 		}
 		QMessageBox::information(0,"Error",errorstr);
 	}
-	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 }
 
 void TableView3D::writeTable(bool ram)

@@ -29,6 +29,7 @@
 #include "ui_tableview3d.h"
 #include "dataview.h"
 #include "tablemap3d.h"
+#include <QTimer>
 class TableView3D : public DataView
 {
 	Q_OBJECT
@@ -41,6 +42,7 @@ public:
 	bool setData(QString name,DataBlock *data);
 	void passDatalog(QVariantMap data);
 private:
+	QTimer *m_inputTimer;
 	void reColorTable(int rownum,int colnum);
 	QList<QPair<int,int> > m_highlightItemList;
 	int m_oldXLoc;
@@ -65,6 +67,7 @@ private:
 	bool m_tracingEnabled;
 	void writeTable(bool ram);
 	QString verifyValue(int row,int column,QString item);
+	QList<QPair<QPair<int,int>,double> > m_queuedValList;
 protected:
 	void contextMenuEvent(QContextMenuEvent *evt);
 	void keyPressEvent(QKeyEvent *event);
@@ -82,6 +85,8 @@ private slots:
 	void exportJson(QString filename);
 	void showMapClicked();
 	void hotKeyPressed(int key,Qt::KeyboardModifier modifier);
+	void inputTimerTimeout();
+
 signals:
 	void show3DTable(unsigned short locationid,Table3DData *data);
 	void saveToFlash(unsigned short locationid);
