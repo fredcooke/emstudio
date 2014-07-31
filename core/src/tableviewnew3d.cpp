@@ -27,8 +27,8 @@ void TableViewNew3D::addHotkey(int key,Qt::KeyboardModifier modifier)
 
 void TableViewNew3D::resizeEvent(QResizeEvent *evt)
 {
-	m_itemWidth = this->width() / 25;
-	m_itemHeight = this->height() / 20;
+	m_itemWidth = this->width() / (m_columnCount + 1);
+	m_itemHeight = this->height() / (m_rowCount + 1);
 	this->update();
 }
 
