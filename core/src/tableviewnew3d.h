@@ -22,8 +22,12 @@ public:
 	QString xAxis(int index);
 	QString yAxis(int index);
 	void addHotkey(int key,Qt::KeyboardModifier modifier);
-
+	void setTracingValue(double x,double y);
+	void setTracingEnabled(bool enabled) { m_traceEnabled = enabled; update(); }
 private:
+	double m_traceX;
+	double m_traceY;
+	bool m_traceEnabled;
 	QList<QPair<int,Qt::KeyboardModifier> > m_hotkeyMap;
 	double m_itemHeight;
 	double m_itemWidth;

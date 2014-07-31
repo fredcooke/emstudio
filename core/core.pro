@@ -60,7 +60,7 @@ DEFINES += GIT_DATE=\""$$system(date)"\"
         DEFINES += GIT_HASH=$$system(git log -n 1 --pretty=format:%H)
         DEFINES += GIT_DATE=\""$$system(date)"\"
 } else:unix {
-	QMAKE_CXXFLAGS += -Werror
+	#QMAKE_CXXFLAGS += -Werror
 	target.path = /usr/bin
 	dashboard.path = /usr/share/EMStudio/dashboards
 	dashboard.files += src/gauges.qml
@@ -118,7 +118,6 @@ SOURCES += src/main.cpp\
     src/scalarparam.cpp \
     src/comboparam.cpp \
     src/ramdiffwindow.cpp \
-    src/pluginmanager.cpp \
     src/qcustomplot.cpp \
     src/tableviewnew3d.cpp
 
@@ -172,9 +171,9 @@ HEADERS  += src/mainwindow.h \
     src/scalarparam.h \
     src/comboparam.h \
     src/ramdiffwindow.h \
-    src/pluginmanager.h \
     src/qcustomplot.h \
-    src/tableviewnew3d.h
+    src/tableviewnew3d.h \
+    src/qcustomplot.h
 
 FORMS    += src/mainwindow.ui \
     src/comsettings.ui \

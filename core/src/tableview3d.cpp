@@ -79,8 +79,8 @@ TableView3D::TableView3D(QWidget *parent)
 		//Is both ram and flash
 	}*/
 	//ui.importPushButton->setVisible(false);
-	ui.tracingCheckBox->setVisible(false);
-	ui.tracingCheckBox->setEnabled(false);
+	//ui.tracingCheckBox->setVisible(false);
+	//ui.tracingCheckBox->setEnabled(false);
 	connect(ui.showMapPushButton,SIGNAL(clicked()),this,SLOT(showMapClicked()));
 }
 void TableView3D::tracingCheckBoxStateChanged(int newstate)
@@ -88,20 +88,12 @@ void TableView3D::tracingCheckBoxStateChanged(int newstate)
 	if (newstate == Qt::Checked)
 	{
 		m_tracingEnabled = true;
+		ui.tableWidget->setTracingEnabled(true);
 	}
 	else
 	{
 		m_tracingEnabled = false;
-		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
-		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
-		for (int i=0;i<m_highlightItemList.size();i++)
-		{
-			//ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setTextColor(QColor::fromRgb(0,0,0));
-			//ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setData(Qt::UserRole+1,false);
-		}
-		m_highlightItemList.clear();
-		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
+		ui.tableWidget->setTracingEnabled(false);
 	}
 }
 
@@ -1165,207 +1157,7 @@ void TableView3D::passDatalog(QVariantMap data)
 	{
 		double xval = data[m_metaData.xHighlight].toDouble();
 		double yval = data[m_metaData.yHighlight].toDouble();
-		int xloc = 1;
-		int yloc = ui.tableWidget->rowCount()-2;
-		int lowerrow = 0;
-		double lowerrowratio = 0;
-		double upperrowratio = 0;
-		double lowercolumnratio = 0;
-		double uppercolumnratio = 0;
-		int higherrow = 0;
-		int lowercolumn = 0;
-		int highercolumn = 1;
-		for (int x=1;x<ui.tableWidget->columnCount()-1;x++)
-		{
-			double testval = 0;//ui.tableWidget->item(ui.tableWidget->rowCount()-1,x)->text().toDouble();
-			double prevtestval;
-			double nexttestval;
-			if (x == 1)
-			{
-				prevtestval = 0;
-			}
-			else
-			{
-				//prevtestval = ui.tableWidget->item(ui.tableWidget->rowCount()-1,x-1)->text().toDouble();
-			}
-			if (x == ui.tableWidget->columnCount()-1)
-			{
-				nexttestval = testval + 1;
-			}
-			else
-			{
-				//nexttestval = ui.tableWidget->item(ui.tableWidget->rowCount()-1,x+1)->text().toDouble();
-			}
-			double lowerlimit = testval - ((testval - prevtestval) / 2.0);
-			double upperlimit = testval + ((nexttestval - testval) / 2.0);
-			if (xval > lowerlimit && xval < upperlimit)
-			{
-				xloc = x;
-				lowercolumn = x-1;
-				highercolumn = x+1;
-				lowercolumnratio = (xval - lowerlimit) / (upperlimit - lowerlimit);
-				uppercolumnratio = (upperlimit - xval) / (upperlimit - lowerlimit);
-				if (xval > testval)
-				{
-					lowercolumn = x+1;
-					highercolumn = x+2;
-					lowercolumnratio = (xval - testval) / (nexttestval - testval);
-					uppercolumnratio = (nexttestval - xval) / (nexttestval - testval);
-				}
-				else
-				{
-					lowercolumn = x;
-					highercolumn = x+1;
-					lowercolumnratio = (xval - prevtestval) / (testval - prevtestval);
-					uppercolumnratio = (testval - xval) / (testval - prevtestval);
-				}
-				//0 500 1000
-				//Val is at 750.
-				//lowerrowratio should be 50%, and upper should be 50%
-				//(xval - lowerlimit) / (upperlimit - lowerlimit) //0-1.0
-				//(upperlimit - xval) / (upperlimit - lowerlimit) //0-1.0
-
-
-				break;
-			}
-		}
-		for (int y=ui.tableWidget->rowCount()-2;y>=1;y--)
-		{
-/*			if (ui.tableWidget->item(y,0))
-			{
-				double testval = ui.tableWidget->item(y,0)->text().toDouble();
-				double prevtestval;
-				double nexttestval;
-				if (y == ui.tableWidget->rowCount()-2)
-				{
-					prevtestval = 0;
-				}
-				else
-				{
-					prevtestval = ui.tableWidget->item(y+1,0)->text().toDouble();
-				}
-				if (y == 0)
-				{
-					nexttestval = testval + 1;
-				}
-				else
-				{
-					nexttestval = ui.tableWidget->item(y-1,0)->text().toDouble();
-				}
-				double lowerlimit = testval - ((testval - prevtestval) / 2.0);
-				double upperlimit = testval + ((nexttestval - testval) / 2.0);
-				if (yval > lowerlimit && yval < upperlimit)
-				{
-					yloc = y;
-					if (yval > testval)
-					{
-						lowerrow = y-1;
-						higherrow = y;
-						lowerrowratio = (yval - testval) / (nexttestval - testval);
-						upperrowratio = (nexttestval - yval) / (nexttestval - testval);
-					}
-					else
-					{
-						lowerrow = y-2;
-						higherrow = y-1;
-						lowerrowratio = (yval - prevtestval) / (testval - prevtestval);
-						upperrowratio = (testval - yval) / (testval - prevtestval);
-					}
-					//0 500 1000
-					//Val is at 750.
-					//lowerrowratio should be 50%, and upper should be 50%
-					//(xval - lowerlimit) / (upperlimit - lowerlimit) //0-1.0
-					//(upperlimit - xval) / (upperlimit - lowerlimit) //0-1.0
-					break;
-				}
-			}*/
-		}
-		if (xloc != -1 && yloc != -1)
-		{
-			if (xloc == m_oldXLoc && yloc == m_oldYLoc)
-			{
-				//No change, no reason to continue;
-				//return;
-			}
-			ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
-			ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
-			QList<QPair<int,int> > undonelist;
-			/*for (int i=0;i<m_highlightItemList.size();i++)
-			{
-				if (!ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->isSelected())
-				{
-					ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setTextColor(QColor::fromRgb(0,0,0));
-					ui.tableWidget->item(m_highlightItemList[i].first,m_highlightItemList[i].second)->setData(Qt::UserRole+1,false);
-				}
-				else
-				{
-					undonelist.append(QPair<int,int>(m_highlightItemList[i].first,m_highlightItemList[i].second));
-				}
-			}*/
-			m_highlightItemList.clear();
-			m_highlightItemList.append(undonelist);
-			m_oldXLoc = xloc;
-			m_oldYLoc = yloc;
-
-			if (lowercolumn > 0 )
-			{
-				/*if (lowerrow > 0)
-				{
-					if (!ui.tableWidget->item(lowerrow,lowercolumn)->isSelected())
-					{
-						m_highlightItemList.append(QPair<int,int>(lowerrow,lowercolumn));
-						ui.tableWidget->item(lowerrow,lowercolumn)->setData(Qt::UserRole+1,true);
-						ui.tableWidget->item(lowerrow,lowercolumn)->setData(Qt::UserRole+2,lowerrowratio);
-					}
-				}
-				if (higherrow < ui.tableWidget->rowCount()-1)
-				{
-					if (!ui.tableWidget->item(higherrow,lowercolumn)->isSelected())
-					{
-						m_highlightItemList.append(QPair<int,int>(higherrow,lowercolumn));
-						ui.tableWidget->item(higherrow,lowercolumn)->setData(Qt::UserRole+1,true);
-						ui.tableWidget->item(higherrow,lowercolumn)->setData(Qt::UserRole+2,upperrowratio);
-					}
-				}*/
-			}
-
-
-
-			/*if (lowerrow > 0)
-			{
-				if (!ui.tableWidget->item(lowerrow,highercolumn)->isSelected())
-				{
-					if (lowercolumnratio != uppercolumnratio)
-					{
-					}
-					//m_highlightItemList.append(QPair<int,int>(lowerrow,highercolumn));
-					//ui.tableWidget->item(lowerrow,highercolumn)->setData(Qt::UserRole+1,true);
-					//ui.tableWidget->item(lowerrow,highercolumn)->setData(Qt::UserRole+2,lowercolumnratio);
-				}
-			}
-
-
-			if (higherrow < ui.tableWidget->rowCount()-1)
-			{
-				if (!ui.tableWidget->item(higherrow,highercolumn)->isSelected())
-				{
-					//m_highlightItemList.append(QPair<int,int>(higherrow,highercolumn));
-					//ui.tableWidget->item(higherrow,highercolumn)->setData(Qt::UserRole+1,true);
-					//ui.tableWidget->item(higherrow,highercolumn)->setData(Qt::UserRole+2,uppercolumnratio);
-				}
-			}*/
-			/*if (ui.tableWidget->item(m_oldYLoc,m_oldXLoc))
-			{
-				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setTextColor(QColor::fromRgb(255,255,255));
-				ui.tableWidget->item(m_oldYLoc,m_oldXLoc)->setData(Qt::UserRole+1,true);
-			}*/
-			connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-			connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
-		}
-		else
-		{
-			QLOG_ERROR() << "Error parsing datalog, xloc and yloc aren't != -1";
-		}
+		ui.tableWidget->setTracingValue(xval,yval);
 	}
 }
 /*bool TableView3D::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata,TableData *newtabledata)

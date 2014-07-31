@@ -7,9 +7,19 @@ TableViewNew3D::TableViewNew3D(QWidget *parent) : QWidget(parent)
 	m_itemHeight = 30;
 	m_itemWidth = 60;
 	multiSelect = false;
+	m_rowCount = 16;
+	m_columnCount = 16;
 	setFocusPolicy(Qt::ClickFocus);
+	m_traceEnabled = false;
 
 }
+void TableViewNew3D::setTracingValue(double x,double y)
+{
+	m_traceX = x;
+	m_traceY = y;
+	update();
+}
+
 void TableViewNew3D::addHotkey(int key,Qt::KeyboardModifier modifier)
 {
 	m_hotkeyMap.append(QPair<int,Qt::KeyboardModifier>(key,modifier));
@@ -154,6 +164,13 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 	painter.drawRect(0,0,width()-1,height()-1);
 	//item width = 40
 	//item height = 20
+	double m_currentTrace = 0;
+	double drawTraceY = 0;
+	bool foundy = false;
+
+	double drawTraceX = 0;
+	bool foundx = false;
+
 	for (int y=0;y<m_rowCount;y++)
 	{
 		if (currentCell.x() == -1 && currentCell.y() == y)
@@ -165,6 +182,54 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 		int width = painter.fontMetrics().width(numval);
 		painter.drawText((m_itemWidth/2.0) - (width / 2.0),(y)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
 		painter.setPen(QColor::fromRgb(0,0,0));
+		if (m_traceEnabled)
+		{
+			m_currentTrace = yaxis.at(y).toDouble();
+			if (m_traceY < m_currentTrace)
+			{
+				if (y == m_rowCount-1)
+				{
+					double prev = yaxis.at(y-1).toDouble();
+					double curr = yaxis.at(y).toDouble();
+					curr = curr - ((prev - curr) / 2.0);
+					if (m_traceY < curr)
+					{
+						//No go, don't trace.
+						continue;
+					}
+					else
+					{
+
+					}
+				}
+			}
+			else if (!foundy)
+			{
+				double prev = 0;
+				if (y == 0)
+				{
+					//Value is between the top and null values
+					prev = yaxis.at(y).toDouble() - ((yaxis.at(y+1).toDouble() - yaxis.at(y).toDouble()) / 2.0);
+				}
+				else
+				{
+					prev = yaxis.at(y-1).toDouble();
+				}
+				//Between the current trace and the last one, we have our value
+
+				double diff = prev - m_currentTrace;
+				double percent =(prev - m_traceY) / diff;
+				//Percent is a 0.0-1.0 of where the trace should lie,between i-1, and i;
+				double currentY = (y)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0);
+				double lastY = (y-1)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0);
+				drawTraceY = (lastY + (percent * (currentY - lastY)));
+				foundy = true;
+			}
+		}
+	}
+	if (!foundy)
+	{
+		//Value is between the bottom cell and the last value.
 	}
 	for (int x=0;x<m_columnCount;x++)
 	{
@@ -177,6 +242,52 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 		int width = painter.fontMetrics().width(numval);
 		painter.drawText(((x+1)*m_itemWidth) + ((m_itemWidth/2.0) - (width / 2.0)),m_itemHeight*m_rowCount + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
 		painter.setPen(QColor::fromRgb(0,0,0));
+
+		if (m_traceEnabled)
+		{
+			m_currentTrace = xaxis.at(x).toDouble();
+			if (m_traceX > m_currentTrace)
+			{
+				if (x == m_columnCount-1)
+				{
+					double prev = xaxis.at(x-1).toDouble();
+					double curr = xaxis.at(x).toDouble();
+					curr = curr - ((prev - curr) / 2.0);
+					if (m_traceX < curr)
+					{
+						//No go, don't trace.
+						continue;
+					}
+					else
+					{
+
+					}
+				}
+			}
+			else if (!foundx)
+			{
+				double prev = 0;
+				if (x == 0)
+				{
+					//Value is between the top and null values
+					prev = xaxis.at(x).toDouble() - ((xaxis.at(x+1).toDouble() - xaxis.at(x).toDouble()) / 2.0);
+				}
+				else
+				{
+					prev = xaxis.at(x-1).toDouble();
+				}
+				//Between the current trace and the last one, we have our value
+
+				double diff = prev - m_currentTrace;
+				double percent =(prev - m_traceX) / diff;
+				//Percent is a 0.0-1.0 of where the trace should lie,between i-1, and i;
+				double currentX = (x+1)*m_itemWidth+ ((m_itemWidth/2.0)-2);
+				double lastX = (x)*m_itemWidth+ ((m_itemWidth/2.0)-2);
+				drawTraceX = (lastX + (percent * (currentX - lastX)));
+				foundx = true;
+			}
+		}
+
 	}
 
 	for (int y=0;y<m_rowCount;y++)
@@ -217,6 +328,19 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 			painter.drawText((m_itemWidth*(x+1)) + ((m_itemWidth / 2.0) - (width / 2.0)),((m_itemHeight*y) + ((m_itemHeight/2.0)-2)) + (painter.fontMetrics().height()/2.0),numval);
 			painter.setPen(QColor::fromRgb(0,0,0));
 		}
+	}
+	if (foundy && foundx && m_traceEnabled)
+	{
+		QPen pen = painter.pen();
+		pen.setWidth(5);
+		pen.setColor(QColor::fromRgb(255,255,0));
+		painter.setPen(pen);
+		//painter.drawLine(0,drawTraceY,width(),drawTraceY);
+		painter.drawEllipse(drawTraceX-2,drawTraceY-1,4,2);
+		pen.setColor(QColor::fromRgb(0,0,0));
+		pen.setWidth(2);
+		painter.setPen(pen);
+		painter.drawEllipse(drawTraceX-6,drawTraceY-4,12,8);
 	}
 }
 void TableViewNew3D::mouseMoveEvent(QMouseEvent *evt)
