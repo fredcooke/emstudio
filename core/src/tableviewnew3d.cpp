@@ -14,6 +14,8 @@ TableViewNew3D::TableViewNew3D(QWidget *parent) : QWidget(parent)
 	m_updateTimer = new QTimer(this);
 	connect(m_updateTimer,SIGNAL(timeout()),this,SLOT(update()));
 	m_updateTimer->start(100);
+	m_inEdit = false;
+	qRegisterMetaType<QList<QPair<int,int> > >("QList<QPair<int,int> >");
 
 }
 void TableViewNew3D::setTracingValue(double x,double y)
@@ -130,6 +132,10 @@ void TableViewNew3D::setItem(int row,int column,QString text)
 	{
 		values[row][column] = text;
 	}
+	if (currentCell.x() == row && currentCell.y() == column)
+	{
+		emit currentSelectionChanged(m_selectionList);
+	}
 	update();
 }
 QString TableViewNew3D::item(int row,int column)
@@ -177,11 +183,23 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 	{
 		if (currentCell.x() == -1 && currentCell.y() == y)
 		{
-			painter.setPen(QColor::fromRgb(0,0,255));
-			painter.drawRect(0,y*m_itemHeight,m_itemWidth-1,m_itemHeight-1);
-			QString numval = yaxis.at(y);
-			int width = painter.fontMetrics().width(numval);
-			painter.drawText((m_itemWidth/2.0) - (width / 2.0),(y)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+			if (m_inEdit)
+			{
+				painter.setPen(QColor::fromRgb(255,255,255));
+				painter.drawRect(0,y*m_itemHeight,m_itemWidth-1,m_itemHeight-1);
+				painter.setPen(QColor::fromRgb(0,0,0));
+				QString numval = m_editText;
+				int width = painter.fontMetrics().width(numval);
+				painter.drawText((m_itemWidth/2.0) - (width / 2.0),(y)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+			}
+			else
+			{
+				painter.setPen(QColor::fromRgb(0,0,255));
+				painter.drawRect(0,y*m_itemHeight,m_itemWidth-1,m_itemHeight-1);
+				QString numval = yaxis.at(y);
+				int width = painter.fontMetrics().width(numval);
+				painter.drawText((m_itemWidth/2.0) - (width / 2.0),(y)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+			}
 		}
 		else
 		{
@@ -253,12 +271,32 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 	{
 		if (currentCell.y() == -1 && currentCell.x() == x)
 		{
-			painter.setPen(QColor::fromRgb(0,0,255));
+			if (m_inEdit)
+			{
+				painter.setPen(QColor::fromRgb(255,255,255));
+				painter.drawRect((x+1)*m_itemWidth,m_itemHeight*m_rowCount,m_itemWidth-1,m_itemHeight-1);
+				painter.setPen(QColor::fromRgb(0,0,0));
+				QString numval = m_editText;
+				int width = painter.fontMetrics().width(numval);
+				painter.drawText(((x+1)*m_itemWidth) + ((m_itemWidth/2.0) - (width / 2.0)),m_itemHeight*m_rowCount + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+			}
+			else
+			{
+				painter.setPen(QColor::fromRgb(0,0,255));
+				painter.drawRect((x+1)*m_itemWidth,m_itemHeight*m_rowCount,m_itemWidth-1,m_itemHeight-1);
+				QString numval = xaxis.at(x);
+				int width = painter.fontMetrics().width(numval);
+				painter.drawText(((x+1)*m_itemWidth) + ((m_itemWidth/2.0) - (width / 2.0)),m_itemHeight*m_rowCount + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+			}
 		}
-		painter.drawRect((x+1)*m_itemWidth,m_itemHeight*m_rowCount,m_itemWidth-1,m_itemHeight-1);
-		QString numval = xaxis.at(x);
-		int width = painter.fontMetrics().width(numval);
-		painter.drawText(((x+1)*m_itemWidth) + ((m_itemWidth/2.0) - (width / 2.0)),m_itemHeight*m_rowCount + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+		else
+		{
+			painter.drawRect((x+1)*m_itemWidth,m_itemHeight*m_rowCount,m_itemWidth-1,m_itemHeight-1);
+			QString numval = xaxis.at(x);
+			int width = painter.fontMetrics().width(numval);
+			painter.drawText(((x+1)*m_itemWidth) + ((m_itemWidth/2.0) - (width / 2.0)),m_itemHeight*m_rowCount + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+		}
+
 		painter.setPen(QColor::fromRgb(0,0,0));
 
 		if (m_traceEnabled)
@@ -325,7 +363,25 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 		{
 			if (currentCell.y() == y && currentCell.x() == x)
 			{
-				painter.setPen(QColor::fromRgb(0,0,255));
+				if (m_inEdit)
+				{
+					painter.setPen(QColor::fromRgb(255,255,255));
+					painter.drawRect(m_itemWidth*(x+1),m_itemHeight*y,m_itemWidth-1,m_itemHeight-1);
+					painter.setPen(QColor::fromRgb(0,0,0));
+					QString numval = m_editText;
+					int width = painter.fontMetrics().width(numval);
+					painter.drawText((m_itemWidth*(x+1)) + ((m_itemWidth / 2.0) - (width / 2.0)),((m_itemHeight*y) + ((m_itemHeight/2.0)-2)) + (painter.fontMetrics().height()/2.0),numval);
+					continue;
+				}
+				else
+				{
+					painter.setPen(QColor::fromRgb(0,0,255));
+					painter.drawRect(m_itemWidth*(x+1),m_itemHeight*y,m_itemWidth-1,m_itemHeight-1);
+					QString numval = values.at(y).at(x);
+					int width = painter.fontMetrics().width(numval);
+					painter.drawText((m_itemWidth*(x+1)) + ((m_itemWidth / 2.0) - (width / 2.0)),((m_itemHeight*y) + ((m_itemHeight/2.0)-2)) + (painter.fontMetrics().height()/2.0),numval);
+				}
+
 			}
 			painter.drawRect(m_itemWidth*(x+1),m_itemHeight*y,m_itemWidth-1,m_itemHeight-1);
 
@@ -407,43 +463,69 @@ void TableViewNew3D::mouseReleaseEvent(QMouseEvent *evt)
 }
 void TableViewNew3D::keyPressEvent(QKeyEvent *evt)
 {
+	if (evt->key() >= Qt::Key_0 && evt->key() <= Qt::Key_9)
+	{
+		//It's a number key!
+		if (!m_inEdit)
+		{
+			m_inEdit = true;
+		}
+
+		m_editText += QString::number(evt->key()-0x30,'f',0);
+		update();
+	}
+	else if (evt->key() == Qt::Key_Period)
+	{
+		if (!m_inEdit)
+		{
+			m_inEdit = true;
+			m_editText = "0";
+		}
+
+		m_editText += ".";
+		update();
+	}
+	else if (evt->key() == Qt::Key_Backspace)
+	{
+		if (m_inEdit)
+		{
+			m_editText = m_editText.mid(0,m_editText.length()-1);
+			update();
+		}
+	}
+	else if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+	{
+		if (m_inEdit)
+		{
+			m_inEdit = false;
+			emit itemChangeRequest(currentCell.y(),currentCell.x(),m_editText);
+			m_editText = "";
+			update();
+		}
+	}
+	else if (evt->key() == Qt::Key_Escape)
+	{
+		if (m_inEdit)
+		{
+			m_inEdit = false;
+			m_editText = "";
+			update();
+		}
+	}
 	if (evt->key() == Qt::Key_Up)
 	{
 		if (currentCell.y() > 0)
 		{
-			/*if (evt->modifiers() & Qt::ShiftModifier)
+			if (m_inEdit)
 			{
-				if (!multiSelect)
-				{
-					//No selection yet.
-					startSelectCell = currentCell;
-					multiSelect = true;
-				}
-				for (int i=)
-				//Selecting a rectangle
-				//selection will be
-				for (int i=0;i<m_highlightList.size();i++)
-				{
-					//Each row here, test if the first is highlighted. If so,
-				}
+				m_inEdit = false;
+				emit itemChangeRequest(currentCell.y(),currentCell.x(),m_editText);
+				m_editText = "";
 			}
-			else if (evt->modifiers()  & Qt::ControlModifier)
-			{
-				//Moving selection without clearing
-			}
-			else
-			{
-				//Deselect everything, and move cursor to new point
-				for (int i=0;i<m_highlightList.size();i++)
-				{
-					for (int j=0;j<m_highlightList[i].size();j++)
-					{
-						m_highlightList[i][j] = 0;
-					}
-
-				}
-			}*/
 			currentCell.setY(currentCell.y()-1);
+			m_selectionList.clear();
+			m_selectionList.append(QPair<int,int>(currentCell.x(),currentCell.y()));
+			emit currentSelectionChanged(m_selectionList);
 			update();
 			return;
 		}
@@ -452,7 +534,16 @@ void TableViewNew3D::keyPressEvent(QKeyEvent *evt)
 	{
 		if (currentCell.y() < m_rowCount)
 		{
+			if (m_inEdit)
+			{
+				m_inEdit = false;
+				emit itemChangeRequest(currentCell.y(),currentCell.x(),m_editText);
+				m_editText = "";
+			}
 			currentCell.setY(currentCell.y()+1);
+			m_selectionList.clear();
+			m_selectionList.append(QPair<int,int>(currentCell.x(),currentCell.y()));
+			emit currentSelectionChanged(m_selectionList);
 			update();
 			return;
 		}
@@ -461,7 +552,16 @@ void TableViewNew3D::keyPressEvent(QKeyEvent *evt)
 	{
 		if (currentCell.x() > 0)
 		{
+			if (m_inEdit)
+			{
+				m_inEdit = false;
+				emit itemChangeRequest(currentCell.y(),currentCell.x(),m_editText);
+				m_editText = "";
+			}
 			currentCell.setX(currentCell.x()-1);
+			m_selectionList.clear();
+			m_selectionList.append(QPair<int,int>(currentCell.x(),currentCell.y()));
+			emit currentSelectionChanged(m_selectionList);
 			update();
 			return;
 		}
@@ -470,10 +570,23 @@ void TableViewNew3D::keyPressEvent(QKeyEvent *evt)
 	{
 		if (currentCell.x() < m_columnCount)
 		{
+			if (m_inEdit)
+			{
+				m_inEdit = false;
+				emit itemChangeRequest(currentCell.y(),currentCell.x(),m_editText);
+				m_editText = "";
+			}
 			currentCell.setX(currentCell.x()+1);
+			m_selectionList.clear();
+			m_selectionList.append(QPair<int,int>(currentCell.x(),currentCell.y()));
+			emit currentSelectionChanged(m_selectionList);
 			update();
 			return;
 		}
+	}
+	if (m_inEdit)
+	{
+		return;
 	}
 	for (int i=0;i<m_hotkeyMap.size();i++)
 	{
@@ -492,44 +605,4 @@ void TableViewNew3D::keyPressEvent(QKeyEvent *evt)
 			}
 		}
 	}
-	if (evt->key() == Qt::Key_Equal)
-	{
-		if (currentCell.x() == 0 && currentCell.y() != 0)
-		{
-			//Y Axis
-		//	yaxis[currentCell.y()]++;
-			update();
-			return;
-		}
-		else if (currentCell.y() == m_rowCount)
-		{
-		//	xaxis[currentCell.x()-1]++;
-			update();
-			return;
-			//X Axis
-		}
-		//values[currentCell.y()][currentCell.x()-1]++;
-		update();
-		return;
 	}
-	if (evt->key() == Qt::Key_Minus)
-	{
-		if (currentCell.x() == 0 && currentCell.y() != 0)
-		{
-			//Y axis
-		//	yaxis[currentCell.y()]--;
-			update();
-			return;
-		}
-		else if (currentCell.y() == m_rowCount)
-		{
-			//X Axis
-		//	xaxis[currentCell.x()-1]--;
-			update();
-			return;
-		}
-		//values[currentCell.y()][currentCell.x()-1]--;
-		update();
-		return;
-	}
-}

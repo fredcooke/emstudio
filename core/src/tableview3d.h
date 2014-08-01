@@ -44,7 +44,6 @@ public:
 private:
 	bool m_firstKeypress;
 	QTimer *m_inputTimer;
-	void reColorTable(int rownum,int colnum);
 	QList<QPair<int,int> > m_highlightItemList;
 	int m_oldXLoc;
 	int m_oldYLoc;
@@ -53,14 +52,13 @@ private:
 	bool metaDataValid;
 	Table3DData *tableData;
 	unsigned short m_locationId;
-	double  currentvalue;
+	QString m_currentValue;
 	Ui::TableView3D ui;
 	unsigned short m_xAxisSize;
 	unsigned short m_yAxisSize;
 	Table3DMetaData m_metaData;
 	void setSilentValue(int row,int column,QString value);
 	QString formatNumber(double num,int prec=2);
-	void resizeColumnWidths();
 	int m_currRow;
 	int m_currCol;
 	void setValue(int row, int column,double value,bool ignoreselection = true);
@@ -75,9 +73,10 @@ protected:
 public slots:
 	bool updateTable();
 private slots:
+	void currentSelectionChanged(QList<QPair<int,int> > selectionList);
+	void itemChangeRequest(int row,int column,QString text);
 	void tracingCheckBoxStateChanged(int newstate);
 	void tableCurrentCellChanged(int currentrow,int currentcolumn,int prevrow,int prevcolumn);
-	void tableCellChanged(int row,int column);
 	void saveClicked();
 	void loadClicked();
 	void loadRamClicked();
@@ -86,6 +85,7 @@ private slots:
 	void exportJson(QString filename);
 	void showMapClicked();
 	void hotKeyPressed(int key,Qt::KeyboardModifier modifier);
+	void regularKeyPressed(int key);
 	void inputTimerTimeout();
 
 signals:

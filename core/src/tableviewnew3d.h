@@ -38,6 +38,7 @@ private:
 	QList<QString> xaxis;
 	QList<QString> yaxis;
 	QList<QList<QString> > values;
+	QList<QPair<int, int> > m_selectionList;
 	void mouseMoveEvent(QMouseEvent *evt);
 	void mousePressEvent(QMouseEvent *evt);
 	void mouseReleaseEvent(QMouseEvent *evt);
@@ -51,8 +52,14 @@ private:
 	int m_rowCount;
 	int m_columnCount;
 	void rebuildtable();
+	bool m_inEdit;
+	QString m_editText;
+
 signals:
+	void keyPressed(int key);
 	void hotKeyPressed(int key,Qt::KeyboardModifier modifier);
+	void itemChangeRequest(int row,int column,QString text);
+	void currentSelectionChanged(QList<QPair<int,int> > selectionList);
 public slots:
 	
 };

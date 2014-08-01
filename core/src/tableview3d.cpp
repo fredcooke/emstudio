@@ -40,8 +40,6 @@ TableView3D::TableView3D(QWidget *parent)
 	ui.setupUi(this);
 	tableData=0;
 	m_tracingEnabled = false;
-	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	connect(ui.savePushButton,SIGNAL(clicked()),this,SLOT(saveClicked()));
 	connect(ui.loadFlashPushButton,SIGNAL(clicked()),this,SLOT(loadClicked()));
 	connect(ui.loadRamPushButton,SIGNAL(clicked()),this,SLOT(loadRamClicked()));
@@ -53,6 +51,7 @@ TableView3D::TableView3D(QWidget *parent)
 	ui.tableWidget->addHotkey(Qt::Key_Minus,Qt::NoModifier);
 	ui.tableWidget->addHotkey(Qt::Key_Underscore,Qt::ShiftModifier);
 	ui.tableWidget->addHotkey(Qt::Key_Equal,Qt::NoModifier);
+	connect(ui.tableWidget,SIGNAL(itemChangeRequest(int,int,QString)),this,SLOT(itemChangeRequest(int,int,QString)));
 	//ui.tableWidget->setItemDelegate(new TableWidgetDelegate());
 
 	setContextMenuPolicy(Qt::DefaultContextMenu);
@@ -152,20 +151,20 @@ void TableView3D::setValue(int row, int column,double value,bool ignoreselection
 			{
 				QLOG_ERROR() << "XAxis edit attempted with multiple cells selected. This is not allowed";
 				QMessageBox::information(0,"Error","Editing of multiple AXIS cells at once is not allowed. Please select a single axis cell to edit at a time");
-				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
+				//setSilentValue(row,column,m_currentValue);
 				return;
 			}
 			if (ui.tableWidget->selectedItems()[i].x() == 0)
 			{
 				QLOG_ERROR() << "YAxis edit attempted with multiple cells selected. This is not allowed";
 				QMessageBox::information(0,"Error","Editing of multiple AXIS cells at once is not allowed. Please select a single axis cell to edit at a time");
-				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
+				//setSilentValue(row,column,m_currentValue);
 				return;
 			}
 		}
-		setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp)); //Reset the value, setRange will set it properly.
+		setSilentValue(row,column,m_currentValue); //Reset the value, setRange will set it properly.
 		//currentvalue = oldValue;
-		QLOG_DEBUG() << "Setting all cells to" << currentvalue << "for" << row << column;
+		QLOG_DEBUG() << "Setting all cells to" << m_currentValue << "for" << row << column;
 		QList<QPair<QPair<int,int>,double> > vallist;
 		for (int i=0;i<ui.tableWidget->selectedItems().size();i++)
 		{
@@ -178,73 +177,65 @@ void TableView3D::setValue(int row, int column,double value,bool ignoreselection
 	}
 	else
 	{
-		if (row == ui.tableWidget->rowCount()-1)
+		if (row == -1)
 		{
-			setSilentValue(row,column,formatNumber(tempValue,m_metaData.xDp));
+
 			if (tempValue > tableData->maxCalcedXAxis())
 			{
 				QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minCalcedXAxis()) + "-" + QString::number(tableData->maxCalcedXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column));
-				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
+				//setSilentValue(row,column,m_currentValue);
 				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 				return;
 			}
 			else if (tempValue < tableData->minCalcedXAxis())
 			{
 				QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minCalcedXAxis()) + "-" + QString::number(tableData->maxCalcedXAxis()) + ". Entered value:") + ui.tableWidget->item(row,column));
-				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.xDp));
+				//setSilentValue(row,column,m_currentValue);
 				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
 				return;
 			}
-
-			currentvalue = oldValue;
-			tableData->setXAxis(column-1,currentvalue);
+			//setSilentValue(row,column,formatNumber(tempValue,m_metaData.xDp));
+			tableData->setXAxis(column,oldValue);
 		}
-		else if (column == 0)
+		else if (column == -1)
 		{
-			setSilentValue(row,column,formatNumber(tempValue,m_metaData.yDp));
+			//setSilentValue(row,column,formatNumber(tempValue,m_metaData.yDp));
 			if (tempValue > tableData->maxCalcedYAxis())
 			{
 				QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minCalcedYAxis()) + "-" + QString::number(tableData->maxCalcedYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column));
 				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.yDp));
+				//setSilentValue(row,column,m_currentValue);
 				return;
 			}
 			else if (tempValue < tableData->minCalcedYAxis())
 			{
 				QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minCalcedYAxis()) + "-" + QString::number(tableData->maxCalcedYAxis()) + ". Entered value:") + ui.tableWidget->item(row,column));
 				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.yDp));
+				//setSilentValue(row,column,m_currentValue);
 				return;
 			}
-			currentvalue = oldValue;
-			tableData->setYAxis(ui.tableWidget->rowCount()-(row+2),currentvalue);
+			tableData->setYAxis(ui.tableWidget->rowCount()-(row+1),oldValue);
 		}
 		else
 		{
-			setSilentValue(row,column,formatNumber(tempValue,m_metaData.zDp));
+			//setSilentValue(row,column,formatNumber(tempValue,m_metaData.zDp));
 			if (tempValue > tableData->maxCalcedValue())
 			{
 				QMessageBox::information(0,"Error",QString("Value entered too large! Value range " + QString::number(tableData->minCalcedValue()) + "-" + QString::number(tableData->maxCalcedValue()) + ". Entered value:") + ui.tableWidget->item(row,column));
 				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
+				//setSilentValue(row,column,m_currentValue);
 				return;
 			}
 			if (tempValue < tableData->minCalcedValue())
 			{
 				QMessageBox::information(0,"Error",QString("Value entered too small! Value range " + QString::number(tableData->minCalcedValue()) + "-" + QString::number(tableData->maxCalcedValue()) + ". Entered value:") + ui.tableWidget->item(row,column));
 				//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-				setSilentValue(row,column,formatNumber(currentvalue,m_metaData.zDp));
+				//setSilentValue(row,column,m_currentValue);
 				return;
 			}
-			currentvalue = oldValue;
-			tableData->setCell(ui.tableWidget->rowCount()-(row+2),column-1,currentvalue);
+			tableData->setCell(ui.tableWidget->rowCount()-(row+1),column,oldValue);
 		}
-		reColorTable(row,column);
 	}
-	//ui.tableWidget->resizeColumnsToContents();
-	resizeColumnWidths();
-
-
 }
 
 void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifier modifier)
@@ -428,6 +419,10 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifier modifier)
 			setRange(vallist);
 		}
 	}
+}
+void TableView3D::regularKeyPressed(int key)
+{
+
 }
 
 void TableView3D::keyPressEvent(QKeyEvent *event)
@@ -652,14 +647,6 @@ void TableView3D::setRange(QList<QPair<QPair<int,int>,double> > data)
 	if (valid)
 	{
 		writeTable(true);
-		if (data.size() == 1)
-		{
-			reColorTable(data[0].first.first,data[0].first.second);
-		}
-		else
-		{
-			reColorTable(-1,-1);
-		}
 	}
 	else
 	{
@@ -740,6 +727,15 @@ void TableView3D::tableCurrentCellChanged(int currentrow,int currentcolumn,int p
 	m_currCol = currentcolumn;
 	//currentvalue = ui.tableWidget->item(currentrow,currentcolumn)->text().toDouble();
 }
+void TableView3D::currentSelectionChanged(QList<QPair<int,int> > selectionList)
+{
+	m_currentValue = "";
+	if (selectionList.size() > 0)
+	{
+		m_currentValue = ui.tableWidget->item(selectionList.at(0).first,selectionList.at(0).second);
+	}
+}
+
 void TableView3D::exportJson(QString filename)
 {
 	//Create a JSON file similar to MTX's yaml format.
@@ -945,8 +941,6 @@ void TableView3D::loadClicked()
 }
 bool TableView3D::updateTable()
 {
-	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
-	ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
 	//connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	QList<QPair<int,int> > selectedlist;
 	if (ui.tableWidget->selectedItems().size() > 0)
@@ -1073,19 +1067,12 @@ bool TableView3D::updateTable()
 			}
 		}
 	}
-	//ui.tableWidget->resizeColumnsToContents();
-	resizeColumnWidths();
-	//ui.tableWidget->setItem(ui.tableWidget->rowCount()-1,0,new QTableWidgetItem());
-	//ui.tableWidget->item(ui.tableWidget->rowCount()-1,0)->setFlags(ui.tableWidget->item(ui.tableWidget->rowCount()-1,0)->flags() & ~Qt::ItemIsEditable);
-	//ui.tableWidget->setCurrentCell(m_currRow,m_currCol);
 	for (int i=0;i<selectedlist.size();i++)
 	{
 		//ui.tableWidget->item(selectedlist[i].first,selectedlist[i].second)->setSelected(true);
 	}
 
 	selectedlist.clear();
-	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
 	QLOG_DEBUG() << "updateTable(): Done with table";
 	return true;
 	//return passData(locationid,data,physicallocation,Table3DMetaData());
@@ -1127,92 +1114,6 @@ bool TableView3D::setData(unsigned short locationid,DataBlock *data)
 	m_locationId = locationid;
 	return updateTable();
 }
-void TableView3D::reColorTable(int rownum,int colnum)
-{
-	//QLOG_DEBUG() << "Recoloring" << rownum << colnum;
-	if (rownum == ui.tableWidget->rowCount()-1 || colnum == 0)
-	{
-		return;
-	}
-	if (rownum == -1 || colnum == -1)
-	{
-		//Recolor the whole table
-		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
-		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
-		QLOG_DEBUG() << "reColorTable(): Starting";
-		for (int row=0;row<tableData->rows();row++)
-		{
-			for (int col=0;col<tableData->columns();col++)
-			{
-				double val = tableData->values()[row][col];
-				//ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
-				if (val < tableData->maxCalcedValue()/4)
-				{
-					//ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxCalcedValue()/4.0))),255));
-				}
-				else if (val < ((tableData->maxCalcedValue()/4)*2))
-				{
-					//ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((tableData->maxCalcedValue()/4.0)))/(tableData->maxCalcedValue()/4.0)))));
-				}
-				else if (val < ((tableData->maxCalcedValue()/4)*3))
-				{
-					//ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb((255*((val-((tableData->maxCalcedValue()/4.0)*2))/(tableData->maxCalcedValue()/4.0))),255,0));
-				}
-				else
-				{
-					//ui.tableWidget->item((tableData->rows()-1)-((row)),(col)+1)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxCalcedValue()/4.0)*3))/(tableData->maxCalcedValue()/4.0))),0));
-				}
-			}
-		}
-		QLOG_DEBUG() << "reColorTable(): Finished";
-		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
-	}
-	else
-	{
-
-		/*
-
-		(9) = 5+4;
-		10-1-4=5
-		10-1-3=6
-
-		10-1-0=9
-		10-1-9=0
-
-		rownum == 0
-		tabledata->values()[(tableData->rows()-1)-rownum][colnum-1]
-
-*/
-
-		//QLOG_DEBUG() << "Loc:" << (tableData->rows()-1)-(rownum) << colnum - 1;
-		ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
-		ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
-		double val = tableData->values()[(tableData->rows()-1)-(rownum)][colnum-1];
-		//QLOG_DEBUG() << "Value:" << val;
-
-		//ui.tableWidget->setItem((tableData->rows()-1)-(row),col+1,new QTableWidgetItem(formatNumber(val,m_metaData.zDp)));
-		if (val < tableData->maxCalcedValue()/4)
-		{
-			//ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(0,(255*((val)/(tableData->maxCalcedValue()/4.0))),255));
-		}
-		else if (val < ((tableData->maxCalcedValue()/4)*2))
-		{
-			//ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(0,255,255-(255*((val-((tableData->maxCalcedValue()/4.0)))/(tableData->maxCalcedValue()/4.0)))));
-		}
-		else if (val < ((tableData->maxCalcedValue()/4)*3))
-		{
-			//ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb((255*((val-((tableData->maxCalcedValue()/4.0)*2))/(tableData->maxCalcedValue()/4.0))),255,0));
-		}
-		else
-		{
-			//ui.tableWidget->item(rownum,colnum)->setBackgroundColor(QColor::fromRgb(255,255-(255*((val-((tableData->maxCalcedValue()/4.0)*3))/(tableData->maxCalcedValue()/4.0))),0));
-		}
-		connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-		connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
-
-	}
-}
 
 void TableView3D::passDatalog(QVariantMap data)
 {
@@ -1227,24 +1128,6 @@ void TableView3D::passDatalog(QVariantMap data)
 		ui.tableWidget->setTracingValue(xval,yval);
 	}
 }
-/*bool TableView3D::setData(unsigned short locationid,QByteArray data,Table3DMetaData metadata,TableData *newtabledata)
-{
-	m_metaData = metadata;
-	metaDataValid = true;
-	return setData(locationid,data,newtabledata);
-}
-bool TableView3D::setData(unsigned short locationid,Table3DData *data,Table3DMetaData metadata)
-{
-	m_metaData = metadata;
-	metaDataValid = true;
-	connect(data,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)),this,SIGNAL(saveSingleData(unsigned short,QByteArray,unsigned short,unsigned short)));
-	setData(locationid,data);
-}
-
-bool TableView3D::setData(unsigned short locationid,QByteArray rawdata)
-{
-	return setData(locationid,rawdata,tableData);
-}*/
 QString TableView3D::formatNumber(double num,int prec)
 {
 	if (metaDataValid)
@@ -1256,57 +1139,10 @@ QString TableView3D::formatNumber(double num,int prec)
 		return QString::number(num);
 	}
 }
-void TableView3D::resizeColumnWidths()
-{
-	/*
-	unsigned int max = 0;
-	for (int i=0;i<ui.tableWidget->columnCount();i++)
-	{
-		for (int j=0;j<ui.tableWidget->rowCount();j++)
-		{
-			if (ui.tableWidget->item(j,i))
-			{
-				//1.3 is required to make text show correctly
-				unsigned int test = ui.tableWidget->fontMetrics().width(ui.tableWidget->item(j,i)->text()) * 1.3;
-				if (test > max)
-				{
-					max = test;
-				}
-			}
-		}
-	}
-	for (int i=0;i<ui.tableWidget->columnCount();i++)
-	{
-		ui.tableWidget->setColumnWidth(i,max);
-	}*/
-}
 
-void TableView3D::tableCellChanged(int row,int column)
-{/*
-	bool conversionOk = false; // Note, value of this is irrelevant, overwritten during call in either case, but throws a compiler error if not set.
-	double tempValue = ui.tableWidget->item(row,column)->text().toDouble(&conversionOk);
-	Q_UNUSED(tempValue)
-	//TODO Fix that ^^
-	//double oldValue = tempValue;
-	if (!conversionOk)
-	{
-		QMessageBox::information(0,"Error","Value entered is not a number: " + ui.tableWidget->item(row,column)->text());
-		setSilentValue(row,column,formatNumber(currentvalue));
-		//ui.tableWidget->item(row,column)->setText(QString::number(currentvalue));
-		return;
-	}
-	setValue(row,column,tempValue,false); //Don't ignore selection, so ALL highlighted cells get changed
-	*/
-}
 void TableView3D::setSilentValue(int row,int column,QString value)
 {
-	/*
-	ui.tableWidget->disconnect(SIGNAL(cellChanged(int,int)));
-	ui.tableWidget->disconnect(SIGNAL(currentCellChanged(int,int,int,int)));
-	ui.tableWidget->item(row,column)->setText(value);
-	connect(ui.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(tableCellChanged(int,int)));
-	connect(ui.tableWidget,SIGNAL(currentCellChanged(int,int,int,int)),this,SLOT(tableCurrentCellChanged(int,int,int,int)));
-	*/
+	ui.tableWidget->setItem(row,column,value);
 }
 
 
@@ -1317,4 +1153,8 @@ void TableView3D::saveClicked()
 }
 TableView3D::~TableView3D()
 {
+}
+void TableView3D::itemChangeRequest(int row,int column,QString text)
+{
+	setValue(row,column,text.toDouble());
 }
