@@ -2,6 +2,7 @@
 #define TABLEVIEWNEW3D_H
 
 #include <QWidget>
+#include <QTimer>
 
 class TableViewNew3D : public QWidget
 {
@@ -25,6 +26,7 @@ public:
 	void setTracingValue(double x,double y);
 	void setTracingEnabled(bool enabled) { m_traceEnabled = enabled; update(); }
 private:
+	QTimer *m_updateTimer;
 	double m_traceX;
 	double m_traceY;
 	bool m_traceEnabled;

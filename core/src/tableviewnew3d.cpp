@@ -11,13 +11,15 @@ TableViewNew3D::TableViewNew3D(QWidget *parent) : QWidget(parent)
 	m_columnCount = 16;
 	setFocusPolicy(Qt::ClickFocus);
 	m_traceEnabled = false;
+	m_updateTimer = new QTimer(this);
+	connect(m_updateTimer,SIGNAL(timeout()),this,SLOT(update()));
+	m_updateTimer->start(100);
 
 }
 void TableViewNew3D::setTracingValue(double x,double y)
 {
 	m_traceX = x;
 	m_traceY = y;
-	update();
 }
 
 void TableViewNew3D::addHotkey(int key,Qt::KeyboardModifier modifier)
