@@ -178,11 +178,21 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 		if (currentCell.x() == -1 && currentCell.y() == y)
 		{
 			painter.setPen(QColor::fromRgb(0,0,255));
+			painter.drawRect(0,y*m_itemHeight,m_itemWidth-1,m_itemHeight-1);
+			QString numval = yaxis.at(y);
+			int width = painter.fontMetrics().width(numval);
+			painter.drawText((m_itemWidth/2.0) - (width / 2.0),(y)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
 		}
-		painter.drawRect(0,y*m_itemHeight,m_itemWidth-1,m_itemHeight-1);
-		QString numval = yaxis.at(y);
-		int width = painter.fontMetrics().width(numval);
-		painter.drawText((m_itemWidth/2.0) - (width / 2.0),(y)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+		else
+		{
+			painter.drawRect(0,y*m_itemHeight,m_itemWidth-1,m_itemHeight-1);
+			QString numval = yaxis.at(y);
+			int width = painter.fontMetrics().width(numval);
+			painter.drawText((m_itemWidth/2.0) - (width / 2.0),(y)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+		}
+
+
+
 		painter.setPen(QColor::fromRgb(0,0,0));
 		if (m_traceEnabled)
 		{
@@ -191,16 +201,20 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 			{
 				if (y == m_rowCount-1)
 				{
-					double prev = yaxis.at(y-1).toDouble();
 					double curr = yaxis.at(y).toDouble();
-					curr = curr - ((prev - curr) / 2.0);
-					if (m_traceY < curr)
+					double next = 0;
+					if (m_traceY < next)
 					{
-						//No go, don't trace.
-						continue;
+						//The trace is below the line, limit it to the line
+						drawTraceY = (y * m_itemHeight) + ((m_itemHeight));
+						foundy = true;
 					}
 					else
 					{
+						//The trace is above the line
+						double percent = (next - m_traceY) / (next - curr);
+						drawTraceY = ((y * m_itemHeight) + (m_itemHeight)) - (percent * (m_itemHeight/2.0));
+						foundy = true;
 
 					}
 				}
@@ -208,30 +222,32 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 			else if (!foundy)
 			{
 				double prev = 0;
+				double lastY = 0;
 				if (y == 0)
 				{
 					//Value is between the top and null values
 					prev = yaxis.at(y).toDouble() - ((yaxis.at(y+1).toDouble() - yaxis.at(y).toDouble()) / 2.0);
+					lastY = 0;
 				}
 				else
 				{
 					prev = yaxis.at(y-1).toDouble();
+					lastY = (y-1)*m_itemHeight + ((m_itemHeight/2.0)-2);
 				}
 				//Between the current trace and the last one, we have our value
 
 				double diff = prev - m_currentTrace;
 				double percent =(prev - m_traceY) / diff;
-				//Percent is a 0.0-1.0 of where the trace should lie,between i-1, and i;
-				double currentY = (y)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0);
-				double lastY = (y-1)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0);
+				double currentY = (y)*m_itemHeight + ((m_itemHeight/2.0)-2);
 				drawTraceY = (lastY + (percent * (currentY - lastY)));
+				if (drawTraceY < 0)
+				{
+					//Cap it at 0
+					drawTraceY = 0;
+				}
 				foundy = true;
 			}
 		}
-	}
-	if (!foundy)
-	{
-		//Value is between the bottom cell and the last value.
 	}
 	for (int x=0;x<m_columnCount;x++)
 	{
@@ -254,41 +270,52 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 				{
 					double prev = xaxis.at(x-1).toDouble();
 					double curr = xaxis.at(x).toDouble();
-					curr = curr - ((prev - curr) / 2.0);
-					if (m_traceX < curr)
+					double next = curr + ((curr - prev) / 2.0);
+					if (m_traceX > next)
 					{
-						//No go, don't trace.
-						continue;
+						//Trace is at or beyond the end
+						drawTraceX = m_itemWidth + (x * m_itemWidth) + (m_itemWidth);
+						foundx = true;
 					}
 					else
 					{
-
+						double percent = (m_traceX - curr) / (next - curr);
+						drawTraceX = (((x+1) * m_itemWidth) + (m_itemWidth / 2.0)) + (percent * (m_itemWidth/2.0));
+						foundx = true;
 					}
 				}
 			}
 			else if (!foundx)
 			{
 				double prev = 0;
+				double lastx;
 				if (x == 0)
 				{
 					//Value is between the top and null values
-					prev = xaxis.at(x).toDouble() - ((xaxis.at(x+1).toDouble() - xaxis.at(x).toDouble()) / 2.0);
+					//prev = xaxis.at(x).toDouble() - ((xaxis.at(x+1).toDouble() - xaxis.at(x).toDouble()));
+					prev = 0;
+					lastx = m_itemWidth;
 				}
 				else
 				{
 					prev = xaxis.at(x-1).toDouble();
+					lastx = m_itemWidth + ((x-1) * m_itemWidth) + (m_itemWidth / 2.0);
 				}
 				//Between the current trace and the last one, we have our value
 
-				double diff = prev - m_currentTrace;
-				double percent =(prev - m_traceX) / diff;
+				double diff = m_currentTrace - prev;
+				double percent =(m_traceX - prev) / diff;
 				//Percent is a 0.0-1.0 of where the trace should lie,between i-1, and i;
-				double currentX = (x+1)*m_itemWidth+ ((m_itemWidth/2.0)-2);
-				double lastX = (x)*m_itemWidth+ ((m_itemWidth/2.0)-2);
-				drawTraceX = (lastX + (percent * (currentX - lastX)));
+				double currentX = m_itemWidth + ((x)*m_itemWidth) + ((m_itemWidth/2.0));
+				drawTraceX = (lastx + (percent * (currentX - lastx)));
+				if (drawTraceX < m_itemWidth)
+				{
+					drawTraceX = m_itemWidth;
+				}
 				foundx = true;
 			}
 		}
+
 
 	}
 
@@ -345,6 +372,7 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 		painter.drawEllipse(drawTraceX-6,drawTraceY-4,12,8);
 	}
 }
+
 void TableViewNew3D::mouseMoveEvent(QMouseEvent *evt)
 {
 	m_x = evt->x() / m_itemWidth;
