@@ -87,7 +87,10 @@ TableView3D::TableView3D(QWidget *parent)
 }
 void TableView3D::inputTimerTimeout()
 {
-	setRange(m_queuedValList);
+	if (!m_firstKeypress)
+	{
+		setRange(m_queuedValList);
+	}
 	m_inputTimer->stop();
 }
 
@@ -324,12 +327,14 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifier modifier)
 			//Timer is already active, too soon!
 			//Let the table continue to increment... but don't fire off
 			m_queuedValList = vallist;
-			m_inputTimer->stop();
-			m_inputTimer->start(250);
+			m_firstKeypress = false;
+			//m_inputTimer->stop();
+			//m_inputTimer->start(250);
 		}
 		else
 		{
-			m_inputTimer->start(250);
+			m_firstKeypress = true;
+			m_inputTimer->start(350);
 			setRange(vallist);
 		}
 	}
@@ -412,11 +417,13 @@ void TableView3D::hotKeyPressed(int key,Qt::KeyboardModifier modifier)
 			//Timer is already active, too soon!
 			//Let the table continue to increment... but don't fire off
 			m_queuedValList = vallist;
-			m_inputTimer->stop();
-			m_inputTimer->start(250);
+			m_firstKeypress = false;
+			//m_inputTimer->stop();
+			//m_inputTimer->start(250);
 		}
 		else
 		{
+			m_firstKeypress = true;
 			m_inputTimer->start(250);
 			setRange(vallist);
 		}

@@ -42,6 +42,7 @@ public:
 	bool setData(QString name,DataBlock *data);
 	void passDatalog(QVariantMap data);
 private:
+	bool m_firstKeypress;
 	QTimer *m_inputTimer;
 	void reColorTable(int rownum,int colnum);
 	QList<QPair<int,int> > m_highlightItemList;
