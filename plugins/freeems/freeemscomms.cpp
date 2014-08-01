@@ -895,6 +895,14 @@ bool FreeEmsComms::sendPacket(RequestClass request)
 		m_timeoutMsecs = QDateTime::currentDateTime().currentMSecsSinceEpoch();
 		m_currentWaitingRequest = request;
 		m_payloadWaitingForResponse = request.type;
+		if (request.type == UPDATE_BLOCK_IN_RAM)
+		{
+			m_waitingForRamWrite = true;
+		}
+		if (request.type == UPDATE_BLOCK_IN_FLASH)
+		{
+			m_waitingForFlashWrite = true;
+		}
 		if (!sendPacket(request.type,request.args,request.argsize,request.hasLength))
 		{
 			return false;
