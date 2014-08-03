@@ -163,6 +163,83 @@ void TableViewNew3D::setColumnCount(int count)
 	m_columnCount = count;
 	rebuildTable();
 }
+void TableViewNew3D::setMaxValues(double maxx,double maxy,double maxz)
+{
+	m_maxXValue = maxx;
+	m_maxYValue = maxy;
+	m_maxZValue = maxz;
+}
+
+void TableViewNew3D::drawCell(QPainter *painter,int cellx,int celly,QString text,bool highlight)
+{
+	QPen oldpen = painter->pen();
+	QPen pen = oldpen;
+	if (highlight)
+	{
+		pen.setColor(QColor::fromRgb(0,0,255));
+		pen.setWidth(2);
+		painter->setPen(pen);
+		painter->drawRect((cellx*m_itemWidth)+2,(celly*m_itemHeight)+2,m_itemWidth-2,m_itemHeight-2);
+	}
+	else
+	{
+		pen.setColor(QColor::fromRgb(0,0,0));
+		painter->setPen(pen);
+		painter->drawRect((cellx*m_itemWidth)+1,(celly*m_itemHeight)+1,m_itemWidth-1,m_itemHeight-1);
+	}
+
+	pen.setColor(QColor::fromRgb(0,0,0));
+
+	//For now, disable coloring for axis
+	if (highlight || cellx == 0 || celly == m_rowCount)
+	{
+		painter->fillRect((m_itemWidth*cellx)+4,(m_itemHeight*celly)+4,m_itemWidth-5,m_itemHeight-5,QColor::fromRgb(255,255,255));
+	}
+	else
+	{
+		double val = text.toDouble();
+		double max = 255;
+		if (cellx == 0)
+		{
+			max = m_maxYValue;
+		}
+		else if (celly == m_rowCount)
+		{
+			max = m_maxXValue;
+		}
+		else
+		{
+			max = m_maxZValue;
+		}
+
+		if (val < max/4.0)
+		{
+			QColor bgcolor = QColor::fromRgb(0,(255*((val)/(max/4.0))),255);
+			painter->fillRect((m_itemWidth*cellx)+2,(m_itemHeight*celly)+2,m_itemWidth-2,m_itemHeight-2,bgcolor);
+		}
+		else if (val < ((max/4.0)*2))
+		{
+			QColor bgcolor = QColor::fromRgb(0,255,255-(255*((val-((max/4.0)))/(max/4.0))));
+			painter->fillRect((m_itemWidth*cellx)+2,(m_itemHeight*celly)+2,m_itemWidth-2,m_itemHeight-2,bgcolor);
+		}
+		else if (val < ((max/4.0)*3))
+		{
+			QColor bgcolor = QColor::fromRgb((255*((val-((max/4.0)*2))/(max/4.0))),255,0);
+			painter->fillRect((m_itemWidth*cellx)+2,(m_itemHeight*celly)+2,m_itemWidth-2,m_itemHeight-2,bgcolor);
+		}
+		else
+		{
+			QColor bgcolor = QColor::fromRgb(255,255-(255*((val-((max/4.0)*3))/(max/4.0))),0);
+			painter->fillRect((m_itemWidth*cellx)+2,(m_itemHeight*celly)+2,m_itemWidth-2,m_itemHeight-2,bgcolor);
+		}
+	}
+
+
+	painter->setPen(pen);
+	int width = painter->fontMetrics().width(text);
+	painter->drawText(((cellx)*m_itemWidth) + (m_itemWidth/2.0) - (width / 2.0),(celly)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter->fontMetrics().height()/2.0),text);
+	painter->setPen(oldpen);
+}
 
 void TableViewNew3D::paintEvent (QPaintEvent *evt)
 {
@@ -185,32 +262,17 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 		{
 			if (m_inEdit)
 			{
-				painter.setPen(QColor::fromRgb(255,255,255));
-				painter.drawRect(0,y*m_itemHeight,m_itemWidth-1,m_itemHeight-1);
-				painter.setPen(QColor::fromRgb(0,0,0));
-				QString numval = m_editText;
-				int width = painter.fontMetrics().width(numval);
-				painter.drawText((m_itemWidth/2.0) - (width / 2.0),(y)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+				drawCell(&painter,0,y,m_editText,true);
 			}
 			else
 			{
-				painter.setPen(QColor::fromRgb(0,0,255));
-				painter.drawRect(0,y*m_itemHeight,m_itemWidth-1,m_itemHeight-1);
-				QString numval = yaxis.at(y);
-				int width = painter.fontMetrics().width(numval);
-				painter.drawText((m_itemWidth/2.0) - (width / 2.0),(y)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+				drawCell(&painter,0,y,yaxis.at(y),true);
 			}
 		}
 		else
 		{
-			painter.drawRect(0,y*m_itemHeight,m_itemWidth-1,m_itemHeight-1);
-			QString numval = yaxis.at(y);
-			int width = painter.fontMetrics().width(numval);
-			painter.drawText((m_itemWidth/2.0) - (width / 2.0),(y)*m_itemHeight + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+			drawCell(&painter,0,y,yaxis.at(y),false);
 		}
-
-
-
 		painter.setPen(QColor::fromRgb(0,0,0));
 		if (m_traceEnabled)
 		{
@@ -273,30 +335,17 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 		{
 			if (m_inEdit)
 			{
-				painter.setPen(QColor::fromRgb(255,255,255));
-				painter.drawRect((x+1)*m_itemWidth,m_itemHeight*m_rowCount,m_itemWidth-1,m_itemHeight-1);
-				painter.setPen(QColor::fromRgb(0,0,0));
-				QString numval = m_editText;
-				int width = painter.fontMetrics().width(numval);
-				painter.drawText(((x+1)*m_itemWidth) + ((m_itemWidth/2.0) - (width / 2.0)),m_itemHeight*m_rowCount + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+				drawCell(&painter,x+1,m_rowCount,m_editText,true);
 			}
 			else
 			{
-				painter.setPen(QColor::fromRgb(0,0,255));
-				painter.drawRect((x+1)*m_itemWidth,m_itemHeight*m_rowCount,m_itemWidth-1,m_itemHeight-1);
-				QString numval = xaxis.at(x);
-				int width = painter.fontMetrics().width(numval);
-				painter.drawText(((x+1)*m_itemWidth) + ((m_itemWidth/2.0) - (width / 2.0)),m_itemHeight*m_rowCount + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+				drawCell(&painter,x+1,m_rowCount,xaxis.at(x),true);
 			}
 		}
 		else
 		{
-			painter.drawRect((x+1)*m_itemWidth,m_itemHeight*m_rowCount,m_itemWidth-1,m_itemHeight-1);
-			QString numval = xaxis.at(x);
-			int width = painter.fontMetrics().width(numval);
-			painter.drawText(((x+1)*m_itemWidth) + ((m_itemWidth/2.0) - (width / 2.0)),m_itemHeight*m_rowCount + ((m_itemHeight/2.0)-2) + (painter.fontMetrics().height()/2.0),numval);
+			drawCell(&painter,x+1,m_rowCount,xaxis.at(x),false);
 		}
-
 		painter.setPen(QColor::fromRgb(0,0,0));
 
 		if (m_traceEnabled)
@@ -365,53 +414,18 @@ void TableViewNew3D::paintEvent (QPaintEvent *evt)
 			{
 				if (m_inEdit)
 				{
-					painter.setPen(QColor::fromRgb(255,255,255));
-					painter.drawRect(m_itemWidth*(x+1),m_itemHeight*y,m_itemWidth-1,m_itemHeight-1);
-					painter.setPen(QColor::fromRgb(0,0,0));
-					QString numval = m_editText;
-					int width = painter.fontMetrics().width(numval);
-					painter.drawText((m_itemWidth*(x+1)) + ((m_itemWidth / 2.0) - (width / 2.0)),((m_itemHeight*y) + ((m_itemHeight/2.0)-2)) + (painter.fontMetrics().height()/2.0),numval);
-					continue;
+					drawCell(&painter,x+1,y,m_editText,true);
 				}
 				else
 				{
-					painter.setPen(QColor::fromRgb(0,0,255));
-					painter.drawRect(m_itemWidth*(x+1),m_itemHeight*y,m_itemWidth-1,m_itemHeight-1);
-					QString numval = values.at(y).at(x);
-					int width = painter.fontMetrics().width(numval);
-					painter.drawText((m_itemWidth*(x+1)) + ((m_itemWidth / 2.0) - (width / 2.0)),((m_itemHeight*y) + ((m_itemHeight/2.0)-2)) + (painter.fontMetrics().height()/2.0),numval);
+					drawCell(&painter,x+1,y,values.at(y).at(x),true);
 				}
 
 			}
-			painter.drawRect(m_itemWidth*(x+1),m_itemHeight*y,m_itemWidth-1,m_itemHeight-1);
-
-			double val = values.at(y).at(x).toDouble();
-			double max = 255;
-			if (val < max/4.0)
-			{
-				QColor bgcolor = QColor::fromRgb(0,(255*((val)/(max/4.0))),255);
-				painter.fillRect(m_itemWidth*(x+1),m_itemHeight*y,m_itemWidth-1,m_itemHeight-1,bgcolor);
-			}
-			else if (val < ((max/4.0)*2))
-			{
-				QColor bgcolor = QColor::fromRgb(0,255,255-(255*((val-((max/4.0)))/(max/4.0))));
-				painter.fillRect(m_itemWidth*(x+1),m_itemHeight*y,m_itemWidth-1,m_itemHeight-1,bgcolor);
-			}
-			else if (val < ((max/4.0)*3))
-			{
-				QColor bgcolor = QColor::fromRgb((255*((val-((max/4.0)*2))/(max/4.0))),255,0);
-				painter.fillRect(m_itemWidth*(x+1),m_itemHeight*y,m_itemWidth-1,m_itemHeight-1,bgcolor);
-			}
 			else
 			{
-				QColor bgcolor = QColor::fromRgb(255,255-(255*((val-((max/4.0)*3))/(max/4.0))),0);
-				painter.fillRect(m_itemWidth*(x+1),m_itemHeight*y,m_itemWidth-1,m_itemHeight-1,bgcolor);
+				drawCell(&painter,x+1,y,values.at(y).at(x),false);
 			}
-
-			QString numval = values.at(y).at(x);
-			int width = painter.fontMetrics().width(numval);
-			painter.drawText((m_itemWidth*(x+1)) + ((m_itemWidth / 2.0) - (width / 2.0)),((m_itemHeight*y) + ((m_itemHeight/2.0)-2)) + (painter.fontMetrics().height()/2.0),numval);
-			painter.setPen(QColor::fromRgb(0,0,0));
 		}
 	}
 	if (foundy && foundx && m_traceEnabled)

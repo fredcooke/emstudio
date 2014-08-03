@@ -25,7 +25,12 @@ public:
 	void addHotkey(int key,Qt::KeyboardModifier modifier);
 	void setTracingValue(double x,double y);
 	void setTracingEnabled(bool enabled) { m_traceEnabled = enabled; update(); }
+	void setMaxValues(double maxx,double maxy,double maxz);
 private:
+	double m_maxXValue;
+	double m_maxYValue;
+	double m_maxZValue;
+	void drawCell(QPainter *painter,int cellx,int celly,QString text,bool highlight);
 	QTimer *m_updateTimer;
 	double m_traceX;
 	double m_traceY;

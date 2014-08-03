@@ -947,6 +947,7 @@ bool TableView3D::updateTable()
 	}
 	QLOG_DEBUG() << "updateTable(): Clearing table";
 	ui.tableWidget->clear();
+	ui.tableWidget->setMaxValues(tableData->maxCalcedXAxis(),tableData->maxCalcedYAxis(),tableData->maxCalcedValue());
 	//ui.tableWidget->horizontalHeader()->hide();
 	//ui.tableWidget->verticalHeader()->hide();
 	ui.tableWidget->setRowCount(tableData->rows());
