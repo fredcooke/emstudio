@@ -1156,5 +1156,14 @@ TableView3D::~TableView3D()
 }
 void TableView3D::itemChangeRequest(int row,int column,QString text)
 {
-	setValue(row,column,text.toDouble());
+
+	bool ok = false;
+	double newval = text.toDouble(&ok);
+	if (!ok)
+	{
+		QLOG_ERROR() << "Attempted to enter a number into table that wasn't a number!";
+		QMessageBox::information(0,"Error",text + " is not a number.'");
+		return;
+	}
+	setValue(row,column,newval);
 }
