@@ -109,18 +109,13 @@ void TableView3D::tracingCheckBoxStateChanged(int newstate)
 
 void TableView3D::setValue(int row, int column,double value,bool ignoreselection)
 {
-	if (row == -1 || column == -1)
-	{
-		QLOG_ERROR() << "Negative array index! Should be unreachable code! FIXME!";
-		return;
-	}
 	if (row >= ui.tableWidget->rowCount() || column >= ui.tableWidget->columnCount())
 	{
 		QLOG_ERROR() << "Larger than life, should be unreachable code! FIXME!";
 		return;
 	}
 	// Ignore bottom right corner if the disallow on editing fails
-	if (row == ui.tableWidget->rowCount()-1 && column == 0)
+	if (row == -1 && column == -1)
 	{
 		QLOG_ERROR() << "This should not happen! Bottom right corner ignored!";
 		return;

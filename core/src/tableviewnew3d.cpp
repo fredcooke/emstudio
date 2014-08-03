@@ -514,7 +514,7 @@ void TableViewNew3D::keyPressEvent(QKeyEvent *evt)
 	}
 	if (evt->key() == Qt::Key_Up)
 	{
-		if (currentCell.y() > 0)
+		if (currentCell.y() > 0 || currentCell.y() == -1)
 		{
 			if (m_inEdit)
 			{
@@ -522,7 +522,14 @@ void TableViewNew3D::keyPressEvent(QKeyEvent *evt)
 				emit itemChangeRequest(currentCell.y(),currentCell.x(),m_editText);
 				m_editText = "";
 			}
-			currentCell.setY(currentCell.y()-1);
+			if (currentCell.y() == -1)
+			{
+				currentCell.setY(m_rowCount-1);
+			}
+			else
+			{
+				currentCell.setY(currentCell.y()-1);
+			}
 			m_selectionList.clear();
 			m_selectionList.append(QPair<int,int>(currentCell.x(),currentCell.y()));
 			emit currentSelectionChanged(m_selectionList);
@@ -532,7 +539,7 @@ void TableViewNew3D::keyPressEvent(QKeyEvent *evt)
 	}
 	if (evt->key() == Qt::Key_Down)
 	{
-		if (currentCell.y() < m_rowCount)
+		if (currentCell.y() < m_rowCount && currentCell.y() != -1)
 		{
 			if (m_inEdit)
 			{
@@ -540,7 +547,19 @@ void TableViewNew3D::keyPressEvent(QKeyEvent *evt)
 				emit itemChangeRequest(currentCell.y(),currentCell.x(),m_editText);
 				m_editText = "";
 			}
-			currentCell.setY(currentCell.y()+1);
+			if (currentCell.y() == m_rowCount-1)
+			{
+				currentCell.setY(-1);
+				if (currentCell.x() == -1)
+				{
+					//We're at the bottom cell of the axis, flip over the other axis
+					currentCell.setX(0);
+				}
+			}
+			else
+			{
+				currentCell.setY(currentCell.y()+1);
+			}
 			m_selectionList.clear();
 			m_selectionList.append(QPair<int,int>(currentCell.x(),currentCell.y()));
 			emit currentSelectionChanged(m_selectionList);
@@ -550,13 +569,18 @@ void TableViewNew3D::keyPressEvent(QKeyEvent *evt)
 	}
 	if (evt->key() == Qt::Key_Left)
 	{
-		if (currentCell.x() > 0)
+		if (currentCell.x() >= 0)
 		{
 			if (m_inEdit)
 			{
 				m_inEdit = false;
 				emit itemChangeRequest(currentCell.y(),currentCell.x(),m_editText);
 				m_editText = "";
+			}
+			if (currentCell.x() == 0 && currentCell.y() == -1)
+			{
+				//At the leftmost axis cell, flip to the other axis
+				currentCell.setY(m_rowCount-1);
 			}
 			currentCell.setX(currentCell.x()-1);
 			m_selectionList.clear();
@@ -568,7 +592,7 @@ void TableViewNew3D::keyPressEvent(QKeyEvent *evt)
 	}
 	if (evt->key() == Qt::Key_Right)
 	{
-		if (currentCell.x() < m_columnCount)
+		if (currentCell.x() < m_columnCount-1)
 		{
 			if (m_inEdit)
 			{
