@@ -1469,9 +1469,11 @@ void MainWindow::interrogationComplete()
 	QLOG_INFO() << "Interrogation complete";
 	if (m_interrogationFailureCount > 0)
 	{
-		QMessageBox::information(0,"Error","Something has gone serious wrong, one of the commands timed out during interrogation. This should be properly investigated before continuing");
-		emsComms->disconnectSerial();
-	return;
+		if (QMessageBox::question(this,"Error","One of the commands has failed during interrogation. This could be a sign of a more serious problem, Do you wish to continue?",QMessageBox::Yes,QMessageBox::No) != QMessageBox::Yes)
+		{
+			emsComms->disconnectSerial();
+			return;
+		}
 	}
 	else
 	{
@@ -1892,6 +1894,7 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	{
 		//interrogateTaskFail(int) catches this case.
 		//if (progressView) progressView->taskFail(sequencenumber);
+		m_interrogationFailureCount++;
 	}
 }
 
