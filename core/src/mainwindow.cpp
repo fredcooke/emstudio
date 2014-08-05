@@ -2066,51 +2066,121 @@ MainWindow::~MainWindow()
 
 	//tablesMdiWindow
 	windowsettings.setArrayIndex(val++);
-	windowsettings.setValue("location",tablesMdiWindow->saveGeometry());
-	windowsettings.setValue("hidden",tablesMdiWindow->isHidden());
 	windowsettings.setValue("type","tablesMdiWindow");
+	if (tablesMdiWindow)
+	{
+		windowsettings.setValue("enabled",true);
+		windowsettings.setValue("location",tablesMdiWindow->saveGeometry());
+		windowsettings.setValue("hidden",tablesMdiWindow->isHidden());
+	}
+	else
+	{
+		windowsettings.setValue("enabled",false);
+	}
 
 	//firmwareMetaMdiWindow
 	windowsettings.setArrayIndex(val++);
-	windowsettings.setValue("location",firmwareMetaMdiWindow->saveGeometry());
-	windowsettings.setValue("hidden",firmwareMetaMdiWindow->isHidden());
 	windowsettings.setValue("type","firmwareMetaMdiWindow");
+	if (firmwareMetaMdiWindow)
+	{
+		windowsettings.setValue("enabled",true);
+		windowsettings.setValue("location",firmwareMetaMdiWindow->saveGeometry());
+		windowsettings.setValue("hidden",firmwareMetaMdiWindow->isHidden());
+	}
+	else
+	{
+		windowsettings.setValue("enabled",false);
+	}
 
 	//interrogateProgressMdiWindow
 	windowsettings.setArrayIndex(val++);
-	windowsettings.setValue("location",interrogateProgressMdiWindow->saveGeometry());
-	windowsettings.setValue("hidden",interrogateProgressMdiWindow->isHidden());
 	windowsettings.setValue("type","interrogateProgressMdiWindow");
+	if (interrogateProgressMdiWindow)
+	{
+		windowsettings.setValue("enabled",true);
+		windowsettings.setValue("location",interrogateProgressMdiWindow->saveGeometry());
+		windowsettings.setValue("hidden",interrogateProgressMdiWindow->isHidden());
+	}
+	else
+	{
+		windowsettings.setValue("enabled",false);
+	}
+
 
 	//emsMdiWindow
 	windowsettings.setArrayIndex(val++);
-	windowsettings.setValue("location",emsMdiWindow->saveGeometry());
-	windowsettings.setValue("hidden",emsMdiWindow->isHidden());
 	windowsettings.setValue("type","emsMdiWindow");
+	if (emsMdiWindow)
+	{
+		windowsettings.setValue("enabled",true);
+		windowsettings.setValue("location",emsMdiWindow->saveGeometry());
+		windowsettings.setValue("hidden",emsMdiWindow->isHidden());
+	}
+	else
+	{
+		windowsettings.setValue("enabled",false);
+	}
+
 
 	//flagsMdiWindow
 	windowsettings.setArrayIndex(val++);
-	windowsettings.setValue("location",flagsMdiWindow->saveGeometry());
-	windowsettings.setValue("hidden",flagsMdiWindow->isHidden());
 	windowsettings.setValue("type","flagsMdiWindow");
+	if (flagsMdiWindow)
+	{
+		windowsettings.setValue("enabled",true);
+		windowsettings.setValue("location",flagsMdiWindow->saveGeometry());
+		windowsettings.setValue("hidden",flagsMdiWindow->isHidden());
+	}
+	else
+	{
+		windowsettings.setValue("enabled",false);
+	}
+
 
 	//gaugesMdiWindow
 	windowsettings.setArrayIndex(val++);
-	windowsettings.setValue("location",gaugesMdiWindow->saveGeometry());
-	windowsettings.setValue("hidden",gaugesMdiWindow->isHidden());
 	windowsettings.setValue("type","gaugesMdiWindow");
+	if (gaugesMdiWindow)
+	{
+		windowsettings.setValue("enabled",true);
+		windowsettings.setValue("location",gaugesMdiWindow->saveGeometry());
+		windowsettings.setValue("hidden",gaugesMdiWindow->isHidden());
+	}
+	else
+	{
+		windowsettings.setValue("enabled",false);
+	}
+
 
 	//packetStatusMdiWindow
 	windowsettings.setArrayIndex(val++);
-	windowsettings.setValue("location",packetStatusMdiWindow->saveGeometry());
-	windowsettings.setValue("hidden",packetStatusMdiWindow->isHidden());
 	windowsettings.setValue("type","packetStatusMdiWindow");
+	if (packetStatusMdiWindow)
+	{
+		windowsettings.setValue("enabled",true);
+		windowsettings.setValue("location",packetStatusMdiWindow->saveGeometry());
+		windowsettings.setValue("hidden",packetStatusMdiWindow->isHidden());
+	}
+	else
+	{
+		windowsettings.setValue("enabled",false);
+	}
+
 
 	//aboutMdiWindow
 	windowsettings.setArrayIndex(val++);
-	windowsettings.setValue("location",aboutMdiWindow->saveGeometry());
-	windowsettings.setValue("hidden",aboutMdiWindow->isHidden());
 	windowsettings.setValue("type","aboutMdiWindow");
+	if (aboutMdiWindow)
+	{
+		windowsettings.setValue("enabled",true);
+		windowsettings.setValue("location",aboutMdiWindow->saveGeometry());
+		windowsettings.setValue("hidden",aboutMdiWindow->isHidden());
+	}
+	else
+	{
+		windowsettings.setValue("enabled",false);
+	}
+
 
 	//emsStatusMdiWindow
 	//windowsettings.setArrayIndex(val++);
