@@ -1,4 +1,4 @@
-#EMStudio
+#EMSTune
 
 Written by Michael Carpenter (malcom2073@gmail.com), and licensed under GPLv2.
 
@@ -8,13 +8,13 @@ I suppose I should have some real documentation here on how to use the different
 
 ### Binaries:
 
-I maintain Windows and Linux 32bit binaries of both the master and dev branches on my website: http://mikesshop.net/EMStudio/
+I maintain Windows and Linux binaries of both the master and dev branches on my website: http://mikesshop.net/EMStudio/
 
 ### Compiling:
 
 #### Linux:
 
-A few packages are needed to compile EMStudio. In Ubuntu:
+A few packages are needed to compile EMStune. In Ubuntu:
 $ sudo apt-get update
 $ sudo apt-get install build-essential libqt4-dev libqt4-opengl-dev libqt4-opengl-dev qt4-qmake libqwt-dev libqt4-declarative libqjson-dev freeglut3-dev
 
@@ -24,10 +24,11 @@ It has been mentioned before to run qmake -project, NEVER EVER EVER DO THIS!. Th
 
 To checkout and build:
 
-$ git clone https://github.com/malcom2073/emstudio.git
+$ git clone https://github.com/malcom2073/emstune.git
 $ cd emstudio
-$ git checkout origin/BRANCHTOBUILD (typically dev or master)
-$ qmake
+$ git clone https://github.com/malcom2073/emstune-freeems.git plugins/freeems
+$ ./checkout.sh origin/BRANCHTOBUILD (typically dev or master, sometimes unstable)
+$ qmake -r
 $ make
 $ cd core
 $ ./emstudio
