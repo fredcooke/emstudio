@@ -1890,7 +1890,8 @@ void MainWindow::commandFailed(int sequencenumber,unsigned short errornum)
 	}
 	else
 	{
-		if (progressView) progressView->taskFail(sequencenumber);
+		//interrogateTaskFail(int) catches this case.
+		//if (progressView) progressView->taskFail(sequencenumber);
 	}
 }
 
