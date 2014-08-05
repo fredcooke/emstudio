@@ -144,7 +144,6 @@ HEADERS  += src/mainwindow.h \
     src/tableview3d.h \
     src/interrogateprogressview.h \
     tabledata.h \
-    datafield.h \
     src/readonlyramview.h \
     src/overviewprogressitemdelegate.h \
     src/dataview.h \
@@ -152,7 +151,6 @@ HEADERS  += src/mainwindow.h \
     src/tablemap3d.h \
     src/tablewidget.h \
     src/configview.h \
-    src/configblock.h \
     table2ddata.h \
     table3ddata.h \
     memorymetadata.h \
