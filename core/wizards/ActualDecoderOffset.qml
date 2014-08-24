@@ -10,8 +10,7 @@ Rectangle {
         decoderEngineOffset.update.connect(offsetupdate);
     }
     function decode(map) {
-        //advancetext.text = map["Advance"].toFixed(2);
-        advancetext.text = "62.21";
+        advancetext.text = map["Advance"].toFixed(2);
     }
     function offsetupdate() {
         offsettext.text = decoderEngineOffset.value().toFixed(2);
