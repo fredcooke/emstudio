@@ -33,6 +33,7 @@ EmsStatus::EmsStatus(QWidget *parent) : QDockWidget(parent)
 	setFlag(ui.camSyncLineEdit,false);
 	setFlag(ui.lastPeriodValidLineEdit,false);
 	setFlag(ui.lastTimeValidLineEdit,false);
+	setFlag(ui.okToScheduleLineEdit,false);
 	emsMemoryTimer = new QTimer(this);
 	connect(emsMemoryTimer,SIGNAL(timeout()),this,SLOT(emsMemoryTimerTick()));
 	ui.memoryCleanLineEdit->setText("NO BURN REQUIRED");
@@ -80,6 +81,7 @@ void EmsStatus::passData(QVariantMap data)
 	setFlag(ui.camSyncLineEdit,decoderFlags & 0x04);
 	setFlag(ui.lastPeriodValidLineEdit,decoderFlags & 0x08);
 	setFlag(ui.lastTimeValidLineEdit,decoderFlags & 0x010);
+	setFlag(ui.okToScheduleLineEdit,decoderFlags & 0x080);
 
 }
 void EmsStatus::setEmsMemoryDirty()

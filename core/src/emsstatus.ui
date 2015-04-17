@@ -92,6 +92,13 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QLineEdit" name="okToScheduleLineEdit">
+       <property name="text">
+        <string>OK To Schedule</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
   </widget>
