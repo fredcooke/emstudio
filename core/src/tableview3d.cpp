@@ -753,26 +753,26 @@ void TableView3D::exportJson(QString filename)
 	z["unit"] = m_metaData.zAxisTitle;
 	z["label"] = m_metaData.zAxisTitle;
 
-	for (int i=1;i<ui.tableWidget->columnCount();i++)
+	for (int i=0;i<ui.tableWidget->columnCount();i++)
 	{
 		//Reformat the number to be XXXX.XX to make Fred happy.
-		//double val = ui.tableWidget->item(ui.tableWidget->rowCount()-1,i)->text().toDouble();
-		//xlist.append(QString::number(val,'f',2));
+		double val = ui.tableWidget->item(ui.tableWidget->rowCount()-1,i).toDouble();
+		xlist.append(QString::number(val,'f',2));
 	}
-	for (int i=0;i<ui.tableWidget->rowCount()-1;i++)
+	for (int i=0;i<ui.tableWidget->rowCount();i++)
 	{
 		//Reformat the number to be XXXX.XX to make Fred happy.
-		//double val = ui.tableWidget->item(i,0)->text().toDouble();
-		//ylist.append(QString::number(val,'f',2));
+		double val = ui.tableWidget->item(i,-1).toDouble();
+		ylist.append(QString::number(val,'f',2));
 	}
-	for (int j=0;j<ui.tableWidget->rowCount()-1;j++)
+	for (int j=0;j<ui.tableWidget->rowCount();j++)
 	{
-		//QVariantList zrow;
-		//for (int i=1;i<ui.tableWidget->columnCount();i++)
-		//{
-		//	zrow.append(ui.tableWidget->item(j,i)->text());
-		//}
-		//zlist.append((QVariant)zrow);
+		QVariantList zrow;
+		for (int i=0;i<ui.tableWidget->columnCount();i++)
+		{
+			zrow.append(ui.tableWidget->item(j,i));
+		}
+		zlist.append((QVariant)zrow);
 	}
 
 	y["values"] = ylist;
