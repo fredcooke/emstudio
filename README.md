@@ -1,14 +1,14 @@
-#EMSTune
+#EMStudio
 
-Written by Michael Carpenter (malcom2073@gmail.com), and licensed under GPLv2.
+Hacked and documented by Fred Cooke. Quality by original author. Licensed under GPLv2.
 
 ### Overview:
 
-I suppose I should have some real documentation here on how to use the different features of EMStudio....
+I suppose there should be some real documentation here on how to use the different features of EMStudio....
 
 ### Binaries:
 
-I maintain Windows and Linux binaries of both the master and dev branches on my website: http://mikesshop.net/EMStudio/
+No. Build from source, and Windows is not an option unless you're very keen. Several things flat out do not work on Windows. Building it on Windows is likely to be similarly painful to having toe nails removed with pliers.
 
 ### Compiling:
 
@@ -16,7 +16,7 @@ I maintain Windows and Linux binaries of both the master and dev branches on my 
 
 A few packages are needed to compile EMStune. In Ubuntu:
 $ sudo apt-get update
-$ sudo apt-get install build-essential libqt4-dev libqt4-opengl-dev libqt4-opengl-dev qt4-qmake libqwt-dev libqt4-declarative libqjson-dev freeglut3-dev
+$ sudo apt-get install build-essential libqt4-dev libqt4-opengl-dev libqt4-opengl-dev qt4-qmake libqwt-dev libqt4-declarative libqjson-dev freeglut3-dev pkg-config
 
 Once this has completed (or the equivalant packages on your own distro), you can then clone the repository and build it. 
 
@@ -24,10 +24,10 @@ It has been mentioned before to run qmake -project, NEVER EVER EVER DO THIS!. Th
 
 To checkout and build:
 
-$ git clone https://github.com/malcom2073/emstune.git
+$ git clone https://github.com/fredcooke/emstudio.git
 $ cd emstudio
-$ git clone https://github.com/malcom2073/emstune-freeems.git plugins/freeems
-$ ./checkout.sh origin/BRANCHTOBUILD (typically dev or master, sometimes unstable)
+$ git clone https://github.com/fredcooke/emstune-freeems.git plugins/freeems
+$ ./checkout.sh origin/unstable
 $ qmake -r
 $ make
 $ cd core
